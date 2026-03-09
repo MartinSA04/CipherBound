@@ -1,0 +1,10 @@
+[
+  { "key": "ctrl+f5", "command": "workbench.action.tasks.runTask",
+    "args": "Run Program", "when": "isMac" },
+
+  { "key": "ctrl+f5", "command": "workbench.action.tasks.runTask",
+    "args": "Run Program", "when": "isLinux" },
+
+  { "key": "ctrl+f5", "command": "workbench.action.tasks.runTask",
+    "args": "Run Program", "when": "isWindows" }
+]

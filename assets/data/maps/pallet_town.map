@@ -1,0 +1,65 @@
+# Pallet Town - Overworld
+# Map description file
+# Sections: [header], [tiles], [warps], [encounters]
+
+[header]
+id|pallet_town
+width|24
+height|20
+background|assets/tilesets/pallet_town/maps/overworld.png
+background_overlay|assets/tilesets/pallet_town/maps/overworld_overlay.png
+
+# Tile type grid (one char per tile, row by row)
+# Legend:
+#   .  = grass (walkable)
+#   T  = tallGrass (encounters)
+#   w  = water (impassable)
+#   p  = path (walkable)
+#   #  = wall/building (impassable)
+#   d  = door (walkable, triggers warp)
+#   m  = mountain (impassable)
+#   s  = sand (walkable)
+#   ^  = ledgeUp
+#   v  = ledgeDown
+#   <  = ledgeLeft
+#   >  = ledgeRight
+[tiles]
+############dd##########
+############..##########
+##....................##
+##....................##
+##...#####....#####...##
+##...#####....#####...##
+##...#####....#####...##
+##..##d###...##d###...##
+##....................##
+##....................##
+##...........#######..##
+##...#####...#######..##
+##...........#######..##
+##...........###d###..##
+##...#................##
+##....................##
+##...........######...##
+##.....wwww...........##
+##.....wwww...........##
+##.....wwww...........##
+
+[warps]
+# Format: fromX|fromY|targetMapId|targetX|targetY
+6|7|house1_1f|4|8
+15|7|house2_1f|4|8
+16|13|oak_lab|6|12
+12|0|route_1|12|38
+13|0|route_1|13|38
+
+[encounters]
+# Format: speciesId|minLevel|maxLevel|weight
+1|2|5|40
+4|2|4|30
+7|3|5|20
+
+[npcs]
+# Format: id|name|type|x|y|facing|sightRange|dialogue|party
+# Dialogue stages separated by @@, each can have flag? prefix
+pallet_girl|Girl|normal|10|9|down|0|Welcome to Pallet Town!;This is a quiet little place.|

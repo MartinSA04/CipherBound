@@ -1,0 +1,85 @@
+# Pallet Town - Overworld
+# Map description file
+# Sections: [header], [tiles], [warps], [encounters]
+
+[header]
+id|route_1
+width|24
+height|40
+background|assets/tilesets/route_1/route_1.png
+background_overlay|assets/tilesets/route_1/route_1_overlay.png
+
+# Tile type grid (one char per tile, row by row)
+# Legend:
+#   .  = grass (walkable)
+#   T  = tallGrass (encounters)
+#   w  = water (impassable)
+#   p  = path (walkable)
+#   #  = wall/building (impassable)
+#   d  = door (walkable, triggers warp)
+#   m  = mountain (impassable)
+#   s  = sand (walkable)
+#   ^  = ledgeUp
+#   v  = ledgeDown
+#   <  = ledgeLeft
+#   >  = ledgeRight
+[tiles]
+##########dddd##########
+##########pppp##########
+##........pppp........##
+##........pppppppppppp##
+##......##pppppppppppp##
+##......##vvvvvv..pppp##
+##......##TTTTTTTTTTTT##
+##......##TTTTTTTTTTTT##
+##......##TTTTTTTTTTTT##
+##......##TTTTTTTTTTTT##
+##vvvvvv##TTTTTTTTTTTT##
+##......##...ppppppppp##
+##...........ppppppppp##
+##...........pppTTTTTT##
+##..............TTTTTT##
+####vvvvvv######TTTTTT##
+####......######TTTTTT##
+##...........pppTTTTTT##
+##...ppppppppppp......##
+##...ppppppppppp......##
+##vv.vvvv..vvvvvvvvvvv##
+##...ppppppppppppppppp##
+##...ppppppppppppppppp##
+##................pppp##
+##..........TTTTTTpppp##
+############TTTTTTpppp##
+############TTTTTTvvvv##
+##..........TTTTTTpppp##
+##..........TTTTTTpppp##
+##pppppppppppppppppppp##
+##pppppppppppppppppppp##
+##vvvv...#vvvvvvvvvvvv##
+##..TTTTTTTpppp..TTTTT##
+##..TTTTTTTpppp..TTTTT##
+##TTTTTTT..ppppTTTTT..##
+##TTTTTTT...TT.TTTTT..##
+############TT##########
+############TT##########
+############..##########
+############dd##########
+
+
+[warps]
+# Format: fromX|fromY|targetMapId|targetX|targetY
+12|39|pallet_town|12|1
+13|39|pallet_town|13|1
+
+
+[encounters]
+# Format: speciesId|minLevel|maxLevel|weight
+1|2|5|40
+
+# 4|2|4|30
+# 7|3|5|20
+
+[npcs]
+# Format: id|name|type|x|y|facing|sightRange|dialogue|party
+# Dialogue stages separated by @@, each can have flag? prefix
+route1_trainer1|Bug Catcher|trainer|10|24|up|4|defeated_route1_trainer1?I can't believe I lost...@@Hey! You have creatures too?;Let's battle!|1:4

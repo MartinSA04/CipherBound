@@ -1,0 +1,29 @@
+# Moves data file
+# Format: id|name|description|type|category|power|accuracy|pp|status|statusChance
+# Types: classical, electromagnetic, quantum, nuclear, radioactive, thermal,
+#        gravitational, algebraic, calculus, probabilistic, algorithmic,
+#        logic, digital, recursive, chaotic
+# Categories: physical, special, status
+# Status effects: none, overheated, entangled, decayed, segfault, deadlocked, paradox
+# Lines starting with # are comments
+
+1|Newton's Cradle|Transfer momentum in a chain collision.|classical|physical|40|100|35|none|0
+2|Lorentz Punch|Strike with electromagnetic force.|electromagnetic|physical|40|100|35|none|0
+3|Tunneling Strike|Phase through defenses via quantum tunneling.|quantum|physical|40|100|35|none|0
+4|Fission Slam|Split atoms on impact.|nuclear|physical|50|95|25|none|0
+5|Beta Decay|Emit a high-energy electron.|radioactive|special|45|100|30|decayed|10
+6|Heat Death|Maximize entropy in the target.|thermal|special|90|85|10|overheated|30
+7|Schwarzschild Crush|Compress with gravitational force.|gravitational|special|55|95|25|none|0
+8|Group Action|Apply an algebraic group operation.|algebraic|special|45|100|30|none|0
+9|L'Hopital's Rule|Resolve an indeterminate form.|calculus|special|60|90|20|none|0
+10|Monte Carlo|Randomly sample the target's weakness.|probabilistic|special|50|85|25|none|0
+11|Quicksort|Efficiently partition and strike.|algorithmic|physical|55|100|25|none|0
+12|Proof by Contradiction|Negate the target's existence.|logic|special|70|90|15|paradox|20
+13|Buffer Overflow|Overwrite the target's memory.|digital|special|65|90|15|segfault|20
+14|Stack Overflow|Recurse until the target crashes.|recursive|special|80|85|10|deadlocked|15
+15|Butterfly Effect|A small change causes massive damage.|chaotic|special|75|80|15|none|0
+16|Entanglement|Quantum-link with the target.|quantum|status|0|100|20|entangled|100
+17|Mutex Lock|Deadlock the target's process.|algorithmic|status|0|90|15|deadlocked|100
+18|Gauss's Law|Enclose target in a flux surface.|electromagnetic|special|70|95|15|none|0
+19|Integration by Parts|Decompose and reassemble damage.|calculus|special|45|100|30|none|0
+20|Fusion Blast|Combine nuclei releasing enormous energy.|nuclear|special|100|75|5|overheated|30

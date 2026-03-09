@@ -1,0 +1,26 @@
+{
+  "configurations": [
+     {
+      "name": "Build and Run Debug (Windows/Linux)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/program",
+      "cwd": "${workspaceFolder}",
+      "args": [],
+      "preLaunchTask": "Build Executable",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Build and Run Debug (macOS)",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/program",
+      "cwd": "${workspaceFolder}",
+      "args": [],
+      "preLaunchTask": "Build Executable",
+      "internalConsoleOptions": "neverOpen"
+    },
+
+   
+  ]
+}

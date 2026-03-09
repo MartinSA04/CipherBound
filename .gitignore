@@ -1,0 +1,28 @@
+# Build directories
+build/
+buildw/
+
+# Meson subproject downloads and extracted sources
+subprojects/packagecache/
+subprojects/SDL2-*/
+subprojects/SDL2_image-*/
+subprojects/SDL2_mixer-*/
+subprojects/sdl2_windows/
+subprojects/sdl2_image_windows/
+subprojects/sdl2_mixer_windows/
+subprojects/libjpeg-turbo-*/
+subprojects/libpng-*/
+subprojects/zlib-*/
+subprojects/libtiff-*/
+
+# Save files (user-specific)
+saves/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~

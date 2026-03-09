@@ -1,0 +1,28 @@
+# Player's House - 1st Floor
+# Map description file
+
+[header]
+id|house1_1f
+width|13
+height|10
+background|assets/tilesets/pallet_town/maps/house1_1f.png
+background_overlay|assets/tilesets/pallet_town/maps/house1_1f_overlay.png
+
+[tiles]
+#############
+#############
+#..........d#
+#............
+#.....##.....
+#.....##.....
+#............
+##..........#
+#............
+####d########
+
+[warps]
+# Format: fromX|fromY|targetMapId|targetX|targetY
+4|9|pallet_town|6|8
+11|2|house1_2f|10|2
+
+[encounters]

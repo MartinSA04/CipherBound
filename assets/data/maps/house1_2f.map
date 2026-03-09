@@ -1,0 +1,30 @@
+# Player's House - 2nd Floor
+# Map description file
+
+[header]
+id|house1_2f
+width|12
+height|9
+background|assets/tilesets/pallet_town/maps/house1_2f.png
+player_spawn|2|3
+
+[tiles]
+############
+############
+#.......#d..
+#.......##..
+#.....#.....
+#.#...#.....
+#.#.........
+#...........
+#...........
+
+[warps]
+# Format: fromX|fromY|targetMapId|targetX|targetY
+9|2|house1_1f|10|2
+
+[encounters]
+
+[npcs]
+# PC terminal
+pc_bedroom|PC|pc|1|1|down|0||

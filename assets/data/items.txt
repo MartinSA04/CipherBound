@@ -1,0 +1,11 @@
+# Items data file
+# Format: id|name|description|category|value|effectValue
+# Categories: healing, capture, battle, keyItem
+# effectValue: heal amount for healing items, catch rate modifier for capture items
+1|Potion|Restores 20 HP|healing|200|20
+2|Super Potion|Restores 50 HP|healing|700|50
+3|Hyper Potion|Restores 200 HP|healing|1500|200
+4|Full Restore|Fully restores HP|healing|3000|9999
+5|Creature Ball|A ball for catching creatures|capture|200|1
+6|Great Ball|A better ball for catching|capture|600|2
+7|Ultra Ball|A high-performance ball|capture|1200|3

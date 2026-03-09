@@ -1,0 +1,43 @@
+# Example cutscene file
+# Demonstrates all available step types
+#
+# Step types:
+#   move|target|x|y        Move entity tile-by-tile to (x,y). Non-blocking.
+#   walk|target|direction   Move entity one tile in a direction. Non-blocking.
+#   face|target|direction   Set entity facing (up/down/left/right). Immediate.
+#   say|speaker|line1;line2 Show dialogue lines. Blocking (waits for dismiss).
+#   wait|frames            Wait N frames. Blocking.
+#   sync                   Wait for all pending moves to finish. Blocking.
+#   flag|name              Set a player event flag. Immediate.
+#   hide|npc_id            Hide an NPC. Immediate.
+#   show|npc_id            Show a hidden NPC. Immediate.
+#
+# Target can be "player" or an NPC id from the map file.
+# Multiple move/walk steps before a sync run in parallel.
+
+[header]
+id|example_cutscene
+
+[steps]
+# Player and NPC move at the same time
+move|player|5|5
+move|some_npc|3|5
+sync
+
+# NPC turns to face player
+face|some_npc|right
+
+# Dialogue
+say|Some NPC|Hello there!;Welcome to this example cutscene.
+
+# Small pause
+wait|30
+
+# Player walks one tile up
+walk|player|up
+sync
+
+say|Some NPC|Goodbye!
+
+# Set a flag so this cutscene doesn't repeat
+flag|example_done

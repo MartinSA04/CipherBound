@@ -1,0 +1,3 @@
+*.h linguist-language=C++
+
+subprojects/** linguist-vendored=true

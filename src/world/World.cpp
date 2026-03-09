@@ -370,7 +370,7 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
                     int speciesId = std::stoi(entry.substr(0, colon));
                     int level = std::stoi(entry.substr(colon + 1));
                     const Species &species = pokedex.getSpecies(speciesId);
-                    npc->addCreature(Creature(species, level));
+                    npc->addDaemon(Daemon(species, level));
                 }
             }
         }
@@ -396,7 +396,7 @@ void World::generate(const Pokedex &pokedex)
     loadMap("assets/data/maps/house1_1f.map", pokedex);
     std::string startMap = loadMap("assets/data/maps/house1_2f.map", pokedex);
     loadMap("assets/data/maps/house2_1f.map", pokedex);
-    loadMap("assets/data/maps/oak_lab.map", pokedex);
+    loadMap("assets/data/maps/bart_iver_lab.map", pokedex);
 
     // route 1
     loadMap("assets/data/maps/route_1.map", pokedex);

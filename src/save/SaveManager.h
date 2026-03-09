@@ -35,9 +35,9 @@ private:
     static constexpr int MAX_SAVE_SLOTS = 4;
     std::string baseSavePath;
 
-    // Creature serialization helpers
-    static std::string serializeCreature(const Creature &creature);
-    static Creature deserializeCreature(const std::string &line, const Pokedex &pokedex);
+    // Daemon serialization helpers
+    static std::string serializeDaemon(const Daemon &daemon);
+    static Daemon deserializeDaemon(const std::string &line, const Pokedex &pokedex);
     static std::string serializeBaseStats(const BaseStats &stats);
     static BaseStats deserializeBaseStats(const std::string &s);
 };

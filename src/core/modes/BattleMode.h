@@ -19,6 +19,13 @@ public:
 private:
     void updateBattleIntroAnim(GameContext &ctx);
 
+    // Battle rendering helpers (moved from GameUI)
+    void drawBattleScene(GameContext &ctx);
+    void drawBattleIntroSceneWild(GameContext &ctx);
+    void drawBattleIntroSceneTrainer(GameContext &ctx);
+    void drawBattleMenu(GameContext &ctx);
+    void drawMoveSelectScreen(GameContext &ctx);
+
     std::string currentTrainerNPCId;
     std::shared_ptr<NPC> battleTrainer;
 

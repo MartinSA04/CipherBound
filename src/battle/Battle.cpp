@@ -1,9 +1,10 @@
 #include "Battle.h"
 #include "TypeChart.h"
 #include <algorithm>
+#include <cmath>
 
-Battle::Battle(Player &player, std::unique_ptr<Creature> opponent, BattleType type, std::mt19937 &rng, const Pokedex &pokedex)
-    : player(player), opponentCreature(std::move(opponent)), type(type), state(BattleState::intro),
+Battle::Battle(Player &player, std::unique_ptr<Daemon> opponent, BattleType type, std::mt19937 &rng, const Pokedex &pokedex)
+    : player(player), opponentDaemon(std::move(opponent)), type(type), state(BattleState::intro),
       pendingState(BattleState::choosingAction),
       playerMoveSlot(0), itemChoice(0), switchTarget(0),
       currentAction(BattleAction::fight), rng(rng), pokedex(pokedex)
@@ -20,24 +21,24 @@ Battle::Battle(Player &player, std::shared_ptr<NPC> opponent, BattleType type, s
 void Battle::start()
 {
     // Battle already starts in BattleState::intro (from constructor).
-    // Phase 0: opponent (creature or NPC) slides in.
+    // Phase 0: opponent (Daemon or NPC) slides in.
     introPhase = 0;
 
     if (opponent == nullptr)
     {
         // Wild: after phase 0 anim, show message then player sends out
-        addMessage("A wild " + getOpponentCreature().getNickname() + " appeared!");
+        addMessage("A wild " + getOpponentDaemon().getNickname() + " appeared!");
     }
     else
     {
-        // Trainer: after phase 0 (NPC appears), show lines, then phase 1 (NPC out, creature in)
+        // Trainer: after phase 0 (NPC appears), show lines, then phase 1 (NPC out, Daemon in)
         addMessage(opponent->getName() + " wants to fight!");
-        addMessage(opponent->getName() + " sent out " + getOpponentCreature().getNickname() + "!");
-        addIntroAnimMarker(); // phase 1: NPC slides out, their creature comes in
+        addMessage(opponent->getName() + " sent out " + getOpponentDaemon().getNickname() + "!");
+        addIntroAnimMarker(); // phase 1: NPC slides out, their Daemon comes in
     }
 
-    addMessage("Go " + getPlayerCreature().getNickname() + "!");
-    addIntroAnimMarker(); // next phase: player creature comes in
+    addMessage("Go " + getPlayerDaemon().getNickname() + "!");
+    addIntroAnimMarker(); // next phase: player Daemon comes in
 
     pendingState = BattleState::choosingAction;
     // state stays as BattleState::intro (set by constructor)
@@ -54,7 +55,7 @@ void Battle::chooseAction(BattleAction action)
     case BattleAction::item:
         state = BattleState::choosingItem;
         break;
-    case BattleAction::switchCreature:
+    case BattleAction::switchDaemon:
         state = BattleState::choosingSwitch;
         break;
     case BattleAction::flee:
@@ -87,7 +88,7 @@ void Battle::chooseItem(int itemId)
 
     if (item.category == ItemCategory::healing)
     {
-        Creature &pc = getPlayerCreature();
+        Daemon &pc = getPlayerDaemon();
         if (pc.getCurrentHP() >= pc.getMaxHP())
         {
             addMessage("HP is already full!");
@@ -134,13 +135,13 @@ void Battle::chooseSwitchTarget(int partyIndex)
 
     if (partyIndex == 0)
     {
-        addMessage("That creature is already out!");
+        addMessage("That Daemon is already out!");
         pendingState = BattleState::choosingSwitch;
         state = BattleState::showingMessages;
         return;
     }
 
-    Creature &target = player.getCreature(partyIndex);
+    Daemon &target = player.getDaemon(partyIndex);
     if (target.isFainted())
     {
         addMessage(target.getNickname() + " has no energy left!");
@@ -149,11 +150,11 @@ void Battle::chooseSwitchTarget(int partyIndex)
         return;
     }
 
-    // Swap the creature to the front
-    std::string oldName = player.getCreature(0).getNickname();
-    player.swapCreature(0, partyIndex);
+    // Swap the Daemon to the front
+    std::string oldName = player.getDaemon(0).getNickname();
+    player.swapDaemon(0, partyIndex);
     addMessage("Come back, " + oldName + "!");
-    addMessage("Go, " + player.getCreature(0).getNickname() + "!");
+    addMessage("Go, " + player.getDaemon(0).getNickname() + "!");
 
     // Opponent gets a turn after switching
     pendingState = BattleState::opponentTurn;
@@ -172,11 +173,11 @@ void Battle::goBack()
 
 void Battle::executeTurn()
 {
-    Creature &playerCreature = player.getCreature(0); // active creature
+    Daemon &playerDaemon = player.getDaemon(0); // active Daemon
 
     if (currentAction == BattleAction::fight)
     {
-        const auto &moves = playerCreature.getMoves();
+        const auto &moves = playerDaemon.getMoves();
         if (playerMoveSlot < 0 || playerMoveSlot >= 4 || moves[playerMoveSlot].moveId < 0)
         {
             addMessage("No move selected!");
@@ -185,7 +186,7 @@ void Battle::executeTurn()
             return;
         }
 
-        if (!playerCreature.useMove(playerMoveSlot))
+        if (!playerDaemon.useMove(playerMoveSlot))
         {
             addMessage("No PP left for that move!");
             pendingState = BattleState::choosingAction;
@@ -195,15 +196,26 @@ void Battle::executeTurn()
 
         // Player attacks
         const MoveData &moveData = pokedex.getMove(moves[playerMoveSlot].moveId);
-        int damage = calculateDamage(playerCreature, getOpponentCreature(), moveData);
-        getOpponentCreature().takeDamage(damage);
-        addMessage(playerCreature.getNickname() + " used " + moveData.name + "!");
+
+        // Accuracy check
+        if (!accuracyCheck(moveData.accuracy))
+        {
+            addMessage(playerDaemon.getNickname() + " used " + moveData.name + "!");
+            addMessage("But it missed!");
+            pendingState = BattleState::opponentTurn;
+            state = BattleState::showingMessages;
+            return;
+        }
+
+        int damage = calculateDamage(playerDaemon, getOpponentDaemon(), moveData);
+        getOpponentDaemon().takeDamage(damage);
+        addMessage(playerDaemon.getNickname() + " used " + moveData.name + "!");
         addHPAnimMarker();
 
         // Type effectiveness message
-        float eff = getTypeEffectiveness(moveData.type, getOpponentCreature().getSpecies().primaryType);
-        if (getOpponentCreature().getSpecies().secondaryType != getOpponentCreature().getSpecies().primaryType)
-            eff *= getTypeEffectiveness(moveData.type, getOpponentCreature().getSpecies().secondaryType);
+        float eff = getTypeEffectiveness(moveData.type, getOpponentDaemon().getSpecies().primaryType);
+        if (getOpponentDaemon().getSpecies().secondaryType != getOpponentDaemon().getSpecies().primaryType)
+            eff *= getTypeEffectiveness(moveData.type, getOpponentDaemon().getSpecies().secondaryType);
 
         if (eff >= 2.0f)
             addMessage("It's super effective!");
@@ -214,11 +226,11 @@ void Battle::executeTurn()
 
         addMessage("It dealt " + std::to_string(damage) + " damage!");
 
-        if (getOpponentCreature().isFainted())
+        if (getOpponentDaemon().isFainted())
         {
-            int exp = calculateExpYield(getOpponentCreature());
-            playerCreature.addExp(exp);
-            addMessage("The opposing " + getOpponentCreature().getNickname() + " fainted!");
+            int exp = calculateExpYield(getOpponentDaemon());
+            playerDaemon.addExp(exp);
+            addMessage("The opposing " + getOpponentDaemon().getNickname() + " fainted!");
             addMessage("Gained " + std::to_string(exp) + " EXP!");
             addEXPAnimMarker();
             addMessage("You won!");
@@ -239,22 +251,87 @@ void Battle::executeTurn()
 
 void Battle::executeOpponentTurn()
 {
-    Creature &playerCreature = player.getCreature(0);
+    Daemon &playerDaemon = player.getDaemon(0);
 
-    // Opponent attacks (simple AI: always use first move)
-    const auto &oppMoves = getOpponentCreature().getMoves();
-    int oppMoveId = (oppMoves[0].moveId >= 0) ? oppMoves[0].moveId : 0;
-    getOpponentCreature().useMove(0);
+    // Smart AI: pick the best move based on effectiveness and power
+    const auto &oppMoves = getOpponentDaemon().getMoves();
+    int bestSlot = -1;
+    float bestScore = -1.0f;
+
+    for (int i = 0; i < 4; ++i)
+    {
+        if (oppMoves[i].moveId < 0 || oppMoves[i].currentPP <= 0)
+            continue;
+
+        const MoveData &move = pokedex.getMove(oppMoves[i].moveId);
+        float score = static_cast<float>(move.power);
+
+        // Factor in type effectiveness
+        float eff = getTypeEffectiveness(move.type, playerDaemon.getSpecies().primaryType);
+        if (playerDaemon.getSpecies().secondaryType != playerDaemon.getSpecies().primaryType)
+            eff *= getTypeEffectiveness(move.type, playerDaemon.getSpecies().secondaryType);
+        score *= eff;
+
+        // STAB bonus consideration
+        if (move.type == getOpponentDaemon().getSpecies().primaryType ||
+            move.type == getOpponentDaemon().getSpecies().secondaryType)
+            score *= 1.5f;
+
+        // Status moves get a base score if they have a useful effect
+        if (move.power <= 0 && move.statusEffect != StatusEffect::none
+            && playerDaemon.getStatus() == StatusEffect::none)
+            score = 40.0f; // Give status moves a moderate score
+
+        // Add small random factor (0.85-1.0) to prevent complete predictability
+        std::uniform_int_distribution<int> fuzz(85, 100);
+        score *= static_cast<float>(fuzz(rng)) / 100.0f;
+
+        if (score > bestScore)
+        {
+            bestScore = score;
+            bestSlot = i;
+        }
+    }
+
+    // Fallback: use first available move if no good move found
+    if (bestSlot < 0)
+    {
+        for (int i = 0; i < 4; ++i)
+        {
+            if (oppMoves[i].moveId >= 0)
+            {
+                bestSlot = i;
+                break;
+            }
+        }
+    }
+
+    if (bestSlot < 0) bestSlot = 0;
+
+    int oppMoveId = oppMoves[bestSlot].moveId;
+    if (oppMoveId < 0) oppMoveId = 0;
+    getOpponentDaemon().useMove(bestSlot);
     const MoveData &oppMoveData = pokedex.getMove(oppMoveId);
-    int oppDamage = calculateDamage(getOpponentCreature(), playerCreature, oppMoveData);
-    playerCreature.takeDamage(oppDamage);
-    addMessage("Foe " + getOpponentCreature().getNickname() + " used " + oppMoveData.name + "!");
+
+    // Accuracy check
+    if (!accuracyCheck(oppMoveData.accuracy))
+    {
+        addMessage("Foe " + getOpponentDaemon().getNickname() + " used " + oppMoveData.name + "!");
+        addMessage("But it missed!");
+        pendingState = BattleState::choosingAction;
+        state = BattleState::showingMessages;
+        return;
+    }
+
+    int oppDamage = calculateDamage(getOpponentDaemon(), playerDaemon, oppMoveData);
+    playerDaemon.takeDamage(oppDamage);
+    addMessage("Foe " + getOpponentDaemon().getNickname() + " used " + oppMoveData.name + "!");
     addHPAnimMarker();
 
     // Type effectiveness for opponent's attack
-    float oppEff = getTypeEffectiveness(oppMoveData.type, playerCreature.getSpecies().primaryType);
-    if (playerCreature.getSpecies().secondaryType != playerCreature.getSpecies().primaryType)
-        oppEff *= getTypeEffectiveness(oppMoveData.type, playerCreature.getSpecies().secondaryType);
+    float oppEff = getTypeEffectiveness(oppMoveData.type, playerDaemon.getSpecies().primaryType);
+    if (playerDaemon.getSpecies().secondaryType != playerDaemon.getSpecies().primaryType)
+        oppEff *= getTypeEffectiveness(oppMoveData.type, playerDaemon.getSpecies().secondaryType);
 
     if (oppEff >= 2.0f)
         addMessage("It's super effective!");
@@ -265,9 +342,9 @@ void Battle::executeOpponentTurn()
 
     addMessage("It dealt " + std::to_string(oppDamage) + " damage!");
 
-    if (playerCreature.isFainted())
+    if (playerDaemon.isFainted())
     {
-        addMessage(playerCreature.getNickname() + " fainted!");
+        addMessage(playerDaemon.getNickname() + " fainted!");
         pendingState = BattleState::defeat;
     }
     else
@@ -291,15 +368,15 @@ BattleResult Battle::getResult() const
     return result;
 }
 
-Creature &Battle::getPlayerCreature()
+Daemon &Battle::getPlayerDaemon()
 {
-    return player.getCreature(0);
+    return player.getDaemon(0);
 }
 
-Creature &Battle::getOpponentCreature()
+Daemon &Battle::getOpponentDaemon()
 {
     if (opponent == nullptr)
-        return *opponentCreature;
+        return *opponentDaemon;
     else
         return opponent->getParty()[0];
 }
@@ -320,29 +397,93 @@ bool Battle::attemptCapture(int itemId)
 {
     if (opponent != nullptr)
     {
-        addMessage("Cannot capture opponent's creatures!");
+        addMessage("Cannot capture opponent's Daemons!");
         pendingState = BattleState::choosingAction;
         state = BattleState::showingMessages;
         return false;
     }
-    (void)itemId;
-    // Simplified capture: random chance
-    std::uniform_int_distribution<int> dist(0, 99);
-    int roll = dist(rng);
 
-    float hpRatio = static_cast<float>(getOpponentCreature().getCurrentHP()) / static_cast<float>(getOpponentCreature().getMaxHP());
-    int threshold = static_cast<int>(60.0f * (1.0f - hpRatio)) + 10;
+    // Proper capture algorithm (based on Gen III-IV formula)
+    const Daemon &target = getOpponentDaemon();
+    const Species &species = target.getSpecies();
+    const ItemData &ball = pokedex.getItem(itemId);
 
-    if (roll < threshold)
+    int maxHP = target.getMaxHP();
+    int curHP = target.getCurrentHP();
+    int catchRate = species.catchRate;          // Species base catch rate (0-255)
+    int ballModifier = ball.effectValue;        // 1 = normal, 2 = great, 3 = ultra
+
+    // Status bonus: sleeping/frozen = 2x, paralyzed/poisoned/burned = 1.5x
+    float statusBonus = 1.0f;
+    if (target.getStatus() == StatusEffect::deadlocked || target.getStatus() == StatusEffect::entangled)
+        statusBonus = 2.0f;
+    else if (target.getStatus() != StatusEffect::none)
+        statusBonus = 1.5f;
+
+    // Modified catch rate: ((3*maxHP - 2*curHP) * catchRate * ballMod) / (3*maxHP) * statusBonus
+    float a = ((3.0f * static_cast<float>(maxHP) - 2.0f * static_cast<float>(curHP))
+               * static_cast<float>(catchRate) * static_cast<float>(ballModifier))
+              / (3.0f * static_cast<float>(maxHP)) * statusBonus;
+    a = std::min(a, 255.0f);
+
+    // If a >= 255, guaranteed catch
+    if (a >= 255.0f)
     {
-        addMessage("Gotcha! " + getOpponentCreature().getNickname() + " was caught!");
+        addMessage("The ball shook three times...");
+        addMessage("Gotcha! " + target.getNickname() + " was caught!");
         pendingState = BattleState::captured;
         state = BattleState::showingMessages;
+
+        // Add Daemon to player's party
+        Daemon caught(species, target.getLevel());
+        caught = target; // copy current state
+        player.addDaemon(std::move(caught));
         return true;
     }
 
-    addMessage("Oh no! It broke free!");
-    pendingState = BattleState::choosingAction;
+    // Shake probability: b = 1048560 / sqrt(sqrt(16711680 / a))
+    // Each shake succeeds with probability b/65536
+    // 4 successful shakes = capture
+    float b = 1048560.0f / std::sqrt(std::sqrt(16711680.0f / a));
+    int shakeThreshold = static_cast<int>(b);
+
+    std::uniform_int_distribution<int> dist(0, 65535);
+    int shakes = 0;
+    for (int i = 0; i < 4; ++i)
+    {
+        if (dist(rng) < shakeThreshold)
+            shakes++;
+        else
+            break;
+    }
+
+    if (shakes == 4)
+    {
+        addMessage("The ball shook three times...");
+        addMessage("Gotcha! " + target.getNickname() + " was caught!");
+        pendingState = BattleState::captured;
+        state = BattleState::showingMessages;
+
+        // Add Daemon to player's party
+        player.addDaemon(Daemon(species, target.getLevel(), target.getExp(),
+                                    target.getCurrentHP(), target.getNickname(),
+                                    target.getStatus(), target.getIVs(), target.getEVs(),
+                                    target.getMoves()));
+        return true;
+    }
+
+    // Show appropriate failure message based on number of shakes
+    if (shakes == 0)
+        addMessage("Oh no! The Daemon broke free immediately!");
+    else if (shakes == 1)
+        addMessage("The ball shook once... but it broke free!");
+    else if (shakes == 2)
+        addMessage("The ball shook twice... but it broke free!");
+    else
+        addMessage("The ball shook three times... So close!");
+
+    // Opponent gets a turn after failed capture
+    pendingState = BattleState::opponentTurn;
     state = BattleState::showingMessages;
     return false;
 }
@@ -460,7 +601,7 @@ void Battle::addIntroAnimMarker()
 
 // --- Private helpers ---
 
-int Battle::calculateDamage(const Creature &attacker, const Creature &defender,
+int Battle::calculateDamage(const Daemon &attacker, const Daemon &defender,
                             const MoveData &move) const
 {
     if (move.power <= 0)
@@ -517,7 +658,7 @@ bool Battle::accuracyCheck(int accuracy) const
     return dist(rng) <= accuracy;
 }
 
-int Battle::calculateExpYield(const Creature &defeated) const
+int Battle::calculateExpYield(const Daemon &defeated) const
 {
     return defeated.getSpecies().baseExpYield * defeated.getLevel() / 7;
 }

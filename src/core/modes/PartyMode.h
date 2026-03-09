@@ -8,5 +8,15 @@ public:
     void render(GameContext &ctx) override;
 
 private:
+    enum class SubState
+    {
+        browsing,      // Navigating party list
+        actionMenu,    // Showing action sub-menu (Summary, Switch, Cancel)
+        selectingSwap, // Picking second Daemon to swap with
+    };
+
     int selected{0};
+    SubState subState{SubState::browsing};
+    int actionSelected{0};
+    int swapSource{0}; // Index of Daemon to swap from
 };

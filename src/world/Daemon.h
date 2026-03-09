@@ -11,13 +11,13 @@ struct MoveSlot
     int maxPP;
 };
 
-class Creature
+class Daemon
 {
 public:
-    Creature(const Species &species, int level);
+    Daemon(const Species &species, int level);
 
     // Rehydrate from saved data
-    Creature(const Species &species, int level, int exp, int currentHP,
+    Daemon(const Species &species, int level, int exp, int currentHP,
              const std::string &nickname, StatusEffect status,
              const BaseStats &ivs, const BaseStats &evs,
              const std::array<MoveSlot, 4> &moves);

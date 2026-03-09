@@ -37,7 +37,7 @@ src = [
     'src/core/modes/bag/MessageState.cpp',
     'src/core/modes/CutSceneMode.cpp',
     'src/world/Entity.cpp',
-    'src/world/Creature.cpp',
+    'src/world/Daemon.cpp',
     'src/world/Player.cpp',
     'src/world/NPC.cpp',
     'src/world/Map.cpp',

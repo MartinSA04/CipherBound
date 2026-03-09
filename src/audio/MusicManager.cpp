@@ -45,7 +45,7 @@ void MusicManager::stop()
 
 MusicTrack MusicManager::trackForMap(const std::string &mapId)
 {
-    if (mapId == "oak_lab")
+    if (mapId == "bart_iver_lab")
         return MusicTrack::lab;
     if (mapId == "route_1")
         return MusicTrack::route;

@@ -17,6 +17,7 @@ GameUI::GameUI()
 Renderer &GameUI::getRenderer() { return renderer; }
 InputManager &GameUI::getInput() { return input; }
 OverworldRenderer &GameUI::getOverworldRenderer() { return overworldRenderer; }
+SpriteFont &GameUI::getSpriteFont() { return spriteFont; }
 
 void GameUI::setScreen(ScreenType screen) { currentScreen = screen; }
 ScreenType GameUI::getCurrentScreen() const { return currentScreen; }
@@ -41,8 +42,8 @@ void GameUI::loadBattleAssets()
     if (battleAssetsLoaded)
         return;
 
-    renderer.loadTexture("ui_player_info", "assets/sprites/ui/player_creature_info.png");
-    renderer.loadTexture("ui_opponent_info", "assets/sprites/ui/opponent_creature_info.png");
+    renderer.loadTexture("ui_player_info", "assets/sprites/ui/player_daemon_info.png");
+    renderer.loadTexture("ui_opponent_info", "assets/sprites/ui/opponent_daemon_info.png");
     renderer.loadTexture("ui_hp_bar", "assets/sprites/ui/hp_bar.png");
     renderer.loadTexture("ui_exp_bar", "assets/sprites/ui/exp_bar.png");
     renderer.loadTexture("ui_player_base", "assets/sprites/ui/player_battle_base.png");
@@ -52,12 +53,12 @@ void GameUI::loadBattleAssets()
     battleAssetsLoaded = true;
 }
 
-void GameUI::loadCreatureSprite(const std::string &speciesName)
+void GameUI::loadDaemonSprite(const std::string &speciesName)
 {
-    std::string frontId = "creature_" + speciesName;
-    std::string backId = "creature_" + speciesName + "_back";
-    std::string frontPath = "assets/sprites/creatures/" + speciesName + ".png";
-    std::string backPath = "assets/sprites/creatures/" + speciesName + "_back.png";
+    std::string frontId = "daemon_" + speciesName;
+    std::string backId = "daemon_" + speciesName + "_back";
+    std::string frontPath = "assets/sprites/daemons/" + speciesName + ".png";
+    std::string backPath = "assets/sprites/daemons/" + speciesName + "_back.png";
 
     if (!renderer.hasTexture(frontId))
         renderer.loadTexture(frontId, frontPath);
@@ -65,244 +66,11 @@ void GameUI::loadCreatureSprite(const std::string &speciesName)
         renderer.loadTexture(backId, backPath);
 }
 
-void GameUI::drawBattleScene(const Creature *playerCreature,
-                             const Creature *opponentCreature)
-{
-    // Ensure battle assets are loaded
-    loadBattleAssets();
-
-    // Background
-    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT - UI_PANEL_HEIGHT,
-                            TDT4102::Color{200, 220, 200});
-
-    // Bases first
-    drawOpponentBase();
-    drawPlayerBase();
-
-    // Sprites on top
-    drawOpponentCreature(opponentCreature);
-    drawPlayerCreature(playerCreature);
-    drawOpponentInfoBar(opponentCreature);
-    drawPlayerInfoBar(playerCreature);
-}
-
-void GameUI::drawBattleIntroScene(const Creature *playerCreature, const Creature *opponentCreature)
-{
-    // Wild battle intro — phases:
-    //   Phase 0: Wild creature slides in from the right, player back sprite visible
-    //   Phase 1: Player back sprite slides out left, player creature slides in from left
-
-    loadBattleAssets();
-
-    float t = static_cast<float>(battleIntroFrame) / static_cast<float>(BATTLE_INTRO_SCENE_DURATION);
-    if (t > 1.0f)
-        t = 1.0f;
-
-    drawBattleBackground();
-
-    if (battleIntroPhase == 0)
-    {
-        // Bases
-        drawOpponentBase();
-        drawPlayerBase();
-        // Sprites on top
-        int slideOffset = static_cast<int>(WINDOW_WIDTH * (1.0f - t));
-        drawOpponentCreature(opponentCreature, slideOffset);
-        drawPlayerBackOnBase();
-    }
-    else if (battleIntroPhase == 1)
-    {
-        // Bases
-        drawOpponentBase();
-        drawPlayerBase();
-        // Sprites on top
-        drawOpponentCreature(opponentCreature);
-        drawOpponentInfoBar(opponentCreature);
-        drawPlayerSendOutPhase(playerCreature, t);
-    }
-}
-
-void GameUI::drawBattleIntroScene(const Creature *playerCreature, const std::shared_ptr<NPC> opponent, const Creature *opponentCreature)
-{
-    // Trainer battle intro — phases:
-    //   Phase 0: Trainer NPC appears from the right, player back sprite visible
-    //   Phase 1: Trainer slides out to right, opponent creature slides in from right
-    //   Phase 2: Player back sprite slides out left, player creature slides in from left
-
-    loadBattleAssets();
-
-    float t = static_cast<float>(battleIntroFrame) / static_cast<float>(BATTLE_INTRO_SCENE_DURATION);
-    if (t > 1.0f)
-        t = 1.0f;
-
-    drawBattleBackground();
-
-    if (battleIntroPhase == 0)
-    {
-        // Bases
-        drawOpponentBase();
-        drawPlayerBase();
-        // Sprites on top
-        int slideOffset = static_cast<int>(WINDOW_WIDTH * (1.0f - t));
-        drawOpponentTrainer(opponent.get(), slideOffset);
-        drawPlayerBackOnBase();
-    }
-    else if (battleIntroPhase == 1)
-    {
-        // Bases
-        drawOpponentBase();
-        drawPlayerBase();
-        // Sprites on top
-        int trainerOut = static_cast<int>(WINDOW_WIDTH * t);
-        drawOpponentTrainer(opponent.get(), trainerOut);
-
-        int creatureIn = static_cast<int>(WINDOW_WIDTH * (1.0f - t));
-        drawOpponentCreature(opponentCreature, creatureIn);
-
-        drawPlayerBackOnBase();
-    }
-    else if (battleIntroPhase == 2)
-    {
-        // Bases
-        drawOpponentBase();
-        drawPlayerBase();
-        // Sprites on top
-        drawOpponentCreature(opponentCreature);
-        drawOpponentInfoBar(opponentCreature);
-        drawPlayerSendOutPhase(playerCreature, t);
-    }
-}
-
-void GameUI::drawBattleMenu(const std::vector<std::string> &options, int selected)
-{
-    int panelY = WINDOW_HEIGHT - UI_PANEL_HEIGHT;
-
-    // Draw text bar background
-    drawTextBar(panelY);
-
-    // Options in a 2x2 grid on the right side
-    int menuX = WINDOW_WIDTH / 2;
-    int menuWidth = WINDOW_WIDTH / 2;
-    int optionHeight = UI_PANEL_HEIGHT / 2 - 10;
-    int scale = PIXEL_SCALE;
-
-    for (int i = 0; i < static_cast<int>(options.size()) && i < 4; ++i)
-    {
-        int col = i % 2;
-        int row = i / 2;
-        int ox = menuX + col * (menuWidth / 2) + 20;
-        int oy = panelY + row * optionHeight + 23;
-
-        if (i == selected)
-        {
-            drawSelectionArrow(ox - 16, oy + 4 * scale, scale);
-        }
-        spriteFont.drawText(renderer, options[i], ox, oy, scale);
-    }
-}
-
-void GameUI::drawMoveSelect(const Creature &creature, const Pokedex &pokedex, int selected)
-{
-    int panelY = WINDOW_HEIGHT - UI_PANEL_HEIGHT;
-    int scale = PIXEL_SCALE;
-
-    // Draw full text bar background for the move names area
-    drawTextBar(panelY);
-
-    // --- Move names in a 2x2 grid on the left side ---
-    int textBarW = 252 * scale;
-    int textBarX = (WINDOW_WIDTH - textBarW) / 2;
-    int gridX = textBarX + 8 * scale;
-    int gridY = panelY + (UI_PANEL_HEIGHT - 46 * scale) / 2 + 5 * scale;
-    int colW = (textBarW / 2) - 12 * scale;
-    int rowH = 18 * scale;
-
-    const auto &moves = creature.getMoves();
-
-    // Find the selected move data for the info panel
-    const MoveData *selectedMove = nullptr;
-
-    for (int i = 0; i < 4; ++i)
-    {
-        int col = i % 2;
-        int row = i / 2;
-        int ox = gridX + col * colW;
-        int oy = gridY + row * rowH;
-
-        if (moves[i].moveId < 0)
-        {
-            spriteFont.drawText(renderer, "---", ox + 6 * scale, oy, scale);
-            continue;
-        }
-
-        const MoveData &moveData = pokedex.getMove(moves[i].moveId);
-
-        if (i == selected)
-        {
-            selectedMove = &moveData;
-            drawSelectionArrow(ox + scale, oy + 4 * scale, scale);
-        }
-
-        spriteFont.drawText(renderer, moveData.name, ox + 6 * scale, oy, scale);
-    }
-
-    // --- Info box on the right using a narrow text bar ---
-    // Draw a narrower text_bar to the right of the main bar
-    int infoSrcW = 100; // source pixels wide
-    int infoH = 46 * scale;
-    int infoX = 0;
-    int infoY = panelY - infoH;
-    drawNarrowTextBar(infoX, infoY, infoSrcW, scale);
-
-    // Draw PP and type info for the selected move
-    if (selectedMove && selected >= 0 && selected < 4 && moves[selected].moveId >= 0)
-    {
-        int labelX = infoX + 10 * scale;
-        int labelY1 = infoY + 5 * scale;
-        int labelY2 = infoY + 24 * scale;
-
-        // PP line
-        std::string ppText = "PP " + std::to_string(moves[selected].currentPP) + "-" +
-                             std::to_string(moves[selected].maxPP);
-        spriteFont.drawText(renderer, ppText, labelX, labelY1, scale);
-
-        // Type line
-        std::string typeName = elementTypeName(selectedMove->type);
-        // Capitalize first letter
-        if (!typeName.empty())
-            typeName[0] = static_cast<char>(std::toupper(static_cast<unsigned char>(typeName[0])));
-        spriteFont.drawText(renderer, typeName, labelX, labelY2, scale);
-    }
-}
+// --- Battle UI (high-level draw functions moved to BattleMode) ---
 
 // --- Menus ---
 
-void GameUI::drawMainMenu(int selected)
-{
-    // Semi-transparent overlay on right side
-    static const std::vector<std::string> menuItems = {"Pokemon", "Bag", "Save", "Exit"};
-    int scale = PIXEL_SCALE;
-    int itemHeight = 18 * scale + 6; // glyph height * scale + padding
-    int menuWidth = 40 * scale;
-    int menuX = WINDOW_WIDTH - menuWidth - 10;
-    int menuY = 10;
-    int menuHeight = static_cast<int>(menuItems.size()) * itemHeight + 16;
-
-    renderer.drawRect(menuX, menuY, menuWidth, menuHeight,
-                      TDT4102::Color::white, TDT4102::Color::black);
-
-    for (int i = 0; i < static_cast<int>(menuItems.size()); ++i)
-    {
-        int oy = menuY + 8 + i * itemHeight;
-
-        if (i == selected)
-        {
-            drawSelectionArrow(menuX + 2 * scale, oy + 4 * scale, scale);
-        }
-
-        spriteFont.drawText(renderer, menuItems[i], menuX + 6 * scale, oy, scale);
-    }
-}
+// --- Main menu (moved to MenuMode) ---
 
 void GameUI::drawPartyList(const Player &player, int selected)
 {
@@ -325,7 +93,7 @@ void GameUI::drawPartyList(const Player &player, int selected)
         renderer.drawRect(20, sy, WINDOW_WIDTH - 40, slotHeight,
                           TDT4102::Color::transparent, TDT4102::Color::black);
 
-        const Creature &c = party[i];
+        const Daemon &c = party[i];
 
         if (i == selected)
             drawSelectionArrow(28, sy + 4 * scale, scale);
@@ -397,108 +165,7 @@ void GameUI::drawBagScreen(const Player &player, const Pokedex &pokedex, int sel
     }
 }
 
-void GameUI::drawPCBoxScreen(const Player &player, int selected, bool viewingParty)
-{
-    int scale = PIXEL_SCALE;
-    int halfW = WINDOW_WIDTH / 2;
-
-    // Background
-    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{50, 60, 90});
-
-    // Title: "Box N" with left/right arrows
-    std::string boxTitle = "< Box " + std::to_string(player.getCurrentBox() + 1) + " >";
-    int titleX = halfW - static_cast<int>(boxTitle.size()) * 4 * scale;
-    spriteFont.drawText(renderer, boxTitle, titleX, 8, scale);
-
-    // --- Left panel: Party ---
-    int panelY = 12 * scale;
-    spriteFont.drawText(renderer, "PARTY", 28, panelY, scale);
-    panelY += 12 * scale;
-
-    int slotH = 12 * scale;
-    int slotGap = 4;
-    const auto &party = player.getParty();
-
-    for (int i = 0; i < 6; ++i)
-    {
-        int sy = panelY + i * (slotH + slotGap);
-        bool hasCreature = i < static_cast<int>(party.size());
-
-        TDT4102::Color bg = TDT4102::Color{70, 80, 110};
-        if (viewingParty && i == selected)
-            bg = TDT4102::Color{140, 160, 220};
-
-        renderer.drawFilledRect(10, sy, halfW - 20, slotH, bg);
-        renderer.drawRect(10, sy, halfW - 20, slotH,
-                          TDT4102::Color::transparent, TDT4102::Color{100, 110, 140});
-
-        if (hasCreature)
-        {
-            const Creature &c = party[i];
-            if (viewingParty && i == selected)
-                drawSelectionArrow(16, sy + 2 * scale, scale);
-
-            spriteFont.drawText(renderer, c.getNickname(), 16 + 6 * scale, sy + 2, scale);
-            spriteFont.drawText(renderer, "Lv" + std::to_string(c.getLevel()),
-                                halfW - 80 - 12 * scale, sy + 2, scale);
-        }
-        else
-        {
-            spriteFont.drawText(renderer, "---", 16 + 6 * scale, sy + 2, scale);
-        }
-    }
-
-    // --- Right panel: Box contents ---
-    int boxPanelX = halfW + 10;
-    spriteFont.drawText(renderer, "BOX", boxPanelX + 8, 12 * scale, scale);
-    int boxPanelY = 16 * scale + 8 * scale;
-
-    const auto &box = player.getBox(player.getCurrentBox());
-    int boxCount = static_cast<int>(box.size());
-
-    // Show up to 30 slots, but only draw visible ones (scrollable if needed)
-    int maxVisible = 10;
-    int scrollOffset = 0;
-    if (!viewingParty && selected >= maxVisible)
-        scrollOffset = selected - maxVisible + 1;
-
-    for (int i = 0; i < maxVisible && (i + scrollOffset) < Player::BOX_SIZE; ++i)
-    {
-        int idx = i + scrollOffset;
-        int sy = boxPanelY + i * (slotH + slotGap);
-        bool hasCreature = idx < boxCount;
-
-        TDT4102::Color bg = TDT4102::Color{70, 80, 110};
-        if (!viewingParty && idx == selected)
-            bg = TDT4102::Color{140, 160, 220};
-
-        renderer.drawFilledRect(boxPanelX, sy, halfW - 20, slotH, bg);
-        renderer.drawRect(boxPanelX, sy, halfW - 20, slotH,
-                          TDT4102::Color::transparent, TDT4102::Color{100, 110, 140});
-
-        if (hasCreature)
-        {
-            const Creature &c = box[idx];
-            if (!viewingParty && idx == selected)
-                drawSelectionArrow(boxPanelX + 6, sy + 2 * scale, scale);
-
-            spriteFont.drawText(renderer, c.getNickname(), boxPanelX + 6 + 6 * scale, sy + 2, scale);
-            spriteFont.drawText(renderer, "Lv" + std::to_string(c.getLevel()),
-                                WINDOW_WIDTH - 80 - 12 * scale, sy + 2, scale);
-        }
-        else
-        {
-            spriteFont.drawText(renderer, "---", boxPanelX + 6 + 6 * scale, sy + 2, scale);
-        }
-    }
-
-    // Status bar at bottom
-    int statusY = WINDOW_HEIGHT - 10 * scale;
-    if (viewingParty)
-        spriteFont.drawText(renderer, "A:Deposit  LR:Switch Box  B:Exit", 20, statusY, scale - 1);
-    else
-        spriteFont.drawText(renderer, "A:Withdraw  LR:Switch Box  B:Exit", 20, statusY, scale - 1);
-}
+// --- PC Box screen (moved to PCBoxMode) ---
 
 void GameUI::navigateVertical(int &selected, int count)
 {
@@ -690,72 +357,7 @@ EXPTickResult GameUI::tickEXPAnimation(int targetEXP, int expNeeded)
 
 // --- Title screen ---
 
-void GameUI::drawTitleScreen(const std::vector<SaveManager::SlotInfo> &slots, int selected)
-{
-    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{20, 20, 60});
-
-    // Title
-    spriteFont.drawText(renderer, "POCKET CREATURES",
-                        WINDOW_WIDTH / 2 - 8 * 16 * PIXEL_SCALE / 2, 40, PIXEL_SCALE, 1);
-
-    // Subtitle
-    renderer.drawText("Select a save slot", WINDOW_WIDTH / 2 - 70, 90,
-                      TDT4102::Color::light_gray, 14);
-
-    // Draw save slots
-    int slotBoxW = 600;
-    int slotBoxH = 80;
-    int startY = 130;
-    int spacing = 10;
-    int startX = (WINDOW_WIDTH - slotBoxW) / 2;
-
-    for (size_t i = 0; i < slots.size(); ++i)
-    {
-        int y = startY + static_cast<int>(i) * (slotBoxH + spacing);
-        bool isSelected = (static_cast<int>(i) == selected);
-
-        // Slot background
-        TDT4102::Color bgColor = isSelected
-                                     ? TDT4102::Color{60, 60, 120}
-                                     : TDT4102::Color{35, 35, 80};
-        renderer.drawFilledRect(startX, y, slotBoxW, slotBoxH, bgColor);
-
-        // Border
-        TDT4102::Color borderColor = isSelected
-                                         ? TDT4102::Color{200, 200, 255}
-                                         : TDT4102::Color{80, 80, 130};
-        renderer.drawRect(startX, y, slotBoxW, slotBoxH, borderColor);
-
-        // Selection arrow
-        if (isSelected)
-            drawSelectionArrow(startX + 8, y + slotBoxH / 2 - PIXEL_SCALE * 3, PIXEL_SCALE);
-
-        int textX = startX + 40;
-        int textY = y + 10;
-
-        std::string slotLabel = "Slot " + std::to_string(i + 1);
-        renderer.drawText(slotLabel, textX, textY, TDT4102::Color::white, 18);
-
-        if (slots[i].exists)
-        {
-            std::string info = slots[i].playerName;
-            info += "   Party: " + std::to_string(slots[i].partySize);
-            info += "   Badges: " + std::to_string(slots[i].badgeCount);
-            if (!slots[i].mapId.empty())
-                info += "   Map: " + slots[i].mapId;
-            renderer.drawText(info, textX, textY + 30, TDT4102::Color::light_gray, 14);
-        }
-        else
-        {
-            renderer.drawText("New Game", textX, textY + 30, TDT4102::Color{140, 140, 180}, 14);
-        }
-    }
-
-    // Controls hint
-    renderer.drawText("Arrow keys to select, Z or Enter to confirm",
-                      WINDOW_WIDTH / 2 - 160, WINDOW_HEIGHT - 40,
-                      TDT4102::Color{100, 100, 150}, 12);
-}
+// --- Title screen (moved to TitleScreenMode) ---
 
 void GameUI::drawDialogueBox(const std::string &speaker, const std::string &text)
 {
@@ -830,75 +432,7 @@ void GameUI::drawChoiceBox(const std::vector<std::string> &options, int selected
     }
 }
 
-void GameUI::drawFade(float alpha)
-{
-    if (alpha <= 0.0f)
-        return;
-    unsigned char a = static_cast<unsigned char>(alpha * 255.0f);
-    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{0, 0, 0, a});
-}
-
-void GameUI::drawBattleIntro()
-{
-    // Battle intro transition phases (Pokemon-style):
-    //   Phase 1 (0-11):    3 quick white flashes over the overworld
-    //   Phase 2 (12-49):   Horizontal bars sweep across the screen
-    //   Phase 3 (50-89):   Fade from bars to solid black, then hold
-
-    constexpr int FLASH_END = 12;
-    constexpr int BARS_END = 50;
-    const int frame = battleIntroFrame;
-
-    if (frame < FLASH_END)
-    {
-        // Phase 1: Quick white flashes (3 flashes, 4 frames each)
-        int flashCycle = frame % 4;
-        if (flashCycle < 2)
-        {
-            // Flash white
-            unsigned char a = (flashCycle == 0) ? 200 : 120;
-            renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
-                                    TDT4102::Color{255, 255, 255, a});
-        }
-    }
-    else if (frame < BARS_END)
-    {
-        // Phase 2: Horizontal bars sweep in from alternating sides
-        int barPhase = frame - FLASH_END;
-        int totalBarFrames = BARS_END - FLASH_END; // 38 frames
-        int numBars = 8;
-        int barHeight = WINDOW_HEIGHT / numBars;
-
-        for (int i = 0; i < numBars; ++i)
-        {
-            // Stagger: each bar starts a few frames after the previous
-            int barDelay = i * (totalBarFrames / (numBars + 2));
-            int barProgress = barPhase - barDelay;
-            if (barProgress < 0)
-                continue;
-
-            // Progress 0..1 for this bar
-            float t = std::min(1.0f, static_cast<float>(barProgress) / static_cast<float>(totalBarFrames - barDelay));
-            int barWidth = static_cast<int>(t * WINDOW_WIDTH);
-
-            int barY = i * barHeight;
-            // Alternate direction: even bars from left, odd from right
-            if (i % 2 == 0)
-            {
-                renderer.drawFilledRect(0, barY, barWidth, barHeight, TDT4102::Color::black);
-            }
-            else
-            {
-                renderer.drawFilledRect(WINDOW_WIDTH - barWidth, barY, barWidth, barHeight, TDT4102::Color::black);
-            }
-        }
-    }
-    else
-    {
-        // Phase 3: Solid black (hold until transition completes)
-        renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color::black);
-    }
-}
+// --- Battle intro transition (moved to BattleIntroMode) ---
 
 // --- Helpers ---
 
@@ -962,9 +496,9 @@ void GameUI::drawSelectionArrow(int x, int y, int scale)
     renderer.drawFilledRect(x, y + 4 * s, 1 * s, 1 * s, TDT4102::Color::black);
 }
 
-// creature info bars
+// Daemon info bars
 
-void GameUI::drawOpponentInfoBar(const Creature *opponentCreature, int offsetX)
+void GameUI::drawOpponentInfoBar(const Daemon *opponentDaemon, int offsetX)
 {
     const int scale = PIXEL_SCALE;
 
@@ -976,27 +510,27 @@ void GameUI::drawOpponentInfoBar(const Creature *opponentCreature, int offsetX)
 
     renderer.drawSpriteRaw("ui_opponent_info", oppPanelX, oppPanelY, oppPanelW, oppPanelH);
 
-    if (opponentCreature)
+    if (opponentDaemon)
     {
         // Opponent name (drawn on top of the panel)
         int oppNameX = oppPanelX + 2 * scale;
         int oppNameY = oppPanelY + 9 * scale;
-        spriteFont.drawText(renderer, opponentCreature->getNickname(), oppNameX, oppNameY, scale);
+        spriteFont.drawText(renderer, opponentDaemon->getNickname(), oppNameX, oppNameY, scale);
 
         // Opponent level number - draw using battle numbers
         int oppLvlX = oppPanelX + 83 * scale;
         int oppLvlY = oppPanelY + 12 * scale;
-        spriteFont.drawBattleNumber(renderer, opponentCreature->getLevel(), oppLvlX, oppLvlY, scale);
+        spriteFont.drawBattleNumber(renderer, opponentDaemon->getLevel(), oppLvlX, oppLvlY, scale);
 
         // Opponent HP bar
         int oppHPBarX = oppPanelX + 50 * scale;
         int oppHPBarY = oppPanelY + 24 * scale;
         int oppHPBarW = 48 * scale; // bar width in destination pixels
         drawSpriteHPBar(oppHPBarX, oppHPBarY, oppHPBarW,
-                        opponentDisplayHP, opponentCreature->getMaxHP(), scale);
+                        opponentDisplayHP, opponentDaemon->getMaxHP(), scale);
     }
 }
-void GameUI::drawPlayerInfoBar(const Creature *playerCreature, int offsetX)
+void GameUI::drawPlayerInfoBar(const Daemon *playerDaemon, int offsetX)
 {
     const int scale = PIXEL_SCALE;
     int battleH = WINDOW_HEIGHT - UI_PANEL_HEIGHT;
@@ -1009,51 +543,51 @@ void GameUI::drawPlayerInfoBar(const Creature *playerCreature, int offsetX)
 
     renderer.drawSpriteRaw("ui_player_info", plyPanelX, plyPanelY, plyPanelW, plyPanelH);
 
-    if (playerCreature)
+    if (playerDaemon)
     {
         // Player name
         int plyNameX = plyPanelX + 18 * scale;
         int plyNameY = plyPanelY + 10 * scale;
-        spriteFont.drawText(renderer, playerCreature->getNickname(), plyNameX, plyNameY, scale);
+        spriteFont.drawText(renderer, playerDaemon->getNickname(), plyNameX, plyNameY, scale);
 
         // Player level number
         int plyLvlX = plyPanelX + 105 * scale;
         int plyLvlY = plyPanelY + 12 * scale;
-        spriteFont.drawBattleNumber(renderer, playerCreature->getLevel(), plyLvlX, plyLvlY, scale);
+        spriteFont.drawBattleNumber(renderer, playerDaemon->getLevel(), plyLvlX, plyLvlY, scale);
 
         // Player HP bar
         int plyHPBarX = plyPanelX + 72 * scale;
         int plyHPBarY = plyPanelY + 25 * scale;
         int plyHPBarW = 48 * scale;
         drawSpriteHPBar(plyHPBarX, plyHPBarY, plyHPBarW,
-                        playerDisplayHP, playerCreature->getMaxHP(), scale);
+                        playerDisplayHP, playerDaemon->getMaxHP(), scale);
 
         // Player HP numbers (current/max) using battle numbers
         int hpNumX = plyPanelX + 92 * scale;
         int hpNumY = plyPanelY + 32 * scale;
         int hpPad = 3 * scale;
         spriteFont.drawBattleNumber(renderer, playerDisplayHP, hpNumX - hpPad, hpNumY, scale, true);
-        spriteFont.drawBattleNumber(renderer, playerCreature->getMaxHP(), hpNumX + hpPad, hpNumY, scale);
+        spriteFont.drawBattleNumber(renderer, playerDaemon->getMaxHP(), hpNumX + hpPad, hpNumY, scale);
 
         // Player EXP bar
         int expBarX = plyPanelX + 24 * scale;
         int expBarY = plyPanelY + 42 * scale;
         int expBarW = 96 * scale;
-        int expNeeded = playerCreature->getExpNeeded();
+        int expNeeded = playerDaemon->getExpNeeded();
         drawSpriteEXPBar(expBarX, expBarY, expBarW, playerDisplayEXP, expNeeded, scale);
     }
 }
 
-void GameUI::drawOpponentCreature(const Creature *opponentCreature, int offsetX)
+void GameUI::drawOpponentDaemon(const Daemon *opponentDaemon, int offsetX)
 {
     int scale = PIXEL_SCALE;
     auto [baseX, baseY, baseW, baseH] = getOpponentBaseGeometry();
 
-    if (opponentCreature)
+    if (opponentDaemon)
     {
-        const std::string &opponentSpeciesName = opponentCreature->getSpecies().name;
-        loadCreatureSprite(opponentSpeciesName);
-        std::string oppSpriteId = "creature_" + opponentCreature->getSpecies().name;
+        const std::string &opponentSpeciesName = opponentDaemon->getSpecies().name;
+        loadDaemonSprite(opponentSpeciesName);
+        std::string oppSpriteId = "daemon_" + opponentDaemon->getSpecies().name;
         TDT4102::Image &oppImg = renderer.getTexture(oppSpriteId);
         int oppSprW = oppImg.width * scale;
         int oppSprH = oppImg.height * scale;
@@ -1062,16 +596,16 @@ void GameUI::drawOpponentCreature(const Creature *opponentCreature, int offsetX)
         renderer.drawSpriteRaw(oppSpriteId, oppSprX, oppSprY, oppSprW, oppSprH);
     }
 }
-void GameUI::drawPlayerCreature(const Creature *playerCreature, int offsetX)
+void GameUI::drawPlayerDaemon(const Daemon *playerDaemon, int offsetX)
 {
     const int scale = PIXEL_SCALE;
     auto [baseX, baseY, baseW, baseH] = getPlayerBaseGeometry();
 
-    if (playerCreature)
+    if (playerDaemon)
     {
-        const std::string &playerSpeciesName = playerCreature->getSpecies().name;
-        loadCreatureSprite(playerSpeciesName);
-        std::string plySpriteId = "creature_" + playerCreature->getSpecies().name + "_back";
+        const std::string &playerSpeciesName = playerDaemon->getSpecies().name;
+        loadDaemonSprite(playerSpeciesName);
+        std::string plySpriteId = "daemon_" + playerDaemon->getSpecies().name + "_back";
         TDT4102::Image &plyImg = renderer.getTexture(plySpriteId);
         int plySprW = plyImg.width * scale;
         int plySprH = plyImg.height * scale;
@@ -1161,7 +695,7 @@ void GameUI::drawPlayerBackOnBase(int offsetX, int frame)
     drawPlayerBackSprite(backX, backY, backW, backH, frame);
 }
 
-void GameUI::drawPlayerSendOutPhase(const Creature *playerCreature, float t)
+void GameUI::drawPlayerSendOutPhase(const Daemon *playerDaemon, float t)
 {
     // Player back sprite slides out to the left (first half)
     int playerSlideOut = static_cast<int>(-WINDOW_WIDTH * t);
@@ -1169,13 +703,13 @@ void GameUI::drawPlayerSendOutPhase(const Creature *playerCreature, float t)
     if (t < 0.5f)
         drawPlayerBackOnBase(playerSlideOut, throwFrame);
 
-    // Player creature slides in from off-screen left
-    int creatureSlideIn = static_cast<int>(-WINDOW_WIDTH * (1.0f - t));
-    drawPlayerCreature(playerCreature, creatureSlideIn);
+    // Player Daemon slides in from off-screen left
+    int daemonSlideIn = static_cast<int>(-WINDOW_WIDTH * (1.0f - t));
+    drawPlayerDaemon(playerDaemon, daemonSlideIn);
 
     // Player info bar slides in from right
     int infoSlideIn = static_cast<int>(WINDOW_WIDTH * (1.0f - t));
-    drawPlayerInfoBar(playerCreature, infoSlideIn);
+    drawPlayerInfoBar(playerDaemon, infoSlideIn);
 }
 
 // --- Sprite-based HP Bar ---

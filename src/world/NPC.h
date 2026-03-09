@@ -3,7 +3,7 @@
 #include <string>
 #include <set>
 #include "Entity.h"
-#include "Creature.h"
+#include "Daemon.h"
 
 enum class NPCType
 {
@@ -43,8 +43,8 @@ public:
     void addDialogueStage(const std::string &requiredFlag, const std::vector<std::string> &lines);
 
     // Trainer party
-    void addCreature(Creature creature);
-    std::vector<Creature> &getParty();
+    void addDaemon(Daemon daemon);
+    std::vector<Daemon> &getParty();
     bool partyEmpty() const;
 
     // Sight range for trainer battles
@@ -71,7 +71,7 @@ private:
     bool defeated;
     int sightRange;
     std::vector<DialogueStage> dialogueStages;
-    std::vector<Creature> party;
+    std::vector<Daemon> party;
 
     // Movement animation state
     int pixelOffsetX{0};

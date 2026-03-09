@@ -56,22 +56,22 @@ BaseStats SaveManager::deserializeBaseStats(const std::string &s)
     return stats;
 }
 
-// --- Creature serialization ---
+// --- Daemon serialization ---
 // Format: speciesId;level;exp;currentHP;nickname;status;iv_hp,iv_atk,...;ev_hp,ev_atk,...;moveId:curPP:maxPP,...
 
-std::string SaveManager::serializeCreature(const Creature &creature)
+std::string SaveManager::serializeDaemon(const Daemon &daemon)
 {
     std::ostringstream oss;
-    oss << creature.getSpeciesId() << ";"
-        << creature.getLevel() << ";"
-        << creature.getExp() << ";"
-        << creature.getCurrentHP() << ";"
-        << creature.getNickname() << ";"
-        << static_cast<int>(creature.getStatus()) << ";"
-        << serializeBaseStats(creature.getIVs()) << ";"
-        << serializeBaseStats(creature.getEVs()) << ";";
+    oss << daemon.getSpeciesId() << ";"
+        << daemon.getLevel() << ";"
+        << daemon.getExp() << ";"
+        << daemon.getCurrentHP() << ";"
+        << daemon.getNickname() << ";"
+        << static_cast<int>(daemon.getStatus()) << ";"
+        << serializeBaseStats(daemon.getIVs()) << ";"
+        << serializeBaseStats(daemon.getEVs()) << ";";
 
-    const auto &moves = creature.getMoves();
+    const auto &moves = daemon.getMoves();
     for (int i = 0; i < 4; ++i)
     {
         if (i > 0)
@@ -83,7 +83,7 @@ std::string SaveManager::serializeCreature(const Creature &creature)
     return oss.str();
 }
 
-Creature SaveManager::deserializeCreature(const std::string &line, const Pokedex &pokedex)
+Daemon SaveManager::deserializeDaemon(const std::string &line, const Pokedex &pokedex)
 {
     std::istringstream iss(line);
     std::string token;
@@ -126,7 +126,7 @@ Creature SaveManager::deserializeCreature(const std::string &line, const Pokedex
     }
 
     const Species &species = pokedex.getSpecies(speciesId);
-    return Creature(species, level, exp, currentHP, nickname, status, ivs, evs, moves);
+    return Daemon(species, level, exp, currentHP, nickname, status, ivs, evs, moves);
 }
 
 // --- Save game ---
@@ -163,8 +163,8 @@ bool SaveManager::saveGame(const std::string &filepath, const Player &player, co
 
     // [party]
     out << "[party]\n";
-    for (const auto &creature : player.getParty())
-        out << serializeCreature(creature) << "\n";
+    for (const auto &daemon : player.getParty())
+        out << serializeDaemon(daemon) << "\n";
 
     // [pc_boxes]
     out << "[pc_boxes]\n";
@@ -172,8 +172,8 @@ bool SaveManager::saveGame(const std::string &filepath, const Player &player, co
     for (int b = 0; b < Player::NUM_BOXES; ++b)
     {
         const auto &box = player.getBox(b);
-        for (const auto &creature : box)
-            out << "box|" << b << "|" << serializeCreature(creature) << "\n";
+        for (const auto &daemon : box)
+            out << "box|" << b << "|" << serializeDaemon(daemon) << "\n";
     }
 
     // [npcs] — save defeated state
@@ -313,12 +313,12 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
         {
             try
             {
-                Creature c = deserializeCreature(line, pokedex);
-                player.addCreature(c);
+                Daemon c = deserializeDaemon(line, pokedex);
+                player.addDaemon(c);
             }
             catch (const std::exception &e)
             {
-                std::cerr << "SaveManager: failed to load creature: " << e.what() << "\n";
+                std::cerr << "SaveManager: failed to load Daemon: " << e.what() << "\n";
             }
             break;
         }
@@ -333,15 +333,15 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
                 auto first = line.find('|');
                 auto second = line.find('|', first + 1);
                 // int boxIdx = std::stoi(line.substr(first + 1, second - first - 1));
-                std::string creatureData = line.substr(second + 1);
+                std::string daemonData = line.substr(second + 1);
                 try
                 {
-                    Creature c = deserializeCreature(creatureData, pokedex);
-                    player.addCreature(c); // Overflows to PC boxes
+                    Daemon c = deserializeDaemon(daemonData, pokedex);
+                    player.addDaemon(c); // Overflows to PC boxes
                 }
                 catch (const std::exception &e)
                 {
-                    std::cerr << "SaveManager: failed to load PC creature: " << e.what() << "\n";
+                    std::cerr << "SaveManager: failed to load PC Daemon: " << e.what() << "\n";
                 }
             }
             break;

@@ -1,7 +1,7 @@
 #pragma once
 #include <random>
 #include <deque>
-#include "../world/Creature.h"
+#include "../world/Daemon.h"
 #include "../world/Player.h"
 #include "../world/NPC.h"
 #include "../data/Pokedex.h"
@@ -28,7 +28,7 @@ enum class BattleAction
 {
     fight,
     item,
-    switchCreature,
+    switchDaemon,
     flee,
 };
 
@@ -51,7 +51,7 @@ enum class BattleType
 class Battle
 {
 public:
-    Battle(Player &player, std::unique_ptr<Creature> opponent, BattleType type, std::mt19937 &rng, const Pokedex &pokedex);
+    Battle(Player &player, std::unique_ptr<Daemon> opponent, BattleType type, std::mt19937 &rng, const Pokedex &pokedex);
     Battle(Player &player, std::shared_ptr<NPC> opponent, BattleType type, std::mt19937 &rng, const Pokedex &pokedex);
 
     void start();
@@ -65,8 +65,8 @@ public:
     BattleState getPendingState() const;
     BattleResult getResult() const;
 
-    Creature &getPlayerCreature();
-    Creature &getOpponentCreature();
+    Daemon &getPlayerDaemon();
+    Daemon &getOpponentDaemon();
     std::shared_ptr<NPC> getOpponent();
     BattleType getType() const;
 
@@ -94,13 +94,13 @@ private:
     void addIntroAnimMarker(); // Insert marker to continue intro animation
     void executeTurn();
 
-    int calculateDamage(const Creature &attacker, const Creature &defender, const MoveData &move) const;
+    int calculateDamage(const Daemon &attacker, const Daemon &defender, const MoveData &move) const;
     float getTypeEffectiveness(ElementType attackType, ElementType defenseType) const;
     bool accuracyCheck(int accuracy) const;
-    int calculateExpYield(const Creature &defeated) const;
+    int calculateExpYield(const Daemon &defeated) const;
 
     Player &player;
-    std::unique_ptr<Creature> opponentCreature = nullptr;
+    std::unique_ptr<Daemon> opponentDaemon = nullptr;
     std::shared_ptr<NPC> opponent = nullptr;
     BattleType type;
     BattleState state;

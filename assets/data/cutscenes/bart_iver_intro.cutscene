@@ -1,0 +1,58 @@
+# Bart Iver's Lab Introduction Cutscene
+# Triggered when the player enters bart_iver_lab without "bart_iver_intro_done" flag.
+# Player enters from the door at (6,13). Bart Iver is at (6,3).
+#
+# Map layout (key tiles):
+#   y=3: Bart Iver's position (6,3), walkable row
+#   y=4: ###.....###..  — table/wall at x=0-2 and x=8-10
+#   y=5: .##..........  — wall at x=1-2, rest walkable
+#   y=6-7: fully walkable
+#   y=8: #####...##### — walls at x=0-4 and x=8-12
+#   y=13: door at (6,13)
+
+[header]
+id|bart_iver_intro
+
+[steps]
+# Player walks up from the door
+move|player|6|8
+sync
+
+# Bart Iver notices the player and walks down to greet them
+face|prof_bart_iver|down
+wait|20
+
+move|prof_bart_iver|6|6
+sync
+
+say|Prof. Bart Iver|Ah, there you are!;I've been waiting for you.
+say|Prof. Bart Iver|Welcome to my lab!;I am Professor Bart Iver.;People call me the Daemon professor.
+
+# Bart Iver walks toward the pokeball table (staying below the wall row)
+say|Prof. Bart Iver|Come, follow me.;I have something special for you.
+
+# Bart Iver goes right along y=6, then up to y=5 next to the table
+move|prof_bart_iver|7|5
+move|player|6|6
+sync
+
+face|prof_bart_iver|up
+face|player|up
+
+wait|15
+
+# Bart Iver presents the Daemons
+say|Prof. Bart Iver|On this table are three Daemons.;Each one is unique and powerful.
+say|Prof. Bart Iver|Bulbulum manipulates classical forces.;Newtonion is a master of mechanics.;And Gravitonion bends gravity itself.
+say|Prof. Bart Iver|Go ahead — pick one!
+
+wait|15
+
+# Bart Iver walks back to his spot
+move|prof_bart_iver|6|3
+sync
+
+face|prof_bart_iver|down
+
+# Set the flag so this cutscene doesn't repeat
+flag|bart_iver_intro_done

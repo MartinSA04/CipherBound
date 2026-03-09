@@ -1,7 +1,7 @@
-#include "Creature.h"
+#include "Daemon.h"
 #include <algorithm>
 
-Creature::Creature(const Species &species, int level)
+Daemon::Daemon(const Species &species, int level)
     : speciesRef(&species), speciesId(species.id), level(level), exp(0), currentHP(0), status(StatusEffect::none),
       ivs{0, 0, 0, 0, 0, 0}, evs{0, 0, 0, 0, 0, 0}
 {
@@ -31,7 +31,7 @@ Creature::Creature(const Species &species, int level)
     currentHP = calculateStat(species.baseStats.hp, ivs.hp, evs.hp, true);
 }
 
-Creature::Creature(const Species &species, int level, int exp, int currentHP,
+Daemon::Daemon(const Species &species, int level, int exp, int currentHP,
                    const std::string &nickname, StatusEffect status,
                    const BaseStats &ivs, const BaseStats &evs,
                    const std::array<MoveSlot, 4> &moves)
@@ -41,7 +41,7 @@ Creature::Creature(const Species &species, int level, int exp, int currentHP,
     this->nickname = nickname;
 }
 
-int Creature::calculateStat(int base, int iv, int ev, bool isHP) const
+int Daemon::calculateStat(int base, int iv, int ev, bool isHP) const
 {
     if (isHP)
     {
@@ -50,45 +50,45 @@ int Creature::calculateStat(int base, int iv, int ev, bool isHP) const
     return ((2 * base + iv + ev / 4) * level / 100) + 5;
 }
 
-int Creature::getMaxHP() const
+int Daemon::getMaxHP() const
 {
     return calculateStat(speciesRef->baseStats.hp, ivs.hp, evs.hp, true);
 }
 
-int Creature::getCurrentHP() const { return currentHP; }
+int Daemon::getCurrentHP() const { return currentHP; }
 
-void Creature::takeDamage(int amount)
+void Daemon::takeDamage(int amount)
 {
     currentHP = std::max(0, currentHP - amount);
 }
 
-void Creature::heal(int amount)
+void Daemon::heal(int amount)
 {
     currentHP = std::min(getMaxHP(), currentHP + amount);
 }
 
-void Creature::fullHeal()
+void Daemon::fullHeal()
 {
     currentHP = getMaxHP();
     status = StatusEffect::none;
 }
 
-bool Creature::isFainted() const { return currentHP <= 0; }
+bool Daemon::isFainted() const { return currentHP <= 0; }
 
-const std::string &Creature::getNickname() const { return nickname; }
-void Creature::setNickname(const std::string &name) { nickname = name; }
-int Creature::getLevel() const { return level; }
-int Creature::getExp() const { return exp; }
-const Species &Creature::getSpecies() const { return *speciesRef; }
-int Creature::getSpeciesId() const { return speciesId; }
-const BaseStats &Creature::getIVs() const { return ivs; }
-const BaseStats &Creature::getEVs() const { return evs; }
-StatusEffect Creature::getStatus() const { return status; }
-void Creature::setStatus(StatusEffect s) { status = s; }
-void Creature::clearStatus() { status = StatusEffect::none; }
-const std::array<MoveSlot, 4> &Creature::getMoves() const { return moves; }
+const std::string &Daemon::getNickname() const { return nickname; }
+void Daemon::setNickname(const std::string &name) { nickname = name; }
+int Daemon::getLevel() const { return level; }
+int Daemon::getExp() const { return exp; }
+const Species &Daemon::getSpecies() const { return *speciesRef; }
+int Daemon::getSpeciesId() const { return speciesId; }
+const BaseStats &Daemon::getIVs() const { return ivs; }
+const BaseStats &Daemon::getEVs() const { return evs; }
+StatusEffect Daemon::getStatus() const { return status; }
+void Daemon::setStatus(StatusEffect s) { status = s; }
+void Daemon::clearStatus() { status = StatusEffect::none; }
+const std::array<MoveSlot, 4> &Daemon::getMoves() const { return moves; }
 
-bool Creature::useMove(int slot)
+bool Daemon::useMove(int slot)
 {
     if (slot < 0 || slot >= 4 || moves[slot].moveId < 0)
         return false;
@@ -98,14 +98,14 @@ bool Creature::useMove(int slot)
     return true;
 }
 
-void Creature::addExp(int amount) { exp += amount; }
+void Daemon::addExp(int amount) { exp += amount; }
 
-int Creature::getExpNeeded() const
+int Daemon::getExpNeeded() const
 {
     return level * level * level;
 }
 
-bool Creature::checkLevelUp()
+bool Daemon::checkLevelUp()
 {
     int needed = getExpNeeded();
     if (exp >= needed)
@@ -120,7 +120,7 @@ bool Creature::checkLevelUp()
     return false;
 }
 
-int Creature::getStat(int statIndex) const
+int Daemon::getStat(int statIndex) const
 {
     const BaseStats &bs = speciesRef->baseStats;
     switch (statIndex)
@@ -142,7 +142,7 @@ int Creature::getStat(int statIndex) const
     }
 }
 
-bool Creature::learnMove(int moveId, int slot)
+bool Daemon::learnMove(int moveId, int slot)
 {
     if (slot < 0 || slot >= 4)
         return false;

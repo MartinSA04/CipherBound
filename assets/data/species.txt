@@ -20,12 +20,12 @@
 #6|Qubit|quantum|quantum|44|40|40|62|55|55|45|64|3:1,16:6|6:16
 #7|Superposer|quantum|probabilistic|59|55|55|82|75|70|45|142|3:1,16:1,10:8|none
 #
-## Math creatures
+## Math Daemons
 #7|Fibonacchi|algebraic|recursive|50|45|50|55|55|45|120|50|8:1,14:8|none
 #8|Eigenmo|algebraic|algebraic|55|50|60|65|65|40|120|50|8:1,9:6|none
 #9|Chaotica|chaotic|probabilistic|48|42|42|58|48|62|100|55|15:1,10:5|none
 #
-## CS creatures
+## CS Daemons
 #10|Boolbit|logic|digital|42|35|45|58|60|50|150|45|12:1,13:5|none
 #11|Sortex|algorithmic|algorithmic|50|60|50|45|45|55|150|45|11:1,17:7|none
 #

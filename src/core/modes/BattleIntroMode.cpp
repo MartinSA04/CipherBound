@@ -1,5 +1,6 @@
 #include "BattleIntroMode.h"
 #include "../../ui/GameUI.h"
+#include "../../ui/Renderer.h"
 #include "../../battle/Battle.h"
 #include "../../world/World.h"
 #include "../../world/Player.h"
@@ -27,15 +28,15 @@ void BattleIntroMode::update(GameContext &ctx, InputManager & /*input*/)
         else
         {
             const Species &sp = ctx.pokedex.getSpecies(speciesId);
-            auto creature = std::make_unique<Creature>(sp, level);
+            auto daemon = std::make_unique<Daemon>(sp, level);
             ctx.currentBattle = std::make_unique<Battle>(
-                ctx.world.getPlayer(), std::move(creature),
+                ctx.world.getPlayer(), std::move(daemon),
                 BattleType::wild, ctx.world.getRng(), ctx.pokedex);
         }
 
-        ctx.ui.playerDisplayHP = ctx.currentBattle->getPlayerCreature().getCurrentHP();
-        ctx.ui.opponentDisplayHP = ctx.currentBattle->getOpponentCreature().getCurrentHP();
-        ctx.ui.playerDisplayEXP = ctx.currentBattle->getPlayerCreature().getExp();
+        ctx.ui.playerDisplayHP = ctx.currentBattle->getPlayerDaemon().getCurrentHP();
+        ctx.ui.opponentDisplayHP = ctx.currentBattle->getOpponentDaemon().getCurrentHP();
+        ctx.ui.playerDisplayEXP = ctx.currentBattle->getPlayerDaemon().getExp();
         ctx.currentBattle->start();
         ctx.ui.battleIntroPhase = 0;
         ctx.ui.battleIntroFrame = 0;
@@ -51,5 +52,61 @@ void BattleIntroMode::render(GameContext &ctx)
 {
     // Draw the overworld underneath the transition effect
     renderOverworld(ctx);
-    ctx.ui.drawBattleIntro();
+
+    // Battle intro transition phases (Pokemon-style):
+    //   Phase 1 (0-11):    3 quick white flashes over the overworld
+    //   Phase 2 (12-49):   Horizontal bars sweep across the screen
+    //   Phase 3 (50-89):   Fade from bars to solid black, then hold
+
+    Renderer &renderer = ctx.ui.getRenderer();
+
+    constexpr int FLASH_END = 12;
+    constexpr int BARS_END = 50;
+    const int frame = ctx.ui.battleIntroFrame;
+
+    if (frame < FLASH_END)
+    {
+        // Phase 1: Quick white flashes (3 flashes, 4 frames each)
+        int flashCycle = frame % 4;
+        if (flashCycle < 2)
+        {
+            unsigned char a = (flashCycle == 0) ? 200 : 120;
+            renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
+                                    TDT4102::Color{255, 255, 255, a});
+        }
+    }
+    else if (frame < BARS_END)
+    {
+        // Phase 2: Horizontal bars sweep in from alternating sides
+        int barPhase = frame - FLASH_END;
+        int totalBarFrames = BARS_END - FLASH_END;
+        int numBars = 8;
+        int barHeight = WINDOW_HEIGHT / numBars;
+
+        for (int i = 0; i < numBars; ++i)
+        {
+            int barDelay = i * (totalBarFrames / (numBars + 2));
+            int barProgress = barPhase - barDelay;
+            if (barProgress < 0)
+                continue;
+
+            float t = std::min(1.0f, static_cast<float>(barProgress) / static_cast<float>(totalBarFrames - barDelay));
+            int barWidth = static_cast<int>(t * WINDOW_WIDTH);
+
+            int barY = i * barHeight;
+            if (i % 2 == 0)
+            {
+                renderer.drawFilledRect(0, barY, barWidth, barHeight, TDT4102::Color::black);
+            }
+            else
+            {
+                renderer.drawFilledRect(WINDOW_WIDTH - barWidth, barY, barWidth, barHeight, TDT4102::Color::black);
+            }
+        }
+    }
+    else
+    {
+        // Phase 3: Solid black (hold until transition completes)
+        renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color::black);
+    }
 }

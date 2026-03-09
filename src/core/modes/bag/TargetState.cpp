@@ -4,7 +4,7 @@
 #include "../../../ui/GameUI.h"
 #include "../../../world/World.h"
 #include "../../../world/Player.h"
-#include "../../../world/Creature.h"
+#include "../../../world/Daemon.h"
 #include "../../../data/Pokedex.h"
 #include <algorithm>
 
@@ -15,7 +15,7 @@ void TargetState::update(BagMode &bag, GameContext &ctx, InputManager &input)
 
     if (input.isConfirmPressed())
     {
-        Creature &target = player.getCreature(bag.partySelected);
+        Daemon &target = player.getDaemon(bag.partySelected);
         const ItemData &item = ctx.pokedex.getItem(bag.useItemId);
 
         if (target.isFainted())

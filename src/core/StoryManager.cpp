@@ -38,14 +38,14 @@ StoryAction StoryManager::onChoiceSelected(const std::string &context, int choic
         // Extract species id from "pokeball_N"
         int speciesId = std::stoi(context.substr(9));
         const Species &species = pokedex.getSpecies(speciesId);
-        Creature starter{species, 5};
-        world.getPlayer().addCreature(starter);
+        Daemon starter{species, 5};
+        world.getPlayer().addDaemon(starter);
         world.getPlayer().setFlag("has_starter");
 
         // Show confirmation dialogue
         StoryAction action;
         action.type = StoryAction::Type::showDialogue;
-        action.speaker = "Prof. Oak";
+        action.speaker = "Prof. Bart Iver";
         action.lines = {
             "So you chose " + species.name + "!",
             "Take good care of it.",
@@ -67,9 +67,9 @@ StoryAction StoryManager::checkWarp(const WarpPoint &warp, Player &player)
         StoryAction action;
         action.type = StoryAction::Type::blockWarp;
         action.lines = {
-            "Prof. Oak's words echoed...",
-            "You can't go out without a creature!",
-            "Go see Prof. Oak in his lab."};
+            "Prof. Bart Iver's words echoed...",
+            "You can't go out without a Daemon!",
+            "Go see Prof. Bart Iver in his lab."};
         return action;
     }
 
@@ -80,12 +80,12 @@ StoryAction StoryManager::checkWarp(const WarpPoint &warp, Player &player)
 
 StoryAction StoryManager::checkMapEnter(const std::string &mapId, Player &player)
 {
-    // Trigger Oak intro cutscene on first visit
-    if (mapId == "oak_lab" && !player.hasFlag("oak_intro_done"))
+    // Trigger Bart Iver intro cutscene on first visit
+    if (mapId == "bart_iver_lab" && !player.hasFlag("bart_iver_intro_done"))
     {
         StoryAction action;
         action.type = StoryAction::Type::startCutscene;
-        action.cutscenePath = "assets/data/cutscenes/oak_intro.cutscene";
+        action.cutscenePath = "assets/data/cutscenes/bart_iver_intro.cutscene";
         return action;
     }
 

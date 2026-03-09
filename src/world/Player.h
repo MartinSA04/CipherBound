@@ -3,7 +3,7 @@
 #include <map>
 #include <set>
 #include "Entity.h"
-#include "Creature.h"
+#include "Daemon.h"
 #include "../data/Item.h"
 
 struct InventoryEntry
@@ -40,20 +40,20 @@ public:
     void resetWalkFrame();
 
     // Party management
-    void addCreature(Creature creature);
-    Creature &getCreature(int index);
-    const std::vector<Creature> &getParty() const;
+    void addDaemon(Daemon daemon);
+    Daemon &getDaemon(int index);
+    const std::vector<Daemon> &getParty() const;
     int partySize() const;
-    void swapCreature(int indexA, int indexB);
+    void swapDaemon(int indexA, int indexB);
 
     // PC Box storage
     static constexpr int BOX_SIZE = 30;
     static constexpr int NUM_BOXES = 8;
-    void depositCreature(int partyIndex);           // Move from party to current box
-    void withdrawCreature(int boxIndex, int slot);  // Move from box to party
+    void depositDaemon(int partyIndex);           // Move from party to current box
+    void withdrawDaemon(int boxIndex, int slot);  // Move from box to party
     bool canDeposit() const;                        // Party must keep at least 1
     bool canWithdraw() const;                       // Party must have room (< 6)
-    const std::vector<Creature> &getBox(int boxIndex) const;
+    const std::vector<Daemon> &getBox(int boxIndex) const;
     int getBoxCount(int boxIndex) const;
     int getCurrentBox() const;
     void setCurrentBox(int box);
@@ -90,8 +90,8 @@ public:
     const std::vector<std::string> &getBadges() const;
 
 private:
-    std::vector<Creature> party;
-    std::vector<std::vector<Creature>> pcBoxes;  // PC storage boxes
+    std::vector<Daemon> party;
+    std::vector<std::vector<Daemon>> pcBoxes;  // PC storage boxes
     int currentBox{0};                           // Currently selected box
     std::vector<InventoryEntry> inventory;
     std::vector<std::string> badges;

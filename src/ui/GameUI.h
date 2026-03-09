@@ -9,7 +9,6 @@
 #include "SpriteFont.h"
 #include "Menu.h"
 #include "../battle/Battle.h"
-#include "../save/SaveManager.h"
 
 enum class ScreenType
 {
@@ -56,23 +55,12 @@ public:
     // Load battle UI sprite assets
     void loadBattleAssets();
 
-    // Load creature front/back sprites by species name
-    void loadCreatureSprite(const std::string &speciesName);
-
-    // Battle UI
-    void drawBattleScene(const Creature *playerCreature, const Creature *opponentCreature);
-    void drawBattleIntroScene(const Creature *playerCreature, const Creature *opponentCreature);
-    void drawBattleIntroScene(const Creature *playerCreature, const std::shared_ptr<NPC> opponent, const Creature *opponentCreature);
-    void drawBattleMenu(const std::vector<std::string> &options, int selected);
-    void drawMoveSelect(const Creature &creature, const Pokedex &pokedex, int selected);
+    // Load Daemon front/back sprites by species name
+    void loadDaemonSprite(const std::string &speciesName);
 
     // Menus
-    void drawMainMenu(int selected);
     void drawPartyList(const Player &player, int selected);
     void drawBagScreen(const Player &player, const Pokedex &pokedex, int selected);
-
-    // PC Box screen
-    void drawPCBoxScreen(const Player &player, int selected, bool viewingParty);
 
     // Navigation helpers
     void navigateVertical(int &selected, int count);
@@ -105,22 +93,49 @@ public:
                          int maxPlayerHP, int maxOpponentHP);
     EXPTickResult tickEXPAnimation(int targetEXP, int expNeeded);
 
-    // Title screen
-    void drawTitleScreen(const std::vector<SaveManager::SlotInfo> &slots, int selected);
-
     // Typewriter text control
     void setDialogueText(const std::string &text);  // Start revealing new text
     bool updateTypewriter(const bool inputConfirm); // Call once per frame to advance reveal, returns true if game should continue.
     bool isTextFullyRevealed() const;               // True when all chars shown
     void revealAllText();                           // Skip to end instantly
 
-    // Screen transitions
-    void drawFade(float alpha); // 0.0 = transparent, 1.0 = fully black
-
-    // Battle intro transition effect
-    void drawBattleIntro();
+    // Battle intro transition constants
     static constexpr int BATTLE_INTRO_DURATION = 90;       // total frames for the intro
     static constexpr int BATTLE_INTRO_SCENE_DURATION = 45; // frames per intro animation phase
+
+    // Sprite font access (for custom screen rendering)
+    SpriteFont &getSpriteFont();
+
+    // Draw a pixel-art selection arrow at the given position
+    void drawSelectionArrow(int x, int y, int scale = PIXEL_SCALE);
+
+    // Battle scene helpers (used by BattleMode rendering)
+    struct BattleBaseGeometry {
+        int x, y, w, h;
+    };
+    void drawOpponentInfoBar(const Daemon *opponentDaemon, int offsetX = 0);
+    void drawPlayerInfoBar(const Daemon *playerDaemon, int offsetX = 0);
+    void drawOpponentDaemon(const Daemon *opponentDaemon, int offsetX = 0);
+    void drawPlayerDaemon(const Daemon *playerDaemon, int offsetX = 0);
+    void drawPlayerBackSprite(int x, int y, int dstW, int dstH, int frame);
+    void drawBattleBackground();
+    void drawPlayerBackOnBase(int offsetX = 0, int frame = 0);
+    void drawPlayerSendOutPhase(const Daemon *playerDaemon, float t);
+    BattleBaseGeometry getPlayerBaseGeometry() const;
+    BattleBaseGeometry getOpponentBaseGeometry() const;
+    void drawPlayerBase();
+    void drawOpponentBase(int offsetX = 0);
+    void drawOpponentTrainer(const NPC *opponent, int offsetX = 0);
+
+    // Sprite-based HP/EXP bar drawing (used by multiple modes)
+    void drawSpriteHPBar(int x, int y, int width, int currentHP, int maxHP, int scale = PIXEL_SCALE);
+    void drawSpriteEXPBar(int x, int y, int width, int currentEXP, int maxEXP, int scale = PIXEL_SCALE);
+
+    // Draw the text_bar.png background across the bottom panel
+    void drawTextBar(int panelY);
+
+    // Draw a narrower text_bar using partial sprite rendering
+    void drawNarrowTextBar(int x, int y, int srcW, int scale = PIXEL_SCALE);
 
 private:
     Renderer renderer;
@@ -152,47 +167,6 @@ private:
     int typewriterFastSpeed{1};      // Frames per character (fast/held)
     int typewriterIndicatorTimer{0}; // Continuous frame counter for indicator animation
 
-    // Creature info boxes
-    void drawOpponentInfoBar(const Creature *opponentCreature, int offsetX = 0);
-    void drawPlayerInfoBar(const Creature *playerCreature, int offsetX = 0);
-
-    // Creature + battle base drawing
-    void drawOpponentCreature(const Creature *opponentCreature, int offsetX = 0);
-    void drawPlayerCreature(const Creature *playerCreature, int offsetX = 0);
-
-    // Player back sprite from spritesheet (3x3 grid, 80x80 frames, 5 used)
-    void drawPlayerBackSprite(int x, int y, int dstW, int dstH, int frame);
-
-    // Battle scene helpers
-    void drawBattleBackground();                                         // Green battle area fill
-    void drawPlayerBackOnBase(int offsetX = 0, int frame = 0);          // Player base + back sprite
-    void drawPlayerSendOutPhase(const Creature *playerCreature, float t); // Back slides out, creature+info slides in
-
-    // Battle base geometry (computed from PIXEL_SCALE)
-    struct BattleBaseGeometry {
-        int x, y, w, h;
-    };
-    BattleBaseGeometry getPlayerBaseGeometry() const;
-    BattleBaseGeometry getOpponentBaseGeometry() const;
-    void drawPlayerBase();
-    void drawOpponentBase(int offsetX = 0);
-    void drawOpponentTrainer(const NPC *opponent, int offsetX = 0);
-
-
-    // Sprite-based HP/EXP bar drawing
-    void drawSpriteHPBar(int x, int y, int width, int currentHP, int maxHP, int scale = PIXEL_SCALE);
-    void drawSpriteEXPBar(int x, int y, int width, int currentEXP, int maxEXP, int scale = PIXEL_SCALE);
-
     // Dialogue box helpers
     void drawTextBox(int x, int y, int width, int height, const std::string &text);
-
-    // Draw the text_bar.png background across the bottom panel
-    void drawTextBar(int panelY);
-
-    // Draw a narrower text_bar using partial sprite rendering
-    // srcW: how many source pixels wide to draw (from center of the 252px bar)
-    void drawNarrowTextBar(int x, int y, int srcW, int scale = PIXEL_SCALE);
-
-    // Draw a pixel-art selection arrow at the given position
-    void drawSelectionArrow(int x, int y, int scale = PIXEL_SCALE);
 };

@@ -174,11 +174,11 @@ bool Player::canMove(Direction direction, const Map &map) const
 
 // --- Party ---
 
-void Player::addCreature(Creature creature)
+void Player::addDaemon(Daemon daemon)
 {
     if (party.size() < 6)
     {
-        party.push_back(std::move(creature));
+        party.push_back(std::move(daemon));
     }
     else
     {
@@ -187,23 +187,23 @@ void Player::addCreature(Creature creature)
         {
             if (static_cast<int>(box.size()) < BOX_SIZE)
             {
-                box.push_back(std::move(creature));
+                box.push_back(std::move(daemon));
                 return;
             }
         }
-        // All boxes full — creature is lost (shouldn't happen with 240 slots)
+        // All boxes full — Daemon is lost (shouldn't happen with 240 slots)
     }
 }
 
-Creature &Player::getCreature(int index)
+Daemon &Player::getDaemon(int index)
 {
     return party.at(index);
 }
 
-const std::vector<Creature> &Player::getParty() const { return party; }
+const std::vector<Daemon> &Player::getParty() const { return party; }
 int Player::partySize() const { return static_cast<int>(party.size()); }
 
-void Player::swapCreature(int indexA, int indexB)
+void Player::swapDaemon(int indexA, int indexB)
 {
     if (indexA >= 0 && indexA < partySize() && indexB >= 0 && indexB < partySize())
         std::swap(party[indexA], party[indexB]);
@@ -211,7 +211,7 @@ void Player::swapCreature(int indexA, int indexB)
 
 // --- PC Box storage ---
 
-void Player::depositCreature(int partyIndex)
+void Player::depositDaemon(int partyIndex)
 {
     if (!canDeposit() || partyIndex < 0 || partyIndex >= partySize())
         return;
@@ -222,7 +222,7 @@ void Player::depositCreature(int partyIndex)
     party.erase(party.begin() + partyIndex);
 }
 
-void Player::withdrawCreature(int boxIndex, int slot)
+void Player::withdrawDaemon(int boxIndex, int slot)
 {
     if (!canWithdraw())
         return;
@@ -245,7 +245,7 @@ bool Player::canWithdraw() const
     return partySize() < 6;
 }
 
-const std::vector<Creature> &Player::getBox(int boxIndex) const
+const std::vector<Daemon> &Player::getBox(int boxIndex) const
 {
     return pcBoxes.at(boxIndex);
 }

@@ -8,6 +8,7 @@
 class MusicManager;
 class CutsceneRunner;
 class Battle;
+class SaveManager;
 
 // ── Game states ────────────────────────────────────────────────────────────────
 

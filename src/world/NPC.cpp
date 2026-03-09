@@ -35,12 +35,12 @@ void NPC::addDialogueStage(const std::string &requiredFlag, const std::vector<st
     dialogueStages.push_back({requiredFlag, lines});
 }
 
-void NPC::addCreature(Creature creature)
+void NPC::addDaemon(Daemon daemon)
 {
-    party.push_back(std::move(creature));
+    party.push_back(std::move(daemon));
 }
 
-std::vector<Creature> &NPC::getParty() { return party; }
+std::vector<Daemon> &NPC::getParty() { return party; }
 bool NPC::partyEmpty() const
 {
     return party.empty();

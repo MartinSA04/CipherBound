@@ -1,6 +1,6 @@
 # CipherBound
 
-A Pokémon-inspired RPG built in C++20 with SDL2, where creatures are themed around physics and mathematics concepts instead of traditional elements.
+A Pokémon-inspired RPG built in C++20 with SDL2, where Daemons are themed around physics and mathematics concepts instead of traditional elements.
 
 ![C++20](https://img.shields.io/badge/C%2B%2B-20-blue)
 ![SDL2](https://img.shields.io/badge/SDL2-2.x-green)
@@ -9,7 +9,7 @@ A Pokémon-inspired RPG built in C++20 with SDL2, where creatures are themed aro
 ## Features
 
 - **Tile-based overworld** with scrolling camera, map transitions, and NPC interactions
-- **Turn-based battle system** with type effectiveness, experience/leveling, items, and creature capture
+- **Turn-based battle system** with type effectiveness, experience/leveling, items, and Daemon capture
 - **Science-themed type system** — types include *classical*, *electromagnetic*, *quantum*, *gravitational*, *algebraic*, *recursive*, *chaotic*, and more
 - **Cutscene engine** driven by data files for scripted story events
 - **Multi-slot save system** with save/load/delete support
@@ -95,7 +95,7 @@ src/
 │   ├── CutsceneRunner.cpp/h Executes scripted cutscene sequences
 │   └── modes/               One class per game state (see Architecture below)
 ├── data/
-│   ├── Species.h            Creature species definitions + science-themed types
+│   ├── Species.h            Daemon species definitions + science-themed types
 │   ├── Move.h               Move data structures
 │   ├── Item.h               Item data structures
 │   ├── Cutscene.h           Cutscene data structures
@@ -105,7 +105,7 @@ src/
 │   ├── Map.cpp/h            Tile-based map with layers and collision
 │   ├── Player.cpp/h         Player state, party, inventory, position
 │   ├── NPC.cpp/h            NPC entities with dialogue and trainer data
-│   ├── Creature.cpp/h       Individual creature instances (stats, moves, HP)
+│   ├── Daemon.cpp/h       Individual Daemon instances (stats, moves, HP)
 │   └── Entity.cpp/h         Base entity with position and animation
 ├── battle/
 │   ├── Battle.cpp/h         Turn-based battle logic and state machine
@@ -125,7 +125,7 @@ src/
 assets/                      Game data and media
 ├── audio/                   Music tracks (MP3)
 ├── data/                    Species, moves, items, maps, cutscenes (text files)
-├── sprites/                 Creature, player, and UI sprites (PNG)
+├── sprites/                 Daemon, player, and UI sprites (PNG)
 └── tilesets/                Map tileset images
 
 subprojects/
@@ -152,9 +152,9 @@ Each mode receives a `GameContext` reference containing all shared subsystems:
 | `BattleIntroMode`    | Battle entry animation                                 |
 | `BattleMode`         | Turn-based combat                                      |
 | `MenuMode`           | In-game pause menu                                     |
-| `PartyMode`          | View and manage party creatures                        |
+| `PartyMode`          | View and manage party Daemons                          |
 | `BagMode`            | Inventory (uses sub-states: Browsing, Target, Message) |
-| `PCBoxMode`          | PC storage box for creatures                           |
+| `PCBoxMode`          | PC storage box for Daemons                             |
 | `SaveMode`           | Save game screen                                       |
 | `DialogueMode`       | NPC dialogue display                                   |
 | `DialogueChoiceMode` | Dialogue with player choices                           |
@@ -170,7 +170,7 @@ Species, moves, items, maps, and cutscenes are all loaded from text files in `as
 
 ## Use of AI
 
-- **Creature sprites** — Some creature sprite artwork was generated with the help of AI image generation tools.
+- **Daemon sprites** — Some Daemon sprite artwork was generated with the help of AI image generation tools.
 - **Emscripten/web build setup** — AI coding assistance (GitHub Copilot) was used to help configure the Meson build system for Emscripten cross-compilation, create the custom HTML shell template, and resolve compatibility issues (main loop adaptation, font system fallbacks, exception handling flags).
 
 ## License

@@ -6,6 +6,6 @@
 2|Super Potion|Restores 50 HP|healing|700|50
 3|Hyper Potion|Restores 200 HP|healing|1500|200
 4|Full Restore|Fully restores HP|healing|3000|9999
-5|Creature Ball|A ball for catching creatures|capture|200|1
+5|Daemon Ball|A ball for catching Daemons|capture|200|1
 6|Great Ball|A better ball for catching|capture|600|2
 7|Ultra Ball|A high-performance ball|capture|1200|3

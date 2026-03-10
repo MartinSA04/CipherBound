@@ -10,15 +10,15 @@ constexpr int SRC_TILE_SIZE = 16;   // Native HeartGold tile size
 constexpr int PIXEL_SCALE = 4;      // Upscale factor for crisp pixel art
 
 // Rendered tile size in pixels
-constexpr int TILE_SIZE = SRC_TILE_SIZE * PIXEL_SCALE;  // 48
+constexpr int TILE_SIZE = SRC_TILE_SIZE * PIXEL_SCALE;  // 64
 
 // Viewport in tiles (DS top screen = 16x12 tiles)
 constexpr int VIEW_TILES_X = 16;
 constexpr int VIEW_TILES_Y = 12;
 
 // Window dimensions in pixels
-constexpr int WINDOW_WIDTH = VIEW_TILES_X * TILE_SIZE;   // 768
-constexpr int WINDOW_HEIGHT = VIEW_TILES_Y * TILE_SIZE;  // 576
+constexpr int WINDOW_WIDTH = VIEW_TILES_X * TILE_SIZE;   // 1024
+constexpr int WINDOW_HEIGHT = VIEW_TILES_Y * TILE_SIZE;  // 768
 
 // UI panel height (bottom area for battle text, menus, etc.)
 constexpr int UI_PANEL_HEIGHT = 3 * TILE_SIZE;  // 144px

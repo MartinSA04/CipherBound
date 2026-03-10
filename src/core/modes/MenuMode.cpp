@@ -41,7 +41,7 @@ void MenuMode::render(GameContext &ctx)
     Renderer &renderer = ctx.ui.getRenderer();
     SpriteFont &spriteFont = ctx.ui.getSpriteFont();
 
-    static const std::vector<std::string> menuItems = {"Pokemon", "Bag", "Save", "Exit"};
+    static const std::vector<std::string> menuItems = {"Daemons", "Bag", "Save", "Exit"};
     int scale = PIXEL_SCALE;
     int itemHeight = 18 * scale + 6;
     int menuWidth = 40 * scale;

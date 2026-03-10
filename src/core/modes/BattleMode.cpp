@@ -295,7 +295,7 @@ void BattleMode::drawBattleMenu(GameContext &ctx)
     Renderer &renderer = ctx.ui.getRenderer();
     SpriteFont &spriteFont = ctx.ui.getSpriteFont();
 
-    static const std::vector<std::string> options = {"Fight", "Bag", "Pokemon", "Run"};
+    static const std::vector<std::string> options = {"Fight", "Bag", "Daemons", "Run"};
 
     int panelY = WINDOW_HEIGHT - UI_PANEL_HEIGHT;
     ctx.ui.drawTextBar(panelY);

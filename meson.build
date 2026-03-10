@@ -66,6 +66,7 @@ elif host_machine.system() == 'emscripten'
     '-sALLOW_MEMORY_GROWTH=1',
     '-sINITIAL_MEMORY=67108864',
     '-sNO_DISABLE_EXCEPTION_CATCHING',
+    '-lidbfs.js',
     '--preload-file=' + meson.project_source_root() / 'assets' + '@' + '/assets',
     '--shell-file=' + meson.project_source_root() / 'shell.html',
     '-o', 'program.html',

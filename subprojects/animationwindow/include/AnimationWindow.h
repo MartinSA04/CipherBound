@@ -68,6 +68,7 @@ class AnimationWindow {
     nk_context* context = nullptr;
     TDT4102::internal::FontCache fontCache;
     unsigned int textWindowCounter = 0;
+    bool cursorHidden = false;
 
     // Input related context
     std::unordered_map<KeyboardKey, bool> currentKeyStates;
@@ -134,5 +135,9 @@ class AnimationWindow {
 
     // 
     void play_audio(TDT4102::Audio& audio, int loops = 0);
+
+    // Hide/show the Nuklear GUI cursor drawn inside the window
+    void hide_cursor();
+    void show_cursor();
 };
 }  // namespace TDT4102

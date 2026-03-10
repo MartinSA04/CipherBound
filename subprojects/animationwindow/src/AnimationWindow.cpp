@@ -29,7 +29,7 @@ TDT4102::AnimationWindow::AnimationWindow(int x, int y, int width, int height, c
 
     // Open a new window
     windowHandle = SDL_CreateWindow(
-        title.c_str(), x, y, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+        title.c_str(), x, y, width, height, SDL_WINDOW_SHOWN);
     if (windowHandle == nullptr) {
         throw std::runtime_error("Failed to create an AnimationWindow: The SDL backend could not open a new window.\nError details: " + std::string(SDL_GetError()));
     }
@@ -142,6 +142,9 @@ void TDT4102::AnimationWindow::update_gui() {
 
 void TDT4102::AnimationWindow::next_frame() {
     update_gui();
+    if (cursorHidden) {
+        nk_style_hide_cursor(context);
+    }
     nk_sdl_render(NK_ANTI_ALIASING_ON);
 
     show_frame();
@@ -436,5 +439,13 @@ void TDT4102::AnimationWindow::setBackgroundColor(TDT4102::Color newBackgroundCo
 
 void TDT4102::AnimationWindow::play_audio(TDT4102::Audio& audio, int loops) {
     audio.play(loops);
+}
+
+void TDT4102::AnimationWindow::hide_cursor() {
+    cursorHidden = true;
+}
+
+void TDT4102::AnimationWindow::show_cursor() {
+    cursorHidden = false;
 }
 

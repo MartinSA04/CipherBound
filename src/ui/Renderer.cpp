@@ -1,9 +1,10 @@
 #include "Renderer.h"
 
 Renderer::Renderer()
-    : window{50, 50, WINDOW_WIDTH, WINDOW_HEIGHT, "Pokemon Clone"}
+    : window{50, 50, WINDOW_WIDTH, WINDOW_HEIGHT, "CipherBound"}
 {
     window.setBackgroundColor(TDT4102::Color::black);
+    window.hide_cursor();
 }
 
 TDT4102::AnimationWindow &Renderer::getWindow()

@@ -2,14 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PokéGame</title>
+  <!--
+    Viewport meta:
+    - width=device-width: correct sizing on all phones
+    - initial-scale=1.0: no zoom on load
+    - maximum-scale=1.0, user-scalable=no: prevent pinch-to-zoom which
+      interferes with touch controls (iOS ≤16, Android Chrome)
+    - viewport-fit=cover: extend content under iOS notch / safe area
+  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <!-- Prevent iOS auto-detecting phone numbers, emails, etc. -->
+  <meta name="format-detection" content="telephone=no">
+  <!-- PWA hints for Add-to-Home-Screen -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- Suppress favicon 404 -->
+  <link rel="icon" href="data:,">
+  <title>CipherBound</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    /* ── Reset ── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     html, body {
       overflow: hidden;
-      overscroll-behavior: none;
+      overscroll-behavior: none;        /* Chrome/Edge: prevent pull-to-refresh */
+      -webkit-overflow-scrolling: auto; /* iOS: disable momentum scrolling */
+    }
+
+    html {
+      /* dvh accounts for mobile browser toolbar show/hide.
+         Falls back to vh on older browsers (CSS ignores unknown units). */
+      height: 100vh;
+      height: 100dvh;
     }
 
     body {
@@ -19,17 +43,24 @@
       align-items: center;
       justify-content: center;
       height: 100vh;
-      font-family: system-ui, -apple-system, sans-serif;
+      height: 100dvh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       color: #e0e0e0;
-      touch-action: none;
+      touch-action: none;              /* Prevent all default touch behaviors */
+      -webkit-touch-callout: none;     /* iOS: prevent long-press callout */
+      -webkit-user-select: none;
+      user-select: none;
+      /* Safe-area padding for notched iPhones */
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
 
+    /* ── Canvas wrapper & container ── */
     #canvas-wrapper {
+      position: relative;
       border: 3px solid #444;
       border-radius: 6px;
       overflow: hidden;
       background: #000;
-      /* wrapper dimensions are set by JS to match the scaled size */
     }
 
     #canvas-container {
@@ -44,39 +75,38 @@
       display: block;
       image-rendering: pixelated;
       image-rendering: crisp-edges;
+      -webkit-touch-callout: none;
     }
 
-    /* Fullscreen: black background, canvas centered */
-    #canvas-wrapper:fullscreen {
-      width: 100vw;
-      height: 100vh;
+    /* ── Fullscreen icon button ── */
+    #fs-toggle {
+      position: fixed;
+      top: 8px;
+      right: 8px;
+      top: max(8px, env(safe-area-inset-top));
+      right: max(8px, env(safe-area-inset-right));
+      z-index: 50;
+      width: 36px;
+      height: 36px;
       border: none;
-      border-radius: 0;
+      border-radius: 8px;
+      background: rgba(0,0,0,0.5);
+      color: #ddd;
+      padding: 0;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #000;
+      line-height: 1;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      touch-action: manipulation;
     }
+    #fs-toggle:hover { opacity: 1; }
+    #fs-toggle:active { opacity: 1; background: rgba(91,127,255,0.6); }
+    #fs-toggle svg { width: 20px; height: 20px; fill: currentColor; pointer-events: none; }
 
-    #controls {
-      margin-top: 12px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    button {
-      background: #2d2d4e;
-      color: #e0e0e0;
-      border: 1px solid #555;
-      border-radius: 4px;
-      padding: 6px 16px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background 0.15s;
-    }
-    button:hover { background: #3d3d6e; }
-
+    /* ── Loading overlay ── */
     #loading {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -87,30 +117,8 @@
       background: #1a1a2e;
       z-index: 10;
     }
-
     #loading.hidden { display: none; }
-
-    #audio-unlock {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(10, 10, 20, 0.72);
-      z-index: 30;
-    }
-    #audio-unlock.hidden { display: none; }
-    #audio-unlock-btn {
-      padding: 12px 18px;
-      font-size: 15px;
-      font-weight: 600;
-      border-radius: 8px;
-    }
-
-    #status {
-      margin-bottom: 12px;
-      font-size: 16px;
-    }
+    #status { margin-bottom: 12px; font-size: 16px; }
 
     progress {
       width: 240px;
@@ -122,10 +130,50 @@
     progress::-webkit-progress-value { background: #5b7fff; border-radius: 6px; }
     progress::-moz-progress-bar { background: #5b7fff; border-radius: 6px; }
 
-    /* ── Mobile touch controls ── */
-    #game-layout {
-      display: contents;
+    /* ── Audio unlock overlay ── */
+    #audio-unlock {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 10, 20, 0.72);
+      z-index: 30;
+      touch-action: manipulation;
     }
+    #audio-unlock.hidden { display: none; }
+    #audio-unlock-btn {
+      padding: 16px 24px;
+      font-size: 17px;
+      font-weight: 600;
+      border-radius: 10px;
+      background: #2d2d4e;
+      color: #e0e0e0;
+      border: 2px solid #5b7fff;
+      cursor: pointer;
+      min-width: 200px;
+      min-height: 48px;     /* Apple HIG minimum tap target */
+      touch-action: manipulation;
+    }
+
+    /* ── Base button styles ── */
+    button {
+      background: #2d2d4e;
+      color: #e0e0e0;
+      border: 1px solid #555;
+      border-radius: 4px;
+      padding: 6px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.15s;
+      touch-action: manipulation;      /* Eliminate 300ms tap delay */
+    }
+    button:hover { background: #3d3d6e; }
+
+    /* ── Layout wrapper ── */
+    #game-layout { display: contents; }
+
+    /* ── Touch control panels ── */
     .touch-side {
       display: none;
       align-items: center;
@@ -133,9 +181,10 @@
       user-select: none;
       -webkit-user-select: none;
       touch-action: none;
+      -webkit-touch-callout: none;
     }
 
-    /* D-Pad */
+    /* D-Pad grid */
     .dpad {
       display: grid;
       grid-template-columns: repeat(3, 52px);
@@ -143,46 +192,34 @@
       gap: 4px;
     }
     .dpad-btn {
-      width: 52px;
-      height: 52px;
+      width: 52px; height: 52px;
       border-radius: 10px;
       background: #2d2d4e;
       border: 2px solid #555;
       color: #ccc;
       font-size: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       padding: 0;
+      touch-action: none;
+      -webkit-touch-callout: none;
     }
     .dpad-btn:active, .dpad-btn.pressed { background: #5b7fff; border-color: #7b9fff; }
     .dpad-blank { visibility: hidden; }
 
     /* Action buttons */
-    .action-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      align-items: center;
-    }
-    .action-row {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
+    .action-buttons { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+    .action-row { display: flex; gap: 12px; align-items: center; }
     .action-btn {
-      width: 56px;
-      height: 56px;
+      width: 56px; height: 56px;
       border-radius: 50%;
       background: #2d2d4e;
       border: 2px solid #555;
       color: #e0e0e0;
-      font-size: 15px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-size: 15px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
       padding: 0;
+      touch-action: none;
+      -webkit-touch-callout: none;
     }
     .action-btn:active, .action-btn.pressed { background: #5b7fff; border-color: #7b9fff; }
     .action-btn.btn-a { background: #2e5e2e; border-color: #4a8; }
@@ -190,87 +227,72 @@
     .action-btn.btn-b { background: #6e2e2e; border-color: #a44; }
     .action-btn.btn-b:active, .action-btn.btn-b.pressed { background: #a44; }
 
-    .small-buttons {
-      display: flex;
-      gap: 8px;
-      margin-top: 4px;
-    }
+    .small-buttons { display: flex; gap: 8px; margin-top: 4px; }
     .small-btn {
-      height: 32px;
-      padding: 0 14px;
+      height: 32px; padding: 0 14px;
       border-radius: 16px;
       background: #333;
       border: 1px solid #555;
       color: #bbb;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px;
+      touch-action: none;
+      -webkit-touch-callout: none;
     }
     .small-btn:active, .small-btn.pressed { background: #5b7fff; }
 
-    /* ── Portrait mobile ── */
+    /* ═══════════════════════════════════
+       PORTRAIT MOBILE
+       ═══════════════════════════════════ */
     @media (max-width: 768px) and (orientation: portrait) {
-      body {
-        justify-content: center;
-        padding-top: 0;
-      }
+      body { justify-content: center; }
       #game-layout {
         display: flex;
         flex-direction: column;
         align-items: center;
         width: 100%;
       }
-      #canvas-wrapper {
-        border-width: 2px;
-        border-radius: 4px;
-      }
+      #canvas-wrapper { border-width: 2px; border-radius: 4px; }
       #touch-portrait-row {
         display: flex;
         width: 100%;
         justify-content: space-between;
         padding: 10px 12px 16px;
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
         user-select: none;
         -webkit-user-select: none;
         touch-action: none;
       }
-      #touch-portrait-row .touch-side {
-        display: flex;
-      }
-      /* Hide standalone touch-sides outside portrait row */
-      #controls { display: none; }
+      #touch-portrait-row .touch-side { display: flex; }
     }
 
-    /* ── Landscape mobile ── */
+    /* ═══════════════════════════════════
+       LANDSCAPE MOBILE
+       ═══════════════════════════════════ */
     @media (orientation: landscape) and (max-height: 500px) {
-      body {
-        justify-content: center;
-        overflow: hidden;
-      }
+      body { justify-content: center; }
       #game-layout {
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: center;
         width: 100%;
-        height: 100vh;
+        height: 100vh; height: 100dvh;
         gap: 4px;
       }
-      /* In landscape, break portrait-row into side-by-side panels */
-      #touch-portrait-row {
-        display: contents;
-      }
+      #touch-portrait-row { display: contents; }
       #canvas-wrapper {
         order: 2;
-        border-width: 2px;
-        border-radius: 4px;
+        border-width: 2px; border-radius: 4px;
         flex-shrink: 0;
       }
       #touch-left {
         order: 1;
+        padding-left: max(4px, env(safe-area-inset-left));
       }
       #touch-right {
         order: 3;
+        padding-right: max(4px, env(safe-area-inset-right));
       }
       .touch-side {
         display: flex;
@@ -278,7 +300,6 @@
         flex-shrink: 0;
         padding: 4px;
       }
-      #controls { display: none; }
       .dpad { grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 44px); gap: 3px; }
       .dpad-btn { width: 44px; height: 44px; font-size: 18px; }
       .action-btn { width: 48px; height: 48px; font-size: 14px; }
@@ -297,18 +318,17 @@
         <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
       </div>
     </div>
-    <!-- Wrapper for portrait: D-pad left, actions right, below canvas -->
     <div id="touch-portrait-row">
       <div id="touch-left" class="touch-side">
         <div class="dpad">
           <div class="dpad-blank"></div>
-          <button class="dpad-btn" data-key="ArrowUp" data-code="ArrowUp">▲</button>
+          <button class="dpad-btn" data-key="ArrowUp" data-code="ArrowUp">&#9650;</button>
           <div class="dpad-blank"></div>
-          <button class="dpad-btn" data-key="ArrowLeft" data-code="ArrowLeft">◀</button>
+          <button class="dpad-btn" data-key="ArrowLeft" data-code="ArrowLeft">&#9664;</button>
           <div class="dpad-blank"></div>
-          <button class="dpad-btn" data-key="ArrowRight" data-code="ArrowRight">▶</button>
+          <button class="dpad-btn" data-key="ArrowRight" data-code="ArrowRight">&#9654;</button>
           <div class="dpad-blank"></div>
-          <button class="dpad-btn" data-key="ArrowDown" data-code="ArrowDown">▼</button>
+          <button class="dpad-btn" data-key="ArrowDown" data-code="ArrowDown">&#9660;</button>
           <div class="dpad-blank"></div>
         </div>
       </div>
@@ -327,36 +347,100 @@
     </div>
   </div>
 
+  <button id="fs-toggle" type="button" aria-label="Toggle fullscreen">
+    <svg id="fs-icon-expand" viewBox="0 0 24 24"><path d="M3 3h6v2H5v4H3V3zm12 0h6v6h-2V5h-4V3zM3 15h2v4h4v2H3v-6zm16 4h-4v2h6v-6h-2v4z"/></svg>
+    <svg id="fs-icon-shrink" style="display:none" viewBox="0 0 24 24"><path d="M9 3v4H5v2h6V3H9zm6 0v6h6V7h-4V3h-2zM5 15h4v6h2v-8H5v2zm10 0v6h2v-4h4v-2h-6z"/></svg>
+  </button>
+
   <div id="audio-unlock">
     <button id="audio-unlock-btn" type="button">Tap to enable audio</button>
   </div>
 
-  <div id="controls">
-    <button id="fullscreen-btn">Fullscreen</button>
-  </div>
-
   <script>
-    var statusElement = document.getElementById('status');
-    var progressElement = document.getElementById('progress');
-    var loadingElement = document.getElementById('loading');
-    var canvasElement = document.getElementById('canvas');
+    /* ═══════════════════════════════════════════════════════════
+     *  DOM REFERENCES
+     * ═══════════════════════════════════════════════════════════ */
+    var statusElement    = document.getElementById('status');
+    var progressElement  = document.getElementById('progress');
+    var loadingElement   = document.getElementById('loading');
+    var canvasElement    = document.getElementById('canvas');
     var containerElement = document.getElementById('canvas-container');
-    var wrapperElement = document.getElementById('canvas-wrapper');
-    var audioUnlockElement = document.getElementById('audio-unlock');
-    var audioUnlockButton = document.getElementById('audio-unlock-btn');
+    var wrapperElement   = document.getElementById('canvas-wrapper');
+    var audioUnlockOverlay = document.getElementById('audio-unlock');
+    var audioUnlockButton  = document.getElementById('audio-unlock-btn');
 
+    /* ═══════════════════════════════════════════════════════════
+     *  WEBGL CONTEXT LOSS
+     *  Supported: all WebGL-capable browsers.
+     * ═══════════════════════════════════════════════════════════ */
     canvasElement.addEventListener('webglcontextlost', function(e) {
       alert('WebGL context lost. You will need to reload the page.');
       e.preventDefault();
     }, false);
 
-    document.getElementById('fullscreen-btn').addEventListener('click', function() {
-      if (wrapperElement.requestFullscreen) wrapperElement.requestFullscreen();
-      else if (wrapperElement.webkitRequestFullscreen) wrapperElement.webkitRequestFullscreen();
-    });
+    /* ═══════════════════════════════════════════════════════════
+     *  FULLSCREEN TOGGLE
+     *
+     *  Fullscreen API support:
+     *    Chrome Android ≥69:  ✓ (standard)
+     *    Firefox Android ≥64: ✓ (standard)
+     *    Samsung Internet:    ✓ (standard)
+     *    Safari macOS ≥16.4:  ✓ (webkitRequestFullscreen)
+     *    iOS Safari:          ✗ (no support, we hide the button)
+     *
+     *  We detect iOS/iPadOS and hide the button since the
+     *  Fullscreen API is not supported there.
+     * ═══════════════════════════════════════════════════════════ */
+    (function() {
+      var fsBtn     = document.getElementById('fs-toggle');
+      var iconExp   = document.getElementById('fs-icon-expand');
+      var iconShrink = document.getElementById('fs-icon-shrink');
+      var docEl     = document.documentElement;
 
+      // Feature detect
+      var hasFS = !!(docEl.requestFullscreen || docEl.webkitRequestFullscreen);
 
+      // iOS/iPadOS detection: Safari on iOS reports webkitRequestFullscreen
+      // but it is a no-op. Detect by UA string or iPad pretending to be Mac.
+      var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
+      if (!hasFS || isIOS) {
+        fsBtn.style.display = 'none';
+        return;
+      }
+
+      function isFS() {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement);
+      }
+
+      function updateIcon() {
+        var fs = isFS();
+        iconExp.style.display    = fs ? 'none' : '';
+        iconShrink.style.display = fs ? ''     : 'none';
+      }
+
+      fsBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (isFS()) {
+          if (document.exitFullscreen)        document.exitFullscreen();
+          else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        } else {
+          if (docEl.requestFullscreen)        docEl.requestFullscreen();
+          else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+        }
+      });
+
+      document.addEventListener('fullscreenchange', updateIcon);
+      document.addEventListener('webkitfullscreenchange', updateIcon);
+      // Poll as safety net for browsers where Escape exits fullscreen
+      // before JS event fires. Cost: ~0.001% CPU.
+      setInterval(updateIcon, 500);
+    })();
+
+    /* ═══════════════════════════════════════════════════════════
+     *  EMSCRIPTEN MODULE CONFIGURATION
+     * ═══════════════════════════════════════════════════════════ */
     var setStatus = function(text) {
       if (!setStatus.last) setStatus.last = { time: Date.now(), text: '' };
       if (text === setStatus.last.text) return;
@@ -368,24 +452,16 @@
       if (m) {
         statusElement.textContent = m[1];
         progressElement.value = parseInt(m[2]) * 100;
-        progressElement.max = parseInt(m[4]) * 100;
+        progressElement.max   = parseInt(m[4]) * 100;
       } else {
-        if (!text) {
-          loadingElement.classList.add('hidden');
-        }
+        if (!text) loadingElement.classList.add('hidden');
         statusElement.textContent = text;
       }
     };
 
     var Module = {
-      print: function() {
-        var args = Array.prototype.slice.call(arguments);
-        console.log.apply(console, args);
-      },
-      printErr: function() {
-        var args = Array.prototype.slice.call(arguments);
-        console.warn.apply(console, args);
-      },
+      print:    function() { console.log.apply(console, arguments); },
+      printErr: function() { console.warn.apply(console, arguments); },
       canvas: canvasElement,
       setStatus: setStatus,
       totalDependencies: 0,
@@ -396,136 +472,288 @@
           : 'All downloads complete.');
       },
       preRun: [function() {
-        // Mount IDBFS on /saves so save files persist across reloads
+        /* Mount IDBFS on /saves for persistent save data.
+         * IDBFS uses IndexedDB — supported on:
+         *   iOS Safari ≥10, Chrome Android ≥24, Firefox Android ≥16,
+         *   Samsung Internet ≥4, Safari macOS ≥10.1
+         * We block game start until existing saves are loaded. */
         FS.mkdir('/saves');
         FS.mount(IDBFS, {}, '/saves');
-        // Block game startup until IndexedDB data is loaded
         Module.addRunDependency('idbfs-load');
         FS.syncfs(true, function(err) {
           if (err) console.warn('IDBFS load error:', err);
-          else console.log('Save data loaded from IndexedDB');
           Module.removeRunDependency('idbfs-load');
         });
       }]
     };
 
-    // Periodically sync /saves to IndexedDB (catches writes from C++)
-    // Also sync on page unload as a safety net
+    /* ═══════════════════════════════════════════════════════════
+     *  SAVE PERSISTENCE (periodic IDBFS sync)
+     *
+     *  Game writes to /saves/slot_N.sav on MEMFS.
+     *  We flush MEMFS → IndexedDB periodically + on page hide.
+     *
+     *  pagehide is the reliable event on iOS Safari for
+     *  catching tab close / app switch. beforeunload works on
+     *  Chrome/Firefox desktop and Android.
+     * ═══════════════════════════════════════════════════════════ */
     (function() {
-      var syncPending = false;
+      var syncing = false;
       function syncSaves() {
-        if (syncPending) return;
-        if (typeof FS === 'undefined' || !FS.syncfs) return;
-        syncPending = true;
+        if (syncing) return;
+        if (typeof FS === 'undefined' || typeof FS.syncfs !== 'function') return;
+        syncing = true;
         FS.syncfs(false, function(err) {
-          syncPending = false;
+          syncing = false;
           if (err) console.warn('IDBFS sync error:', err);
         });
       }
-      // Sync every 2 seconds while the game runs
       setInterval(syncSaves, 2000);
-      // Also sync on visibility change (user switches tabs / closes)
       document.addEventListener('visibilitychange', function() {
         if (document.visibilityState === 'hidden') syncSaves();
       });
       window.addEventListener('beforeunload', syncSaves);
+      window.addEventListener('pagehide', syncSaves);
     })();
 
     setStatus('Downloading...');
-    window.onerror = function(event) {
+    window.onerror = function() {
       setStatus('Exception thrown, see JavaScript console');
       setStatus = function(text) {
         if (text) console.error('[post-exception status] ' + text);
       };
     };
 
-    /* ── Audio unlock (mobile autoplay policy) ── */
+    /* ═══════════════════════════════════════════════════════════
+     *  AUDIO UNLOCK — iOS / Android / Desktop
+     *
+     *  Root cause (Emscripten SDL2 bug in SDL_emscriptenaudio.c):
+     *  When navigator.userActivation exists (iOS ≥16, Chrome ≥72,
+     *  Firefox ≥120), Emscripten's SDL2 audio SKIPS registering
+     *  autoResumeAudioContext. Instead it falls back to a
+     *  setInterval that polls hasBeenActive and calls .resume().
+     *  But setInterval callbacks are NOT user gestures — iOS
+     *  Safari silently ignores .resume() from non-gesture contexts.
+     *
+     *  Additionally, autoResumeAudioContext itself only listens on
+     *  'touchstart', which per WebKit's official docs is NOT a
+     *  user activation event on Safari. Only touchend, mousedown,
+     *  pointerup (non-mouse), pointerdown (mouse), and keydown
+     *  are activation-triggering events.
+     *
+     *  Fix (Google Chrome team's official recommendation):
+     *  1. Use ES6 Proxy to intercept AudioContext construction
+     *     (transparent — preserves instanceof, property access).
+     *  2. Register event listeners on ONLY activation-triggering
+     *     events (NOT touchstart) to call .resume() on all
+     *     tracked contexts from within a real user gesture.
+     *  3. Pre-create AudioContext during overlay button gesture
+     *     and store on Module.SDL2.audioContext so SDL reuses it.
+     *
+     *  Sources:
+     *    Chrome: developer.chrome.com/blog/web-audio-autoplay
+     *    WebKit: webkit.org/blog/13862/ (user activation events)
+     *
+     *  Compatibility:
+     *    iOS Safari ≥10:    ✓ (Proxy + touchend activation)
+     *    Chrome Android:    ✓ (click/pointerup gesture)
+     *    Firefox Android:   ✓ (click gesture)
+     *    Samsung Internet:  ✓ (click/touchend gesture)
+     *    Desktop browsers:  ✓ (click/keydown gesture)
+     * ═══════════════════════════════════════════════════════════ */
     (function() {
-      var audioUnlocked = false;
+      var allCtx = [];      // Every AudioContext we know about
+      var unlocked = false;
 
-      function getAudioContexts() {
-        var contexts = [];
-        if (typeof Module !== 'undefined' && Module && Module.SDL2 && Module.SDL2.audioContext) {
-          contexts.push(Module.SDL2.audioContext);
-        }
-        if (typeof window !== 'undefined' && window.SDL2 && window.SDL2.audioContext) {
-          contexts.push(window.SDL2.audioContext);
-        }
-        return contexts;
-      }
-
-      function updateOverlay() {
-        var contexts = getAudioContexts();
-        var running = contexts.length > 0 && contexts.every(function(ctx) { return ctx && ctx.state === 'running'; });
-
-        if (running) {
-          audioUnlocked = true;
-          audioUnlockElement.classList.add('hidden');
-        } else {
-          audioUnlockElement.classList.remove('hidden');
-        }
-      }
-
-      function tryUnlockAudio() {
-        if (audioUnlocked) return;
-
-        var contexts = getAudioContexts();
-        if (contexts.length === 0) {
-          updateOverlay();
-          return;
-        }
-
-        contexts.forEach(function(ctx) {
-          if (ctx && typeof ctx.resume === 'function' && ctx.state !== 'running') {
-            ctx.resume().catch(function() {});
+      /* ── 1. Proxy-based AudioContext interception ──
+       * Uses ES6 Proxy with a construct trap (recommended by
+       * the Chrome team). More transparent than monkey-patching
+       * with a replacement function — preserves instanceof,
+       * static properties, and prototype chain automatically.
+       *
+       * When Emscripten's SDL2 EM_ASM does "new AudioContext()",
+       * it goes through our Proxy so we can track the context.
+       */
+      function proxyAC(CtorName) {
+        var Original = window[CtorName];
+        if (!Original || typeof Proxy === 'undefined') return;
+        window[CtorName] = new Proxy(Original, {
+          construct: function(target, args) {
+            var ctx = new (Function.prototype.bind.apply(target, [null].concat(args)))();
+            allCtx.push(ctx);
+            return ctx;
           }
         });
+      }
+      proxyAC('AudioContext');
+      proxyAC('webkitAudioContext');
 
-        // Allow state transitions to settle
-        setTimeout(updateOverlay, 50);
+      /* ── 2. Resume ALL known contexts ──
+       * Called from every real user activation event. Resumes
+       * any suspended context and plays a silent buffer to
+       * prime iOS audio hardware.
+       */
+      function resumeAll() {
+        // Pick up SDL2's context even if created before our Proxy
+        try {
+          var sdlCtx = Module && Module.SDL2 && Module.SDL2.audioContext;
+          if (sdlCtx && allCtx.indexOf(sdlCtx) === -1) allCtx.push(sdlCtx);
+        } catch(e) {}
+
+        for (var i = 0; i < allCtx.length; i++) {
+          try {
+            var ctx = allCtx[i];
+            if (ctx.state === 'suspended') {
+              ctx.resume();
+              // Silent buffer kickstarts iOS audio hardware
+              var buf = ctx.createBuffer(1, 1, ctx.sampleRate || 44100);
+              var src = ctx.createBufferSource();
+              src.buffer = buf;
+              src.connect(ctx.destination);
+              src.start(0);
+            }
+          } catch(e) {}
+        }
+
+        if (!unlocked) {
+          unlocked = true;
+          audioUnlockOverlay.classList.add('hidden');
+        }
       }
 
-      window.tryUnlockGameAudio = tryUnlockAudio;
-
-      audioUnlockButton.addEventListener('pointerdown', function(e) {
-        e.preventDefault();
-        tryUnlockAudio();
+      /* ── 3. Activation-event listeners ──
+       *
+       * CRITICAL: Only listen on REAL user activation events.
+       * Per WebKit (webkit.org/blog/13862/), Safari's activation
+       * triggering events are ONLY:
+       *   touchend, mousedown, pointerdown (mouse), pointerup
+       *   (non-mouse), keydown (except Escape)
+       *
+       * touchstart is explicitly NOT an activation event on Safari.
+       * Calling .resume() from a touchstart handler is silently
+       * ignored and may interfere with the subsequent touchend.
+       *
+       * Per Chrome (developer.chrome.com/blog/web-audio-autoplay),
+       * also include: click, contextmenu, auxclick, dblclick,
+       * mouseup, keyup.
+       *
+       * Combined list covers all browsers. Capture phase fires
+       * BEFORE bubble-phase handlers (before touch controls call
+       * preventDefault). Passive for performance. NOT { once }.
+       */
+      var ACTIVATION_EVENTS = [
+        'touchend',     // iOS Safari primary activation event
+        'mousedown',    // Safari, Chrome, Firefox activation event
+        'mouseup',      // Chrome activation event
+        'pointerup',    // Safari (non-mouse), Chrome activation event
+        'click',        // All browsers (fires after mouseup/touchend)
+        'dblclick',     // Chrome activation event
+        'contextmenu',  // Chrome activation event
+        'auxclick',     // Chrome activation event
+        'keydown',      // All browsers (except Escape on Safari)
+        'keyup'         // Chrome activation event
+      ];
+      ACTIVATION_EVENTS.forEach(function(evt) {
+        document.addEventListener(evt, resumeAll, { capture: true, passive: true });
       });
-      document.addEventListener('pointerdown', tryUnlockAudio, { passive: true });
-      document.addEventListener('keydown', tryUnlockAudio, { passive: true });
 
-      // Poll briefly in case SDL creates audio context after startup
-      var checks = 0;
-      var interval = setInterval(function() {
-        updateOverlay();
-        if (audioUnlocked || ++checks > 120) clearInterval(interval);
+      /* ── 4. Overlay button ──
+       * The touchend handler pre-creates an AudioContext and
+       * stores it on Module.SDL2 so that when SDL2 later calls
+       * "new AudioContext()" it finds an existing context that
+       * is already running (bypassing the suspended→silence path).
+       */
+      audioUnlockButton.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        // Pre-create context during this real user gesture
+        try {
+          if (typeof Module !== 'undefined') {
+            if (!Module.SDL2) Module.SDL2 = {};
+            if (!Module.SDL2.audioContext) {
+              Module.SDL2.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+          }
+        } catch(ex) {}
+        resumeAll();
+      }, { passive: false });
+      audioUnlockButton.addEventListener('click', function() {
+        // Same pre-creation for desktop (click = activation event)
+        try {
+          if (typeof Module !== 'undefined') {
+            if (!Module.SDL2) Module.SDL2 = {};
+            if (!Module.SDL2.audioContext) {
+              Module.SDL2.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+          }
+        } catch(ex) {}
+        resumeAll();
+      });
+
+      /* ── 5. Expose for touch controls ── */
+      window.tryUnlockGameAudio = resumeAll;
+
+      /* ── 6. Poll for overlay visibility ── */
+      var pollCount = 0;
+      var pollTimer = setInterval(function() {
+        try {
+          var ctx = Module && Module.SDL2 && Module.SDL2.audioContext;
+          if (ctx) {
+            if (allCtx.indexOf(ctx) === -1) allCtx.push(ctx);
+            if (ctx.state === 'running') audioUnlockOverlay.classList.add('hidden');
+          }
+        } catch(e) {}
+        if (++pollCount > 240) clearInterval(pollTimer);
       }, 250);
+
+      /* ── 7. Re-resume on visibility change ──
+       * iOS suspends AudioContext when app is backgrounded.
+       * When returning to foreground after user has interacted,
+       * re-resume all contexts.
+       */
+      document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible' && unlocked) resumeAll();
+      });
     })();
 
-    /* ── Touch controls → keyboard events ── */
+    /* ═══════════════════════════════════════════════════════════
+     *  TOUCH CONTROLS → KEYBOARD EVENTS
+     *
+     *  Uses Touch Events API (not Pointer Events) because:
+     *  - Multi-touch: Touch.identifier tracks individual fingers,
+     *    needed for pressing D-pad + action simultaneously.
+     *  - iOS Safari: full Touch Events support since v3.2.
+     *  - Android Chrome: full support since v18.
+     *  - Firefox Android: full support since v52.
+     *
+     *  Hit testing uses getBoundingClientRect() instead of
+     *  elementFromPoint() because the latter doesn't work
+     *  correctly during touchmove on iOS (the touch target
+     *  element captures the gesture).
+     *
+     *  trackedTouches{}: Tracks all touch IDs that started on
+     *  our control area. This ensures sliding off a button gap
+     *  and back onto another button re-activates it.
+     * ═══════════════════════════════════════════════════════════ */
     (function() {
-      var touchPanels = [document.getElementById('touch-portrait-row')];
-      var allBtns = Array.prototype.slice.call(document.querySelectorAll('.touch-side [data-key]'));
-      var activeMap = {};   // touchId -> pressed button element
-      var trackedTouches = {};  // touchId -> true, for all touches that started on us
+      var touchRoot = document.getElementById('touch-portrait-row');
+      var allBtns = Array.prototype.slice.call(
+        document.querySelectorAll('.touch-side [data-key]')
+      );
+      var activeMap = {};       // touchId → currently pressed button
+      var trackedTouches = {};  // touchId → true
+
+      var KEY_CODES = {
+        'ArrowUp': 38, 'ArrowDown': 40, 'ArrowLeft': 37, 'ArrowRight': 39,
+        'z': 90, 'x': 88, 'c': 67, 'Shift': 16
+      };
 
       function sendKey(type, key, code) {
         canvasElement.dispatchEvent(new KeyboardEvent(type, {
-          key: key,
-          code: code,
-          keyCode: keyCodeFor(key),
-          which: keyCodeFor(key),
-          bubbles: true,
-          cancelable: true
+          key: key, code: code,
+          keyCode: KEY_CODES[key] || 0,
+          which:   KEY_CODES[key] || 0,
+          bubbles: true, cancelable: true
         }));
-      }
-
-      function keyCodeFor(key) {
-        var map = {
-          'ArrowUp': 38, 'ArrowDown': 40, 'ArrowLeft': 37, 'ArrowRight': 39,
-          'z': 90, 'x': 88, 'c': 67, 'Shift': 16
-        };
-        return map[key] || 0;
       }
 
       function pressButton(touchId, btn) {
@@ -544,7 +772,7 @@
         }
       }
 
-      function buttonAtPoint(x, y) {
+      function btnAtPoint(x, y) {
         for (var i = 0; i < allBtns.length; i++) {
           var r = allBtns[i].getBoundingClientRect();
           if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
@@ -554,25 +782,29 @@
         return null;
       }
 
-      function onTouchStart(e) {
+      function onStart(e) {
         e.preventDefault();
-        if (window.tryUnlockGameAudio) window.tryUnlockGameAudio();
         for (var i = 0; i < e.changedTouches.length; i++) {
           var t = e.changedTouches[i];
           trackedTouches[t.identifier] = true;
-          pressButton(t.identifier, buttonAtPoint(t.clientX, t.clientY));
+          pressButton(t.identifier, btnAtPoint(t.clientX, t.clientY));
         }
       }
-      function onTouchMove(e) {
+
+      function onMove(e) {
         e.preventDefault();
         for (var i = 0; i < e.changedTouches.length; i++) {
           var t = e.changedTouches[i];
           if (t.identifier in trackedTouches) {
-            pressButton(t.identifier, buttonAtPoint(t.clientX, t.clientY));
+            pressButton(t.identifier, btnAtPoint(t.clientX, t.clientY));
           }
         }
       }
-      function onTouchEnd(e) {
+
+      function onEnd(e) {
+        // Resume audio on touchend — touchend IS a user activation
+        // event on Safari (unlike touchstart which is NOT).
+        if (window.tryUnlockGameAudio) window.tryUnlockGameAudio();
         e.preventDefault();
         for (var i = 0; i < e.changedTouches.length; i++) {
           var id = e.changedTouches[i].identifier;
@@ -580,7 +812,8 @@
           delete trackedTouches[id];
         }
       }
-      function onTouchCancel(e) {
+
+      function onCancel(e) {
         for (var i = 0; i < e.changedTouches.length; i++) {
           var id = e.changedTouches[i].identifier;
           pressButton(id, null);
@@ -588,80 +821,119 @@
         }
       }
 
-      touchPanels.forEach(function(panel) {
-        panel.addEventListener('touchstart', onTouchStart, { passive: false });
-        panel.addEventListener('touchmove', onTouchMove, { passive: false });
-        panel.addEventListener('touchend', onTouchEnd, { passive: false });
-        panel.addEventListener('touchcancel', onTouchCancel);
-        panel.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-      });
+      touchRoot.addEventListener('touchstart',  onStart,  { passive: false });
+      touchRoot.addEventListener('touchmove',   onMove,   { passive: false });
+      touchRoot.addEventListener('touchend',    onEnd,    { passive: false });
+      touchRoot.addEventListener('touchcancel', onCancel, { passive: false });
+      touchRoot.addEventListener('contextmenu', function(e) { e.preventDefault(); });
     })();
 
-    /* ── Responsive canvas sizing ── */
+    /* ═══════════════════════════════════════════════════════════
+     *  RESPONSIVE CANVAS SCALING
+     *
+     *  CSS transform: scale() on the container, keeping the
+     *  actual canvas buffer at 1024×768. This prevents
+     *  Emscripten from resizing the WebGL framebuffer.
+     *
+     *  viewport sizing:
+     *    Modern (iOS ≥13, Chrome ≥61, FF ≥91):
+     *      window.visualViewport.width/height — most accurate,
+     *      accounts for mobile browser toolbar show/hide.
+     *    Fallback: window.innerWidth/Height
+     * ═══════════════════════════════════════════════════════════ */
     (function() {
       var NW = 1024, NH = 768, PIXEL_SCALE = 4;
+
+      function getVP() {
+        if (window.visualViewport) {
+          return { w: window.visualViewport.width, h: window.visualViewport.height };
+        }
+        return { w: window.innerWidth, h: window.innerHeight };
+      }
 
       function applyScale() {
         if (canvasElement.width < 2 || canvasElement.height < 2) return;
 
-        var wrapperStyles = window.getComputedStyle(wrapperElement);
-        var borderX = (parseFloat(wrapperStyles.borderLeftWidth) || 0) + (parseFloat(wrapperStyles.borderRightWidth) || 0);
-        var borderY = (parseFloat(wrapperStyles.borderTopWidth) || 0) + (parseFloat(wrapperStyles.borderBottomWidth) || 0);
+        var vp = getVP();
+        var ws = window.getComputedStyle(wrapperElement);
+        var bx = (parseFloat(ws.borderLeftWidth) || 0) + (parseFloat(ws.borderRightWidth) || 0);
+        var by = (parseFloat(ws.borderTopWidth)  || 0) + (parseFloat(ws.borderBottomWidth) || 0);
 
-        var isLandscapeMobile = (window.innerWidth > window.innerHeight) && window.innerHeight <= 500;
-        var isPortraitMobile = window.innerWidth <= 768 && !isLandscapeMobile;
-        var cssScale;
+        var isLand = (vp.w > vp.h) && vp.h <= 500;
+        var isPort = vp.w <= 768 && !isLand;
+        var scale;
 
-        if (isLandscapeMobile) {
-          // Landscape: canvas between side panels, fit to height
-          // D-pad: 3×44 + 2×3 gap + 2×4 pad = 148px; Actions: 2×48+12 gap + 2×4 pad = 124px
-          var sideW = 148 + 124 + 8; // two panels + gaps
-          var scaleW = (window.innerWidth - sideW - borderX) / NW;
-          var scaleH = (window.innerHeight - 8 - borderY) / NH;
-          cssScale = Math.min(scaleW, scaleH);
-          if (cssScale < 0.1) cssScale = 0.1;
-        } else if (isPortraitMobile) {
-          // Portrait: fill width, but leave room for controls below (~180px)
-          var controlsH = 180;
-          var scaleByW = (window.innerWidth - 16 - borderX) / NW;
-          var scaleByH = (window.innerHeight - controlsH - borderY - 16) / NH;
-          cssScale = Math.min(scaleByW, scaleByH);
-          if (cssScale < 0.1) cssScale = 0.1;
+        if (isLand) {
+          var side = 148 + 124 + 8; // d-pad + actions + gaps
+          scale = Math.min((vp.w - side - bx) / NW, (vp.h - 8 - by) / NH);
+        } else if (isPort) {
+          var ctrlH = 180;
+          scale = Math.min((vp.w - 16 - bx) / NW, (vp.h - ctrlH - by - 16) / NH);
         } else {
-          // Desktop: perfect-pixel steps, capped by height
-          var maxW = Math.min(NW * 2, window.innerWidth * 0.9);
-          var maxH = window.innerHeight * 0.85 - 50;
-          var stepPx = NW / PIXEL_SCALE;
-          var steps = Math.floor(maxW / stepPx);
-          if (steps < 1) steps = 1;
-          cssScale = steps / PIXEL_SCALE;
-          while (NH * cssScale > maxH && cssScale > 1 / PIXEL_SCALE) {
-            steps--;
-            cssScale = Math.max(steps, 1) / PIXEL_SCALE;
+          // Desktop: integer-step for crisp pixels
+          var maxW = Math.min(NW * 2, vp.w * 0.9);
+          var maxH = vp.h * 0.85 - 50;
+          var step = NW / PIXEL_SCALE;
+          var n = Math.floor(maxW / step);
+          if (n < 1) n = 1;
+          scale = n / PIXEL_SCALE;
+          while (NH * scale > maxH && scale > 1 / PIXEL_SCALE) {
+            n--;
+            scale = Math.max(n, 1) / PIXEL_SCALE;
           }
         }
 
-        containerElement.style.transform = 'scale(' + cssScale + ')';
-        wrapperElement.style.width = Math.floor(NW * cssScale + borderX) + 'px';
-        wrapperElement.style.height = Math.floor(NH * cssScale + borderY) + 'px';
+        scale = Math.max(scale, 0.1);
+        containerElement.style.transform = 'scale(' + scale + ')';
+        wrapperElement.style.width  = Math.floor(NW * scale + bx) + 'px';
+        wrapperElement.style.height = Math.floor(NH * scale + by) + 'px';
       }
 
       window.addEventListener('resize', applyScale);
-      window.addEventListener('orientationchange', function() { setTimeout(applyScale, 200); });
 
-      // Poll until canvas is ready, then keep re-applying for a bit
-      // to catch Emscripten's late canvas init
-      var settled = 0;
+      // visualViewport.resize: fires when iOS toolbar appears/disappears.
+      // More reliable than window.resize on mobile Safari.
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', applyScale);
+      }
+
+      // orientationchange: additional safety for mobile rotation.
+      // Some browsers fire resize before layout settles.
+      window.addEventListener('orientationchange', function() {
+        applyScale();
+        setTimeout(applyScale, 100);
+        setTimeout(applyScale, 300);
+      });
+
+      // Poll until Emscripten initializes the canvas
+      var n = 0;
       (function poll() {
         if (canvasElement.width >= 2 && canvasElement.height >= 2) {
           applyScale();
-          settled++;
-          if (settled < 10) setTimeout(poll, 100);
+          if (++n < 10) setTimeout(poll, 100);
         } else {
           requestAnimationFrame(poll);
         }
       })();
     })();
+
+    /* ═══════════════════════════════════════════════════════════
+     *  PREVENT iOS RUBBER-BAND BOUNCE / PULL-TO-REFRESH
+     *
+     *  Even with overflow:hidden + touch-action:none on body,
+     *  some iOS versions allow scrolling on the <html> element.
+     *  This catches and prevents it for any touch not already
+     *  handled by the touch controls.
+     *
+     *  passive: false is required to call preventDefault().
+     * ═══════════════════════════════════════════════════════════ */
+    document.addEventListener('touchmove', function(e) {
+      // Don't double-prevent on touch controls (they already do it)
+      var tgt = e.target;
+      if (tgt && tgt.closest && tgt.closest('#touch-portrait-row')) return;
+      e.preventDefault();
+    }, { passive: false });
+
   </script>
   {{{ SCRIPT }}}
 </body>

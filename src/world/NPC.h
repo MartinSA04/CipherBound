@@ -60,6 +60,7 @@ public:
     bool isWalking() const;
     int getPixelOffsetX() const;
     int getPixelOffsetY() const;
+    int getWalkFrame() const;
 
     // Visibility (cutscene hide/show)
     bool isHidden() const;
@@ -78,6 +79,7 @@ private:
     int pixelOffsetY{0};
     int animFramesLeft{0};
     int moveDelay{12};
+    int walkFrame{0};
 
     bool hidden{false};
 

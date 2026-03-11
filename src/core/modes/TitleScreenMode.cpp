@@ -112,7 +112,7 @@ void TitleScreenMode::render(GameContext &ctx)
 
         // Title
         spriteFont.drawText(renderer, "CIPHERBOUND",
-                            WINDOW_WIDTH / 2 - 8 * 16 * PIXEL_SCALE / 2, 40, PIXEL_SCALE, 1);
+                            WINDOW_WIDTH / 2 - 11 * 8 * PIXEL_SCALE / 2, 40, PIXEL_SCALE, 1);
 
         // Subtitle
         renderer.drawText("Select a save slot", WINDOW_WIDTH / 2 - 70, 90,

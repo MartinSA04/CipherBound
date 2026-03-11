@@ -35,12 +35,39 @@ fi
 echo "=== Building for WebAssembly ==="
 meson compile -C "$BUILD_DIR"
 
+# ─── Cache-busting: rename outputs with content hashes ───
+echo "=== Adding content hashes to filenames ==="
+
+# Remove old hashed files from previous builds
+rm -f "$BUILD_DIR"/program.*.js "$BUILD_DIR"/program.*.wasm "$BUILD_DIR"/program.*.data
+
+# Compute short hashes (first 8 hex chars of sha256)
+JS_HASH=$(sha256sum "$BUILD_DIR/program.js"   | cut -c1-8)
+WASM_HASH=$(sha256sum "$BUILD_DIR/program.wasm" | cut -c1-8)
+DATA_HASH=$(sha256sum "$BUILD_DIR/program.data" | cut -c1-8)
+
+# Copy to hashed filenames (keep originals for meson's incremental builds)
+cp "$BUILD_DIR/program.js"   "$BUILD_DIR/program.${JS_HASH}.js"
+cp "$BUILD_DIR/program.wasm" "$BUILD_DIR/program.${WASM_HASH}.wasm"
+cp "$BUILD_DIR/program.data" "$BUILD_DIR/program.${DATA_HASH}.data"
+
+# Patch the hashed JS to reference hashed wasm + data
+sed -i \
+    -e "s|'program\.data'|'program.${DATA_HASH}.data'|g" \
+    -e "s|'program\.wasm'|'program.${WASM_HASH}.wasm'|g" \
+    "$BUILD_DIR/program.${JS_HASH}.js"
+
+# Patch the HTML to load the hashed JS
+sed -i \
+    "s|src=\"program\.js\"|src=\"program.${JS_HASH}.js\"|" \
+    "$BUILD_DIR/program.html"
+
 echo ""
 echo "Build complete!  Output files:"
 echo "  $BUILD_DIR/program.html"
-echo "  $BUILD_DIR/program.js"
-echo "  $BUILD_DIR/program.wasm"
-echo "  $BUILD_DIR/program.data"
+echo "  $BUILD_DIR/program.${JS_HASH}.js"
+echo "  $BUILD_DIR/program.${WASM_HASH}.wasm"
+echo "  $BUILD_DIR/program.${DATA_HASH}.data"
 
 # Optional: serve
 if [ "${1:-}" = "serve" ] || [ "${1:-}" = "--serve" ]; then

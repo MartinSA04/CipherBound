@@ -527,57 +527,56 @@
     /* ═══════════════════════════════════════════════════════════
      *  AUDIO UNLOCK — iOS / Android / Desktop
      *
-     *  Root cause (Emscripten SDL2 bug in SDL_emscriptenaudio.c):
-     *  When navigator.userActivation exists (iOS ≥16, Chrome ≥72,
-     *  Firefox ≥120), Emscripten's SDL2 audio SKIPS registering
-     *  autoResumeAudioContext. Instead it falls back to a
-     *  setInterval that polls hasBeenActive and calls .resume().
-     *  But setInterval callbacks are NOT user gestures — iOS
-     *  Safari silently ignores .resume() from non-gesture contexts.
+     *  Three problems on iOS Safari:
      *
-     *  Additionally, autoResumeAudioContext itself only listens on
-     *  'touchstart', which per WebKit's official docs is NOT a
-     *  user activation event on Safari. Only touchend, mousedown,
-     *  pointerup (non-mouse), pointerdown (mouse), and keydown
-     *  are activation-triggering events.
+     *  1. Emscripten SDL2 bug: When navigator.userActivation
+     *     exists (all modern browsers), autoResumeAudioContext
+     *     is SKIPPED, and the fallback setInterval calls
+     *     .resume() outside a user gesture — iOS ignores this.
      *
-     *  Fix (Google Chrome team's official recommendation):
-     *  1. Use ES6 Proxy to intercept AudioContext construction
-     *     (transparent — preserves instanceof, property access).
-     *  2. Register event listeners on ONLY activation-triggering
-     *     events (NOT touchstart) to call .resume() on all
-     *     tracked contexts from within a real user gesture.
-     *  3. Pre-create AudioContext during overlay button gesture
-     *     and store on Module.SDL2.audioContext so SDL reuses it.
+     *  2. autoResumeAudioContext listens on 'touchstart', but
+     *     per WebKit docs touchstart is NOT a user activation
+     *     event on Safari.
+     *
+     *  3. iOS mute switch: Web Audio respects the mute/ringer
+     *     switch by default. AudioContext reports 'running' and
+     *     data flows normally, but output is silenced. Playing
+     *     an HTML <audio> element from a user gesture switches
+     *     the iOS audio session from "ambient" (respects mute)
+     *     to "playback" (ignores mute) — like YouTube does.
+     *
+     *  Fix:
+     *  1. ES6 Proxy intercepts AudioContext construction to
+     *     track all contexts (Chrome team's recommendation).
+     *  2. Event listeners on ONLY real activation events (NOT
+     *     touchstart) call .resume() on every interaction.
+     *  3. Playing a silent WAV via <audio> from the first user
+     *     gesture switches iOS audio session to "playback" mode.
      *
      *  Sources:
      *    Chrome: developer.chrome.com/blog/web-audio-autoplay
-     *    WebKit: webkit.org/blog/13862/ (user activation events)
+     *    WebKit: webkit.org/blog/13862/ (activation events)
      *
      *  Compatibility:
-     *    iOS Safari ≥10:    ✓ (Proxy + touchend activation)
+     *    iOS Safari ≥10:    ✓ (Proxy + touchend + <audio> trick)
      *    Chrome Android:    ✓ (click/pointerup gesture)
      *    Firefox Android:   ✓ (click gesture)
      *    Samsung Internet:  ✓ (click/touchend gesture)
      *    Desktop browsers:  ✓ (click/keydown gesture)
      * ═══════════════════════════════════════════════════════════ */
     (function() {
-      var allCtx = [];      // Every AudioContext we know about
+      var allCtx = [];
       var unlocked = false;
+      var audioSessionUnlocked = false;
 
       /* ── 1. Proxy-based AudioContext interception ──
-       * Uses ES6 Proxy with a construct trap (recommended by
-       * the Chrome team). More transparent than monkey-patching
-       * with a replacement function — preserves instanceof,
-       * static properties, and prototype chain automatically.
-       *
-       * When Emscripten's SDL2 EM_ASM does "new AudioContext()",
-       * it goes through our Proxy so we can track the context.
+       * ES6 Proxy with construct trap — transparent interception
+       * that preserves instanceof, static properties, prototype.
        */
-      function proxyAC(CtorName) {
-        var Original = window[CtorName];
-        if (!Original || typeof Proxy === 'undefined') return;
-        window[CtorName] = new Proxy(Original, {
+      function proxyAC(name) {
+        var Orig = window[name];
+        if (!Orig || typeof Proxy === 'undefined') return;
+        window[name] = new Proxy(Orig, {
           construct: function(target, args) {
             var ctx = new (Function.prototype.bind.apply(target, [null].concat(args)))();
             allCtx.push(ctx);
@@ -588,13 +587,66 @@
       proxyAC('AudioContext');
       proxyAC('webkitAudioContext');
 
-      /* ── 2. Resume ALL known contexts ──
-       * Called from every real user activation event. Resumes
-       * any suspended context and plays a silent buffer to
-       * prime iOS audio hardware.
+      /* ── 2. Generate a silent WAV blob URL (once) ──
+       * Playing an HTML <audio> element from a user gesture
+       * switches iOS from "ambient" audio session (muted by
+       * silent switch) to "playback" session (ignores switch).
+       * This is the same technique YouTube uses.
+       *
+       * CRITICAL: The <audio> element must keep playing
+       * (looping) for the entire session. If it stops/pauses,
+       * iOS reverts to "ambient" and the mute switch takes
+       * effect again.
+       */
+      var silentWavUrl = null;
+      function getSilentWavUrl() {
+        if (silentWavUrl) return silentWavUrl;
+        // 1 second of silence — long enough for smooth looping
+        var sr = 44100, ns = 44100;
+        var ds = ns * 2;
+        var buf = new ArrayBuffer(44 + ds);
+        var v = new DataView(buf);
+        function w(o, s) { for (var i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); }
+        w(0,'RIFF'); v.setUint32(4, 36+ds, true); w(8,'WAVE');
+        w(12,'fmt '); v.setUint32(16, 16, true);
+        v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+        v.setUint32(24, sr, true); v.setUint32(28, sr*2, true);
+        v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+        w(36,'data'); v.setUint32(40, ds, true);
+        silentWavUrl = URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+        return silentWavUrl;
+      }
+
+      /* ── 3. Unlock iOS audio session ──
+       * Plays a looping silent WAV via <audio> to permanently
+       * switch the audio session to "playback" mode. The element
+       * keeps playing silently for the entire page lifetime so
+       * iOS never reverts to "ambient" (mute-respecting) mode.
+       */
+      var keepAliveAudio = null;
+      function unlockAudioSession() {
+        if (audioSessionUnlocked) return;
+        try {
+          keepAliveAudio = new Audio(getSilentWavUrl());
+          keepAliveAudio.setAttribute('playsinline', '');
+          keepAliveAudio.loop = true;
+          var p = keepAliveAudio.play();
+          if (p) p.then(function() {
+            audioSessionUnlocked = true;
+          }).catch(function() {
+            keepAliveAudio = null;
+          });
+        } catch(e) { keepAliveAudio = null; }
+      }
+
+      /* ── 4. Resume ALL known AudioContexts ──
+       * Called from every user activation event. Also triggers
+       * the audio session unlock on iOS.
        */
       function resumeAll() {
-        // Pick up SDL2's context even if created before our Proxy
+        unlockAudioSession();
+
+        // Pick up SDL2's context if created before our Proxy
         try {
           var sdlCtx = Module && Module.SDL2 && Module.SDL2.audioContext;
           if (sdlCtx && allCtx.indexOf(sdlCtx) === -1) allCtx.push(sdlCtx);
@@ -605,7 +657,7 @@
             var ctx = allCtx[i];
             if (ctx.state === 'suspended') {
               ctx.resume();
-              // Silent buffer kickstarts iOS audio hardware
+              // Silent buffer primes iOS audio hardware
               var buf = ctx.createBuffer(1, 1, ctx.sampleRate || 44100);
               var src = ctx.createBufferSource();
               src.buffer = buf;
@@ -621,51 +673,28 @@
         }
       }
 
-      /* ── 3. Activation-event listeners ──
+      /* ── 5. Activation-event listeners ──
+       * ONLY real user activation events (NOT touchstart).
+       * Per WebKit: touchend, mousedown, pointerdown (mouse),
+       *   pointerup (non-mouse), keydown (except Escape)
+       * Per Chrome: also click, contextmenu, auxclick, dblclick,
+       *   mouseup, keyup
        *
-       * CRITICAL: Only listen on REAL user activation events.
-       * Per WebKit (webkit.org/blog/13862/), Safari's activation
-       * triggering events are ONLY:
-       *   touchend, mousedown, pointerdown (mouse), pointerup
-       *   (non-mouse), keydown (except Escape)
-       *
-       * touchstart is explicitly NOT an activation event on Safari.
-       * Calling .resume() from a touchstart handler is silently
-       * ignored and may interfere with the subsequent touchend.
-       *
-       * Per Chrome (developer.chrome.com/blog/web-audio-autoplay),
-       * also include: click, contextmenu, auxclick, dblclick,
-       * mouseup, keyup.
-       *
-       * Combined list covers all browsers. Capture phase fires
-       * BEFORE bubble-phase handlers (before touch controls call
-       * preventDefault). Passive for performance. NOT { once }.
+       * Capture phase, passive, permanent (not { once }).
        */
-      var ACTIVATION_EVENTS = [
-        'touchend',     // iOS Safari primary activation event
-        'mousedown',    // Safari, Chrome, Firefox activation event
-        'mouseup',      // Chrome activation event
-        'pointerup',    // Safari (non-mouse), Chrome activation event
-        'click',        // All browsers (fires after mouseup/touchend)
-        'dblclick',     // Chrome activation event
-        'contextmenu',  // Chrome activation event
-        'auxclick',     // Chrome activation event
-        'keydown',      // All browsers (except Escape on Safari)
-        'keyup'         // Chrome activation event
-      ];
-      ACTIVATION_EVENTS.forEach(function(evt) {
+      ['touchend','mousedown','mouseup','pointerup','click',
+       'dblclick','contextmenu','auxclick','keydown','keyup'
+      ].forEach(function(evt) {
         document.addEventListener(evt, resumeAll, { capture: true, passive: true });
       });
 
-      /* ── 4. Overlay button ──
-       * The touchend handler pre-creates an AudioContext and
-       * stores it on Module.SDL2 so that when SDL2 later calls
-       * "new AudioContext()" it finds an existing context that
-       * is already running (bypassing the suspended→silence path).
+      /* ── 6. Overlay button ──
+       * Pre-creates AudioContext during user gesture and stores
+       * on Module.SDL2.audioContext so SDL reuses it.
        */
-      audioUnlockButton.addEventListener('touchend', function(e) {
-        e.preventDefault();
-        // Pre-create context during this real user gesture
+      function onOverlayGesture(e) {
+        if (e.preventDefault) e.preventDefault();
+        unlockAudioSession();
         try {
           if (typeof Module !== 'undefined') {
             if (!Module.SDL2) Module.SDL2 = {};
@@ -675,24 +704,14 @@
           }
         } catch(ex) {}
         resumeAll();
-      }, { passive: false });
-      audioUnlockButton.addEventListener('click', function() {
-        // Same pre-creation for desktop (click = activation event)
-        try {
-          if (typeof Module !== 'undefined') {
-            if (!Module.SDL2) Module.SDL2 = {};
-            if (!Module.SDL2.audioContext) {
-              Module.SDL2.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-          }
-        } catch(ex) {}
-        resumeAll();
-      });
+      }
+      audioUnlockButton.addEventListener('touchend', onOverlayGesture, { passive: false });
+      audioUnlockButton.addEventListener('click', onOverlayGesture);
 
-      /* ── 5. Expose for touch controls ── */
+      /* ── 7. Expose for touch controls ── */
       window.tryUnlockGameAudio = resumeAll;
 
-      /* ── 6. Poll for overlay visibility ── */
+      /* ── 8. Poll for overlay visibility ── */
       var pollCount = 0;
       var pollTimer = setInterval(function() {
         try {
@@ -705,10 +724,8 @@
         if (++pollCount > 240) clearInterval(pollTimer);
       }, 250);
 
-      /* ── 7. Re-resume on visibility change ──
-       * iOS suspends AudioContext when app is backgrounded.
-       * When returning to foreground after user has interacted,
-       * re-resume all contexts.
+      /* ── 9. Re-resume on visibility change ──
+       * iOS suspends AudioContext when backgrounded.
        */
       document.addEventListener('visibilitychange', function() {
         if (document.visibilityState === 'visible' && unlocked) resumeAll();

@@ -25,6 +25,7 @@ void OverworldRenderer::loadSprites()
     if (!spritesLoaded)
     {
         renderer.loadTexture("player", "assets/sprites/player/player_sheet.png");
+        renderer.loadTexture("prof_bart_iver", "assets/sprites/npcs/bart_iver/bart_iver_sheet.png");
         spritesLoaded = true;
     }
 }
@@ -88,6 +89,23 @@ SpriteFrame OverworldRenderer::getPlayerFrame(const Player &player) const
     {
         // 4-frame walk cycle: 0-1-2-3, pick based on walkFrame
         int step = player.getWalkFrame() % 4;
+        return walkFrames[dirIdx][step];
+    }
+    else
+    {
+        // Idle: frame 0
+        return walkFrames[dirIdx][0];
+    }
+}
+
+SpriteFrame OverworldRenderer::getNPCFrame(const NPC &npc) const
+{
+    int dirIdx = dirToIndex(npc.getFacing());
+
+    if (npc.isWalking())
+    {
+        // 4-frame walk cycle: 0-1-2-3, pick based on walkFrame
+        int step = npc.getWalkFrame() % 4;
         return walkFrames[dirIdx][step];
     }
     else
@@ -249,8 +267,33 @@ void OverworldRenderer::renderNPCs(const std::vector<std::shared_ptr<NPC>> &npcs
 {
     for (const auto &npc : npcs)
     {
+
+        Position pos = npc->getPosition();
+        int sx = pos.x * TILE_SIZE + npc->getPixelOffsetX() - cameraX;
+        int sy = pos.y * TILE_SIZE + npc->getPixelOffsetY() - cameraY;
+
         if (npc->isHidden())
             continue;
+
+        if (renderer.hasTexture(npc->getId()))
+        {
+            SpriteFrame frame = getNPCFrame(*npc);
+
+            // Scale sprite to 2x tile size so character fills one tile nicely
+            // (the 32x32 source has ~7px padding on each side)
+            int dstW = TILE_SIZE * 2;
+            int dstH = TILE_SIZE * 2;
+
+            // Center horizontally on the tile, anchor bottom to tile bottom
+            int offsetX = (TILE_SIZE - dstW) / 2;
+            int offsetY = TILE_SIZE - dstH;
+
+            renderer.drawSpriteRegion(npc->getId(),
+                                      frame.x, frame.y, frame.w, frame.h,
+                                      sx + offsetX, sy + offsetY, dstW, dstH,
+                                      false);
+            continue;
+        }
 
         TDT4102::Color color = TDT4102::Color::red;
         switch (npc->getType())

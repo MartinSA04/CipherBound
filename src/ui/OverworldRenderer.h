@@ -62,6 +62,8 @@ private:
 
     // Get the correct sprite frame for the player's current state
     SpriteFrame getPlayerFrame(const Player &player) const;
+    SpriteFrame getNPCFrame(const NPC &npc) const;
+
 
     // Direction enum to index
     static int dirToIndex(Direction dir);

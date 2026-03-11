@@ -111,6 +111,7 @@ void NPC::walkStep(Direction dir, int delay)
         break;
     }
     animFramesLeft = moveDelay;
+    walkFrame++;
 }
 
 void NPC::updateWalkAnimation()
@@ -119,6 +120,9 @@ void NPC::updateWalkAnimation()
         return;
 
     --animFramesLeft;
+
+    if (animFramesLeft == moveDelay / 2)
+        walkFrame++;
 
     if (animFramesLeft <= 0)
     {
@@ -155,5 +159,6 @@ void NPC::updateWalkAnimation()
 bool NPC::isWalking() const { return animFramesLeft > 0; }
 int NPC::getPixelOffsetX() const { return pixelOffsetX; }
 int NPC::getPixelOffsetY() const { return pixelOffsetY; }
+int NPC::getWalkFrame() const { return walkFrame; }
 bool NPC::isHidden() const { return hidden; }
 void NPC::setHidden(bool h) { hidden = h; }

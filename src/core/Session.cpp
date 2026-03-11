@@ -39,8 +39,6 @@ void Session::run()
 
 void Session::tick()
 {
-    auto frameStart = std::chrono::steady_clock::now();
-
     ui.beginFrame();
 
     // Update active mode
@@ -57,13 +55,6 @@ void Session::tick()
     ui.updateInput();
     ui.endFrame();
 
-#ifndef __EMSCRIPTEN__
-    // Stable frame time (not needed under Emscripten — browser handles vsync)
-    auto frameEnd = std::chrono::steady_clock::now();
-    auto elapsed = frameEnd - frameStart;
-    if (elapsed < targetFrameTime)
-        std::this_thread::sleep_for(targetFrameTime - elapsed);
-#endif
 }
 
 // ── Initialisation ─────────────────────────────────────────────────────────────

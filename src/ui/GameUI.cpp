@@ -42,8 +42,8 @@ void GameUI::loadBattleAssets()
     if (battleAssetsLoaded)
         return;
 
-    renderer.loadTexture("ui_player_info", "assets/sprites/ui/player_daemon_info.png");
-    renderer.loadTexture("ui_opponent_info", "assets/sprites/ui/opponent_daemon_info.png");
+    renderer.loadTexture("ui_player_info", "assets/sprites/ui/player_creature_info.png");
+    renderer.loadTexture("ui_opponent_info", "assets/sprites/ui/opponent_creature_info.png");
     renderer.loadTexture("ui_hp_bar", "assets/sprites/ui/hp_bar.png");
     renderer.loadTexture("ui_exp_bar", "assets/sprites/ui/exp_bar.png");
     renderer.loadTexture("ui_player_base", "assets/sprites/ui/player_battle_base.png");
@@ -51,6 +51,7 @@ void GameUI::loadBattleAssets()
     renderer.loadTexture("player_back", "assets/sprites/player/player_back.png");
 
     battleAssetsLoaded = true;
+
 }
 
 void GameUI::loadDaemonSprite(const std::string &speciesName)

@@ -8,9 +8,9 @@
 # Lines starting with # are comments
 
 # Physics starters
-1|Bulbulum|classical|classical|45|55|45|40|40|50|45|64|1:1,11:5|2:16
-2|Newtonion|classical|classical|45|55|45|40|40|50|45|64|1:1,11:5|3:32
-3|Gravitonion|quantum|gravitational|60|70|60|55|55|65|45|142|1:1,7:1,11:5|none
+1|Bulbulum|classical|classical|45|55|45|40|40|50|200|64|1:1,11:5|2:16
+2|Newtonion|classical|classical|45|55|45|40|40|50|200|64|1:1,11:5|3:32
+3|Gravitonion|quantum|gravitational|60|70|60|55|55|65|200|142|1:1,7:1,11:5|none
 
 
 

@@ -9,7 +9,7 @@ void CutSceneMode::update(GameContext &ctx, InputManager &input)
     // Player animation must tick for smooth movement
     ctx.world.getPlayer().updateAnimation();
 
-    bool running = ctx.cutsceneRunner.update(ctx.world, ctx.ui, input.isConfirmPressed());
+    bool running = ctx.cutsceneRunner.update(ctx.world, ctx.ui, input.isConfirmPressed(), ctx.sound);
     if (!running)
     {
         ctx.pushRequest(ModeRequest::changeState(GameState::overworld));

@@ -27,6 +27,7 @@ if [ ! -f "$BUILD_DIR/build.ninja" ]; then
     meson setup "$BUILD_DIR" \
         --cross-file emscripten-cross.ini \
         --default-library static \
+        --buildtype release \
         -Dcpp_std=c++20 \
         -Dc_std=c11
 fi

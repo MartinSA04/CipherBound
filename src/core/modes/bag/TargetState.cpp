@@ -6,6 +6,7 @@
 #include "../../../world/Player.h"
 #include "../../../world/Daemon.h"
 #include "../../../data/Pokedex.h"
+#include "../../../audio/SoundManager.h"
 #include <algorithm>
 
 void TargetState::update(BagMode &bag, GameContext &ctx, InputManager &input)
@@ -42,6 +43,7 @@ void TargetState::update(BagMode &bag, GameContext &ctx, InputManager &input)
 
             bag.showMessage(target.getNickname() + " recovered " +
                             std::to_string(healed) + " HP!", ctx);
+            ctx.playSound(SoundEffect::recovery);
             // After using item, return to browsing (via message)
             bag.returnAfterMessage = BagMode::SubStateType::browsing;
         }

@@ -4,6 +4,7 @@
 #include "../../world/World.h"
 #include "../../data/Pokedex.h"
 #include "../StoryManager.h"
+#include "../../audio/SoundManager.h"
 
 DialogueChoiceMode::DialogueChoiceMode(const std::vector<std::string> &options,
                                        const std::string &context,
@@ -21,6 +22,7 @@ void DialogueChoiceMode::update(GameContext &ctx, InputManager &input)
 
     if (input.isConfirmPressed())
     {
+        ctx.playSound(SoundEffect::select);
         StoryAction action = ctx.story.onChoiceSelected(choiceContext, choiceSelected,
                                                         ctx.world, ctx.pokedex);
         ctx.pushRequest(ModeRequest::storyAction(action));

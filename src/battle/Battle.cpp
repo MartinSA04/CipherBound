@@ -210,6 +210,7 @@ void Battle::executeTurn()
         int damage = calculateDamage(playerDaemon, getOpponentDaemon(), moveData);
         getOpponentDaemon().takeDamage(damage);
         addMessage(playerDaemon.getNickname() + " used " + moveData.name + "!");
+        addAttackAnimMarker(true);
         addHPAnimMarker();
 
         // Type effectiveness message
@@ -326,6 +327,7 @@ void Battle::executeOpponentTurn()
     int oppDamage = calculateDamage(getOpponentDaemon(), playerDaemon, oppMoveData);
     playerDaemon.takeDamage(oppDamage);
     addMessage("Foe " + getOpponentDaemon().getNickname() + " used " + oppMoveData.name + "!");
+    addAttackAnimMarker(false);
     addHPAnimMarker();
 
     // Type effectiveness for opponent's attack
@@ -429,7 +431,10 @@ bool Battle::attemptCapture(int itemId)
     // If a >= 255, guaranteed catch
     if (a >= 255.0f)
     {
-        addMessage("The ball shook three times...");
+        captureShakes = 4;
+        captureSuccess = true;
+        addMessage("Used " + ball.name + "!");
+        addCaptureAnimMarker();
         addMessage("Gotcha! " + target.getNickname() + " was caught!");
         pendingState = BattleState::captured;
         state = BattleState::showingMessages;
@@ -459,7 +464,10 @@ bool Battle::attemptCapture(int itemId)
 
     if (shakes == 4)
     {
-        addMessage("The ball shook three times...");
+        captureShakes = 4;
+        captureSuccess = true;
+        addMessage("Used " + ball.name + "!");
+        addCaptureAnimMarker();
         addMessage("Gotcha! " + target.getNickname() + " was caught!");
         pendingState = BattleState::captured;
         state = BattleState::showingMessages;
@@ -473,6 +481,11 @@ bool Battle::attemptCapture(int itemId)
     }
 
     // Show appropriate failure message based on number of shakes
+    captureShakes = shakes;
+    captureSuccess = false;
+    addMessage("Used " + ball.name + "!");
+    addCaptureAnimMarker();
+
     if (shakes == 0)
         addMessage("Oh no! The Daemon broke free immediately!");
     else if (shakes == 1)
@@ -531,6 +544,26 @@ void Battle::advanceMessage()
         state = BattleState::intro;
         return;
     }
+    if (messages.front() == CAPTURE_ANIM_MARKER)
+    {
+        messages.pop_front();
+        state = BattleState::animatingCapture;
+        return;
+    }
+    if (messages.front() == ATTACK_ANIM_PLAYER_MARKER)
+    {
+        messages.pop_front();
+        attackAnimIsPlayer = true;
+        state = BattleState::animatingAttack;
+        return;
+    }
+    if (messages.front() == ATTACK_ANIM_OPP_MARKER)
+    {
+        messages.pop_front();
+        attackAnimIsPlayer = false;
+        state = BattleState::animatingAttack;
+        return;
+    }
 }
 
 void Battle::finishIntroAnimation()
@@ -570,6 +603,24 @@ void Battle::finishEXPAnimation()
         state = BattleState::showingMessages;
 }
 
+void Battle::finishCaptureAnimation()
+{
+    if (messages.empty())
+        state = pendingState;
+    else
+        state = BattleState::showingMessages;
+}
+
+int Battle::getCaptureShakes() const
+{
+    return captureShakes;
+}
+
+bool Battle::getCaptureSuccess() const
+{
+    return captureSuccess;
+}
+
 void Battle::addLevelUpMessage(const std::string &msg)
 {
     // Insert level-up message + EXP anim marker at front of queue
@@ -597,6 +648,45 @@ void Battle::addEXPAnimMarker()
 void Battle::addIntroAnimMarker()
 {
     messages.push_back(INTRO_ANIM_MARKER);
+}
+
+void Battle::addCaptureAnimMarker()
+{
+    messages.push_back(CAPTURE_ANIM_MARKER);
+}
+
+void Battle::addAttackAnimMarker(bool isPlayer)
+{
+    messages.push_back(isPlayer ? ATTACK_ANIM_PLAYER_MARKER : ATTACK_ANIM_OPP_MARKER);
+}
+
+void Battle::finishAttackAnimation()
+{
+    if (messages.empty())
+    {
+        state = pendingState;
+        return;
+    }
+
+    // Check for markers at the front of the queue (same logic as advanceMessage)
+    if (messages.front() == HP_ANIM_MARKER)
+    {
+        messages.pop_front();
+        state = BattleState::animatingHP;
+        return;
+    }
+    if (messages.front() == EXP_ANIM_MARKER)
+    {
+        messages.pop_front();
+        state = BattleState::animatingEXP;
+        return;
+    }
+    state = BattleState::showingMessages;
+}
+
+bool Battle::isPlayerAttacking() const
+{
+    return attackAnimIsPlayer;
 }
 
 // --- Private helpers ---

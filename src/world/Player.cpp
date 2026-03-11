@@ -27,7 +27,7 @@ bool Player::canTurn() const
 
 void Player::startTurnCooldown()
 {
-    turnCooldown = 7; // Number of frames to wait after turning before allowing movement
+    turnCooldown = 4; // Number of frames to wait after turning before allowing movement
 }
 
 void Player::setMoveDelay(int frames)

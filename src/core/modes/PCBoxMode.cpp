@@ -6,14 +6,16 @@
 #include "../../world/World.h"
 #include "../../world/Player.h"
 #include "../../world/Daemon.h"
+#include "../../audio/SoundManager.h"
 #include <algorithm>
 
-void PCBoxMode::onEnter(GameContext & /*ctx*/)
+void PCBoxMode::onEnter(GameContext &ctx)
 {
     selected = 0;
     viewingParty = true;
     showingMessage = false;
     message.clear();
+    ctx.playSound(SoundEffect::pcLogin);
 }
 
 void PCBoxMode::update(GameContext &ctx, InputManager &input)
@@ -24,7 +26,10 @@ void PCBoxMode::update(GameContext &ctx, InputManager &input)
     if (showingMessage)
     {
         if (ctx.ui.updateTypewriter(input.isConfirmPressed()))
+        {
+            ctx.playSound(SoundEffect::select);
             showingMessage = false;
+        }
         return;
     }
 
@@ -138,6 +143,7 @@ void PCBoxMode::update(GameContext &ctx, InputManager &input)
     // Cancel: exit PC
     if (input.isCancelPressed())
     {
+        ctx.playSound(SoundEffect::pcLogoff);
         ctx.pushRequest(ModeRequest::changeState(GameState::overworld));
     }
 }

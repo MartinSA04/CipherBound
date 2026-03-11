@@ -5,6 +5,7 @@
 
 class Battle;
 class NPC;
+class Renderer;
 
 class BattleMode : public GameMode
 {
@@ -18,6 +19,7 @@ public:
 
 private:
     void updateBattleIntroAnim(GameContext &ctx);
+    void updateCaptureAnim(GameContext &ctx);
 
     // Battle rendering helpers (moved from GameUI)
     void drawBattleScene(GameContext &ctx);
@@ -25,6 +27,9 @@ private:
     void drawBattleIntroSceneTrainer(GameContext &ctx);
     void drawBattleMenu(GameContext &ctx);
     void drawMoveSelectScreen(GameContext &ctx);
+    void drawCaptureScene(GameContext &ctx);
+    void drawBall(Renderer &renderer, int frame, int x, int y) const;
+    void drawBallCentered(Renderer &renderer, int frame, int cx, int cy) const;
 
     std::string currentTrainerNPCId;
     std::shared_ptr<NPC> battleTrainer;
@@ -33,4 +38,18 @@ private:
     int moveSelected{0};
     int partySelected{0};
     int bagSelected{0};
+
+    // Capture animation state
+    int captureAnimFrame{0};
+    int captureAnimShakesDone{0};
+    bool captureAnimDone{false};
+
+    // Attack animation state
+    int attackAnimFrame{0};
+
+    // Idle bob animation counter (increments every frame in battle)
+    int battleAnimFrame{0};
+
+    // EXP animation sound state
+    bool expSoundPlayed{false};
 };

@@ -4,6 +4,7 @@
 #include "../../save/SaveManager.h"
 #include "../../world/World.h"
 #include "../../world/Player.h"
+#include "../../audio/SoundManager.h"
 
 void SaveMode::onEnter(GameContext & /*ctx*/)
 {
@@ -20,13 +21,19 @@ void SaveMode::update(GameContext &ctx, InputManager &input)
             ctx.world.getPlayer(), ctx.world);
         saveComplete = true;
         if (saveSuccess)
+        {
+            ctx.playSound(SoundEffect::save);
             ctx.ui.setDialogueText("Game saved!");
+        }
         else
             ctx.ui.setDialogueText("Save failed...");
     }
 
     if (ctx.ui.updateTypewriter(input.isConfirmPressed()))
+    {
+        ctx.playSound(SoundEffect::select);
         ctx.pushRequest(ModeRequest::changeState(GameState::overworld));
+    }
 }
 
 void SaveMode::render(GameContext &ctx)

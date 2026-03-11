@@ -17,6 +17,8 @@ enum class BattleState
     showingMessages,
     animatingHP,
     animatingEXP,
+    animatingCapture,
+    animatingAttack,
     opponentTurn,
     victory,
     defeat,
@@ -84,14 +86,23 @@ public:
     void finishHPAnimation();                       // Called when HP animation completes
     void finishEXPAnimation();                      // Called when EXP animation completes
     void finishIntroAnimation();                    // Called when intro scene animation completes
+    void finishCaptureAnimation();                  // Called when capture animation completes
+    void finishAttackAnimation();                    // Called when attack animation completes
     void addLevelUpMessage(const std::string &msg); // Insert level-up msg + resume EXP anim
     void executeOpponentTurn();                     // Execute the opponent's attack phase
+
+    // Capture animation data
+    int getCaptureShakes() const;                   // How many shakes before break/catch
+    bool getCaptureSuccess() const;                 // Did the capture succeed?
+    bool isPlayerAttacking() const;                 // Is the player the attacker in current attack anim?
 
 private:
     void addMessage(const std::string &msg);
     void addHPAnimMarker();    // Insert marker to trigger HP bar animation
     void addEXPAnimMarker();   // Insert marker to trigger EXP bar animation
     void addIntroAnimMarker(); // Insert marker to continue intro animation
+    void addCaptureAnimMarker(); // Insert marker to trigger capture animation
+    void addAttackAnimMarker(bool isPlayer); // Insert marker to trigger attack animation
     void executeTurn();
 
     int calculateDamage(const Daemon &attacker, const Daemon &defender, const MoveData &move) const;
@@ -107,6 +118,9 @@ private:
     BattleState pendingState;  // State to go to after message queue is drained
     int introPhase{0};         // Which intro animation phase we're in
     bool introComplete{false}; // True once all intro phases are done
+    int captureShakes{0};      // How many shakes the ball does
+    bool captureSuccess{false}; // Did the capture succeed?
+    bool attackAnimIsPlayer{true}; // Is the attacker the player?
 
     int playerMoveSlot;
     int itemChoice;
@@ -120,4 +134,7 @@ private:
     static constexpr const char *HP_ANIM_MARKER = "__HP_ANIM__";
     static constexpr const char *EXP_ANIM_MARKER = "__EXP_ANIM__";
     static constexpr const char *INTRO_ANIM_MARKER = "__INTRO_ANIM__";
+    static constexpr const char *CAPTURE_ANIM_MARKER = "__CAPTURE_ANIM__";
+    static constexpr const char *ATTACK_ANIM_PLAYER_MARKER = "__ATTACK_ANIM_PLAYER__";
+    static constexpr const char *ATTACK_ANIM_OPP_MARKER = "__ATTACK_ANIM_OPP__";
 };

@@ -6,6 +6,7 @@
 #include "../../data/Pokedex.h"
 #include "../../ui/GameUI.h"
 #include "../StoryManager.h"
+#include "../../audio/SoundManager.h"
 
 void OverworldMode::update(GameContext &ctx, InputManager &input)
 {
@@ -116,6 +117,7 @@ void OverworldMode::handlePlayerMove(GameContext &ctx, InputManager &input)
     if (!input.getMovementDirection(dir))
     {
         player.resetWalkFrame();
+        wallHitPlayed = false;
         return;
     }
 
@@ -132,7 +134,17 @@ void OverworldMode::handlePlayerMove(GameContext &ctx, InputManager &input)
 
     Map &map = ctx.world.getMap(ctx.world.getCurrentMapId());
     if (!player.canMove(dir, map))
+    {
+        if (!wallHitPlayed || dir != wallHitDir)
+        {
+            ctx.playSound(SoundEffect::wallHit);
+            wallHitPlayed = true;
+            wallHitDir = dir;
+        }
         return;
+    }
+
+    wallHitPlayed = false;
 
     Position target = player.getPosition();
     target.moveDirection(dir);
@@ -179,10 +191,12 @@ void OverworldMode::handlePlayerInteraction(GameContext &ctx)
 
     if (npc->getType() == NPCType::pc)
     {
+        ctx.playSound(SoundEffect::pcOn);
         ctx.pushRequest(ModeRequest::changeState(GameState::pcBox));
     }
     else
     {
+        ctx.playSound(SoundEffect::select);
         npc->setFacingOpposite(player.getFacing());
         dialogueStarts(ctx, npc);
     }

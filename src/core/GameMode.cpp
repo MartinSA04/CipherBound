@@ -10,6 +10,11 @@ void GameContext::pushRequest(ModeRequest req)
     pendingRequests.push_back(std::move(req));
 }
 
+void GameContext::playSound(SoundEffect sfx)
+{
+    sound.play(sfx, ui.getRenderer().getWindow());
+}
+
 // ── ModeRequest factory helpers ────────────────────────────────────────────────
 
 ModeRequest ModeRequest::changeState(GameState s)

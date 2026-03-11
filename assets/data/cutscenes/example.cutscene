@@ -31,7 +31,7 @@ face|some_npc|right
 say|Some NPC|Hello there!;Welcome to this example cutscene.
 
 # Small pause
-wait|30
+wait|60
 
 # Player walks one tile up
 walk|player|up

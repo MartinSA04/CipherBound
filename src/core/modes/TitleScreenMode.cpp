@@ -8,6 +8,7 @@
 #include "../../world/Player.h"
 #include "../../data/Pokedex.h"
 #include "../../audio/MusicManager.h"
+#include "../../audio/SoundManager.h"
 #include <algorithm>
 
 void TitleScreenMode::onEnter(GameContext &ctx)
@@ -25,8 +26,8 @@ void TitleScreenMode::update(GameContext &ctx, InputManager &input)
     case Phase::titleCard:
     {
         titleTimer++;
-        // Wait at least 30 frames before allowing skip, then any key proceeds
-        if (titleTimer > 30 && (input.isConfirmPressed() || input.isCancelPressed()))
+        // Wait at least 15 frames before allowing skip, then any key proceeds
+        if (titleTimer > 15 && (input.isConfirmPressed() || input.isCancelPressed()))
         {
             phase = Phase::saveSlotSelect;
         }
@@ -39,6 +40,7 @@ void TitleScreenMode::update(GameContext &ctx, InputManager &input)
 
         if (input.isConfirmPressed())
         {
+            ctx.playSound(SoundEffect::select);
             ctx.currentSaveSlot = selected;
             const auto &info = slotInfos[static_cast<size_t>(ctx.currentSaveSlot)];
 
@@ -79,10 +81,10 @@ void TitleScreenMode::render(GameContext &ctx)
         r.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{10, 10, 35});
 
         // Title text with pulsing effect
-        int alpha = std::min(255, titleTimer * 6);
+        int alpha = std::min(255, titleTimer * 12);
         (void)alpha; // Used conceptually — we just draw when visible
 
-        if (titleTimer > 10)
+        if (titleTimer > 5)
         {
             ctx.ui.getSpriteFont().drawText(r, "CIPHERBOUND",
                                             WINDOW_WIDTH / 2 - 11 * 8 * PIXEL_SCALE / 2,
@@ -95,7 +97,7 @@ void TitleScreenMode::render(GameContext &ctx)
         }
 
         // "Press any key" blink
-        if (titleTimer > 30 && (titleTimer / 30) % 2 == 0)
+        if (titleTimer > 15 && (titleTimer / 15) % 2 == 0)
         {
             r.drawText("Press Z or Enter to continue",
                        WINDOW_WIDTH / 2 - 110, WINDOW_HEIGHT - 60,

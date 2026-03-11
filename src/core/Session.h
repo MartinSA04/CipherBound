@@ -11,6 +11,7 @@
 #include "StoryManager.h"
 #include "CutsceneRunner.h"
 #include "../audio/MusicManager.h"
+#include "../audio/SoundManager.h"
 
 class Session
 {
@@ -42,6 +43,7 @@ private:
     SaveManager saveManager;
     StoryManager story;
     MusicManager music;
+    SoundManager sound;
     CutsceneRunner cutsceneRunner;
 
     // Shared context (references into subsystems above)

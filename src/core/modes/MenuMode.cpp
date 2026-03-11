@@ -3,6 +3,7 @@
 #include "../../ui/GameUI.h"
 #include "../../ui/Renderer.h"
 #include "../../ui/SpriteFont.h"
+#include "../../audio/SoundManager.h"
 
 void MenuMode::update(GameContext &ctx, InputManager &input)
 {
@@ -15,6 +16,7 @@ void MenuMode::update(GameContext &ctx, InputManager &input)
 
     if (input.isConfirmPressed())
     {
+        ctx.playSound(SoundEffect::select);
         switch (selected)
         {
         case 0:

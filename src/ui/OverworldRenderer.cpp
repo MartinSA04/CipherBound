@@ -26,6 +26,7 @@ void OverworldRenderer::loadSprites()
     {
         renderer.loadTexture("player", "assets/sprites/player/player_sheet.png");
         renderer.loadTexture("prof_bart_iver", "assets/sprites/npcs/bart_iver/bart_iver_sheet.png");
+        renderer.loadTexture("daemon_ball", "assets/sprites/items/daemon_ball.png");
         spritesLoaded = true;
     }
 }
@@ -274,6 +275,21 @@ void OverworldRenderer::renderNPCs(const std::vector<std::shared_ptr<NPC>> &npcs
 
         if (npc->isHidden())
             continue;
+
+        // Render pokeball NPCs using the pokeball sprite (frame 2 = closed ball)
+        if (npc->getId().rfind("pokeball_", 0) == 0)
+        {
+            constexpr int BALL_FRAME = 16; // each frame is 16x16
+            int srcX = 0;                  // frame 0 = closed ball
+            int dstSize = TILE_SIZE;       // fill one tile
+            int offsetX = (TILE_SIZE - dstSize) / 2;
+            int offsetY = (TILE_SIZE - dstSize) / 2;
+            renderer.drawSpriteRegion("daemon_ball",
+                                      srcX, 0, BALL_FRAME, BALL_FRAME,
+                                      sx + offsetX, sy + offsetY, dstSize, dstSize,
+                                      false);
+            continue;
+        }
 
         if (renderer.hasTexture(npc->getId()))
         {

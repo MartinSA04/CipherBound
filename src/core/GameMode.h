@@ -4,6 +4,8 @@
 #include <memory>
 #include "StoryManager.h"
 
+#include "../audio/SoundManager.h"
+
 // Forward declarations for types not included through StoryManager.h
 class MusicManager;
 class CutsceneRunner;
@@ -101,11 +103,15 @@ struct GameContext
     StoryManager &story;
     MusicManager &music;
     CutsceneRunner &cutsceneRunner;
+    SoundManager &sound;
 
     // Shared mutable state (owned here, used by multiple modes)
     std::unique_ptr<Battle> currentBattle;
     int currentSaveSlot{-1};
     bool pendingPushBack{false};
+
+    // Play a sound effect (convenience wrapper)
+    void playSound(SoundEffect sfx);
 
     // Pending requests from the active mode
     std::vector<ModeRequest> pendingRequests;

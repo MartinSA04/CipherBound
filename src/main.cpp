@@ -2,6 +2,7 @@
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
+#include <chrono>
 
 static Session *g_session = nullptr;
 
@@ -19,7 +20,7 @@ int main()
 
 #ifdef __EMSCRIPTEN__
     g_session = &session;
-    // 0 = use requestAnimationFrame, 1 = simulate infinite loop
+    // 0 = use requestAnimationFrame for smooth vsync-driven callbacks
     emscripten_set_main_loop(emscriptenMainLoop, 0, 1);
 #else
     session.run();

@@ -70,6 +70,8 @@ public:
     int playerDisplayHP{0};
     int opponentDisplayHP{0};
     int playerDisplayEXP{0};
+    int expAnimFrame{0};
+    int expAnimStartEXP{-1};
 
     // Battle intro animation frame
     int battleIntroFrame{0};
@@ -100,8 +102,8 @@ public:
     void revealAllText();                           // Skip to end instantly
 
     // Battle intro transition constants
-    static constexpr int BATTLE_INTRO_DURATION = 90;       // total frames for the intro
-    static constexpr int BATTLE_INTRO_SCENE_DURATION = 45; // frames per intro animation phase
+    static constexpr int BATTLE_INTRO_DURATION = 90;       // total frames for the intro (60fps)
+    static constexpr int BATTLE_INTRO_SCENE_DURATION = 46; // frames per intro animation phase (60fps)
 
     // Sprite font access (for custom screen rendering)
     SpriteFont &getSpriteFont();
@@ -115,8 +117,8 @@ public:
     };
     void drawOpponentInfoBar(const Daemon *opponentDaemon, int offsetX = 0);
     void drawPlayerInfoBar(const Daemon *playerDaemon, int offsetX = 0);
-    void drawOpponentDaemon(const Daemon *opponentDaemon, int offsetX = 0);
-    void drawPlayerDaemon(const Daemon *playerDaemon, int offsetX = 0);
+    void drawOpponentDaemon(const Daemon *opponentDaemon, int offsetX = 0, int offsetY = 0);
+    void drawPlayerDaemon(const Daemon *playerDaemon, int offsetX = 0, int offsetY = 0);
     void drawPlayerBackSprite(int x, int y, int dstW, int dstH, int frame);
     void drawBattleBackground();
     void drawPlayerBackOnBase(int offsetX = 0, int frame = 0);
@@ -151,7 +153,7 @@ private:
     bool menuFirstRepeat{true};
     bool menuDirHeld{false};
     Direction menuLastDir{Direction::up};
-    static constexpr int menuInitialDelay = 15;
+    static constexpr int menuInitialDelay = 16;
     static constexpr int menuRepeatDelay = 6;
 
     // Multi-line dialogue state
@@ -163,7 +165,7 @@ private:
     std::string typewriterFullText;  // The complete text to reveal
     int typewriterCharsRevealed{0};  // How many characters are currently visible
     int typewriterFrameCounter{0};   // Frame counter for timing
-    int typewriterSpeed{2};          // Frames per character (normal speed)
+    int typewriterSpeed{2};          // Frames per character (normal speed, 60fps)
     int typewriterFastSpeed{1};      // Frames per character (fast/held)
     int typewriterIndicatorTimer{0}; // Continuous frame counter for indicator animation
 

@@ -5,6 +5,7 @@
 #include "../data/Cutscene.h"
 #include "../world/World.h"
 #include "../ui/GameUI.h"
+#include "../audio/SoundManager.h"
 
 class CutsceneRunner
 {
@@ -19,7 +20,7 @@ public:
 
     // Update one frame. Returns true while the cutscene is still running.
     // confirmPressed: whether the player pressed confirm this frame (for dialogue).
-    bool update(World &world, GameUI &ui, bool confirmPressed);
+    bool update(World &world, GameUI &ui, bool confirmPressed, SoundManager &sound);
 
     // True if the cutscene has finished
     bool isFinished() const;

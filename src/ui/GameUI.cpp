@@ -49,6 +49,7 @@ void GameUI::loadBattleAssets()
     renderer.loadTexture("ui_player_base", "assets/sprites/ui/player_battle_base.png");
     renderer.loadTexture("ui_opponent_base", "assets/sprites/ui/opponent_battle_base.png");
     renderer.loadTexture("player_back", "assets/sprites/player/player_back.png");
+    renderer.loadTexture("daemon_ball", "assets/sprites/items/daemon_ball.png");
 
     battleAssetsLoaded = true;
 
@@ -324,8 +325,8 @@ const std::string &GameUI::getDialogueSpeaker() const
 bool GameUI::tickHPAnimation(int targetPlayerHP, int targetOpponentHP,
                              int maxPlayerHP, int maxOpponentHP)
 {
-    int playerStep = std::max(1, maxPlayerHP / 30);
-    int opponentStep = std::max(1, maxOpponentHP / 30);
+    int playerStep = std::max(1, maxPlayerHP / 15);
+    int opponentStep = std::max(1, maxOpponentHP / 15);
 
     if (playerDisplayHP > targetPlayerHP)
         playerDisplayHP = std::max(targetPlayerHP, playerDisplayHP - playerStep);
@@ -342,17 +343,42 @@ bool GameUI::tickHPAnimation(int targetPlayerHP, int targetOpponentHP,
 
 EXPTickResult GameUI::tickEXPAnimation(int targetEXP, int expNeeded)
 {
-    int expStep = std::max(1, expNeeded / 30);
-    playerDisplayEXP += expStep;
+    static constexpr int EXP_ANIM_FRAMES = 120;
 
-    if (playerDisplayEXP >= expNeeded)
-        return EXPTickResult::filledBar;
+    // The destination for this segment is either the target or a full bar
+    int destination = std::min(targetEXP, expNeeded);
 
-    if (playerDisplayEXP >= targetEXP)
+    // Latch the start value on the first frame
+    if (expAnimStartEXP < 0)
+        expAnimStartEXP = playerDisplayEXP;
+
+    expAnimFrame++;
+
+    if (expAnimFrame >= EXP_ANIM_FRAMES)
     {
-        playerDisplayEXP = targetEXP;
+        // Animation complete — snap to destination
+        playerDisplayEXP = destination;
+        expAnimFrame = 0;
+        expAnimStartEXP = -1;
+
+        if (playerDisplayEXP >= expNeeded)
+            return EXPTickResult::filledBar;
         return EXPTickResult::reachedTarget;
     }
+
+    // Linearly interpolate between start and destination
+    playerDisplayEXP = expAnimStartEXP +
+        (destination - expAnimStartEXP) * expAnimFrame / EXP_ANIM_FRAMES;
+
+    // Check if we've crossed the bar boundary mid-animation
+    if (playerDisplayEXP >= expNeeded)
+    {
+        playerDisplayEXP = expNeeded;
+        expAnimFrame = 0;
+        expAnimStartEXP = -1;
+        return EXPTickResult::filledBar;
+    }
+
     return EXPTickResult::inProgress;
 }
 
@@ -387,8 +413,8 @@ void GameUI::drawDialogueBox(const std::string &speaker, const std::string &text
     // Draw bouncing continue indicator when text is fully revealed
     if (isTextFullyRevealed())
     {
-        int bouncePhase = typewriterIndicatorTimer % 40;
-        int bounceOffset = (bouncePhase < 20) ? (bouncePhase / 5) : (4 - (bouncePhase - 20) / 5);
+        int bouncePhase = typewriterIndicatorTimer % 20;
+        int bounceOffset = (bouncePhase < 10) ? (bouncePhase / 3) : (3 - (bouncePhase - 10) / 3);
 
         int indicatorX = textBarX + textBarW - 12 * scale;
         int indicatorY = textBarY + textBarH - 14 * scale + bounceOffset * scale;
@@ -579,7 +605,7 @@ void GameUI::drawPlayerInfoBar(const Daemon *playerDaemon, int offsetX)
     }
 }
 
-void GameUI::drawOpponentDaemon(const Daemon *opponentDaemon, int offsetX)
+void GameUI::drawOpponentDaemon(const Daemon *opponentDaemon, int offsetX, int offsetY)
 {
     int scale = PIXEL_SCALE;
     auto [baseX, baseY, baseW, baseH] = getOpponentBaseGeometry();
@@ -593,11 +619,11 @@ void GameUI::drawOpponentDaemon(const Daemon *opponentDaemon, int offsetX)
         int oppSprW = oppImg.width * scale;
         int oppSprH = oppImg.height * scale;
         int oppSprX = baseX + baseW / 2 - oppSprW / 2 + offsetX;
-        int oppSprY = baseY - oppSprH + baseH - 10 * scale;
+        int oppSprY = baseY - oppSprH + baseH - 10 * scale + offsetY;
         renderer.drawSpriteRaw(oppSpriteId, oppSprX, oppSprY, oppSprW, oppSprH);
     }
 }
-void GameUI::drawPlayerDaemon(const Daemon *playerDaemon, int offsetX)
+void GameUI::drawPlayerDaemon(const Daemon *playerDaemon, int offsetX, int offsetY)
 {
     const int scale = PIXEL_SCALE;
     auto [baseX, baseY, baseW, baseH] = getPlayerBaseGeometry();
@@ -611,7 +637,7 @@ void GameUI::drawPlayerDaemon(const Daemon *playerDaemon, int offsetX)
         int plySprW = plyImg.width * scale;
         int plySprH = plyImg.height * scale;
         int plySprX = baseX + baseW / 2 - plySprW / 2 + offsetX;
-        int plySprY = baseY - plySprH + baseH;
+        int plySprY = baseY - plySprH + baseH + offsetY;
         renderer.drawSpriteRaw(plySpriteId, plySprX, plySprY, plySprW, plySprH);
     }
 }
@@ -700,7 +726,7 @@ void GameUI::drawPlayerSendOutPhase(const Daemon *playerDaemon, float t)
 {
     // Player back sprite slides out to the left (first half)
     int playerSlideOut = static_cast<int>(-WINDOW_WIDTH * t);
-    int throwFrame = battleIntroFrame / 8;
+    int throwFrame = battleIntroFrame / 4;
     if (t < 0.5f)
         drawPlayerBackOnBase(playerSlideOut, throwFrame);
 

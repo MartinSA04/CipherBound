@@ -179,7 +179,7 @@ bool CutsceneRunner::isFinished() const { return finished; }
 bool CutsceneRunner::isShowingDialogue() const { return inDialogue; }
 const std::string &CutsceneRunner::getId() const { return cutscene.id; }
 
-bool CutsceneRunner::update(World &world, GameUI &ui, bool confirmPressed)
+bool CutsceneRunner::update(World &world, GameUI &ui, bool confirmPressed, SoundManager &sound)
 {
     if (finished)
         return false;
@@ -193,6 +193,7 @@ bool CutsceneRunner::update(World &world, GameUI &ui, bool confirmPressed)
     {
         if (ui.updateTypewriter(confirmPressed))
         {
+            sound.play(SoundEffect::select, ui.getRenderer().getWindow());
             if (!ui.advanceDialogueLine())
             {
                 // Dialogue finished
@@ -430,7 +431,7 @@ void CutsceneRunner::stepEntityToward(World &world, const std::string &targetId,
         {
             if (n->getId() == targetId)
             {
-                n->walkStep(dir, 12);
+                n->walkStep(dir, 24);
                 break;
             }
         }

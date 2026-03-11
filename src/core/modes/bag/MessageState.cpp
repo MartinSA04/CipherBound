@@ -2,6 +2,7 @@
 #include "../BagMode.h"
 #include "../../../ui/InputManager.h"
 #include "../../../ui/GameUI.h"
+#include "../../../audio/SoundManager.h"
 #include "../../../world/World.h"
 #include "../../../world/Player.h"
 
@@ -9,6 +10,7 @@ void MessageState::update(BagMode &bag, GameContext &ctx, InputManager &input)
 {
     if (ctx.ui.updateTypewriter(input.isConfirmPressed()))
     {
+        ctx.playSound(SoundEffect::select);
         Player &player = ctx.world.getPlayer();
         if (player.getInventory().empty())
         {

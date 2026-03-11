@@ -47,6 +47,7 @@ src = [
     'src/battle/TypeChart.cpp',
     'src/save/SaveManager.cpp',
     'src/audio/MusicManager.cpp',
+    'src/audio/SoundManager.cpp',
     'src/ui/Renderer.cpp',
     'src/ui/InputManager.cpp',
     'src/ui/OverworldRenderer.cpp',

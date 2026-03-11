@@ -24,4 +24,8 @@ private:
     // Wild encounters are only checked once per step.
     // Set to true when the player finishes a step; cleared after a check.
     bool justStepped{false};
+
+    // Wall-hit sound: only play once per blocked attempt
+    bool wallHitPlayed{false};
+    Direction wallHitDir{Direction::down};
 };

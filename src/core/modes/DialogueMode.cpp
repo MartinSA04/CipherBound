@@ -3,6 +3,7 @@
 #include "../../ui/GameUI.h"
 #include "../../world/World.h"
 #include "../../data/Pokedex.h"
+#include "../../audio/SoundManager.h"
 #include "../StoryManager.h"
 
 DialogueMode::DialogueMode(const std::string &speaker,
@@ -25,6 +26,7 @@ void DialogueMode::update(GameContext &ctx, InputManager &input)
 {
     if (ctx.ui.updateTypewriter(input.isConfirmPressed()))
     {
+        ctx.playSound(SoundEffect::select);
         if (!ctx.ui.advanceDialogueLine())
         {
             // Dialogue finished — ask StoryManager what to do

@@ -66,11 +66,11 @@ void BattleIntroMode::render(GameContext &ctx)
 
     if (frame < FLASH_END)
     {
-        // Phase 1: Quick white flashes (3 flashes, 4 frames each)
+        // Phase 1: Quick white flashes (3 flashes, 4 frames each at 60fps)
         int flashCycle = frame % 4;
         if (flashCycle < 2)
         {
-            unsigned char a = (flashCycle == 0) ? 200 : 120;
+            unsigned char a = 200;
             renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
                                     TDT4102::Color{255, 255, 255, a});
         }

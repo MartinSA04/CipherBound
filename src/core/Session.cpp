@@ -22,8 +22,9 @@ Session::Session(unsigned long seed)
       saveManager(),
       story(),
       music(),
+      sound(),
       cutsceneRunner(),
-      ctx{world, pokedex, ui, saveManager, story, music, cutsceneRunner, nullptr, -1, false, {}}
+      ctx{world, pokedex, ui, saveManager, story, music, cutsceneRunner, sound, nullptr, -1, false, {}}
 {
 }
 
@@ -39,6 +40,10 @@ void Session::run()
 
 void Session::tick()
 {
+#ifndef __EMSCRIPTEN__
+    auto frameStart = std::chrono::high_resolution_clock::now();
+#endif
+
     ui.beginFrame();
 
     // Update active mode
@@ -55,6 +60,12 @@ void Session::tick()
     ui.updateInput();
     ui.endFrame();
 
+#ifndef __EMSCRIPTEN__
+    auto frameEnd = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration<double>(frameEnd - frameStart);
+    if (elapsed < targetFrameTime)
+        std::this_thread::sleep_for(targetFrameTime - elapsed);
+#endif
 }
 
 // ── Initialisation ─────────────────────────────────────────────────────────────
@@ -69,6 +80,7 @@ void Session::init()
     world.generate(pokedex);
     ui.getOverworldRenderer().loadMapBackgrounds(world);
     music.loadAll();
+    sound.loadAll();
 
     switchMode(GameState::titleScreen);
     music.play(MusicTrack::titleScreen, ui.getRenderer().getWindow());

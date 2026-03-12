@@ -74,7 +74,7 @@ jobs:
           for f in "${data_files[@]}"; do
             name="$(basename "$f")"
             echo "Uploading $name to R2 bucket $R2_BUCKET"
-            wrangler r2 object put "$R2_BUCKET/$name" --file="$f"
+            wrangler r2 object put "$R2_BUCKET/$name" --file="$f" --remote
           done
 
       - name: Remove .data files from Pages upload directory

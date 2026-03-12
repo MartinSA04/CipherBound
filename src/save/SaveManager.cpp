@@ -188,6 +188,13 @@ bool SaveManager::saveGame(const std::string &filepath, const Player &player, co
         }
     }
 
+    // [daemondex]
+    out << "[daemondex]\n";
+    for (int id : player.getSeenSet())
+        out << "seen|" << id << "\n";
+    for (int id : player.getCaughtSet())
+        out << "caught|" << id << "\n";
+
     return true;
 }
 
@@ -205,6 +212,7 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
     player.clearBadges();
     player.clearFlags();
     player.clearPCBoxes();
+    player.clearDaemondex();
     player.setMoney(0);
 
     std::string mapId;
@@ -220,7 +228,8 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
         inventory,
         party,
         pc_boxes,
-        npcs
+        npcs,
+        daemondex
     };
     Section section = Section::none;
 
@@ -266,6 +275,11 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
         if (line == "[npcs]")
         {
             section = Section::npcs;
+            continue;
+        }
+        if (line == "[daemondex]")
+        {
+            section = Section::daemondex;
             continue;
         }
 
@@ -357,6 +371,20 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
                 std::shared_ptr<NPC> npc = world.findNPCById(npcMapId, npcId);
                 if (npc)
                     npc->setDefeated(true);
+            }
+            break;
+        }
+        case Section::daemondex:
+        {
+            auto sep = line.find('|');
+            if (sep != std::string::npos)
+            {
+                std::string key = line.substr(0, sep);
+                int id = std::stoi(line.substr(sep + 1));
+                if (key == "seen")
+                    player.markSeen(id);
+                else if (key == "caught")
+                    player.markCaught(id);
             }
             break;
         }

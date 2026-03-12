@@ -443,6 +443,7 @@ bool Battle::attemptCapture(int itemId)
         Daemon caught(species, target.getLevel());
         caught = target; // copy current state
         player.addDaemon(std::move(caught));
+        player.markCaught(target.getSpeciesId());
         return true;
     }
 
@@ -477,6 +478,7 @@ bool Battle::attemptCapture(int itemId)
                                     target.getCurrentHP(), target.getNickname(),
                                     target.getStatus(), target.getIVs(), target.getEVs(),
                                     target.getMoves()));
+        player.markCaught(target.getSpeciesId());
         return true;
     }
 

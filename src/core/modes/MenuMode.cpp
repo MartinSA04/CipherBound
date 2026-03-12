@@ -7,7 +7,7 @@
 
 void MenuMode::update(GameContext &ctx, InputManager &input)
 {
-    ctx.ui.navigateVertical(selected, 4);
+    ctx.ui.navigateVertical(selected, 5);
 
     if (input.isCancelPressed())
     {
@@ -20,15 +20,18 @@ void MenuMode::update(GameContext &ctx, InputManager &input)
         switch (selected)
         {
         case 0:
-            ctx.pushRequest(ModeRequest::changeState(GameState::party));
+            ctx.pushRequest(ModeRequest::changeState(GameState::daemondex));
             break;
         case 1:
-            ctx.pushRequest(ModeRequest::changeState(GameState::bag));
+            ctx.pushRequest(ModeRequest::changeState(GameState::party));
             break;
         case 2:
-            ctx.pushRequest(ModeRequest::changeState(GameState::saving));
+            ctx.pushRequest(ModeRequest::changeState(GameState::bag));
             break;
         case 3:
+            ctx.pushRequest(ModeRequest::changeState(GameState::saving));
+            break;
+        case 4:
             ctx.pushRequest(ModeRequest::changeState(GameState::overworld));
             break;
         }
@@ -43,7 +46,7 @@ void MenuMode::render(GameContext &ctx)
     Renderer &renderer = ctx.ui.getRenderer();
     SpriteFont &spriteFont = ctx.ui.getSpriteFont();
 
-    static const std::vector<std::string> menuItems = {"Daemons", "Bag", "Save", "Exit"};
+    static const std::vector<std::string> menuItems = {"Daemondex", "Daemons", "Bag", "Save", "Exit"};
     int scale = PIXEL_SCALE;
 
     int maxTextW = 0;

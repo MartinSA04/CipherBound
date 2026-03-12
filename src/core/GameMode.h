@@ -29,6 +29,7 @@ enum class GameState
     transition,
     pcBox,
     cutscene,
+    daemondex,
 };
 
 // ── Mode request (modes push these to trigger cross-mode transitions) ──────────

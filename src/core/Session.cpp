@@ -13,6 +13,7 @@
 #include "modes/DialogueChoiceMode.h"
 #include "modes/PCBoxMode.h"
 #include "modes/CutSceneMode.h"
+#include "modes/DaemondexMode.h"
 
 Session::Session(unsigned long seed)
     : seed(seed),
@@ -278,6 +279,8 @@ std::unique_ptr<GameMode> Session::createMode(GameState state)
         return std::make_unique<PCBoxMode>();
     case GameState::cutscene:
         return std::make_unique<CutSceneMode>();
+    case GameState::daemondex:
+        return std::make_unique<DaemondexMode>();
     default:
         return std::make_unique<OverworldMode>();
     }
@@ -315,6 +318,8 @@ ScreenType Session::screenForState(GameState gs)
         return ScreenType::menu;
     case GameState::cutscene:
         return ScreenType::overworld;
+    case GameState::daemondex:
+        return ScreenType::menu;
     default:
         return ScreenType::overworld;
     }

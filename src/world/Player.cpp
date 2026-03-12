@@ -170,6 +170,7 @@ bool Player::canMove(Direction direction, const Map &map) const
 
 void Player::addDaemon(Daemon daemon)
 {
+    markCaught(daemon.getSpeciesId());
     if (party.size() < 6)
     {
         party.push_back(std::move(daemon));
@@ -349,3 +350,23 @@ void Player::clearPCBoxes()
 }
 void Player::setMoney(int amount) { money = amount; }
 const std::vector<std::string> &Player::getBadges() const { return badges; }
+
+// --- Daemondex ---
+
+void Player::markSeen(int speciesId) { seenSpecies.insert(speciesId); }
+void Player::markCaught(int speciesId)
+{
+    seenSpecies.insert(speciesId);
+    caughtSpecies.insert(speciesId);
+}
+bool Player::hasSeen(int speciesId) const { return seenSpecies.count(speciesId) > 0; }
+bool Player::hasCaught(int speciesId) const { return caughtSpecies.count(speciesId) > 0; }
+int Player::seenCount() const { return static_cast<int>(seenSpecies.size()); }
+int Player::caughtCount() const { return static_cast<int>(caughtSpecies.size()); }
+const std::set<int> &Player::getSeenSet() const { return seenSpecies; }
+const std::set<int> &Player::getCaughtSet() const { return caughtSpecies; }
+void Player::clearDaemondex()
+{
+    seenSpecies.clear();
+    caughtSpecies.clear();
+}

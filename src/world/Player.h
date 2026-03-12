@@ -85,8 +85,19 @@ public:
     void clearBadges();
     void clearFlags();
     void clearPCBoxes();
+    void clearDaemondex();
     void setMoney(int amount);
     const std::vector<std::string> &getBadges() const;
+
+    // Daemondex (seen/caught tracking)
+    void markSeen(int speciesId);
+    void markCaught(int speciesId);
+    bool hasSeen(int speciesId) const;
+    bool hasCaught(int speciesId) const;
+    int seenCount() const;
+    int caughtCount() const;
+    const std::set<int> &getSeenSet() const;
+    const std::set<int> &getCaughtSet() const;
 
 private:
     std::vector<Daemon> party;
@@ -95,6 +106,8 @@ private:
     std::vector<InventoryEntry> inventory;
     std::vector<std::string> badges;
     std::set<std::string> eventFlags;
+    std::set<int> seenSpecies;
+    std::set<int> caughtSpecies;
     int money;
 
     int moveDelay;       // frames per tile movement (animation duration)

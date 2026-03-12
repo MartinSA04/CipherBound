@@ -24,6 +24,10 @@ void BattleIntroMode::update(GameContext &ctx, InputManager & /*input*/)
             ctx.currentBattle = std::make_unique<Battle>(
                 ctx.world.getPlayer(), trainer,
                 BattleType::trainer, ctx.world.getRng(), ctx.pokedex);
+
+            // Mark all trainer daemons as seen
+            for (const auto &d : trainer->getParty())
+                ctx.world.getPlayer().markSeen(d.getSpeciesId());
         }
         else
         {
@@ -32,6 +36,8 @@ void BattleIntroMode::update(GameContext &ctx, InputManager & /*input*/)
             ctx.currentBattle = std::make_unique<Battle>(
                 ctx.world.getPlayer(), std::move(daemon),
                 BattleType::wild, ctx.world.getRng(), ctx.pokedex);
+
+            ctx.world.getPlayer().markSeen(speciesId);
         }
 
         ctx.ui.playerDisplayHP = ctx.currentBattle->getPlayerDaemon().getCurrentHP();

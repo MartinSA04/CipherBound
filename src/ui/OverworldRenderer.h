@@ -36,7 +36,7 @@ public:
                       TDT4102::Color color = TDT4102::Color::red,
                       int pixelOffsetX = 0, int pixelOffsetY = 0);
     void renderPlayer(const Player &player, int cameraX, int cameraY);
-    void renderNPCs(const std::vector<std::shared_ptr<NPC>> &npcs, int cameraX, int cameraY);
+    void renderNPC(const NPC &npc, int cameraX, int cameraY);
     void renderMapOverlay(const Map &map, int cameraX, int cameraY);
 
     // Camera follows the player, centered on screen

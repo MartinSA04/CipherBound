@@ -1,59 +1,65 @@
 project('GUI Project', 'cpp',
   version : '0.1',
-  default_options : ['warning_level=2',
-                     'cpp_std=c++20',
-                     'c_std=c11',
-                     'default_library=static'])
+  default_options : [
+    'warning_level=2',
+    'cpp_std=c++20',
+    'c_std=c11',
+    'default_library=static'
+  ])
 
 animationwindow_dep = dependency('animationwindow', fallback: ['animationwindow', 'animationwindow_dep'])
 std_lib_facilities_dep = dependency('std_lib_facilities', fallback: ['std_lib_facilities', 'std_lib_facilities_dep'])
 
-compiler_flags = ['-Wconversion', '-fdiagnostics-color=always', '-Werror=return-type']
+compiler_flags = [
+  '-Wconversion',
+  '-fdiagnostics-color=always',
+  '-Werror=return-type'
+]
 
 if host_machine.system() != 'emscripten'
   compiler_flags += ['-static']
 endif
 
 src = [
-    'src/main.cpp',
-    'src/core/Session.cpp',
-    'src/core/GameMode.cpp',
-    'src/core/StoryManager.cpp',
-    'src/core/CutsceneRunner.cpp',
-    'src/core/modes/OverworldMode.cpp',
-    'src/core/modes/MenuMode.cpp',
-    'src/core/modes/BattleMode.cpp',
-    'src/core/modes/BattleIntroMode.cpp',
-    'src/core/modes/TitleScreenMode.cpp',
-    'src/core/modes/TransitionMode.cpp',
-    'src/core/modes/PartyMode.cpp',
-    'src/core/modes/BagMode.cpp',
-    'src/core/modes/SaveMode.cpp',
-    'src/core/modes/DialogueMode.cpp',
-    'src/core/modes/DialogueChoiceMode.cpp',
-    'src/core/modes/PCBoxMode.cpp',
-    'src/core/modes/bag/BrowsingState.cpp',
-    'src/core/modes/bag/TargetState.cpp',
-    'src/core/modes/bag/MessageState.cpp',
-    'src/core/modes/CutSceneMode.cpp',
-    'src/core/modes/DaemondexMode.cpp',
-    'src/world/Entity.cpp',
-    'src/world/Daemon.cpp',
-    'src/world/Player.cpp',
-    'src/world/NPC.cpp',
-    'src/world/Map.cpp',
-    'src/world/World.cpp',
-    'src/data/Pokedex.cpp',
-    'src/battle/Battle.cpp',
-    'src/battle/TypeChart.cpp',
-    'src/save/SaveManager.cpp',
-    'src/audio/MusicManager.cpp',
-    'src/audio/SoundManager.cpp',
-    'src/ui/Renderer.cpp',
-    'src/ui/InputManager.cpp',
-    'src/ui/OverworldRenderer.cpp',
-    'src/ui/GameUI.cpp',
-    'src/ui/SpriteFont.cpp',
+  'src/main.cpp',
+  'src/core/Session.cpp',
+  'src/core/GameMode.cpp',
+  'src/core/StoryManager.cpp',
+  'src/core/CutsceneRunner.cpp',
+  'src/core/modes/OverworldMode.cpp',
+  'src/core/modes/MenuMode.cpp',
+  'src/core/modes/BattleMode.cpp',
+  'src/core/modes/BattleIntroMode.cpp',
+  'src/core/modes/TitleScreenMode.cpp',
+  'src/core/modes/TransitionMode.cpp',
+  'src/core/modes/PartyMode.cpp',
+  'src/core/modes/BagMode.cpp',
+  'src/core/modes/SaveMode.cpp',
+  'src/core/modes/DialogueMode.cpp',
+  'src/core/modes/DialogueChoiceMode.cpp',
+  'src/core/modes/PCBoxMode.cpp',
+  'src/core/modes/bag/BrowsingState.cpp',
+  'src/core/modes/bag/TargetState.cpp',
+  'src/core/modes/bag/MessageState.cpp',
+  'src/core/modes/CutSceneMode.cpp',
+  'src/core/modes/DaemondexMode.cpp',
+  'src/world/Entity.cpp',
+  'src/world/Daemon.cpp',
+  'src/world/Player.cpp',
+  'src/world/NPC.cpp',
+  'src/world/Map.cpp',
+  'src/world/World.cpp',
+  'src/data/Pokedex.cpp',
+  'src/battle/Battle.cpp',
+  'src/battle/TypeChart.cpp',
+  'src/save/SaveManager.cpp',
+  'src/audio/MusicManager.cpp',
+  'src/audio/SoundManager.cpp',
+  'src/ui/Renderer.cpp',
+  'src/ui/InputManager.cpp',
+  'src/ui/OverworldRenderer.cpp',
+  'src/ui/GameUI.cpp',
+  'src/ui/SpriteFont.cpp',
 ]
 
 if host_machine.system() == 'windows'
@@ -71,8 +77,9 @@ elif host_machine.system() == 'emscripten'
     '-lidbfs.js',
     '--preload-file=' + meson.project_source_root() / 'assets' + '@' + '/assets',
     '--shell-file=' + meson.project_source_root() / 'shell.html',
-    '-o', 'program.html',
+    '-o', 'index.html',
   ]
+
   compiler_flags += [
     '-sUSE_SDL=2',
     '-sUSE_SDL_IMAGE=2',
@@ -83,4 +90,10 @@ else
   ld_flags = []
 endif
 
-exe = executable('program', src, dependencies : [std_lib_facilities_dep, animationwindow_dep], cpp_args : compiler_flags, link_args: ld_flags)
+exe = executable(
+  'program',
+  src,
+  dependencies : [std_lib_facilities_dep, animationwindow_dep],
+  cpp_args : compiler_flags,
+  link_args : ld_flags
+)

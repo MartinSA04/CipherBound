@@ -1,0 +1,84 @@
+name: Deploy CipherBound
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      PAGES_PROJECT_NAME: cipherbound
+      R2_BUCKET: cipherbound-assets
+      R2_PUBLIC_BASE: https://assets.cipherbound.com
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install system build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y meson ninja-build python3 curl git
+
+      - name: Install Emscripten SDK
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git
+          cd emsdk
+          ./emsdk install latest
+          ./emsdk activate latest
+
+      - name: Install Wrangler
+        run: npm install -g wrangler
+
+      - name: Build web version
+        run: |
+          source emsdk/emsdk_env.sh
+          chmod +x ./build_web.sh
+          ./build_web.sh
+
+      - name: Rewrite asset base for production
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          p = Path("buildw/deploy/index.html")
+          text = p.read_text(encoding="utf-8")
+          old = "window.ASSET_BASE = window.ASSET_BASE || '';"
+          new = "window.ASSET_BASE = 'https://assets.cipherbound.com';"
+          if old not in text:
+              raise SystemExit("ASSET_BASE marker not found in index.html")
+          text = text.replace(old, new, 1)
+          p.write_text(text, encoding="utf-8")
+          PY
+
+      - name: Show deploy output
+        run: ls -lah buildw/deploy
+
+      - name: Upload hashed .data file(s) to R2
+        run: |
+          shopt -s nullglob
+          data_files=(buildw/deploy/program.*.data)
+
+          if [ ${#data_files[@]} -eq 0 ]; then
+            echo "No hashed .data file found in buildw/deploy/"
+            exit 1
+          fi
+
+          for f in "${data_files[@]}"; do
+            name="$(basename "$f")"
+            echo "Uploading $name to R2 bucket $R2_BUCKET"
+            wrangler r2 object put "$R2_BUCKET/$name" --file="$f"
+          done
+
+      - name: Remove .data files from Pages upload directory
+        run: rm -f buildw/deploy/*.data
+
+      - name: Deploy to Cloudflare Pages
+        run: wrangler pages deploy buildw/deploy --project-name "$PAGES_PROJECT_NAME"

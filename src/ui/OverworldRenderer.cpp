@@ -1,4 +1,5 @@
 #include "OverworldRenderer.h"
+#include <algorithm>
 
 OverworldRenderer::OverworldRenderer(Renderer &renderer)
     : renderer(renderer)
@@ -123,8 +124,19 @@ void OverworldRenderer::render(const Map &map, const Player &player,
     calculateCamera(player, map, cameraX, cameraY);
 
     renderMap(map, cameraX, cameraY);
-    renderNPCs(npcs, cameraX, cameraY);
+
+    int playerSortY = player.getPosition().y * TILE_SIZE + player.getPixelOffsetY();
+
+    for (const auto &npc : npcs)
+        if (npc->getPosition().y * TILE_SIZE + npc->getPixelOffsetY() <= playerSortY)
+            renderNPC(*npc, cameraX, cameraY);
+
     renderPlayer(player, cameraX, cameraY);
+
+    for (const auto &npc : npcs)
+        if (npc->getPosition().y * TILE_SIZE + npc->getPixelOffsetY() > playerSortY)
+            renderNPC(*npc, cameraX, cameraY);
+
     renderMapOverlay(map, cameraX, cameraY);
 }
 
@@ -264,77 +276,58 @@ void OverworldRenderer::renderPlayer(const Player &player, int cameraX, int came
     }
 }
 
-void OverworldRenderer::renderNPCs(const std::vector<std::shared_ptr<NPC>> &npcs, int cameraX, int cameraY)
+void OverworldRenderer::renderNPC(const NPC &npc, int cameraX, int cameraY)
 {
-    for (const auto &npc : npcs)
+    if (npc.isHidden())
+        return;
+
+    Position pos = npc.getPosition();
+    int sx = pos.x * TILE_SIZE + npc.getPixelOffsetX() - cameraX;
+    int sy = pos.y * TILE_SIZE + npc.getPixelOffsetY() - cameraY;
+
+    if (npc.getId().rfind("pokeball_", 0) == 0)
     {
-
-        Position pos = npc->getPosition();
-        int sx = pos.x * TILE_SIZE + npc->getPixelOffsetX() - cameraX;
-        int sy = pos.y * TILE_SIZE + npc->getPixelOffsetY() - cameraY;
-
-        if (npc->isHidden())
-            continue;
-
-        // Render pokeball NPCs using the pokeball sprite (frame 2 = closed ball)
-        if (npc->getId().rfind("pokeball_", 0) == 0)
-        {
-            constexpr int BALL_FRAME = 16; // each frame is 16x16
-            int srcX = 0;                  // frame 0 = closed ball
-            int dstSize = TILE_SIZE;       // fill one tile
-            int offsetX = (TILE_SIZE - dstSize) / 2;
-            int offsetY = (TILE_SIZE - dstSize) / 2;
-            renderer.drawSpriteRegion("daemon_ball",
-                                      srcX, 0, BALL_FRAME, BALL_FRAME,
-                                      sx + offsetX, sy + offsetY, dstSize, dstSize,
-                                      false);
-            continue;
-        }
-
-        if (renderer.hasTexture(npc->getId()))
-        {
-            SpriteFrame frame = getNPCFrame(*npc);
-
-            // Scale sprite to 2x tile size so character fills one tile nicely
-            // (the 32x32 source has ~7px padding on each side)
-            int dstW = TILE_SIZE * 2;
-            int dstH = TILE_SIZE * 2;
-
-            // Center horizontally on the tile, anchor bottom to tile bottom
-            int offsetX = (TILE_SIZE - dstW) / 2;
-            int offsetY = TILE_SIZE - dstH;
-
-            renderer.drawSpriteRegion(npc->getId(),
-                                      frame.x, frame.y, frame.w, frame.h,
-                                      sx + offsetX, sy + offsetY, dstW, dstH,
-                                      false);
-            continue;
-        }
-
-        TDT4102::Color color = TDT4102::Color::red;
-        switch (npc->getType())
-        {
-        case NPCType::trainer:
-        case NPCType::gymLeader:
-            color = TDT4102::Color::red;
-            break;
-        case NPCType::shopkeeper:
-            color = TDT4102::Color::orange;
-            break;
-        case NPCType::healer:
-            color = TDT4102::Color::cyan;
-            break;
-        case NPCType::questGiver:
-            color = TDT4102::Color::yellow;
-            break;
-        default:
-            color = TDT4102::Color::red;
-            break;
-        }
-
-        renderEntity(*npc, cameraX, cameraY, color,
-                     npc->getPixelOffsetX(), npc->getPixelOffsetY());
+        constexpr int BALL_FRAME = 16;
+        int dstSize = TILE_SIZE;
+        int offsetX = (TILE_SIZE - dstSize) / 2;
+        int offsetY = (TILE_SIZE - dstSize) / 2;
+        renderer.drawSpriteRegion("daemon_ball",
+                                  0, 0, BALL_FRAME, BALL_FRAME,
+                                  sx + offsetX, sy + offsetY, dstSize, dstSize,
+                                  false);
+        return;
     }
+
+    if (renderer.hasTexture(npc.getId()))
+    {
+        SpriteFrame frame = getNPCFrame(npc);
+        int dstW = TILE_SIZE * 2;
+        int dstH = TILE_SIZE * 2;
+        int offsetX = (TILE_SIZE - dstW) / 2;
+        int offsetY = TILE_SIZE - dstH;
+        renderer.drawSpriteRegion(npc.getId(),
+                                  frame.x, frame.y, frame.w, frame.h,
+                                  sx + offsetX, sy + offsetY, dstW, dstH,
+                                  false);
+        return;
+    }
+
+    TDT4102::Color color = TDT4102::Color::red;
+    switch (npc.getType())
+    {
+    case NPCType::shopkeeper:
+        color = TDT4102::Color::orange;
+        break;
+    case NPCType::healer:
+        color = TDT4102::Color::cyan;
+        break;
+    case NPCType::questGiver:
+        color = TDT4102::Color::yellow;
+        break;
+    default:
+        break;
+    }
+    renderEntity(npc, cameraX, cameraY, color, npc.getPixelOffsetX(), npc.getPixelOffsetY());
 }
 
 TDT4102::Color OverworldRenderer::getTileColor(TileType type) const

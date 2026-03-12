@@ -369,6 +369,8 @@
     var audioUnlockOverlay = document.getElementById('audio-unlock');
     var audioUnlockButton  = document.getElementById('audio-unlock-btn');
 
+    window.ASSET_BASE = window.ASSET_BASE || '';
+
     /* ═══════════════════════════════════════════════════════════
      *  WEBGL CONTEXT LOSS
      *  Supported: all WebGL-capable browsers.
@@ -460,8 +462,21 @@
     };
 
     var Module = {
-      print:    function() { console.log.apply(console, arguments); },
-      printErr: function() { console.warn.apply(console, arguments); },
+      locateFile: function(path, prefix) {
+        if (path.endsWith('.data')) {
+          var base = window.ASSET_BASE || '';
+          if (base && !base.endsWith('/')) base += '/';
+          return base + path;
+        }
+        return prefix + path;
+      },
+
+      print: function() {
+        console.log.apply(console, arguments);
+      },
+      printErr: function() {
+        console.warn.apply(console, arguments);
+      },
       canvas: canvasElement,
       setStatus: setStatus,
       totalDependencies: 0,
@@ -473,10 +488,10 @@
       },
       preRun: [function() {
         /* Mount IDBFS on /saves for persistent save data.
-         * IDBFS uses IndexedDB — supported on:
-         *   iOS Safari ≥10, Chrome Android ≥24, Firefox Android ≥16,
-         *   Samsung Internet ≥4, Safari macOS ≥10.1
-         * We block game start until existing saves are loaded. */
+        * IDBFS uses IndexedDB — supported on:
+        *   iOS Safari ≥10, Chrome Android ≥24, Firefox Android ≥16,
+        *   Samsung Internet ≥4, Safari macOS ≥10.1
+        * We block game start until existing saves are loaded. */
         FS.mkdir('/saves');
         FS.mount(IDBFS, {}, '/saves');
         Module.addRunDependency('idbfs-load');

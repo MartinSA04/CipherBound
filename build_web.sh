@@ -1,79 +1,129 @@
 #!/usr/bin/env bash
 # Build the project for WebAssembly using Emscripten.
 #
-# Prerequisites:
-#   - Install Emscripten SDK: https://emscripten.org/docs/getting_started/downloads.html
-#   - Activate it:  source /path/to/emsdk/emsdk_env.sh
-#
 # Usage:
-#   ./build_web.sh          # configure + build
-#   ./build_web.sh serve    # build then start a local HTTP server on port 8080
-#   ./build_web.sh --serve  # same as above
+#   ./build_web.sh
+#   ./build_web.sh serve
+#   ./build_web.sh --serve
+#
+# Output:
+#   buildw/deploy/
+#     index.html
+#     program.<hash>.js
+#     program.<hash>.wasm
+#     program.<hash>.data
+#
+# Local:
+#   serves from same folder, so .data loads locally
+#
+# CI:
+#   rewrite ASSET_BASE in index.html to https://assets.cipherbound.com
+#   upload .data to R2
+#   delete .data from deploy/
+#   deploy deploy/ to Cloudflare Pages
 
 set -euo pipefail
 
 BUILD_DIR="buildw"
+DEPLOY_DIR="$BUILD_DIR/deploy"
+PROGRAM_NAME="program"
+HTML_NAME="index.html"
+MESON_CROSS_FILE="emscripten-cross.ini"
 
-# Verify emcc is available
-if ! command -v emcc &>/dev/null; then
-    echo "Error: emcc not found.  Activate the Emscripten SDK first:"
+if ! command -v emcc >/dev/null 2>&1; then
+    echo "Error: emcc not found. Activate Emscripten first:"
     echo "  source /path/to/emsdk/emsdk_env.sh"
     exit 1
 fi
 
-# Configure (only if not already configured)
+for tool in meson sha256sum sed cp rm mkdir python3; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        echo "Error: required tool '$tool' not found."
+        exit 1
+    fi
+done
+
 if [ ! -f "$BUILD_DIR/build.ninja" ]; then
     echo "=== Configuring Emscripten build ==="
     meson setup "$BUILD_DIR" \
-        --cross-file emscripten-cross.ini \
+        --cross-file "$MESON_CROSS_FILE" \
         --default-library static \
         --buildtype release \
         -Dcpp_std=c++20 \
         -Dc_std=c11
 fi
 
-# Build
 echo "=== Building for WebAssembly ==="
 meson compile -C "$BUILD_DIR"
 
-# ─── Cache-busting: rename outputs with content hashes ───
-echo "=== Adding content hashes to filenames ==="
+SRC_HTML="$BUILD_DIR/index.html"
+SRC_JS="$BUILD_DIR/${PROGRAM_NAME}.js"
+SRC_WASM="$BUILD_DIR/${PROGRAM_NAME}.wasm"
+SRC_DATA="$BUILD_DIR/${PROGRAM_NAME}.data"
 
-# Remove old hashed files from previous builds
-rm -f "$BUILD_DIR"/program.*.js "$BUILD_DIR"/program.*.wasm "$BUILD_DIR"/program.*.data
+for f in "$SRC_HTML" "$SRC_JS" "$SRC_WASM" "$SRC_DATA"; do
+    if [ ! -f "$f" ]; then
+        echo "Error: expected build output not found: $f"
+        exit 1
+    fi
+done
 
-# Compute short hashes (first 8 hex chars of sha256)
-JS_HASH=$(sha256sum "$BUILD_DIR/program.js"   | cut -c1-8)
-WASM_HASH=$(sha256sum "$BUILD_DIR/program.wasm" | cut -c1-8)
-DATA_HASH=$(sha256sum "$BUILD_DIR/program.data" | cut -c1-8)
+echo "=== Creating hashed asset filenames ==="
 
-# Copy to hashed filenames (keep originals for meson's incremental builds)
-cp "$BUILD_DIR/program.js"   "$BUILD_DIR/program.${JS_HASH}.js"
-cp "$BUILD_DIR/program.wasm" "$BUILD_DIR/program.${WASM_HASH}.wasm"
-cp "$BUILD_DIR/program.data" "$BUILD_DIR/program.${DATA_HASH}.data"
+rm -f "$BUILD_DIR"/"${PROGRAM_NAME}".*.js
+rm -f "$BUILD_DIR"/"${PROGRAM_NAME}".*.wasm
+rm -f "$BUILD_DIR"/"${PROGRAM_NAME}".*.data
 
-# Patch the hashed JS to reference hashed wasm + data
+JS_HASH="$(sha256sum "$SRC_JS" | cut -c1-8)"
+WASM_HASH="$(sha256sum "$SRC_WASM" | cut -c1-8)"
+DATA_HASH="$(sha256sum "$SRC_DATA" | cut -c1-8)"
+
+HASHED_JS="${PROGRAM_NAME}.${JS_HASH}.js"
+HASHED_WASM="${PROGRAM_NAME}.${WASM_HASH}.wasm"
+HASHED_DATA="${PROGRAM_NAME}.${DATA_HASH}.data"
+
+cp "$SRC_JS"   "$BUILD_DIR/$HASHED_JS"
+cp "$SRC_WASM" "$BUILD_DIR/$HASHED_WASM"
+cp "$SRC_DATA" "$BUILD_DIR/$HASHED_DATA"
+
 sed -i \
-    -e "s|'program\.data'|'program.${DATA_HASH}.data'|g" \
-    -e "s|'program\.wasm'|'program.${WASM_HASH}.wasm'|g" \
-    "$BUILD_DIR/program.${JS_HASH}.js"
+    -e "s|'${PROGRAM_NAME}\.wasm'|'${HASHED_WASM}'|g" \
+    -e "s|\"${PROGRAM_NAME}\.wasm\"|\"${HASHED_WASM}\"|g" \
+    -e "s|'${PROGRAM_NAME}\.data'|'${HASHED_DATA}'|g" \
+    -e "s|\"${PROGRAM_NAME}\.data\"|\"${HASHED_DATA}\"|g" \
+    "$BUILD_DIR/$HASHED_JS"
 
-# Patch the HTML to load the hashed JS
-sed -i \
-    "s|src=\"program\.js\"|src=\"program.${JS_HASH}.js\"|" \
-    "$BUILD_DIR/program.html"
+echo "=== Creating clean deploy directory ==="
+rm -rf "$DEPLOY_DIR"
+mkdir -p "$DEPLOY_DIR"
 
-echo ""
-echo "Build complete!  Output files:"
-echo "  $BUILD_DIR/program.html"
-echo "  $BUILD_DIR/program.${JS_HASH}.js"
-echo "  $BUILD_DIR/program.${WASM_HASH}.wasm"
-echo "  $BUILD_DIR/program.${DATA_HASH}.data"
+cp "$BUILD_DIR/$HASHED_JS"   "$DEPLOY_DIR/$HASHED_JS"
+cp "$BUILD_DIR/$HASHED_WASM" "$DEPLOY_DIR/$HASHED_WASM"
+cp "$BUILD_DIR/$HASHED_DATA" "$DEPLOY_DIR/$HASHED_DATA"
+cp "$SRC_HTML"               "$DEPLOY_DIR/$HTML_NAME"
 
-# Optional: serve
+echo
+echo "Build complete."
+echo
+echo "Deploy directory contents:"
+echo "  $DEPLOY_DIR/$HTML_NAME"
+echo "  $DEPLOY_DIR/$HASHED_JS"
+echo "  $DEPLOY_DIR/$HASHED_WASM"
+echo "  $DEPLOY_DIR/$HASHED_DATA"
+echo
+echo "Local test:"
+echo "  cd $DEPLOY_DIR && python3 -m http.server 8080"
+echo "  open http://localhost:8080/$HTML_NAME"
+echo
+echo "CI steps:"
+echo "  1. rewrite ASSET_BASE to https://assets.cipherbound.com"
+echo "  2. upload $HASHED_DATA to R2"
+echo "  3. remove .data from $DEPLOY_DIR"
+echo "  4. deploy $DEPLOY_DIR to Cloudflare Pages"
+
 if [ "${1:-}" = "serve" ] || [ "${1:-}" = "--serve" ]; then
-    echo ""
-    echo "Starting local server at http://localhost:8080/program.html"
-    cd "$BUILD_DIR"
+    echo
+    echo "Starting local server at http://localhost:8080/$HTML_NAME"
+    cd "$DEPLOY_DIR"
     python3 -m http.server 8080
 fi

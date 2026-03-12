@@ -64,7 +64,7 @@ jobs:
       - name: Upload hashed .data file(s) to R2
         run: |
           shopt -s nullglob
-          data_files=(buildw/deploy/program.*.data)
+          data_files=(buildw/deploy/index.*.data)
 
           if [ ${#data_files[@]} -eq 0 ]; then
             echo "No hashed .data file found in buildw/deploy/"

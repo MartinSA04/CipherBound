@@ -68,7 +68,7 @@ void Pokedex::loadSpecies(const std::string &path)
         sp.baseExpYield = std::stoi(tokens[11]);
 
         // Parse learnset: "moveId:level,moveId:level,..."
-        if (!tokens[12].empty() and tokens[12] != "none")
+        if (!tokens[12].empty() && tokens[12] != "none")
         {
             std::istringstream lss(tokens[12]);
             std::string entry;
@@ -85,7 +85,7 @@ void Pokedex::loadSpecies(const std::string &path)
         }
 
         // Parse evolutions: "targetId:level,targetId:level,..."
-        if (!tokens[13].empty() and tokens[13] != "none")
+        if (!tokens[13].empty() && tokens[13] != "none")
         {
             std::istringstream ess(tokens[13]);
             std::string entry;

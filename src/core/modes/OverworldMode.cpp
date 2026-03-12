@@ -51,7 +51,7 @@ bool OverworldMode::wildBattleStarts(GameContext &ctx)
 
     Map &map = ctx.world.getMap(ctx.world.getCurrentMapId());
     const Tile &tile = map.getTile(player.getPosition());
-    if (tile.type != TileType::tallGrass or !map.hasWildEncounters())
+    if (tile.type != TileType::tallGrass || !map.hasWildEncounters())
         return false;
 
     if (!ctx.world.rollWildEncounter(player.getPosition()))
@@ -67,7 +67,7 @@ bool OverworldMode::warpBlockStarts(GameContext &ctx)
 {
     Player &player = ctx.world.getPlayer();
 
-    if (!pendingWarpBlock or player.isMoving())
+    if (!pendingWarpBlock || player.isMoving())
         return false;
     pendingWarpBlock = false;
     ctx.pendingPushBack = true;
@@ -116,12 +116,11 @@ void OverworldMode::handlePlayerMove(GameContext &ctx, InputManager &input)
     Direction dir;
     if (!input.getMovementDirection(dir))
     {
-        player.resetWalkFrame();
         wallHitPlayed = false;
         return;
     }
 
-    if (dir != player.getFacing() and player.canTurn())
+    if (dir != player.getFacing() && player.canTurn())
     {
         player.setFacing(dir);
         if (!player.wasRecentlyMoving())

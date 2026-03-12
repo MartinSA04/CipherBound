@@ -70,9 +70,6 @@ public:
 
     void drawFilledRect(int x, int y, int w, int h, TDT4102::Color color);
 
-    // HP bar
-    void drawHPBar(int x, int y, int width, int currentHP, int maxHP);
-
     // Coordinate conversion
     static int worldToScreenX(int worldX, int cameraX);
     static int worldToScreenY(int worldY, int cameraY);

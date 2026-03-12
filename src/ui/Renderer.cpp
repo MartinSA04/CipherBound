@@ -166,26 +166,3 @@ void Renderer::drawFilledRect(int x, int y, int w, int h, TDT4102::Color color)
 {
     window.draw_rectangle({x, y}, w, h, color);
 }
-
-void Renderer::drawHPBar(int x, int y, int width, int currentHP, int maxHP)
-{
-    int barHeight = 8;
-    float ratio = (maxHP > 0) ? static_cast<float>(currentHP) / static_cast<float>(maxHP) : 0.0f;
-    int filledWidth = static_cast<int>(static_cast<float>(width) * ratio);
-
-    // Background (red)
-    drawFilledRect(x, y, width, barHeight, TDT4102::Color::grey);
-
-    // Filled portion (green or yellow based on HP)
-    TDT4102::Color hpColor = TDT4102::Color::green;
-    if (ratio < 0.2f)
-        hpColor = TDT4102::Color::red;
-    else if (ratio < 0.5f)
-        hpColor = TDT4102::Color::yellow;
-
-    if (filledWidth > 0)
-        drawFilledRect(x, y, filledWidth, barHeight, hpColor);
-
-    // Border
-    drawRect(x, y, width, barHeight, TDT4102::Color::transparent, TDT4102::Color::black);
-}

@@ -720,7 +720,7 @@ int Battle::calculateDamage(const Daemon &attacker, const Daemon &defender,
     float eff = getTypeEffectiveness(move.type, defender.getSpecies().primaryType);
     if (defender.getSpecies().secondaryType != defender.getSpecies().primaryType)
         eff *= getTypeEffectiveness(move.type, defender.getSpecies().secondaryType);
-    baseDamage = static_cast<int>(baseDamage * eff);
+    baseDamage = static_cast<int>(static_cast<float>(baseDamage) * eff);
 
     // STAB (Same Type Attack Bonus)
     if (move.type == attacker.getSpecies().primaryType ||

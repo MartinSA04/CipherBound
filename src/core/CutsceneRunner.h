@@ -67,6 +67,4 @@ private:
     // Start a single tile step for an entity toward its destination
     void stepEntityToward(World &world, const std::string &targetId, Position dest);
 
-    // Helper: parse direction string
-    static Direction parseDirection(const std::string &s);
 };

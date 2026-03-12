@@ -1,50 +1,13 @@
 #include "CutsceneRunner.h"
+#include "StringUtils.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <set>
 
-// ---- helpers (local) ----
-
-namespace
-{
-    std::vector<std::string> splitPipe(const std::string &s)
-    {
-        std::vector<std::string> parts;
-        std::istringstream iss(s);
-        std::string token;
-        while (std::getline(iss, token, '|'))
-            parts.push_back(token);
-        return parts;
-    }
-
-    std::vector<std::string> splitSemicolon(const std::string &s)
-    {
-        std::vector<std::string> parts;
-        if (s.empty())
-            return parts;
-        std::istringstream iss(s);
-        std::string token;
-        while (std::getline(iss, token, ';'))
-            parts.push_back(token);
-        return parts;
-    }
-} // namespace
-
-// ---- parsing ----
-
-Direction CutsceneRunner::parseDirection(const std::string &s)
-{
-    if (s == "up")
-        return Direction::up;
-    if (s == "down")
-        return Direction::down;
-    if (s == "left")
-        return Direction::left;
-    if (s == "right")
-        return Direction::right;
-    return Direction::down;
-}
+using StringUtils::splitPipe;
+using StringUtils::splitSemicolon;
+using StringUtils::parseDirection;
 
 bool CutsceneRunner::load(const std::string &path)
 {

@@ -3,6 +3,7 @@
 #include "../../ui/GameUI.h"
 #include "../../world/World.h"
 #include "../../world/Player.h"
+#include "../../data/Pokedex.h"
 
 void PartyMode::update(GameContext &ctx, InputManager &input)
 {
@@ -16,6 +17,7 @@ void PartyMode::update(GameContext &ctx, InputManager &input)
 
         if (input.isConfirmPressed())
         {
+            ctx.playSound(SoundEffect::select);
             subState = SubState::actionMenu;
             actionSelected = 0;
         }
@@ -30,10 +32,12 @@ void PartyMode::update(GameContext &ctx, InputManager &input)
 
         if (input.isConfirmPressed())
         {
+            ctx.playSound(SoundEffect::select);
             switch (actionSelected)
             {
-            case 0: // Summary — just go back for now (placeholder)
-                subState = SubState::browsing;
+            case 0: // Summary
+                summaryPage = 0;
+                subState = SubState::showingSummary;
                 break;
             case 1: // Switch
                 if (partySize > 1)
@@ -62,6 +66,7 @@ void PartyMode::update(GameContext &ctx, InputManager &input)
 
         if (input.isConfirmPressed())
         {
+            ctx.playSound(SoundEffect::select);
             if (selected != swapSource)
             {
                 player.swapDaemon(swapSource, selected);
@@ -73,11 +78,39 @@ void PartyMode::update(GameContext &ctx, InputManager &input)
             subState = SubState::browsing;
         }
         break;
+
+    case SubState::showingSummary:
+    {
+        // Left/Right to switch pages
+        Direction dir;
+        bool dirHeld = input.getMovementDirection(dir);
+        if (dirHeld)
+        {
+            if (dir == Direction::left && summaryPage > 0)
+                summaryPage = 0;
+            else if (dir == Direction::right && summaryPage < 1)
+                summaryPage = 1;
+        }
+        // Up/Down to switch between party members (with repeat delay)
+        ctx.ui.navigateVertical(selected, partySize);
+        if (input.isCancelPressed())
+        {
+            subState = SubState::browsing;
+        }
+        break;
+    }
     }
 }
 
 void PartyMode::render(GameContext &ctx)
 {
+    if (subState == SubState::showingSummary)
+    {
+        const Daemon &daemon = ctx.world.getPlayer().getDaemon(selected);
+        ctx.ui.drawSummaryScreen(daemon, ctx.pokedex, summaryPage);
+        return;
+    }
+
     ctx.ui.drawPartyList(ctx.world.getPlayer(), selected);
 
     if (subState == SubState::actionMenu)
@@ -86,7 +119,6 @@ void PartyMode::render(GameContext &ctx)
     }
     else if (subState == SubState::selectingSwap)
     {
-        // Draw indicator of which Daemon is being swapped
         ctx.ui.drawDialogueBox("", "Choose a Daemon to swap with.");
     }
 }

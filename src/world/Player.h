@@ -37,7 +37,6 @@ public:
     int getPixelOffsetX() const;
     int getPixelOffsetY() const;
     int getWalkFrame() const;
-    void resetWalkFrame();
 
     // Party management
     void addDaemon(Daemon daemon);

@@ -39,6 +39,12 @@ private:
     int partySelected{0};
     int bagSelected{0};
 
+    // Battle party sub-state (for viewing summary or action menu from party list)
+    bool viewingSummary{false};
+    bool showingPartyAction{false};
+    int partyActionSelected{0};
+    int summaryPage{0};
+
     // Capture animation state
     int captureAnimFrame{0};
     int captureAnimShakesDone{0};

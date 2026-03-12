@@ -45,14 +45,23 @@ void MenuMode::render(GameContext &ctx)
 
     static const std::vector<std::string> menuItems = {"Daemons", "Bag", "Save", "Exit"};
     int scale = PIXEL_SCALE;
+
+    int maxTextW = 0;
+    for (const auto &opt : menuItems)
+    {
+        int tw = spriteFont.getTextWidth(opt, scale);
+        if (tw > maxTextW) maxTextW = tw;
+    }
+
     int itemHeight = 18 * scale + 6;
-    int menuWidth = 40 * scale;
+    int menuWidth = maxTextW + 10 * scale;
     int menuX = WINDOW_WIDTH - menuWidth - 10;
     int menuY = 10;
     int menuHeight = static_cast<int>(menuItems.size()) * itemHeight + 16;
 
+    renderer.drawFilledRect(menuX, menuY, menuWidth, menuHeight, TDT4102::Color{240, 245, 255});
     renderer.drawRect(menuX, menuY, menuWidth, menuHeight,
-                      TDT4102::Color::white, TDT4102::Color::black);
+                      TDT4102::Color::transparent, TDT4102::Color{60, 70, 100});
 
     for (int i = 0; i < static_cast<int>(menuItems.size()); ++i)
     {

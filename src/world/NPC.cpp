@@ -1,4 +1,5 @@
 #include "NPC.h"
+#include "../ui/Renderer.h"
 #include <cmath>
 
 const std::vector<std::string> NPC::emptyLines = {};
@@ -85,28 +86,27 @@ void NPC::walkStep(Direction dir, int delay)
     facing = dir;
     moveDelay = delay;
 
-    // Set initial pixel offset to full tile (same as Player::move)
-    // so the NPC visually starts at the old position and slides to the new one
+    // Set initial pixel offset to full tile so the NPC slides to the new position
     switch (dir)
     {
     case Direction::up:
         position.y--;
         pixelOffsetX = 0;
-        pixelOffsetY = 48; // TILE_SIZE
+        pixelOffsetY = TILE_SIZE;
         break;
     case Direction::down:
         position.y++;
         pixelOffsetX = 0;
-        pixelOffsetY = -48;
+        pixelOffsetY = -TILE_SIZE;
         break;
     case Direction::left:
         position.x--;
-        pixelOffsetX = 48;
+        pixelOffsetX = TILE_SIZE;
         pixelOffsetY = 0;
         break;
     case Direction::right:
         position.x++;
-        pixelOffsetX = -48;
+        pixelOffsetX = -TILE_SIZE;
         pixelOffsetY = 0;
         break;
     }
@@ -132,7 +132,7 @@ void NPC::updateWalkAnimation()
     else
     {
         double t = static_cast<double>(animFramesLeft) / moveDelay;
-        int totalOffset = static_cast<int>(t * 48); // TILE_SIZE = 48
+        int totalOffset = static_cast<int>(t * TILE_SIZE);
 
         switch (facing)
         {

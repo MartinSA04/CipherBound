@@ -3,10 +3,9 @@
 #include <algorithm>
 
 Player::Player(const std::string &name, Position position)
-    : Entity(name, position), money(0), moveDelay(12),
+    : Entity(name, position), pcBoxes(NUM_BOXES), money(0), moveDelay(12),
       pixelOffsetX(0), pixelOffsetY(0), animFramesLeft(0), turnCooldown(0),
-      walkFrame(0), wasMoving(false),
-      pcBoxes(NUM_BOXES)
+      walkFrame(0), wasMoving(false)
 {
 }
 
@@ -115,11 +114,6 @@ bool Player::wasRecentlyMoving() const
 int Player::getPixelOffsetX() const { return pixelOffsetX; }
 int Player::getPixelOffsetY() const { return pixelOffsetY; }
 int Player::getWalkFrame() const { return walkFrame; }
-void Player::resetWalkFrame()
-{
-    // if (not isMoving())
-    //     walkFrame = 0;
-}
 
 void Player::move(Direction direction)
 {

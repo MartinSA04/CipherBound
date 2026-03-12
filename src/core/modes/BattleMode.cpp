@@ -11,8 +11,8 @@
 #include "../../data/Species.h"
 #include "../../audio/MusicManager.h"
 #include "../../audio/SoundManager.h"
+#include "../StringUtils.h"
 #include <algorithm>
-#include <cctype>
 #include <cmath>
 
 void BattleMode::setTrainerNPCId(const std::string &id)
@@ -184,6 +184,9 @@ void BattleMode::update(GameContext &ctx, InputManager &input)
             moveSelected = 0;
             partySelected = 0;
             bagSelected = 0;
+            showingPartyAction = false;
+            viewingSummary = false;
+            partyActionSelected = 0;
         }
         return;
 
@@ -200,12 +203,64 @@ void BattleMode::update(GameContext &ctx, InputManager &input)
         return;
 
     case BattleState::choosingSwitch:
+        if (viewingSummary)
+        {
+            // Summary sub-view within battle party
+            Direction dir;
+            bool dirHeld = input.getMovementDirection(dir);
+            if (dirHeld)
+            {
+                if (dir == Direction::left && summaryPage > 0)
+                    summaryPage = 0;
+                else if (dir == Direction::right && summaryPage < 1)
+                    summaryPage = 1;
+            }
+            if (input.isCancelPressed())
+            {
+                viewingSummary = false;
+                showingPartyAction = true; // go back to action menu
+            }
+            return;
+        }
+
+        if (showingPartyAction)
+        {
+            // Action sub-menu: Summary, Switch, Cancel
+            ctx.ui.navigateVertical(partyActionSelected, 3);
+
+            if (input.isConfirmPressed())
+            {
+                ctx.playSound(SoundEffect::select);
+                switch (partyActionSelected)
+                {
+                case 0: // Summary
+                    summaryPage = 0;
+                    viewingSummary = true;
+                    showingPartyAction = false;
+                    break;
+                case 1: // Switch
+                    showingPartyAction = false;
+                    ctx.currentBattle->chooseSwitchTarget(partySelected);
+                    break;
+                case 2: // Cancel
+                    showingPartyAction = false;
+                    break;
+                }
+            }
+            if (input.isCancelPressed())
+            {
+                showingPartyAction = false;
+            }
+            return;
+        }
+
         ctx.ui.navigateVertical(partySelected, ctx.world.getPlayer().partySize());
 
         if (input.isConfirmPressed())
         {
             ctx.playSound(SoundEffect::select);
-            ctx.currentBattle->chooseSwitchTarget(partySelected);
+            showingPartyAction = true;
+            partyActionSelected = 0;
         }
         if (input.isCancelPressed())
             ctx.currentBattle->goBack();
@@ -491,7 +546,6 @@ void BattleMode::drawMoveSelectScreen(GameContext &ctx)
         spriteFont.drawText(renderer, moveData.name, ox + 6 * scale, oy, scale);
     }
 
-    // Info box
     int infoSrcW = 100;
     int infoH = 46 * scale;
     int infoX = 0;
@@ -508,9 +562,7 @@ void BattleMode::drawMoveSelectScreen(GameContext &ctx)
                              std::to_string(moves[moveSelected].maxPP);
         spriteFont.drawText(renderer, ppText, labelX, labelY1, scale);
 
-        std::string typeName = elementTypeName(selectedMove->type);
-        if (!typeName.empty())
-            typeName[0] = static_cast<char>(std::toupper(static_cast<unsigned char>(typeName[0])));
+        std::string typeName = StringUtils::capitalize(elementTypeName(selectedMove->type));
         spriteFont.drawText(renderer, typeName, labelX, labelY2, scale);
     }
 }
@@ -568,7 +620,19 @@ void BattleMode::render(GameContext &ctx)
     }
     else if (bs == BattleState::choosingSwitch)
     {
-        ctx.ui.drawPartyList(ctx.world.getPlayer(), partySelected);
+        if (viewingSummary)
+        {
+            const Daemon &daemon = ctx.world.getPlayer().getDaemon(partySelected);
+            ctx.ui.drawSummaryScreen(daemon, ctx.pokedex, summaryPage);
+        }
+        else
+        {
+            ctx.ui.drawPartyList(ctx.world.getPlayer(), partySelected);
+            if (showingPartyAction)
+            {
+                ctx.ui.drawChoiceBox({"Summary", "Switch", "Cancel"}, partyActionSelected);
+            }
+        }
     }
     else if (bs == BattleState::choosingItem)
     {
@@ -646,7 +710,6 @@ void BattleMode::drawCaptureScene(GameContext &ctx)
     ui.drawOpponentBase();
     ui.drawPlayerBase();
 
-    // Draw player info bars
     const Daemon *playerDaemon = &ctx.currentBattle->getPlayerDaemon();
     const Daemon *opponentDaemon = &ctx.currentBattle->getOpponentDaemon();
     ui.drawPlayerDaemon(playerDaemon);

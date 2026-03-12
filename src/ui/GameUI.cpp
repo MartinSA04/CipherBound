@@ -1,6 +1,6 @@
 #include "GameUI.h"
+#include "../core/StringUtils.h"
 #include <algorithm>
-#include <cctype>
 
 GameUI::GameUI()
     : renderer(),
@@ -27,15 +27,11 @@ void GameUI::endFrame() { renderer.endFrame(); }
 bool GameUI::shouldClose() const { return renderer.shouldClose(); }
 void GameUI::updateInput() { input.update(); }
 
-// --- Overworld ---
-
 void GameUI::drawOverworld(const Map &map, const Player &player,
                            const std::vector<std::shared_ptr<NPC>> &npcs)
 {
     overworldRenderer.render(map, player, npcs);
 }
-
-// --- Battle UI ---
 
 void GameUI::loadBattleAssets()
 {
@@ -68,24 +64,19 @@ void GameUI::loadDaemonSprite(const std::string &speciesName)
         renderer.loadTexture(backId, backPath);
 }
 
-// --- Battle UI (high-level draw functions moved to BattleMode) ---
-
-// --- Menus ---
-
-// --- Main menu (moved to MenuMode) ---
-
 void GameUI::drawPartyList(const Player &player, int selected)
 {
-    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{40, 40, 80});
+    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{140, 155, 190});
 
     const auto &party = player.getParty();
     int scale = PIXEL_SCALE;
-    int slotHeight = 16 * scale + 8;
-    int startY = 20;
+    int slotHeight = 24 * scale;
+    int gap = 4 * scale;
+    int startY = 12;
 
     for (int i = 0; i < static_cast<int>(party.size()); ++i)
     {
-        int sy = startY + i * (slotHeight + 8);
+        int sy = startY + i * (slotHeight + gap);
 
         TDT4102::Color bgColor = (i == selected)
                                      ? TDT4102::Color{200, 215, 255}
@@ -98,25 +89,180 @@ void GameUI::drawPartyList(const Player &player, int selected)
         const Daemon &c = party[i];
 
         if (i == selected)
-            drawSelectionArrow(28, sy + 4 * scale, scale);
+            drawSelectionArrow(28, sy + 6 * scale, scale);
 
-        spriteFont.drawText(renderer, c.getNickname(), 28 + 6 * scale, sy + 4, scale);
+        spriteFont.drawText(renderer, c.getNickname(), 28 + 6 * scale, sy + 2 * scale, scale);
 
         int lvlX = WINDOW_WIDTH / 2 - 30 * scale;
-        spriteFont.drawText(renderer, "Lv" + std::to_string(c.getLevel()), lvlX, sy + 4, scale);
+        spriteFont.drawText(renderer, "Lv" + std::to_string(c.getLevel()), lvlX, sy + 2 * scale, scale);
 
         int hpBarX = WINDOW_WIDTH / 2 + 10 * scale;
         int hpBarW = 48 * scale;
-        drawSpriteHPBar(hpBarX, sy + 6 * scale, hpBarW, c.getCurrentHP(), c.getMaxHP(), scale);
+        drawSpriteHPBar(hpBarX, sy + 4 * scale, hpBarW, c.getCurrentHP(), c.getMaxHP(), scale);
 
         spriteFont.drawText(renderer, std::to_string(c.getCurrentHP()) + "-" + std::to_string(c.getMaxHP()),
-                            hpBarX, sy + 10 * scale, scale);
+                            hpBarX, sy + 9 * scale, scale);
+
+        std::string typeName = StringUtils::capitalize(elementTypeName(c.getSpecies().primaryType));
+        spriteFont.drawText(renderer, typeName, 28 + 6 * scale, sy + 14 * scale, scale - 1);
     }
+}
+
+void GameUI::drawSummaryScreen(const Daemon &daemon, const Pokedex &pokedex, int page)
+{
+    loadBattleAssets();
+    int scale = PIXEL_SCALE;
+    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{150, 160, 195});
+
+    // Daemon sprite (front)
+    const std::string &speciesName = daemon.getSpecies().name;
+    loadDaemonSprite(speciesName);
+    std::string spriteId = "daemon_" + speciesName;
+    if (renderer.hasTexture(spriteId))
+    {
+        TDT4102::Image &img = renderer.getTexture(spriteId);
+        int sprW = img.width * scale;
+        int sprH = img.height * scale;
+        int sprX = WINDOW_WIDTH - sprW - 24;
+        int sprY = 8;
+        renderer.drawSpriteRaw(spriteId, sprX, sprY, sprW, sprH);
+    }
+
+    int headerY = 8;
+    spriteFont.drawText(renderer, daemon.getNickname(), 24, headerY, scale);
+    std::string lvlStr = "Lv" + std::to_string(daemon.getLevel());
+    spriteFont.drawText(renderer, lvlStr, 24 + spriteFont.getTextWidth(daemon.getNickname(), scale) + 8 * scale, headerY, scale);
+
+    int subY = headerY + 18 * scale;
+    if (daemon.getNickname() != daemon.getSpecies().name)
+    {
+        spriteFont.drawText(renderer, daemon.getSpecies().name, 24, subY, scale - 1);
+    }
+
+    int typeY = subY + 14 * scale;
+    std::string primaryType = StringUtils::capitalize(elementTypeName(daemon.getSpecies().primaryType));
+    std::string secondaryType = StringUtils::capitalize(elementTypeName(daemon.getSpecies().secondaryType));
+
+    TDT4102::Color typeBg{90, 100, 145};
+    int typeBoxH = 14 * scale;
+    int typeTextY = typeY + 2 * scale;
+
+    int tw1 = spriteFont.getTextWidth(primaryType, scale - 1) + 6 * scale;
+    renderer.drawFilledRect(24, typeY, tw1, typeBoxH, typeBg);
+    spriteFont.drawText(renderer, primaryType, 24 + 3 * scale, typeTextY, scale - 1);
+
+    if (daemon.getSpecies().primaryType != daemon.getSpecies().secondaryType)
+    {
+        int tw2 = spriteFont.getTextWidth(secondaryType, scale - 1) + 6 * scale;
+        renderer.drawFilledRect(24 + tw1 + 4 * scale, typeY, tw2, typeBoxH, typeBg);
+        spriteFont.drawText(renderer, secondaryType, 24 + tw1 + 4 * scale + 3 * scale, typeTextY, scale - 1);
+    }
+
+    int divY = typeY + typeBoxH + 4 * scale;
+    renderer.drawFilledRect(20, divY, WINDOW_WIDTH / 2, 2, TDT4102::Color{120, 130, 170});
+
+    if (page == 0)
+    {
+        int infoY = divY + 4 * scale;
+        spriteFont.drawText(renderer, "HP", 24, infoY, scale);
+        int hpBarX = 54 + 16 * scale;
+        int hpBarW = 48 * scale;
+        drawSpriteHPBar(hpBarX, infoY + 4 * scale, hpBarW, daemon.getCurrentHP(), daemon.getMaxHP(), scale);
+        spriteFont.drawText(renderer, std::to_string(daemon.getCurrentHP()) + "-" + std::to_string(daemon.getMaxHP()),
+                            hpBarX + hpBarW + 4 * scale, infoY, scale);
+
+        int expY = infoY + 14 * scale;
+        spriteFont.drawText(renderer, "EXP", 24, expY, scale);
+        int expBarX = 54 + 16 * scale;
+        int expBarW = 48 * scale;
+        int expNeeded = daemon.getExpNeeded();
+        drawSpriteEXPBar(expBarX, expY + 4 * scale, expBarW, daemon.getExp(), expNeeded, scale);
+        spriteFont.drawText(renderer, std::to_string(daemon.getExp()) + "-" + std::to_string(expNeeded),
+                            expBarX + expBarW + 4 * scale, expY, scale);
+
+        int movesHeaderY = expY + 16 * scale;
+        renderer.drawFilledRect(20, movesHeaderY, WINDOW_WIDTH - 40, 2, TDT4102::Color{120, 130, 170});
+        int moveLabelY = movesHeaderY + 4 * scale;
+        spriteFont.drawText(renderer, "MOVES", 24, moveLabelY, scale);
+
+        int moveStartY = moveLabelY + 14 * scale;
+        // Calculate move slot height to fit remaining space
+        int availableH = (WINDOW_HEIGHT - 16 * scale) - moveStartY; // footer at bottom
+        int moveSlotH = availableH / 4;
+
+        const auto &moves = daemon.getMoves();
+        for (int i = 0; i < 4; ++i)
+        {
+            int my = moveStartY + i * moveSlotH;
+
+            // Subtle alternating row background
+            if (i % 2 == 0)
+                renderer.drawFilledRect(24, my, WINDOW_WIDTH - 48, moveSlotH - 2, TDT4102::Color{135, 145, 180});
+
+            if (moves[i].moveId < 0)
+            {
+                spriteFont.drawText(renderer, "---", 36, my + 2 * scale, scale);
+                continue;
+            }
+
+            const MoveData &moveData = pokedex.getMove(moves[i].moveId);
+
+            spriteFont.drawText(renderer, moveData.name, 36, my + 2 * scale, scale);
+
+            std::string mType = StringUtils::capitalize(elementTypeName(moveData.type));
+            spriteFont.drawText(renderer, mType, WINDOW_WIDTH / 2 - 10 * scale, my + 2 * scale, scale - 1);
+
+            std::string pp = "PP " + std::to_string(moves[i].currentPP) + "-" + std::to_string(moves[i].maxPP);
+            int ppX = WINDOW_WIDTH - 24 - spriteFont.getTextWidth(pp, scale);
+            spriteFont.drawText(renderer, pp, ppX, my + 2 * scale, scale);
+        }
+    }
+    else
+    {
+        int infoY = divY + 4 * scale;
+        spriteFont.drawText(renderer, "STATS", 24, infoY, scale);
+
+        static const std::string statNames[] = {"HP", "Atk", "Def", "SpA", "SpD", "Spe"};
+        int statStartY = infoY + 18 * scale;
+
+        for (int i = 0; i < 6; ++i)
+        {
+            int sy = statStartY + i * 14 * scale;
+            spriteFont.drawText(renderer, statNames[i], 36, sy, scale);
+
+            int statVal = daemon.getStat(i);
+            std::string valStr = std::to_string(statVal);
+            int valX = 36 + 30 * scale;
+            spriteFont.drawText(renderer, valStr, valX, sy, scale);
+
+            int barX = valX + 24 * scale;
+            int barMaxW = WINDOW_WIDTH - barX - 40;
+            int barW = std::min(barMaxW, statVal * barMaxW / 200);
+            int barH = 8 * scale;
+            renderer.drawFilledRect(barX, sy + 3 * scale, barMaxW, barH, TDT4102::Color{120, 125, 155});
+            if (barW > 0)
+            {
+                TDT4102::Color barColor{100, 180, 255};
+                if (statVal > 120)
+                    barColor = TDT4102::Color{100, 220, 130};
+                else if (statVal < 50)
+                    barColor = TDT4102::Color{255, 130, 100};
+                renderer.drawFilledRect(barX, sy + 3 * scale, barW, barH, barColor);
+            }
+        }
+    }
+
+    int footerY = WINDOW_HEIGHT - 16 * scale;
+    std::string pageText = (page == 0) ? "Info  LR:Stats" : "Stats  LR:Info";
+    int pageTextX = (WINDOW_WIDTH - spriteFont.getTextWidth(pageText, scale - 1)) / 2;
+    spriteFont.drawText(renderer, pageText, pageTextX, footerY, scale - 1);
+
+    spriteFont.drawText(renderer, "B:Back", 24, footerY, scale - 1);
 }
 
 void GameUI::drawBagScreen(const Player &player, const Pokedex &pokedex, int selected)
 {
-    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{80, 60, 40});
+    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{170, 155, 130});
 
     int scale = PIXEL_SCALE;
     spriteFont.drawText(renderer, "BAG", 28, 10, scale);
@@ -151,7 +297,6 @@ void GameUI::drawBagScreen(const Player &player, const Pokedex &pokedex, int sel
 
         spriteFont.drawText(renderer, item.name, 28 + 6 * scale, sy + 4, scale);
 
-        // Quantity on the right
         std::string qtyStr = "x" + std::to_string(inventory[i].quantity);
         int qtyX = WINDOW_WIDTH - 60 - static_cast<int>(qtyStr.size()) * 8 * scale;
         spriteFont.drawText(renderer, qtyStr, qtyX, sy + 4, scale);
@@ -166,8 +311,6 @@ void GameUI::drawBagScreen(const Player &player, const Pokedex &pokedex, int sel
         spriteFont.drawText(renderer, item.description, 28 + 4 * scale, descY + 5 * scale, scale);
     }
 }
-
-// --- PC Box screen (moved to PCBoxMode) ---
 
 void GameUI::navigateVertical(int &selected, int count)
 {
@@ -223,8 +366,6 @@ void GameUI::navigate2x2(int &sel)
     else if (input.isUpHeld() && sel >= 2)
         sel -= 2;
 }
-
-// --- Dialogue ---
 
 void GameUI::setDialogueText(const std::string &text)
 {
@@ -283,8 +424,6 @@ void GameUI::revealAllText()
     typewriterIndicatorTimer = 0;
 }
 
-// --- Multi-line dialogue management ---
-
 void GameUI::startDialogue(const std::string &speaker, const std::vector<std::string> &lines)
 {
     dialogueSpeaker = speaker;
@@ -320,8 +459,6 @@ const std::string &GameUI::getDialogueSpeaker() const
     return dialogueSpeaker;
 }
 
-// --- HP/EXP animation tick helpers ---
-
 bool GameUI::tickHPAnimation(int targetPlayerHP, int targetOpponentHP,
                              int maxPlayerHP, int maxOpponentHP)
 {
@@ -344,11 +481,8 @@ bool GameUI::tickHPAnimation(int targetPlayerHP, int targetOpponentHP,
 EXPTickResult GameUI::tickEXPAnimation(int targetEXP, int expNeeded)
 {
     static constexpr int EXP_ANIM_FRAMES = 120;
-
-    // The destination for this segment is either the target or a full bar
     int destination = std::min(targetEXP, expNeeded);
 
-    // Latch the start value on the first frame
     if (expAnimStartEXP < 0)
         expAnimStartEXP = playerDisplayEXP;
 
@@ -382,10 +516,6 @@ EXPTickResult GameUI::tickEXPAnimation(int targetEXP, int expNeeded)
     return EXPTickResult::inProgress;
 }
 
-// --- Title screen ---
-
-// --- Title screen (moved to TitleScreenMode) ---
-
 void GameUI::drawDialogueBox(const std::string &speaker, const std::string &text)
 {
     // Update typewriter state for this text
@@ -394,7 +524,6 @@ void GameUI::drawDialogueBox(const std::string &speaker, const std::string &text
     int panelY = WINDOW_HEIGHT - UI_PANEL_HEIGHT;
     int scale = PIXEL_SCALE;
 
-    // Draw text bar background
     drawTextBar(panelY);
 
     int textBarW = 252 * scale;
@@ -405,12 +534,11 @@ void GameUI::drawDialogueBox(const std::string &speaker, const std::string &text
     int textX = textBarX + 12 * scale;
     int textY = textBarY + 6 * scale;
 
-    // Draw text with typewriter effect using sprite font (word-wrapped)
-    int textMaxW = textBarW - 24 * scale; // 12px padding on each side
+    int textMaxW = textBarW - 24 * scale;
     spriteFont.drawTextPartial(renderer, text, typewriterCharsRevealed,
                                textX, textY, scale, 1, textMaxW);
 
-    // Draw bouncing continue indicator when text is fully revealed
+    // Bouncing continue indicator
     if (isTextFullyRevealed())
     {
         int bouncePhase = typewriterIndicatorTimer % 20;
@@ -422,7 +550,7 @@ void GameUI::drawDialogueBox(const std::string &speaker, const std::string &text
         spriteFont.drawContinueIndicator(renderer, indicatorX, indicatorY, scale);
     }
 
-    // Speaker name badge using sprite font
+    // Speaker name badge
     if (!speaker.empty())
     {
         int spkW = spriteFont.getTextWidth(speaker, scale) + 6 * scale;
@@ -440,15 +568,22 @@ void GameUI::drawDialogueBox(const std::string &speaker, const std::string &text
 void GameUI::drawChoiceBox(const std::vector<std::string> &options, int selected)
 {
     int scale = PIXEL_SCALE;
-    int boxWidth = 40 * scale;
+    // Auto-size width to fit the longest option
+    int maxTextW = 0;
+    for (const auto &opt : options)
+    {
+        int tw = spriteFont.getTextWidth(opt, scale);
+        if (tw > maxTextW) maxTextW = tw;
+    }
+    int boxWidth = maxTextW + 10 * scale; // arrow (6*scale) + padding
     int itemHeight = 16 * scale + 8; // glyph height * scale + padding
     int boxHeight = static_cast<int>(options.size()) * itemHeight + 16;
     int boxX = WINDOW_WIDTH - boxWidth - 20;
     int boxY = WINDOW_HEIGHT - UI_PANEL_HEIGHT - boxHeight - 10;
 
-    renderer.drawFilledRect(boxX, boxY, boxWidth, boxHeight, TDT4102::Color::white);
+    renderer.drawFilledRect(boxX, boxY, boxWidth, boxHeight, TDT4102::Color{240, 245, 255});
     renderer.drawRect(boxX, boxY, boxWidth, boxHeight,
-                      TDT4102::Color::transparent, TDT4102::Color::black);
+                      TDT4102::Color::transparent, TDT4102::Color{60, 70, 100});
 
     for (int i = 0; i < static_cast<int>(options.size()); ++i)
     {
@@ -458,10 +593,6 @@ void GameUI::drawChoiceBox(const std::vector<std::string> &options, int selected
         spriteFont.drawText(renderer, options[i], boxX + 6 * scale, oy, scale);
     }
 }
-
-// --- Battle intro transition (moved to BattleIntroMode) ---
-
-// --- Helpers ---
 
 void GameUI::drawTextBox(int x, int y, int width, int height, const std::string &text)
 {
@@ -512,9 +643,9 @@ void GameUI::drawNarrowTextBar(int x, int y, int srcW, int scale)
                               x + (edgeW + middleSrcW) * scale, y, edgeW * scale, dstH);
 }
 
+// Pixel-art right-pointing arrow
 void GameUI::drawSelectionArrow(int x, int y, int scale)
 {
-    // Pixel-art right-pointing arrow (5 pixels tall at source scale)
     int s = scale;
     renderer.drawFilledRect(x, y + 0 * s, 1 * s, 1 * s, TDT4102::Color::black);
     renderer.drawFilledRect(x, y + 1 * s, 2 * s, 1 * s, TDT4102::Color::black);
@@ -529,9 +660,8 @@ void GameUI::drawOpponentInfoBar(const Daemon *opponentDaemon, int offsetX)
 {
     const int scale = PIXEL_SCALE;
 
-    // === Opponent info panel (top-left) ===
-    int oppPanelW = 122 * scale; // 366
-    int oppPanelH = 35 * scale;  // 105
+    int oppPanelW = 122 * scale;
+    int oppPanelH = 35 * scale;
     int oppPanelX = offsetX;
     int oppPanelY = 16;
 
@@ -539,20 +669,17 @@ void GameUI::drawOpponentInfoBar(const Daemon *opponentDaemon, int offsetX)
 
     if (opponentDaemon)
     {
-        // Opponent name (drawn on top of the panel)
         int oppNameX = oppPanelX + 2 * scale;
         int oppNameY = oppPanelY + 9 * scale;
         spriteFont.drawText(renderer, opponentDaemon->getNickname(), oppNameX, oppNameY, scale);
 
-        // Opponent level number - draw using battle numbers
         int oppLvlX = oppPanelX + 83 * scale;
         int oppLvlY = oppPanelY + 12 * scale;
         spriteFont.drawBattleNumber(renderer, opponentDaemon->getLevel(), oppLvlX, oppLvlY, scale);
 
-        // Opponent HP bar
         int oppHPBarX = oppPanelX + 50 * scale;
         int oppHPBarY = oppPanelY + 24 * scale;
-        int oppHPBarW = 48 * scale; // bar width in destination pixels
+        int oppHPBarW = 48 * scale;
         drawSpriteHPBar(oppHPBarX, oppHPBarY, oppHPBarW,
                         opponentDisplayHP, opponentDaemon->getMaxHP(), scale);
     }
@@ -562,9 +689,8 @@ void GameUI::drawPlayerInfoBar(const Daemon *playerDaemon, int offsetX)
     const int scale = PIXEL_SCALE;
     int battleH = WINDOW_HEIGHT - UI_PANEL_HEIGHT;
 
-    // === Player info panel (bottom-right) ===
-    int plyPanelW = 128 * scale; // 384
-    int plyPanelH = 47 * scale;  // 141
+    int plyPanelW = 128 * scale;
+    int plyPanelH = 47 * scale;
     int plyPanelX = WINDOW_WIDTH - plyPanelW + offsetX;
     int plyPanelY = battleH - plyPanelH - 10;
 
@@ -572,31 +698,26 @@ void GameUI::drawPlayerInfoBar(const Daemon *playerDaemon, int offsetX)
 
     if (playerDaemon)
     {
-        // Player name
         int plyNameX = plyPanelX + 18 * scale;
         int plyNameY = plyPanelY + 10 * scale;
         spriteFont.drawText(renderer, playerDaemon->getNickname(), plyNameX, plyNameY, scale);
 
-        // Player level number
         int plyLvlX = plyPanelX + 105 * scale;
         int plyLvlY = plyPanelY + 12 * scale;
         spriteFont.drawBattleNumber(renderer, playerDaemon->getLevel(), plyLvlX, plyLvlY, scale);
 
-        // Player HP bar
         int plyHPBarX = plyPanelX + 72 * scale;
         int plyHPBarY = plyPanelY + 25 * scale;
         int plyHPBarW = 48 * scale;
         drawSpriteHPBar(plyHPBarX, plyHPBarY, plyHPBarW,
                         playerDisplayHP, playerDaemon->getMaxHP(), scale);
 
-        // Player HP numbers (current/max) using battle numbers
         int hpNumX = plyPanelX + 92 * scale;
         int hpNumY = plyPanelY + 32 * scale;
         int hpPad = 3 * scale;
         spriteFont.drawBattleNumber(renderer, playerDisplayHP, hpNumX - hpPad, hpNumY, scale, true);
         spriteFont.drawBattleNumber(renderer, playerDaemon->getMaxHP(), hpNumX + hpPad, hpNumY, scale);
 
-        // Player EXP bar
         int expBarX = plyPanelX + 24 * scale;
         int expBarY = plyPanelY + 42 * scale;
         int expBarW = 96 * scale;
@@ -739,28 +860,23 @@ void GameUI::drawPlayerSendOutPhase(const Daemon *playerDaemon, float t)
     drawPlayerInfoBar(playerDaemon, infoSlideIn);
 }
 
-// --- Sprite-based HP Bar ---
-// Uses hp_bar.png (3x12): rows 0-2 green, 3-5 yellow, 6-8 red, 9-11 empty
+// HP bar sprite: hp_bar.png rows — 0-2 green, 3-5 yellow, 6-8 red, 9-11 empty
 void GameUI::drawSpriteHPBar(int x, int y, int width, int currentHP, int maxHP, int scale)
 {
     float ratio = (maxHP > 0) ? static_cast<float>(currentHP) / static_cast<float>(maxHP) : 0.0f;
     int filledWidth = static_cast<int>(static_cast<float>(width) * ratio);
 
-    // Choose color variant based on HP ratio
-    // hp_bar.png rows: 0-2 = green, 3-5 = yellow, 6-8 = red, 9-11 = empty
-    int emptySrcY = 9; // empty/gray variant (rows 9-11)
+    int emptySrcY = 9;
     int fillSrcY;
     if (ratio > 0.5f)
-        fillSrcY = 0; // green (rows 0-2)
+        fillSrcY = 0;
     else if (ratio > 0.2f)
-        fillSrcY = 3; // yellow (rows 3-5)
+        fillSrcY = 3;
     else
-        fillSrcY = 6; // red (rows 6-8)
+        fillSrcY = 6;
 
-    int barH = 3 * scale; // 3 source pixels tall, scaled
+    int barH = 3 * scale;
 
-    // Draw empty background across full width
-    // We tile the 3px wide source horizontally
     for (int dx = 0; dx < width; dx += scale)
     {
         int tileW = std::min(scale, width - dx);
@@ -769,7 +885,6 @@ void GameUI::drawSpriteHPBar(int x, int y, int width, int currentHP, int maxHP, 
                                   x + dx, y, tileW, barH);
     }
 
-    // Draw filled portion
     if (filledWidth > 0)
     {
         for (int dx = 0; dx < filledWidth; dx += scale)
@@ -782,17 +897,15 @@ void GameUI::drawSpriteHPBar(int x, int y, int width, int currentHP, int maxHP, 
     }
 }
 
-// --- Sprite-based EXP Bar ---
-// Uses exp_bar.png (3x4): rows 0-1 empty, rows 2-3 filled
+// EXP bar sprite: exp_bar.png rows — 0-1 empty, 2-3 filled
 void GameUI::drawSpriteEXPBar(int x, int y, int width, int currentEXP, int maxEXP, int scale)
 {
     int filledWidth = 0;
     if (maxEXP > 0)
         filledWidth = std::min(width, currentEXP * width / maxEXP);
 
-    int barH = 2 * scale; // 2 source pixels tall, scaled
+    int barH = 2 * scale;
 
-    // Draw empty background
     for (int dx = 0; dx < width; dx += scale)
     {
         int tileW = std::min(scale, width - dx);
@@ -801,7 +914,6 @@ void GameUI::drawSpriteEXPBar(int x, int y, int width, int currentEXP, int maxEX
                                   x + dx, y, tileW, barH);
     }
 
-    // Draw filled portion
     if (filledWidth > 0)
     {
         for (int dx = 0; dx < filledWidth; dx += scale)

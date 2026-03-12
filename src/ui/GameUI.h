@@ -61,6 +61,7 @@ public:
     // Menus
     void drawPartyList(const Player &player, int selected);
     void drawBagScreen(const Player &player, const Pokedex &pokedex, int selected);
+    void drawSummaryScreen(const Daemon &daemon, const Pokedex &pokedex, int page = 0);
 
     // Navigation helpers
     void navigateVertical(int &selected, int count);

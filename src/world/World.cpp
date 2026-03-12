@@ -1,8 +1,14 @@
 #include "World.h"
 #include "../data/Pokedex.h"
+#include "../core/StringUtils.h"
 #include <stdexcept>
 #include <fstream>
 #include <sstream>
+
+using StringUtils::splitPipe;
+using StringUtils::splitSemicolon;
+using StringUtils::splitDoubleAt;
+using StringUtils::parseDirection;
 
 World::World(unsigned long seed)
     : seed(seed), rng(seed), currentMapId(""), player("Player", {5, 5})
@@ -56,60 +62,6 @@ namespace
         default:
             return true;
         }
-    }
-
-    std::vector<std::string> splitPipe(const std::string &s)
-    {
-        std::vector<std::string> parts;
-        std::istringstream iss(s);
-        std::string token;
-        while (std::getline(iss, token, '|'))
-            parts.push_back(token);
-        return parts;
-    }
-
-    std::vector<std::string> splitSemicolon(const std::string &s)
-    {
-        std::vector<std::string> parts;
-        if (s.empty() || s == "-")
-            return parts;
-        std::istringstream iss(s);
-        std::string token;
-        while (std::getline(iss, token, ';'))
-            parts.push_back(token);
-        return parts;
-    }
-
-    // Split a string on "@@" delimiter (for dialogue stages)
-    std::vector<std::string> splitDoubleAt(const std::string &s)
-    {
-        std::vector<std::string> parts;
-        if (s.empty())
-            return parts;
-        size_t start = 0;
-        while (true)
-        {
-            size_t pos = s.find("@@", start);
-            if (pos == std::string::npos)
-            {
-                parts.push_back(s.substr(start));
-                break;
-            }
-            parts.push_back(s.substr(start, pos - start));
-            start = pos + 2;
-        }
-        return parts;
-    }
-
-    Direction parseDirection(const std::string &s)
-    {
-        if (s == "up")
-            return Direction::up;
-        if (s == "left")
-            return Direction::left;
-        if (s == "right")
-            return Direction::right;
-        return Direction::down; // default
     }
 
     NPCType parseNPCType(const std::string &s)
@@ -178,7 +130,7 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
         // Skip empty lines and comments
         if (line.empty())
             continue;
-        if (section != Section::tiles and line[0] == '#')
+        if (section != Section::tiles && line[0] == '#')
             continue;
 
         // Section headers
@@ -543,7 +495,7 @@ bool World::rollWildEncounter(const Position &position)
     return dist(rng) < 15;
 }
 
-int World::getWildSpecies(const Position &position)
+int World::getWildSpecies([[maybe_unused]] const Position &position)
 {
     const Map &map = getMap(currentMapId);
     const auto &slots = map.getEncounterSlots();
@@ -568,7 +520,7 @@ int World::getWildSpecies(const Position &position)
     return slots.back().speciesId;
 }
 
-int World::getWildLevel(const Position &position)
+int World::getWildLevel([[maybe_unused]] const Position &position)
 {
     const Map &map = getMap(currentMapId);
     const auto &slots = map.getEncounterSlots();

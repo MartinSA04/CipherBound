@@ -3,7 +3,7 @@
 #include <vector>
 #include <set>
 #include "../data/Cutscene.h"
-#include "../world/World.h"
+#include "../state/World.h"
 #include "../ui/GameUI.h"
 #include "../audio/SoundManager.h"
 

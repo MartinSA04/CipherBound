@@ -1,7 +1,7 @@
 #include "DialogueChoiceMode.h"
 #include "../../ui/InputManager.h"
 #include "../../ui/GameUI.h"
-#include "../../world/World.h"
+#include "../../state/World.h"
 #include "../../data/Pokedex.h"
 #include "../StoryManager.h"
 #include "../../audio/SoundManager.h"

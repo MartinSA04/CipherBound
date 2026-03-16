@@ -1,9 +1,9 @@
 #pragma once
 #include "Renderer.h"
-#include "../world/Map.h"
-#include "../world/Player.h"
-#include "../world/NPC.h"
-#include "../world/World.h"
+#include "../state/Map.h"
+#include "../state/Player.h"
+#include "../state/NPC.h"
+#include "../state/World.h"
 #include <vector>
 #include <array>
 

@@ -279,8 +279,7 @@ void Battle::executeOpponentTurn()
             score *= 1.5f;
 
         // Status moves get a base score if they have a useful effect
-        if (move.power <= 0 && move.statusEffect != StatusEffect::none
-            && playerDaemon.getStatus() == StatusEffect::none)
+        if (move.power <= 0 && move.statusEffect != StatusEffect::none && playerDaemon.getStatus() == StatusEffect::none)
             score = 40.0f; // Give status moves a moderate score
 
         // Add small random factor (0.85-1.0) to prevent complete predictability
@@ -307,10 +306,12 @@ void Battle::executeOpponentTurn()
         }
     }
 
-    if (bestSlot < 0) bestSlot = 0;
+    if (bestSlot < 0)
+        bestSlot = 0;
 
     int oppMoveId = oppMoves[bestSlot].moveId;
-    if (oppMoveId < 0) oppMoveId = 0;
+    if (oppMoveId < 0)
+        oppMoveId = 0;
     getOpponentDaemon().useMove(bestSlot);
     const MoveData &oppMoveData = pokedex.getMove(oppMoveId);
 
@@ -380,7 +381,7 @@ Daemon &Battle::getOpponentDaemon()
     if (opponent == nullptr)
         return *opponentDaemon;
     else
-        return opponent->getParty()[0];
+        return opponent->getDaemon(0);
 }
 
 std::shared_ptr<NPC> Battle::getOpponent()
@@ -412,8 +413,8 @@ bool Battle::attemptCapture(int itemId)
 
     int maxHP = target.getMaxHP();
     int curHP = target.getCurrentHP();
-    int catchRate = species.catchRate;          // Species base catch rate (0-255)
-    int ballModifier = ball.effectValue;        // 1 = normal, 2 = great, 3 = ultra
+    int catchRate = species.catchRate;   // Species base catch rate (0-255)
+    int ballModifier = ball.effectValue; // 1 = normal, 2 = great, 3 = ultra
 
     // Status bonus: sleeping/frozen = 2x, paralyzed/poisoned/burned = 1.5x
     float statusBonus = 1.0f;
@@ -423,9 +424,7 @@ bool Battle::attemptCapture(int itemId)
         statusBonus = 1.5f;
 
     // Modified catch rate: ((3*maxHP - 2*curHP) * catchRate * ballMod) / (3*maxHP) * statusBonus
-    float a = ((3.0f * static_cast<float>(maxHP) - 2.0f * static_cast<float>(curHP))
-               * static_cast<float>(catchRate) * static_cast<float>(ballModifier))
-              / (3.0f * static_cast<float>(maxHP)) * statusBonus;
+    float a = ((3.0f * static_cast<float>(maxHP) - 2.0f * static_cast<float>(curHP)) * static_cast<float>(catchRate) * static_cast<float>(ballModifier)) / (3.0f * static_cast<float>(maxHP)) * statusBonus;
     a = std::min(a, 255.0f);
 
     // If a >= 255, guaranteed catch
@@ -475,9 +474,9 @@ bool Battle::attemptCapture(int itemId)
 
         // Add Daemon to player's party
         player.addDaemon(Daemon(species, target.getLevel(), target.getExp(),
-                                    target.getCurrentHP(), target.getNickname(),
-                                    target.getStatus(), target.getIVs(), target.getEVs(),
-                                    target.getMoves()));
+                                target.getCurrentHP(), target.getNickname(),
+                                target.getStatus(), target.getIVs(), target.getEVs(),
+                                target.getMoves()));
         player.markCaught(target.getSpeciesId());
         return true;
     }

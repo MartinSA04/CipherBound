@@ -2,8 +2,8 @@
 #include "../../ui/InputManager.h"
 #include "../../ui/GameUI.h"
 #include "../../save/SaveManager.h"
-#include "../../world/World.h"
-#include "../../world/Player.h"
+#include "../../state/World.h"
+#include "../../state/Player.h"
 #include "../../audio/SoundManager.h"
 
 void SaveMode::onEnter(GameContext & /*ctx*/)

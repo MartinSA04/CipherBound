@@ -1,8 +1,8 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "../world/Player.h"
-#include "../world/World.h"
+#include "../state/Player.h"
+#include "../state/World.h"
 #include "../data/Pokedex.h"
 
 class SaveManager

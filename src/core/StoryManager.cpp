@@ -1,11 +1,11 @@
 #include "StoryManager.h"
 
-StoryAction StoryManager::onDialogueEnd(std::shared_ptr<NPC> npc, World &world, Pokedex &pokedex)
+StoryAction StoryManager::onDialogueEnd(std::shared_ptr<NPC> npc, World &world)
 {
     // Check for trainer battle
     if (npc && !npc->isDefeated() &&
         (npc->getType() == NPCType::trainer || npc->getType() == NPCType::gymLeader) &&
-        !npc->getParty().empty())
+        !npc->partyEmpty())
     {
         StoryAction action;
         action.type = StoryAction::Type::startBattle;

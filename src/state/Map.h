@@ -2,40 +2,8 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include "Movement.h"
 
-enum class Direction
-{
-    up,
-    down,
-    left,
-    right,
-};
-
-struct Position
-{
-    int x, y;
-
-    bool operator==(const Position &other) const { return x == other.x && y == other.y; }
-    bool operator!=(const Position &other) const { return !(*this == other); }
-    void moveDirection(const Direction &dir)
-    {
-        switch (dir)
-        {
-        case Direction::up:
-            y--;
-            break;
-        case Direction::down:
-            y++;
-            break;
-        case Direction::left:
-            x--;
-            break;
-        case Direction::right:
-            x++;
-            break;
-        }
-    }
-};
 
 enum class TileType
 {
@@ -74,7 +42,6 @@ struct Tile
     TileType type;
     bool isOccupied;
     bool hasCollision;
-    int spriteId;
 };
 
 class Map
@@ -95,6 +62,7 @@ public:
 
     bool isInBounds(const Position &position) const;
     bool isWalkable(const Position &position) const;
+    bool isWalkable(const Position &position, Direction fromDirection) const;
 
     // Wild encounters
     void addEncounterSlot(WildEncounterSlot slot);
@@ -104,9 +72,6 @@ public:
     // Warp points (doors, cave entrances, etc.)
     void addWarp(WarpPoint warp);
     const WarpPoint *getWarp(const Position &position) const;
-
-    // Directional walkability check (needed for ledges)
-    bool isWalkable(const Position &position, Direction fromDirection) const;
 
     // Background image for tile rendering
     void setBackgroundImage(const std::string &path);

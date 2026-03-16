@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "../world/World.h"
+#include "../state/World.h"
 #include "../data/Pokedex.h"
 #include "../ui/GameUI.h"
 
@@ -43,7 +43,7 @@ public:
 
     // Called when a dialogue finishes — decides what happens next
     // npc: the NPC whose dialogue just ended (may be nullptr)
-    StoryAction onDialogueEnd(std::shared_ptr<NPC> npc, World &world, Pokedex &pokedex);
+    StoryAction onDialogueEnd(std::shared_ptr<NPC> npc, World &world);
 
     // Called when the player picks a choice — decides what happens next
     StoryAction onChoiceSelected(const std::string &context, int choice,

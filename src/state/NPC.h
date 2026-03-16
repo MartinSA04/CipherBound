@@ -4,6 +4,7 @@
 #include <set>
 #include "Entity.h"
 #include "Daemon.h"
+#include "Party.h"
 
 enum class NPCType
 {
@@ -25,12 +26,14 @@ struct DialogueStage
     std::vector<std::string> lines;
 };
 
-class NPC : public Entity
+class NPC : public Entity, public Party
 {
 public:
     NPC(const std::string &id, const std::string &name, Position position, NPCType type);
 
     void update() override;
+
+    void addDaemon(Daemon daemon) override;
 
     const std::string &getId() const;
     NPCType getType() const;
@@ -42,25 +45,12 @@ public:
     const std::vector<std::string> &getDialogueLines(const std::set<std::string> &playerFlags) const;
     void addDialogueStage(const std::string &requiredFlag, const std::vector<std::string> &lines);
 
-    // Trainer party
-    void addDaemon(Daemon daemon);
-    std::vector<Daemon> &getParty();
-    bool partyEmpty() const;
-
     // Sight range for trainer battles
     int getSightRange() const;
     void setSightRange(int range);
 
     bool canSeePlayer(Position playerPos) const;
     bool willFight() const;
-
-    // Movement animation (used by cutscenes)
-    void walkStep(Direction dir, int delay = 12);
-    void updateWalkAnimation();
-    bool isWalking() const;
-    int getPixelOffsetX() const;
-    int getPixelOffsetY() const;
-    int getWalkFrame() const;
 
     // Visibility (cutscene hide/show)
     bool isHidden() const;
@@ -72,14 +62,6 @@ private:
     bool defeated;
     int sightRange;
     std::vector<DialogueStage> dialogueStages;
-    std::vector<Daemon> party;
-
-    // Movement animation state
-    int pixelOffsetX{0};
-    int pixelOffsetY{0};
-    int animFramesLeft{0};
-    int moveDelay{12};
-    int walkFrame{0};
 
     bool hidden{false};
 

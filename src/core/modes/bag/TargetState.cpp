@@ -2,9 +2,9 @@
 #include "../BagMode.h"
 #include "../../../ui/InputManager.h"
 #include "../../../ui/GameUI.h"
-#include "../../../world/World.h"
-#include "../../../world/Player.h"
-#include "../../../world/Daemon.h"
+#include "../../../state/World.h"
+#include "../../../state/Player.h"
+#include "../../../state/Daemon.h"
 #include "../../../data/Pokedex.h"
 #include "../../../audio/SoundManager.h"
 #include <algorithm>

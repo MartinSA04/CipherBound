@@ -3,7 +3,7 @@
 #include "../../ui/GameUI.h"
 #include "../../ui/Renderer.h"
 #include "../../ui/SpriteFont.h"
-#include "../../world/Player.h"
+#include "../../state/Player.h"
 #include "../../data/Pokedex.h"
 #include "../StringUtils.h"
 

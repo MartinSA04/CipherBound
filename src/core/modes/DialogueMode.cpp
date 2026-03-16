@@ -1,7 +1,7 @@
 #include "DialogueMode.h"
 #include "../../ui/InputManager.h"
 #include "../../ui/GameUI.h"
-#include "../../world/World.h"
+#include "../../state/World.h"
 #include "../../data/Pokedex.h"
 #include "../../audio/SoundManager.h"
 #include "../StoryManager.h"
@@ -30,7 +30,7 @@ void DialogueMode::update(GameContext &ctx, InputManager &input)
         if (!ctx.ui.advanceDialogueLine())
         {
             // Dialogue finished — ask StoryManager what to do
-            StoryAction action = ctx.story.onDialogueEnd(dialogueNPC, ctx.world, ctx.pokedex);
+            StoryAction action = ctx.story.onDialogueEnd(dialogueNPC, ctx.world);
             dialogueNPC = nullptr;
             ctx.pushRequest(ModeRequest::storyAction(action));
         }

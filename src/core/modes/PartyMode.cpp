@@ -1,8 +1,8 @@
 #include "PartyMode.h"
 #include "../../ui/InputManager.h"
 #include "../../ui/GameUI.h"
-#include "../../world/World.h"
-#include "../../world/Player.h"
+#include "../../state/World.h"
+#include "../../state/Player.h"
 #include "../../data/Pokedex.h"
 
 void PartyMode::update(GameContext &ctx, InputManager &input)

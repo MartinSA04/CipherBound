@@ -1,7 +1,7 @@
 #pragma once
 #include <AnimationWindow.h>
 #include <KeyboardKey.h>
-#include "../world/Map.h"
+#include "../state/Map.h"
 
 class InputManager
 {

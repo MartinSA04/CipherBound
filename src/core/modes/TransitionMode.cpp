@@ -2,8 +2,8 @@
 #include "../../ui/InputManager.h"
 #include "../../ui/GameUI.h"
 #include "../../ui/Renderer.h"
-#include "../../world/World.h"
-#include "../../world/Player.h"
+#include "../../state/World.h"
+#include "../../state/Player.h"
 #include "../../audio/MusicManager.h"
 #include "../StoryManager.h"
 
@@ -26,7 +26,7 @@ void TransitionMode::update(GameContext &ctx, InputManager & /*input*/)
             // Load the new map
             ctx.world.setCurrentMap(targetMapId);
             ctx.world.getPlayer().setPosition(targetSpawn);
-            ctx.world.getPlayer().startAnimation();
+            ctx.world.getPlayer().startAnimation(ctx.world.getPlayer().getFacing());
             fadeOut = false;
 
             MusicTrack mapTrack = MusicManager::trackForMap(targetMapId);

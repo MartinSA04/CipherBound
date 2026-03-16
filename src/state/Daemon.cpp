@@ -2,8 +2,8 @@
 #include <algorithm>
 
 Daemon::Daemon(const Species &species, int level)
-    : speciesRef(&species), speciesId(species.id), level(level), exp(0), currentHP(0), status(StatusEffect::none),
-      ivs{0, 0, 0, 0, 0, 0}, evs{0, 0, 0, 0, 0, 0}
+    : speciesId(species.id), level(level), exp(0), currentHP(0), status(StatusEffect::none),
+      ivs{0, 0, 0, 0, 0, 0}, evs{0, 0, 0, 0, 0, 0}, speciesRef(&species)
 {
     nickname = species.name;
 
@@ -32,11 +32,11 @@ Daemon::Daemon(const Species &species, int level)
 }
 
 Daemon::Daemon(const Species &species, int level, int exp, int currentHP,
-                   const std::string &nickname, StatusEffect status,
-                   const BaseStats &ivs, const BaseStats &evs,
-                   const std::array<MoveSlot, 4> &moves)
-    : speciesRef(&species), speciesId(species.id), level(level), exp(exp),
-      currentHP(currentHP), status(status), ivs(ivs), evs(evs), moves(moves)
+               const std::string &nickname, StatusEffect status,
+               const BaseStats &ivs, const BaseStats &evs,
+               const std::array<MoveSlot, 4> &moves)
+    : speciesId(species.id), level(level), exp(exp), currentHP(currentHP),
+      status(status), ivs(ivs), evs(evs), moves(moves), speciesRef(&species)
 {
     this->nickname = nickname;
 }

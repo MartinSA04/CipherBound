@@ -1,9 +1,9 @@
 #pragma once
 #include <random>
 #include <deque>
-#include "../world/Daemon.h"
-#include "../world/Player.h"
-#include "../world/NPC.h"
+#include "../state/Daemon.h"
+#include "../state/Player.h"
+#include "../state/NPC.h"
 #include "../data/Pokedex.h"
 #include <memory>
 

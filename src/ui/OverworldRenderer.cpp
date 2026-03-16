@@ -104,9 +104,8 @@ SpriteFrame OverworldRenderer::getNPCFrame(const NPC &npc) const
 {
     int dirIdx = dirToIndex(npc.getFacing());
 
-    if (npc.isWalking())
+    if (npc.isMoving())
     {
-        // 4-frame walk cycle: 0-1-2-3, pick based on walkFrame
         int step = npc.getWalkFrame() % 4;
         return walkFrames[dirIdx][step];
     }

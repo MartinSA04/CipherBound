@@ -5,9 +5,9 @@
 #include <iostream>
 #include <set>
 
+using StringUtils::parseDirection;
 using StringUtils::splitPipe;
 using StringUtils::splitSemicolon;
-using StringUtils::parseDirection;
 
 bool CutsceneRunner::load(const std::string &path)
 {
@@ -149,7 +149,7 @@ bool CutsceneRunner::update(World &world, GameUI &ui, bool confirmPressed, Sound
 
     // Update all NPC walk animations on the current map
     for (auto &npc : world.getNPCs(world.getCurrentMapId()))
-        npc->updateWalkAnimation();
+        npc->updateAnimation();
 
     // If we're in a dialogue, wait for dismissal
     if (inDialogue)
@@ -358,7 +358,7 @@ bool CutsceneRunner::isEntityWalking(const World &world, const std::string &targ
     for (const auto &n : world.getNPCs(world.getCurrentMapId()))
     {
         if (n->getId() == targetId)
-            return n->isWalking();
+            return n->isMoving();
     }
     return false;
 }
@@ -394,7 +394,8 @@ void CutsceneRunner::stepEntityToward(World &world, const std::string &targetId,
         {
             if (n->getId() == targetId)
             {
-                n->walkStep(dir, 24);
+                n->setMoveDelay(24);
+                n->move(dir);
                 break;
             }
         }

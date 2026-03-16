@@ -266,7 +266,6 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
             tile.type = type;
             tile.isOccupied = false;
             tile.hasCollision = !isTileWalkable(type);
-            tile.spriteId = 0;
             map.setTile({x, y}, tile);
         }
     }

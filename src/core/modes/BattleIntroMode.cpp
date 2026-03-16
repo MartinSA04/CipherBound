@@ -2,9 +2,9 @@
 #include "../../ui/GameUI.h"
 #include "../../ui/Renderer.h"
 #include "../../battle/Battle.h"
-#include "../../world/World.h"
-#include "../../world/Player.h"
-#include "../../world/NPC.h"
+#include "../../state/World.h"
+#include "../../state/Player.h"
+#include "../../state/NPC.h"
 #include "../../data/Pokedex.h"
 
 BattleIntroMode::BattleIntroMode(int speciesId, int level)

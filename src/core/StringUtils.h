@@ -3,7 +3,7 @@
 #include <vector>
 #include <sstream>
 #include <cctype>
-#include "../world/Map.h"
+#include "../state/Map.h"
 
 namespace StringUtils
 {

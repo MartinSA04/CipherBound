@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "../world/Map.h" // Position, Direction
+#include "../state/Movement.h"
 
 // A single step in a cutscene script
 struct CutsceneStep

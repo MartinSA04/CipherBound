@@ -4,7 +4,7 @@
 #include <chrono>
 #include <thread>
 #include "GameMode.h"
-#include "../world/World.h"
+#include "../state/World.h"
 #include "../data/Pokedex.h"
 #include "../save/SaveManager.h"
 #include "../ui/GameUI.h"

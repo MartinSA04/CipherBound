@@ -1,5 +1,11 @@
 #include "Map.h"
 #include <stdexcept>
+std::out_of_range out_of_range_error(const Position &position)
+{
+    return std::out_of_range("Tile position out of bounds: (" +
+                             std::to_string(position.x) + ", " +
+                             std::to_string(position.y) + ")");
+}
 
 Map::Map() : id(""), width(0), height(0) {}
 
@@ -17,7 +23,6 @@ Map::Map(const std::string &id, int width, int height)
             tile.type = TileType::grass;
             tile.isOccupied = false;
             tile.hasCollision = false;
-            tile.spriteId = 0;
             grid[y][x] = tile;
         }
     }
@@ -30,27 +35,21 @@ int Map::getHeight() const { return height; }
 Tile &Map::getTile(const Position &position)
 {
     if (!isInBounds(position))
-        throw std::out_of_range("Tile position out of bounds: (" +
-                                std::to_string(position.x) + ", " +
-                                std::to_string(position.y) + ")");
+        throw out_of_range_error(position);
     return grid[position.y][position.x];
 }
 
 const Tile &Map::getTile(const Position &position) const
 {
     if (!isInBounds(position))
-        throw std::out_of_range("Tile position out of bounds: (" +
-                                std::to_string(position.x) + ", " +
-                                std::to_string(position.y) + ")");
+        throw out_of_range_error(position);
     return grid[position.y][position.x];
 }
 
 void Map::setTile(const Position &position, Tile tile)
 {
     if (!isInBounds(position))
-        throw std::out_of_range("Tile position out of bounds: (" +
-                                std::to_string(position.x) + ", " +
-                                std::to_string(position.y) + ")");
+        throw out_of_range_error(position);
     tile.position = position; // ensure position consistency
     grid[position.y][position.x] = tile;
 }

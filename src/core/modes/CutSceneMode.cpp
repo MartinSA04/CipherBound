@@ -1,7 +1,7 @@
 #include "CutSceneMode.h"
 #include "../../ui/InputManager.h"
 #include "../../ui/GameUI.h"
-#include "../../world/World.h"
+#include "../../state/World.h"
 #include "../CutsceneRunner.h"
 
 void CutSceneMode::update(GameContext &ctx, InputManager &input)

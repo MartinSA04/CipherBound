@@ -3,9 +3,9 @@
 #include "../../ui/GameUI.h"
 #include "../../ui/Renderer.h"
 #include "../../ui/SpriteFont.h"
-#include "../../world/World.h"
-#include "../../world/Player.h"
-#include "../../world/Daemon.h"
+#include "../../state/World.h"
+#include "../../state/Player.h"
+#include "../../state/Daemon.h"
 #include "../../audio/SoundManager.h"
 #include <algorithm>
 

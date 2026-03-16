@@ -3,8 +3,8 @@
 #include "../../../ui/InputManager.h"
 #include "../../../ui/GameUI.h"
 #include "../../../audio/SoundManager.h"
-#include "../../../world/World.h"
-#include "../../../world/Player.h"
+#include "../../../state/World.h"
+#include "../../../state/Player.h"
 
 void MessageState::update(BagMode &bag, GameContext &ctx, InputManager &input)
 {

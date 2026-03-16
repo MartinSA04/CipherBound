@@ -1,8 +1,8 @@
 #pragma once
 #include "../state/Map.h"
 #include "../state/NPC.h"
-#include "../state/Player.h"
 #include "../state/World.h"
+#include "../state/player/Player.h"
 #include "Renderer.h"
 #include <array>
 #include <vector>

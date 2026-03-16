@@ -1,5 +1,5 @@
 #pragma once
-#include "WalkAnimation.h"
+#include "player/WalkAnimation.h"
 
 class Map;
 

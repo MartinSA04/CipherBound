@@ -1,8 +1,8 @@
 #include "OverworldMode.h"
 #include "../../audio/SoundManager.h"
 #include "../../state/NPC.h"
-#include "../../state/Player.h"
 #include "../../state/World.h"
+#include "../../state/player/Player.h"
 #include "../../ui/InputManager.h"
 #include "../StoryManager.h"
 

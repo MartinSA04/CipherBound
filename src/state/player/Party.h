@@ -1,5 +1,5 @@
 #pragma once
-#include "Daemon.h"
+#include "../Daemon.h"
 #include <vector>
 
 class Party {

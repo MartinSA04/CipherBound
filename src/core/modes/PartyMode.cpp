@@ -1,6 +1,6 @@
 #include "PartyMode.h"
-#include "../../state/Player.h"
 #include "../../state/World.h"
+#include "../../state/player/Player.h"
 #include "../../ui/GameUI.h"
 #include "../../ui/InputManager.h"
 

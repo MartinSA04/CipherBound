@@ -2,8 +2,8 @@
 #include "../../battle/Battle.h"
 #include "../../data/Pokedex.h"
 #include "../../state/NPC.h"
-#include "../../state/Player.h"
 #include "../../state/World.h"
+#include "../../state/player/Player.h"
 #include "../../ui/GameUI.h"
 #include "../../ui/Renderer.h"
 

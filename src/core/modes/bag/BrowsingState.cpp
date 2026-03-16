@@ -1,7 +1,7 @@
 #include "BrowsingState.h"
 #include "../../../data/Pokedex.h"
-#include "../../../state/Player.h"
 #include "../../../state/World.h"
+#include "../../../state/player/Player.h"
 #include "../../../ui/GameUI.h"
 #include "../../../ui/InputManager.h"
 #include "../BagMode.h"

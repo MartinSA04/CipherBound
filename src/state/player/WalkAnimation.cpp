@@ -1,6 +1,6 @@
 #include "WalkAnimation.h"
-#include "../ui/Renderer.h"
-#include "Movement.h"
+#include "../../ui/Renderer.h"
+#include "../Movement.h"
 
 int WalkAnimation::getMoveDelay() const { return moveDelay; }
 void WalkAnimation::setMoveDelay(int delay) { moveDelay = (delay <= 0) ? 1 : delay; }

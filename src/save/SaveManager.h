@@ -1,7 +1,7 @@
 #pragma once
 #include "../data/Pokedex.h"
-#include "../state/Player.h"
 #include "../state/World.h"
+#include "../state/player/Player.h"
 #include <string>
 #include <vector>
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Daemon.h"
+#include "../Daemon.h"
+#include "../Entity.h"
 #include "DaemonDex.h"
-#include "Entity.h"
 #include "EventFlags.h"
 #include "Inventory.h"
 #include "Party.h"

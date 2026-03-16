@@ -1,7 +1,7 @@
 #pragma once
 #include "Daemon.h"
 #include "Entity.h"
-#include "Party.h"
+#include "player/Party.h"
 #include <set>
 #include <string>
 #include <vector>

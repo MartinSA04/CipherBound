@@ -2,7 +2,7 @@
 #include "../data/Pokedex.h"
 #include "../state/Daemon.h"
 #include "../state/NPC.h"
-#include "../state/Player.h"
+#include "../state/player/Player.h"
 #include <deque>
 #include <memory>
 #include <random>

@@ -1,23 +1,20 @@
 #include "Pokedex.h"
-#include <stdexcept>
 #include <fstream>
-#include <sstream>
 #include <iostream>
+#include <sstream>
+#include <stdexcept>
 #include <unordered_map>
 
-Pokedex::Pokedex()
-{
+Pokedex::Pokedex() {
     // Index 0 is unused (dummy)
     species.push_back({});
     moves.push_back({});
     items.push_back({});
 }
 
-void Pokedex::loadSpecies(const std::string &path)
-{
+void Pokedex::loadSpecies(const std::string &path) {
     std::ifstream file(path);
-    if (!file.is_open())
-    {
+    if (!file.is_open()) {
         std::cerr << "Failed to open species file: " << path << std::endl;
         return;
     }
@@ -26,8 +23,7 @@ void Pokedex::loadSpecies(const std::string &path)
     species.resize(1);
 
     std::string line;
-    while (std::getline(file, line))
-    {
+    while (std::getline(file, line)) {
         if (line.empty() || line[0] == '#')
             continue;
 
@@ -38,9 +34,9 @@ void Pokedex::loadSpecies(const std::string &path)
         while (std::getline(ss, token, '|'))
             tokens.push_back(token);
 
-        if (tokens.size() < 14)
-        {
-            std::cerr << "Malformed species line (expected 14 fields): " << line << std::endl;
+        if (tokens.size() < 14) {
+            std::cerr << "Malformed species line (expected 14 fields): " << line
+                      << std::endl;
             continue;
         }
 
@@ -50,8 +46,7 @@ void Pokedex::loadSpecies(const std::string &path)
 
         auto pt = typeMap.find(tokens[2]);
         auto st = typeMap.find(tokens[3]);
-        if (pt == typeMap.end() || st == typeMap.end())
-        {
+        if (pt == typeMap.end() || st == typeMap.end()) {
             std::cerr << "Unknown type for species " << sp.name << std::endl;
             continue;
         }
@@ -68,15 +63,12 @@ void Pokedex::loadSpecies(const std::string &path)
         sp.baseExpYield = std::stoi(tokens[11]);
 
         // Parse learnset: "moveId:level,moveId:level,..."
-        if (!tokens[12].empty() && tokens[12] != "none")
-        {
+        if (!tokens[12].empty() && tokens[12] != "none") {
             std::istringstream lss(tokens[12]);
             std::string entry;
-            while (std::getline(lss, entry, ','))
-            {
+            while (std::getline(lss, entry, ',')) {
                 auto colon = entry.find(':');
-                if (colon != std::string::npos)
-                {
+                if (colon != std::string::npos) {
                     int moveId = std::stoi(entry.substr(0, colon));
                     int level = std::stoi(entry.substr(colon + 1));
                     sp.learnset.push_back({moveId, level});
@@ -85,15 +77,12 @@ void Pokedex::loadSpecies(const std::string &path)
         }
 
         // Parse evolutions: "targetId:level,targetId:level,..."
-        if (!tokens[13].empty() && tokens[13] != "none")
-        {
+        if (!tokens[13].empty() && tokens[13] != "none") {
             std::istringstream ess(tokens[13]);
             std::string entry;
-            while (std::getline(ess, entry, ','))
-            {
+            while (std::getline(ess, entry, ',')) {
                 auto colon = entry.find(':');
-                if (colon != std::string::npos)
-                {
+                if (colon != std::string::npos) {
                     int targetId = std::stoi(entry.substr(0, colon));
                     int level = std::stoi(entry.substr(colon + 1));
                     sp.evolutions.push_back({targetId, level});
@@ -101,18 +90,22 @@ void Pokedex::loadSpecies(const std::string &path)
             }
         }
 
+        if (sp.id <= 0) {
+            std::cerr << "Invalid species id: " << sp.id << std::endl;
+            continue;
+        }
+
         // Insert at correct index
-        while (static_cast<int>(species.size()) <= sp.id)
+        const std::size_t speciesIndex = static_cast<std::size_t>(sp.id);
+        while (species.size() <= speciesIndex)
             species.push_back({});
-        species[static_cast<size_t>(sp.id)] = sp;
+        species[speciesIndex] = sp;
     }
 }
 
-void Pokedex::loadMoves(const std::string &path)
-{
+void Pokedex::loadMoves(const std::string &path) {
     std::ifstream file(path);
-    if (!file.is_open())
-    {
+    if (!file.is_open()) {
         std::cerr << "Failed to open moves file: " << path << std::endl;
         return;
     }
@@ -121,8 +114,7 @@ void Pokedex::loadMoves(const std::string &path)
     moves.resize(1);
 
     std::string line;
-    while (std::getline(file, line))
-    {
+    while (std::getline(file, line)) {
         // Skip empty lines and comments
         if (line.empty() || line[0] == '#')
             continue;
@@ -134,9 +126,9 @@ void Pokedex::loadMoves(const std::string &path)
         while (std::getline(ss, token, '|'))
             tokens.push_back(token);
 
-        if (tokens.size() < 10)
-        {
-            std::cerr << "Malformed move line (expected 10 fields): " << line << std::endl;
+        if (tokens.size() < 10) {
+            std::cerr << "Malformed move line (expected 10 fields): " << line
+                      << std::endl;
             continue;
         }
 
@@ -146,17 +138,17 @@ void Pokedex::loadMoves(const std::string &path)
         move.description = tokens[2];
 
         auto typeIt = typeMap.find(tokens[3]);
-        if (typeIt == typeMap.end())
-        {
-            std::cerr << "Unknown type '" << tokens[3] << "' for move " << move.name << std::endl;
+        if (typeIt == typeMap.end()) {
+            std::cerr << "Unknown type '" << tokens[3] << "' for move "
+                      << move.name << std::endl;
             continue;
         }
         move.type = typeIt->second;
 
         auto catIt = categoryMap.find(tokens[4]);
-        if (catIt == categoryMap.end())
-        {
-            std::cerr << "Unknown category '" << tokens[4] << "' for move " << move.name << std::endl;
+        if (catIt == categoryMap.end()) {
+            std::cerr << "Unknown category '" << tokens[4] << "' for move "
+                      << move.name << std::endl;
             continue;
         }
         move.category = catIt->second;
@@ -166,26 +158,30 @@ void Pokedex::loadMoves(const std::string &path)
         move.maxPP = std::stoi(tokens[7]);
 
         auto statusIt = statusMap.find(tokens[8]);
-        if (statusIt == statusMap.end())
-        {
-            std::cerr << "Unknown status '" << tokens[8] << "' for move " << move.name << std::endl;
+        if (statusIt == statusMap.end()) {
+            std::cerr << "Unknown status '" << tokens[8] << "' for move "
+                      << move.name << std::endl;
             continue;
         }
         move.statusEffect = statusIt->second;
         move.statusChance = std::stoi(tokens[9]);
 
+        if (move.id <= 0) {
+            std::cerr << "Invalid move id: " << move.id << std::endl;
+            continue;
+        }
+
         // Insert at correct index (pad with empty entries if needed)
-        while (static_cast<int>(moves.size()) <= move.id)
+        const std::size_t moveIndex = static_cast<std::size_t>(move.id);
+        while (moves.size() <= moveIndex)
             moves.push_back({});
-        moves[static_cast<size_t>(move.id)] = move;
+        moves[moveIndex] = move;
     }
 }
 
-void Pokedex::loadItems(const std::string &path)
-{
+void Pokedex::loadItems(const std::string &path) {
     std::ifstream file(path);
-    if (!file.is_open())
-    {
+    if (!file.is_open()) {
         std::cerr << "Failed to open items file: " << path << std::endl;
         return;
     }
@@ -200,8 +196,7 @@ void Pokedex::loadItems(const std::string &path)
     };
 
     std::string line;
-    while (std::getline(file, line))
-    {
+    while (std::getline(file, line)) {
         if (line.empty() || line[0] == '#')
             continue;
 
@@ -211,9 +206,9 @@ void Pokedex::loadItems(const std::string &path)
         while (std::getline(ss, token, '|'))
             tokens.push_back(token);
 
-        if (tokens.size() < 6)
-        {
-            std::cerr << "Malformed item line (expected 6 fields): " << line << std::endl;
+        if (tokens.size() < 6) {
+            std::cerr << "Malformed item line (expected 6 fields): " << line
+                      << std::endl;
             continue;
         }
 
@@ -223,40 +218,54 @@ void Pokedex::loadItems(const std::string &path)
         item.description = tokens[2];
 
         auto catIt = catMap.find(tokens[3]);
-        if (catIt == catMap.end())
-        {
-            std::cerr << "Unknown item category '" << tokens[3] << "' for item " << item.name << std::endl;
+        if (catIt == catMap.end()) {
+            std::cerr << "Unknown item category '" << tokens[3] << "' for item "
+                      << item.name << std::endl;
             continue;
         }
         item.category = catIt->second;
         item.value = std::stoi(tokens[4]);
         item.effectValue = std::stoi(tokens[5]);
 
-        while (static_cast<int>(items.size()) <= item.id)
+        if (item.id <= 0) {
+            std::cerr << "Invalid item id: " << item.id << std::endl;
+            continue;
+        }
+
+        const std::size_t itemIndex = static_cast<std::size_t>(item.id);
+        while (items.size() <= itemIndex)
             items.push_back({});
-        items[static_cast<size_t>(item.id)] = item;
+        items[itemIndex] = item;
     }
 }
 
-const Species &Pokedex::getSpecies(int id) const
-{
-    if (id < 0 || id >= static_cast<int>(species.size()))
-        throw std::out_of_range("Species id out of range: " + std::to_string(id));
-    return species[id];
+const Species &Pokedex::getSpecies(int id) const {
+    if (id <= 0)
+        throw std::out_of_range("Species id out of range: " +
+                                std::to_string(id));
+    std::size_t speciesIndex = static_cast<std::size_t>(id);
+    if (speciesIndex >= species.size())
+        throw std::out_of_range("Species id out of range: " +
+                                std::to_string(id));
+    return species[speciesIndex];
 }
 
-const MoveData &Pokedex::getMove(int id) const
-{
-    if (id < 0 || id >= static_cast<int>(moves.size()))
+const MoveData &Pokedex::getMove(int id) const {
+    if (id <= 0)
         throw std::out_of_range("Move id out of range: " + std::to_string(id));
-    return moves[id];
+    std::size_t moveIndex = static_cast<std::size_t>(id);
+    if (moveIndex >= moves.size())
+        throw std::out_of_range("Move id out of range: " + std::to_string(id));
+    return moves[moveIndex];
 }
 
-const ItemData &Pokedex::getItem(int id) const
-{
-    if (id < 0 || id >= static_cast<int>(items.size()))
+const ItemData &Pokedex::getItem(int id) const {
+    if (id <= 0)
         throw std::out_of_range("Item id out of range: " + std::to_string(id));
-    return items[id];
+    std::size_t itemIndex = static_cast<std::size_t>(id);
+    if (itemIndex >= items.size())
+        throw std::out_of_range("Item id out of range: " + std::to_string(id));
+    return items[itemIndex];
 }
 
 int Pokedex::speciesCount() const { return static_cast<int>(species.size()); }

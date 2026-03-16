@@ -1,15 +1,12 @@
 #include "OverworldMode.h"
-#include "../../ui/InputManager.h"
-#include "../../state/World.h"
-#include "../../state/Player.h"
-#include "../../state/NPC.h"
-#include "../../data/Pokedex.h"
-#include "../../ui/GameUI.h"
-#include "../StoryManager.h"
 #include "../../audio/SoundManager.h"
+#include "../../state/NPC.h"
+#include "../../state/Player.h"
+#include "../../state/World.h"
+#include "../../ui/InputManager.h"
+#include "../StoryManager.h"
 
-void OverworldMode::update(GameContext &ctx, InputManager &input)
-{
+void OverworldMode::update(GameContext &ctx, InputManager &input) {
     Player &player = ctx.world.getPlayer();
     player.updateAnimation();
 
@@ -31,15 +28,12 @@ void OverworldMode::update(GameContext &ctx, InputManager &input)
         handlePlayerInteraction(ctx);
 }
 
-void OverworldMode::render(GameContext &ctx)
-{
-    renderOverworld(ctx);
-}
+void OverworldMode::render(GameContext &ctx) { renderOverworld(ctx); }
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
+// ── Helpers
+// ────────────────────────────────────────────────────────────────────
 
-bool OverworldMode::wildBattleStarts(GameContext &ctx)
-{
+bool OverworldMode::wildBattleStarts(GameContext &ctx) {
     Player &player = ctx.world.getPlayer();
     if (player.isMoving())
         return false;
@@ -63,24 +57,20 @@ bool OverworldMode::wildBattleStarts(GameContext &ctx)
     return true;
 }
 
-bool OverworldMode::warpBlockStarts(GameContext &ctx)
-{
+bool OverworldMode::warpBlockStarts(GameContext &ctx) {
     Player &player = ctx.world.getPlayer();
 
     if (!pendingWarpBlock || player.isMoving())
         return false;
     pendingWarpBlock = false;
     ctx.pendingPushBack = true;
-    ctx.pushRequest(ModeRequest::dialogue(
-        pendingWarpBlockAction.speaker,
-        pendingWarpBlockAction.lines,
-        nullptr,
-        GameState::overworld));
+    ctx.pushRequest(ModeRequest::dialogue(pendingWarpBlockAction.speaker,
+                                          pendingWarpBlockAction.lines, nullptr,
+                                          GameState::overworld));
     return true;
 }
 
-bool OverworldMode::trainerBattleStarts(GameContext &ctx)
-{
+bool OverworldMode::trainerBattleStarts(GameContext &ctx) {
     Player &player = ctx.world.getPlayer();
 
     if (player.isMoving())
@@ -90,38 +80,34 @@ bool OverworldMode::trainerBattleStarts(GameContext &ctx)
     if (!npc)
         return false;
 
-    if (!dialogueStarts(ctx, npc))
-    {
+    if (!dialogueStarts(ctx, npc)) {
         ctx.pushRequest(ModeRequest::trainerBattle(npc));
     }
     return true;
 }
 
-bool OverworldMode::dialogueStarts(GameContext &ctx, std::shared_ptr<NPC> npc)
-{
+bool OverworldMode::dialogueStarts(GameContext &ctx, std::shared_ptr<NPC> npc) {
     Player &player = ctx.world.getPlayer();
 
     const auto &lines = npc->getDialogueLines(player.getFlags());
     if (lines.empty())
         return false;
 
-    ctx.pushRequest(ModeRequest::dialogue(npc->getName(), lines, npc, GameState::overworld));
+    ctx.pushRequest(ModeRequest::dialogue(npc->getName(), lines, npc,
+                                          GameState::overworld));
     return true;
 }
 
-void OverworldMode::handlePlayerMove(GameContext &ctx, InputManager &input)
-{
+void OverworldMode::handlePlayerMove(GameContext &ctx, InputManager &input) {
     Player &player = ctx.world.getPlayer();
 
     Direction dir;
-    if (!input.getMovementDirection(dir))
-    {
+    if (!input.getMovementDirection(dir)) {
         wallHitPlayed = false;
         return;
     }
 
-    if (dir != player.getFacing() && player.canTurn())
-    {
+    if (dir != player.getFacing() && player.canTurn()) {
         player.setFacing(dir);
         if (!player.wasRecentlyMoving())
             player.startTurnCooldown();
@@ -132,10 +118,8 @@ void OverworldMode::handlePlayerMove(GameContext &ctx, InputManager &input)
         return;
 
     Map &map = ctx.world.getMap(ctx.world.getCurrentMapId());
-    if (!player.canMove(dir, map))
-    {
-        if (!wallHitPlayed || dir != wallHitDir)
-        {
+    if (!player.canMove(dir, map)) {
+        if (!wallHitPlayed || dir != wallHitDir) {
             ctx.playSound(SoundEffect::wallHit);
             wallHitPlayed = true;
             wallHitDir = dir;
@@ -158,8 +142,7 @@ void OverworldMode::handlePlayerMove(GameContext &ctx, InputManager &input)
     handlePlayerWarpAttempt(ctx);
 }
 
-void OverworldMode::handlePlayerWarpAttempt(GameContext &ctx)
-{
+void OverworldMode::handlePlayerWarpAttempt(GameContext &ctx) {
     Player &player = ctx.world.getPlayer();
     Map &map = ctx.world.getMap(ctx.world.getCurrentMapId());
 
@@ -168,33 +151,30 @@ void OverworldMode::handlePlayerWarpAttempt(GameContext &ctx)
         return;
 
     StoryAction block = ctx.story.checkWarp(*warp, player);
-    if (block.type == StoryAction::Type::blockWarp)
-    {
+    if (block.type == StoryAction::Type::blockWarp) {
         pendingWarpBlock = true;
         pendingWarpBlockAction = block;
         return;
     }
 
-    ctx.pushRequest(ModeRequest::transition(warp->targetMapId, warp->targetPosition));
+    ctx.pushRequest(
+        ModeRequest::transition(warp->targetMapId, warp->targetPosition));
 }
 
-void OverworldMode::handlePlayerInteraction(GameContext &ctx)
-{
+void OverworldMode::handlePlayerInteraction(GameContext &ctx) {
     Player &player = ctx.world.getPlayer();
     Position front = player.getPosition();
     front.moveDirection(player.getFacing());
 
-    std::shared_ptr<NPC> npc = ctx.world.findNPCAt(ctx.world.getCurrentMapId(), front);
+    std::shared_ptr<NPC> npc =
+        ctx.world.findNPCAt(ctx.world.getCurrentMapId(), front);
     if (!npc)
         return;
 
-    if (npc->getType() == NPCType::pc)
-    {
+    if (npc->getType() == NPCType::pc) {
         ctx.playSound(SoundEffect::pcOn);
         ctx.pushRequest(ModeRequest::changeState(GameState::pcBox));
-    }
-    else
-    {
+    } else {
         ctx.playSound(SoundEffect::select);
         npc->setFacingOpposite(player.getFacing());
         dialogueStarts(ctx, npc);

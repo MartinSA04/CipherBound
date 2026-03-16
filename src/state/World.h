@@ -1,27 +1,27 @@
 #pragma once
 
-#include <vector>
-#include <map>
-#include <string>
-#include <random>
-#include <filesystem>
-#include <memory>
 #include "Map.h"
-#include "Player.h"
 #include "NPC.h"
+#include "Player.h"
+#include <filesystem>
+#include <map>
+#include <memory>
+#include <random>
+#include <string>
+#include <vector>
 
 class Pokedex; // forward declaration
 
-class World
-{
-public:
-    World(unsigned long seed);
+class World {
+  public:
+    World(int seed);
 
     void generate(const Pokedex &pokedex);
 
     // Load a map from a .map description file
     // Returns the map id read from the file
-    std::string loadMap(const std::filesystem::path &path, const Pokedex &pokedex);
+    std::string loadMap(const std::filesystem::path &path,
+                        const Pokedex &pokedex);
 
     // Map management
     void addMap(const std::string &id, Map map);
@@ -39,10 +39,13 @@ public:
     // NPCs on current map
     void addNPC(const std::string &mapId, std::shared_ptr<NPC> npc);
     std::vector<std::shared_ptr<NPC>> &getNPCs(const std::string &mapId);
-    const std::vector<std::shared_ptr<NPC>> &getNPCs(const std::string &mapId) const;
-    std::shared_ptr<NPC> findNPCAt(const std::string &mapId, const Position &pos);
+    const std::vector<std::shared_ptr<NPC>> &
+    getNPCs(const std::string &mapId) const;
+    std::shared_ptr<NPC> findNPCAt(const std::string &mapId,
+                                   const Position &pos);
     std::shared_ptr<NPC> findNPCById(const std::string &npcId);
-    std::shared_ptr<NPC> findNPCById(const std::string &mapId, const std::string &npcId);
+    std::shared_ptr<NPC> findNPCById(const std::string &mapId,
+                                     const std::string &npcId);
     std::shared_ptr<NPC> NPCSeeingPlayer();
     void setNPCDefeated(const std::string &npcId);
 
@@ -57,8 +60,7 @@ public:
     // Random engine
     std::mt19937 &getRng();
 
-private:
-    unsigned long seed;
+  private:
     std::mt19937 rng;
     std::string currentMapId;
     std::map<std::string, Map> maps;

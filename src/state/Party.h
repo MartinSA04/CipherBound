@@ -2,9 +2,8 @@
 #include "Daemon.h"
 #include <vector>
 
-class Party
-{
-public:
+class Party {
+  public:
     virtual void addDaemon(Daemon daemon) = 0;
     Daemon &getDaemon(int index);
     const std::vector<Daemon> &getParty() const;
@@ -14,14 +13,13 @@ public:
 
     void clearParty();
 
-protected:
+  protected:
     std::vector<Daemon> party;
 };
 
-class PartyAndPCBoxes : public Party
-{
+class PartyAndPCBoxes : public Party {
 
-public:
+  public:
     void addDaemonToBox(Daemon daemon);
 
     // PC Box storage
@@ -38,7 +36,7 @@ public:
     void setCurrentBox(int box);
     void clearPCBoxes();
 
-private:
+  private:
     std::vector<std::vector<Daemon>> pcBoxes{NUM_BOXES}; // PC storage boxes
-    int currentBox{0};                                   // Currently selected box
+    int currentBox{0}; // Currently selected box
 };

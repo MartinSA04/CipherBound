@@ -1,13 +1,13 @@
 #pragma once
 
 class BagMode;
-class GameContext;
+struct GameContext;
 class InputManager;
 
-class BagSubState
-{
-public:
+class BagSubState {
+  public:
     virtual ~BagSubState() = default;
-    virtual void update(BagMode &bag, GameContext &ctx, InputManager &input) = 0;
+    virtual void update(BagMode &bag, GameContext &ctx,
+                        InputManager &input) = 0;
     virtual void render(BagMode &bag, GameContext &ctx) = 0;
 };

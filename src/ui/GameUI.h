@@ -1,17 +1,14 @@
 #pragma once
+#include "InputManager.h"
+#include "OverworldRenderer.h"
+#include "Renderer.h"
+#include "SpriteFont.h"
+#include <cstddef>
+#include <memory>
 #include <string>
 #include <vector>
-#include <functional>
-#include <memory>
-#include "Renderer.h"
-#include "OverworldRenderer.h"
-#include "InputManager.h"
-#include "SpriteFont.h"
-#include "Menu.h"
-#include "../battle/Battle.h"
 
-enum class ScreenType
-{
+enum class ScreenType {
     title,
     overworld,
     battle,
@@ -23,16 +20,14 @@ enum class ScreenType
     dialogue,
 };
 
-enum class EXPTickResult
-{
+enum class EXPTickResult {
     inProgress,
     reachedTarget,
     filledBar,
 };
 
-class GameUI
-{
-public:
+class GameUI {
+  public:
     GameUI();
 
     // Access subsystems
@@ -50,7 +45,8 @@ public:
     void updateInput();
 
     // Overworld
-    void drawOverworld(const Map &map, const Player &player, const std::vector<std::shared_ptr<NPC>> &npcs);
+    void drawOverworld(const Map &map, const Player &player,
+                       const std::vector<std::shared_ptr<NPC>> &npcs);
 
     // Load battle UI sprite assets
     void loadBattleAssets();
@@ -60,8 +56,10 @@ public:
 
     // Menus
     void drawPartyList(const Player &player, int selected);
-    void drawBagScreen(const Player &player, const Pokedex &pokedex, int selected);
-    void drawSummaryScreen(const Daemon &daemon, const Pokedex &pokedex, int page = 0);
+    void drawBagScreen(const Player &player, const Pokedex &pokedex,
+                       int selected);
+    void drawSummaryScreen(const Daemon &daemon, const Pokedex &pokedex,
+                           int page = 0);
 
     // Navigation helpers
     void navigateVertical(int &selected, int count);
@@ -78,15 +76,15 @@ public:
     int battleIntroFrame{0};
     int battleIntroPhase{0};
 
-
-
     // Dialogue box
     void drawDialogueBox(const std::string &speaker, const std::string &text);
     void drawChoiceBox(const std::vector<std::string> &options, int selected);
 
     // Multi-line dialogue management
-    void startDialogue(const std::string &speaker, const std::vector<std::string> &lines);
-    bool advanceDialogueLine(); // advance to next line; returns true if more lines remain
+    void startDialogue(const std::string &speaker,
+                       const std::vector<std::string> &lines);
+    bool advanceDialogueLine(); // advance to next line; returns true if more
+                                // lines remain
     bool isDialogueActive() const;
     const std::string &getCurrentDialogueLine() const;
     const std::string &getDialogueSpeaker() const;
@@ -97,14 +95,18 @@ public:
     EXPTickResult tickEXPAnimation(int targetEXP, int expNeeded);
 
     // Typewriter text control
-    void setDialogueText(const std::string &text);  // Start revealing new text
-    bool updateTypewriter(const bool inputConfirm); // Call once per frame to advance reveal, returns true if game should continue.
-    bool isTextFullyRevealed() const;               // True when all chars shown
-    void revealAllText();                           // Skip to end instantly
+    void setDialogueText(const std::string &text); // Start revealing new text
+    bool updateTypewriter(
+        const bool inputConfirm);     // Call once per frame to advance reveal,
+                                      // returns true if game should continue.
+    bool isTextFullyRevealed() const; // True when all chars shown
+    void revealAllText();             // Skip to end instantly
 
     // Battle intro transition constants
-    static constexpr int BATTLE_INTRO_DURATION = 90;       // total frames for the intro (60fps)
-    static constexpr int BATTLE_INTRO_SCENE_DURATION = 46; // frames per intro animation phase (60fps)
+    static constexpr int BATTLE_INTRO_DURATION =
+        90; // total frames for the intro (60fps)
+    static constexpr int BATTLE_INTRO_SCENE_DURATION =
+        46; // frames per intro animation phase (60fps)
 
     // Sprite font access (for custom screen rendering)
     SpriteFont &getSpriteFont();
@@ -118,8 +120,10 @@ public:
     };
     void drawOpponentInfoBar(const Daemon *opponentDaemon, int offsetX = 0);
     void drawPlayerInfoBar(const Daemon *playerDaemon, int offsetX = 0);
-    void drawOpponentDaemon(const Daemon *opponentDaemon, int offsetX = 0, int offsetY = 0);
-    void drawPlayerDaemon(const Daemon *playerDaemon, int offsetX = 0, int offsetY = 0);
+    void drawOpponentDaemon(const Daemon *opponentDaemon, int offsetX = 0,
+                            int offsetY = 0);
+    void drawPlayerDaemon(const Daemon *playerDaemon, int offsetX = 0,
+                          int offsetY = 0);
     void drawPlayerBackSprite(int x, int y, int dstW, int dstH, int frame);
     void drawBattleBackground();
     void drawPlayerBackOnBase(int offsetX = 0, int frame = 0);
@@ -131,8 +135,10 @@ public:
     void drawOpponentTrainer(const NPC *opponent, int offsetX = 0);
 
     // Sprite-based HP/EXP bar drawing (used by multiple modes)
-    void drawSpriteHPBar(int x, int y, int width, int currentHP, int maxHP, int scale = PIXEL_SCALE);
-    void drawSpriteEXPBar(int x, int y, int width, int currentEXP, int maxEXP, int scale = PIXEL_SCALE);
+    void drawSpriteHPBar(int x, int y, int width, int currentHP, int maxHP,
+                         int scale = PIXEL_SCALE);
+    void drawSpriteEXPBar(int x, int y, int width, int currentEXP, int maxEXP,
+                          int scale = PIXEL_SCALE);
 
     // Draw the text_bar.png background across the bottom panel
     void drawTextBar(int panelY);
@@ -140,7 +146,7 @@ public:
     // Draw a narrower text_bar using partial sprite rendering
     void drawNarrowTextBar(int x, int y, int srcW, int scale = PIXEL_SCALE);
 
-private:
+  private:
     Renderer renderer;
     InputManager input;
     OverworldRenderer overworldRenderer;
@@ -163,13 +169,16 @@ private:
     std::string dialogueSpeaker;
 
     // Typewriter effect state
-    std::string typewriterFullText;  // The complete text to reveal
-    int typewriterCharsRevealed{0};  // How many characters are currently visible
-    int typewriterFrameCounter{0};   // Frame counter for timing
-    int typewriterSpeed{2};          // Frames per character (normal speed, 60fps)
-    int typewriterFastSpeed{1};      // Frames per character (fast/held)
-    int typewriterIndicatorTimer{0}; // Continuous frame counter for indicator animation
+    std::string typewriterFullText; // The complete text to reveal
+    std::size_t typewriterCharsRevealed{
+        0};                        // How many characters are currently visible
+    int typewriterFrameCounter{0}; // Frame counter for timing
+    int typewriterSpeed{2};        // Frames per character (normal speed, 60fps)
+    int typewriterFastSpeed{1};    // Frames per character (fast/held)
+    int typewriterIndicatorTimer{
+        0}; // Continuous frame counter for indicator animation
 
     // Dialogue box helpers
-    void drawTextBox(int x, int y, int width, int height, const std::string &text);
+    void drawTextBox(int x, int y, int width, int height,
+                     const std::string &text);
 };

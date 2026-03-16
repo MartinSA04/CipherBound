@@ -1,14 +1,13 @@
 #pragma once
-#include <random>
-#include <deque>
-#include "../state/Daemon.h"
-#include "../state/Player.h"
-#include "../state/NPC.h"
 #include "../data/Pokedex.h"
+#include "../state/Daemon.h"
+#include "../state/NPC.h"
+#include "../state/Player.h"
+#include <deque>
 #include <memory>
+#include <random>
 
-enum class BattleState
-{
+enum class BattleState {
     intro,
     choosingAction,
     choosingMove,
@@ -26,16 +25,14 @@ enum class BattleState
     captured,
 };
 
-enum class BattleAction
-{
+enum class BattleAction {
     fight,
     item,
     switchDaemon,
     flee,
 };
 
-struct BattleResult
-{
+struct BattleResult {
     bool playerWon;
     bool playerFled;
     bool captured;
@@ -43,18 +40,18 @@ struct BattleResult
     int moneyGained;
 };
 
-enum class BattleType
-{
+enum class BattleType {
     wild,
     trainer,
     gymLeader,
 };
 
-class Battle
-{
-public:
-    Battle(Player &player, std::unique_ptr<Daemon> opponent, BattleType type, std::mt19937 &rng, const Pokedex &pokedex);
-    Battle(Player &player, std::shared_ptr<NPC> opponent, BattleType type, std::mt19937 &rng, const Pokedex &pokedex);
+class Battle {
+  public:
+    Battle(Player &player, std::unique_ptr<Daemon> opponent, BattleType type,
+           std::mt19937 &rng, const Pokedex &pokedex);
+    Battle(Player &player, std::shared_ptr<NPC> opponent, BattleType type,
+           std::mt19937 &rng, const Pokedex &pokedex);
 
     void start();
     void chooseAction(BattleAction action);
@@ -82,31 +79,36 @@ public:
     // Message queue
     const std::string &getMessage() const;
     bool hasMessages() const;
-    void advanceMessage();                          // Pop front; if marker hit, go to animatingHP
-    void finishHPAnimation();                       // Called when HP animation completes
-    void finishEXPAnimation();                      // Called when EXP animation completes
-    void finishIntroAnimation();                    // Called when intro scene animation completes
-    void finishCaptureAnimation();                  // Called when capture animation completes
-    void finishAttackAnimation();                    // Called when attack animation completes
-    void addLevelUpMessage(const std::string &msg); // Insert level-up msg + resume EXP anim
-    void executeOpponentTurn();                     // Execute the opponent's attack phase
+    void advanceMessage();       // Pop front; if marker hit, go to animatingHP
+    void finishHPAnimation();    // Called when HP animation completes
+    void finishEXPAnimation();   // Called when EXP animation completes
+    void finishIntroAnimation(); // Called when intro scene animation completes
+    void finishCaptureAnimation(); // Called when capture animation completes
+    void finishAttackAnimation();  // Called when attack animation completes
+    void addLevelUpMessage(
+        const std::string &msg); // Insert level-up msg + resume EXP anim
+    void executeOpponentTurn();  // Execute the opponent's attack phase
 
     // Capture animation data
-    int getCaptureShakes() const;                   // How many shakes before break/catch
-    bool getCaptureSuccess() const;                 // Did the capture succeed?
-    bool isPlayerAttacking() const;                 // Is the player the attacker in current attack anim?
+    int getCaptureShakes() const;   // How many shakes before break/catch
+    bool getCaptureSuccess() const; // Did the capture succeed?
+    bool isPlayerAttacking()
+        const; // Is the player the attacker in current attack anim?
 
-private:
+  private:
     void addMessage(const std::string &msg);
-    void addHPAnimMarker();    // Insert marker to trigger HP bar animation
-    void addEXPAnimMarker();   // Insert marker to trigger EXP bar animation
-    void addIntroAnimMarker(); // Insert marker to continue intro animation
+    void addHPAnimMarker();      // Insert marker to trigger HP bar animation
+    void addEXPAnimMarker();     // Insert marker to trigger EXP bar animation
+    void addIntroAnimMarker();   // Insert marker to continue intro animation
     void addCaptureAnimMarker(); // Insert marker to trigger capture animation
-    void addAttackAnimMarker(bool isPlayer); // Insert marker to trigger attack animation
+    void addAttackAnimMarker(
+        bool isPlayer); // Insert marker to trigger attack animation
     void executeTurn();
 
-    int calculateDamage(const Daemon &attacker, const Daemon &defender, const MoveData &move) const;
-    float getTypeEffectiveness(ElementType attackType, ElementType defenseType) const;
+    int calculateDamage(const Daemon &attacker, const Daemon &defender,
+                        const MoveData &move) const;
+    float getTypeEffectiveness(ElementType attackType,
+                               ElementType defenseType) const;
     bool accuracyCheck(int accuracy) const;
     int calculateExpYield(const Daemon &defeated) const;
 
@@ -115,10 +117,10 @@ private:
     std::shared_ptr<NPC> opponent = nullptr;
     BattleType type;
     BattleState state;
-    BattleState pendingState;  // State to go to after message queue is drained
-    int introPhase{0};         // Which intro animation phase we're in
-    bool introComplete{false}; // True once all intro phases are done
-    int captureShakes{0};      // How many shakes the ball does
+    BattleState pendingState;   // State to go to after message queue is drained
+    int introPhase{0};          // Which intro animation phase we're in
+    bool introComplete{false};  // True once all intro phases are done
+    int captureShakes{0};       // How many shakes the ball does
     bool captureSuccess{false}; // Did the capture succeed?
     bool attackAnimIsPlayer{true}; // Is the attacker the player?
 
@@ -135,6 +137,7 @@ private:
     static constexpr const char *EXP_ANIM_MARKER = "__EXP_ANIM__";
     static constexpr const char *INTRO_ANIM_MARKER = "__INTRO_ANIM__";
     static constexpr const char *CAPTURE_ANIM_MARKER = "__CAPTURE_ANIM__";
-    static constexpr const char *ATTACK_ANIM_PLAYER_MARKER = "__ATTACK_ANIM_PLAYER__";
+    static constexpr const char *ATTACK_ANIM_PLAYER_MARKER =
+        "__ATTACK_ANIM_PLAYER__";
     static constexpr const char *ATTACK_ANIM_OPP_MARKER = "__ATTACK_ANIM_OPP__";
 };

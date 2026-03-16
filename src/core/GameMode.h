@@ -1,21 +1,23 @@
 #pragma once
+#include "../audio/SoundManager.h"
+#include "../battle/Battle.h"
+#include "StoryManager.h"
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include "StoryManager.h"
-
-#include "../audio/SoundManager.h"
 
 // Forward declarations for types not included through StoryManager.h
 class MusicManager;
 class CutsceneRunner;
 class Battle;
 class SaveManager;
+class GameUI;
+class InputManager;
 
-// ── Game states ────────────────────────────────────────────────────────────────
+// ── Game states
+// ────────────────────────────────────────────────────────────────
 
-enum class GameState
-{
+enum class GameState {
     titleScreen,
     overworld,
     battle,
@@ -32,12 +34,11 @@ enum class GameState
     daemondex,
 };
 
-// ── Mode request (modes push these to trigger cross-mode transitions) ──────────
+// ── Mode request (modes push these to trigger cross-mode transitions)
+// ──────────
 
-struct ModeRequest
-{
-    enum class Type
-    {
+struct ModeRequest {
+    enum class Type {
         changeState,
         startWildBattle,
         startTrainerBattle,
@@ -81,22 +82,24 @@ struct ModeRequest
     static ModeRequest wildBattle(int species, int level);
     static ModeRequest trainerBattle(std::shared_ptr<NPC> t);
     static ModeRequest endBattle();
-    static ModeRequest transition(const std::string &mapId, const Position &spawn);
+    static ModeRequest transition(const std::string &mapId,
+                                  const Position &spawn);
     static ModeRequest dialogue(const std::string &speaker,
                                 const std::vector<std::string> &lines,
                                 std::shared_ptr<NPC> npc = nullptr,
                                 GameState retState = GameState::overworld);
-    static ModeRequest dialogueChoice(const std::vector<std::string> &options,
-                                      const std::string &context,
-                                      GameState retState = GameState::overworld);
+    static ModeRequest
+    dialogueChoice(const std::vector<std::string> &options,
+                   const std::string &context,
+                   GameState retState = GameState::overworld);
     static ModeRequest cutscene(const std::string &path);
     static ModeRequest storyAction(const StoryAction &action);
 };
 
-// ── Shared context passed to every mode ────────────────────────────────────────
+// ── Shared context passed to every mode
+// ────────────────────────────────────────
 
-struct GameContext
-{
+struct GameContext {
     World &world;
     Pokedex &pokedex;
     GameUI &ui;
@@ -121,18 +124,18 @@ struct GameContext
     ~GameContext();
 };
 
-// ── Abstract base for all game modes ───────────────────────────────────────────
+// ── Abstract base for all game modes
+// ───────────────────────────────────────────
 
-class GameMode
-{
-public:
+class GameMode {
+  public:
     virtual ~GameMode() = default;
     virtual void update(GameContext &ctx, InputManager &input) = 0;
     virtual void render(GameContext &ctx) = 0;
     virtual void onEnter(GameContext & /*ctx*/) {}
     virtual void onExit(GameContext & /*ctx*/) {}
 
-protected:
+  protected:
     // Convenience: render the overworld (many modes draw it as a backdrop)
     static void renderOverworld(GameContext &ctx);
 };

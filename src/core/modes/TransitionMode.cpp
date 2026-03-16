@@ -1,32 +1,29 @@
 #include "TransitionMode.h"
-#include "../../ui/InputManager.h"
-#include "../../ui/GameUI.h"
-#include "../../ui/Renderer.h"
-#include "../../state/World.h"
-#include "../../state/Player.h"
 #include "../../audio/MusicManager.h"
+#include "../../state/Player.h"
+#include "../../state/World.h"
+#include "../../ui/GameUI.h"
+#include "../../ui/InputManager.h"
+#include "../../ui/Renderer.h"
 #include "../StoryManager.h"
 
-TransitionMode::TransitionMode(const std::string &targetMapId, const Position &targetSpawn)
+TransitionMode::TransitionMode(const std::string &targetMapId,
+                               const Position &targetSpawn)
     : targetMapId(targetMapId), targetSpawn(targetSpawn) {}
 
-void TransitionMode::update(GameContext &ctx, InputManager & /*input*/)
-{
+void TransitionMode::update(GameContext &ctx, InputManager & /*input*/) {
     ctx.world.getPlayer().updateAnimation();
     int animFrames = ctx.world.getPlayer().getAnimationFrame();
 
-    if (animFrames == 0)
-    {
-        if (targetMapId.empty())
-        {
+    if (animFrames == 0) {
+        if (targetMapId.empty()) {
             ctx.pushRequest(ModeRequest::changeState(GameState::overworld));
-        }
-        else
-        {
+        } else {
             // Load the new map
             ctx.world.setCurrentMap(targetMapId);
             ctx.world.getPlayer().setPosition(targetSpawn);
-            ctx.world.getPlayer().startAnimation(ctx.world.getPlayer().getFacing());
+            ctx.world.getPlayer().startAnimation(
+                ctx.world.getPlayer().getFacing());
             fadeOut = false;
 
             MusicTrack mapTrack = MusicManager::trackForMap(targetMapId);
@@ -43,8 +40,7 @@ void TransitionMode::update(GameContext &ctx, InputManager & /*input*/)
     }
 }
 
-void TransitionMode::render(GameContext &ctx)
-{
+void TransitionMode::render(GameContext &ctx) {
     renderOverworld(ctx);
     Renderer &r = ctx.ui.getRenderer();
     int moveDelay = ctx.world.getPlayer().getMoveDelay();
@@ -52,6 +48,7 @@ void TransitionMode::render(GameContext &ctx)
         static_cast<float>(ctx.world.getPlayer().getAnimationFrame()) /
         static_cast<float>(moveDelay) * 255.0f);
     int alpha = fadeOut ? 255 - transitionAlpha : transitionAlpha;
-    r.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
-                     TDT4102::Color{0, 0, 0, static_cast<unsigned char>(alpha)});
+    r.drawFilledRect(
+        0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
+        TDT4102::Color{0, 0, 0, static_cast<unsigned char>(alpha)});
 }

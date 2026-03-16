@@ -1,17 +1,18 @@
 #pragma once
-#include <string>
-#include <vector>
+#include "../data/Pokedex.h"
 #include "../state/Player.h"
 #include "../state/World.h"
-#include "../data/Pokedex.h"
+#include <string>
+#include <vector>
 
-class SaveManager
-{
-public:
+class SaveManager {
+  public:
     SaveManager();
 
-    bool saveGame(const std::string &filepath, const Player &player, const World &world);
-    bool loadGame(const std::string &filepath, Player &player, World &world, const Pokedex &pokedex);
+    bool saveGame(const std::string &filepath, const Player &player,
+                  const World &world);
+    bool loadGame(const std::string &filepath, Player &player, World &world,
+                  const Pokedex &pokedex);
     bool saveFileExists(const std::string &filepath) const;
     bool deleteSave(const std::string &filepath);
 
@@ -20,8 +21,7 @@ public:
     int getSlotCount() const;
 
     // Quick info for title screen slot display
-    struct SlotInfo
-    {
+    struct SlotInfo {
         bool exists{false};
         std::string playerName;
         int partySize{0};
@@ -31,13 +31,14 @@ public:
     SlotInfo getSlotInfo(int slot) const;
     std::vector<SlotInfo> getSlotInfos() const;
 
-private:
+  private:
     static constexpr int MAX_SAVE_SLOTS = 4;
     std::string baseSavePath;
 
     // Daemon serialization helpers
     static std::string serializeDaemon(const Daemon &daemon);
-    static Daemon deserializeDaemon(const std::string &line, const Pokedex &pokedex);
+    static Daemon deserializeDaemon(const std::string &line,
+                                    const Pokedex &pokedex);
     static std::string serializeBaseStats(const BaseStats &stats);
     static BaseStats deserializeBaseStats(const std::string &s);
 };

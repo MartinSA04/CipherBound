@@ -1,13 +1,11 @@
 #pragma once
-#include <vector>
-#include <optional>
-#include "Species.h"
-#include "Move.h"
 #include "Item.h"
+#include "Move.h"
+#include "Species.h"
+#include <vector>
 
-class Pokedex
-{
-public:
+class Pokedex {
+  public:
     Pokedex();
 
     void loadSpecies(const std::string &path);
@@ -22,7 +20,7 @@ public:
     int moveCount() const;
     int itemCount() const;
 
-private:
+  private:
     std::vector<Species> species;
     std::vector<MoveData> moves;
     std::vector<ItemData> items;

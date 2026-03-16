@@ -1,26 +1,24 @@
 #pragma once
-#include <string>
-#include <array>
-#include "../data/Species.h"
 #include "../data/Move.h"
+#include "../data/Species.h"
+#include <array>
+#include <string>
 
-struct MoveSlot
-{
-    int moveId;
+struct MoveSlot {
+    int moveId; // can be -1 for None
     int currentPP;
     int maxPP;
 };
 
-class Daemon
-{
-public:
+class Daemon {
+  public:
     Daemon(const Species &species, int level);
 
     // Rehydrate from saved data
     Daemon(const Species &species, int level, int exp, int currentHP,
-             const std::string &nickname, StatusEffect status,
-             const BaseStats &ivs, const BaseStats &evs,
-             const std::array<MoveSlot, 4> &moves);
+           const std::string &nickname, StatusEffect status,
+           const BaseStats &ivs, const BaseStats &evs,
+           const std::array<MoveSlot, 4> &moves);
 
     const std::string &getNickname() const;
     void setNickname(const std::string &name);
@@ -53,7 +51,7 @@ public:
     const BaseStats &getIVs() const;
     const BaseStats &getEVs() const;
 
-private:
+  private:
     std::string nickname;
     int speciesId;
     int level;
@@ -61,8 +59,8 @@ private:
     int currentHP;
     StatusEffect status;
 
-    BaseStats ivs;  // individual values
-    BaseStats evs;  // effort values
+    BaseStats ivs; // individual values
+    BaseStats evs; // effort values
 
     std::array<MoveSlot, 4> moves;
 

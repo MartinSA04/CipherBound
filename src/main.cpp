@@ -1,20 +1,16 @@
 #include "core/Session.h"
 
 #ifdef __EMSCRIPTEN__
-#include <emscripten.h>
 #include <chrono>
+#include <emscripten.h>
 
 static Session *g_session = nullptr;
 
-static void emscriptenMainLoop()
-{
-    g_session->tick();
-}
+static void emscriptenMainLoop() { g_session->tick(); }
 #endif
 
-int main()
-{
-    unsigned long seed = 42;
+int main() {
+    int seed = 42;
     Session session(seed);
     session.init();
 

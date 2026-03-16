@@ -1,11 +1,10 @@
 #pragma once
+#include "../state/Movement.h"
 #include <AnimationWindow.h>
 #include <KeyboardKey.h>
-#include "../state/Map.h"
 
-class InputManager
-{
-public:
+class InputManager {
+  public:
     InputManager(TDT4102::AnimationWindow &window);
 
     // Call once per frame to update input state
@@ -21,10 +20,10 @@ public:
     bool getMovementDirection(Direction &outDirection) const;
 
     // Action buttons
-    bool isConfirmHeld() const;   // Z / Enter
-    bool isCancelHeld() const;    // X / Escape
-    bool isMenuHeld() const;      // C / Backspace
-    bool isRunHeld() const;       // Left Shift
+    bool isConfirmHeld() const; // Z / Enter
+    bool isCancelHeld() const;  // X / Escape
+    bool isMenuHeld() const;    // C / Backspace
+    bool isRunHeld() const;     // Left Shift
 
     // Single-press detection (true only on the frame the key goes down)
     bool isConfirmPressed() const;
@@ -33,7 +32,7 @@ public:
 
     bool isKeyHeld(KeyboardKey key) const;
 
-private:
+  private:
     TDT4102::AnimationWindow &window;
 
     // Previous frame state for press detection

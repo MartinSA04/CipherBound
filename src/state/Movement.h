@@ -3,24 +3,22 @@
 
 class Map;
 
-enum class Direction
-{
+enum class Direction {
     up,
     down,
     left,
     right,
 };
 
-struct Position
-{
+struct Position {
     int x, y;
 
-    bool operator==(const Position &other) const { return x == other.x && y == other.y; }
+    bool operator==(const Position &other) const {
+        return x == other.x && y == other.y;
+    }
     bool operator!=(const Position &other) const { return !(*this == other); }
-    void moveDirection(const Direction &dir)
-    {
-        switch (dir)
-        {
+    void moveDirection(const Direction &dir) {
+        switch (dir) {
         case Direction::up:
             y--;
             break;
@@ -37,10 +35,9 @@ struct Position
     }
 };
 
-class Movement : public WalkAnimation
-{
+class Movement : public WalkAnimation {
 
-public:
+  public:
     Movement(Position position);
 
     void move(Direction direction);
@@ -57,10 +54,10 @@ public:
     void setFacing(Direction direction);
     void setFacingOpposite(Direction direction);
 
-protected:
+  protected:
     Position position;
     Direction facing;
 
-private:
+  private:
     int turnCooldown{0}; // frames to wait after turning before moving
 };

@@ -1,17 +1,15 @@
 #pragma once
-
-//forward declare
+// forward declare
 enum class Direction;
-class Position;
+struct Position;
 
-class WalkAnimation
-{
-public:
+class WalkAnimation {
+  public:
     int getMoveDelay() const;
     void setMoveDelay(int delay);
 
     // Animation
-    void startAnimation(const Direction& direction);
+    void startAnimation(const Direction &direction);
     int getAnimationFrame();
 
     bool isMoving() const;
@@ -21,7 +19,7 @@ public:
     int getPixelOffsetY() const;
     int getWalkFrame() const;
 
-protected:
+  protected:
     void updateWalkAnimation(const Direction &facing);
 
     int pixelOffsetX{0}; // current pixel offset during animation
@@ -29,5 +27,6 @@ protected:
     int animFramesLeft{0}; // remaining animation frames
     int moveDelay{12};     // frames per tile movement (animation duration)
     int walkFrame{0};      // walk cycle counter (alternates feet each step)
-    bool wasMoving;        // was the player walking last frame (for turn cooldown logic)
+    bool wasMoving; // was the player walking last frame (for turn cooldown
+                    // logic)
 };

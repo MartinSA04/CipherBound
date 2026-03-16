@@ -1,10 +1,9 @@
 #pragma once
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
-enum class ElementType
-{
+enum class ElementType {
     classical,       // Newtonian mechanics
     electromagnetic, // EM force, Maxwell's equations
     quantum,         // Quantum mechanics, wave-particle duality
@@ -40,18 +39,15 @@ inline const std::unordered_map<std::string, ElementType> typeMap = {
     {"chaotic", ElementType::chaotic},
 };
 
-inline std::string elementTypeName(ElementType t)
-{
-    for (const auto &[name, val] : typeMap)
-    {
+inline std::string elementTypeName(ElementType t) {
+    for (const auto &[name, val] : typeMap) {
         if (val == t)
             return name;
     }
     return "???";
 }
 
-struct BaseStats
-{
+struct BaseStats {
     int hp;
     int attack;
     int defense;
@@ -60,20 +56,17 @@ struct BaseStats
     int speed;
 };
 
-struct EvolutionInfo
-{
+struct EvolutionInfo {
     int targetSpeciesId;
     int levelRequired;
 };
 
-struct LearnableMove
-{
+struct LearnableMove {
     int moveId;
     int levelLearned;
 };
 
-struct Species
-{
+struct Species {
     int id;
     std::string name;
     ElementType primaryType;

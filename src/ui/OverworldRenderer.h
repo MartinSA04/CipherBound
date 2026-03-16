@@ -1,34 +1,35 @@
 #pragma once
-#include "Renderer.h"
 #include "../state/Map.h"
-#include "../state/Player.h"
 #include "../state/NPC.h"
+#include "../state/Player.h"
 #include "../state/World.h"
-#include <vector>
+#include "Renderer.h"
 #include <array>
+#include <vector>
 
 // Source rectangle for a sprite frame
-struct SpriteFrame
-{
+struct SpriteFrame {
     int x, y, w, h;
 };
 
-class OverworldRenderer
-{
-public:
+class OverworldRenderer {
+  public:
     OverworldRenderer(Renderer &renderer);
 
     // Load the player spritesheet (call once at init)
     void loadSprites();
 
     // Load a background image for a map (call when entering a map)
-    void loadMapBackground(const std::string &mapId, const std::string &imagePath);
-    void loadMapBackgroundOverlay(const std::string &mapId, const std::string &imagePath);
+    void loadMapBackground(const std::string &mapId,
+                           const std::string &imagePath);
+    void loadMapBackgroundOverlay(const std::string &mapId,
+                                  const std::string &imagePath);
 
     void loadMapBackgrounds(const World &world);
 
     // Render the full overworld scene
-    void render(const Map &map, const Player &player, const std::vector<std::shared_ptr<NPC>> &npcs);
+    void render(const Map &map, const Player &player,
+                const std::vector<std::shared_ptr<NPC>> &npcs);
 
     // Individual layers (called by render in order)
     void renderMap(const Map &map, int cameraX, int cameraY);
@@ -40,9 +41,10 @@ public:
     void renderMapOverlay(const Map &map, int cameraX, int cameraY);
 
     // Camera follows the player, centered on screen
-    void calculateCamera(const Player &player, const Map &map, int &cameraX, int &cameraY) const;
+    void calculateCamera(const Player &player, const Map &map, int &cameraX,
+                         int &cameraY) const;
 
-private:
+  private:
     Renderer &renderer;
     bool spritesLoaded{false};
 
@@ -63,7 +65,6 @@ private:
     // Get the correct sprite frame for the player's current state
     SpriteFrame getPlayerFrame(const Player &player) const;
     SpriteFrame getNPCFrame(const NPC &npc) const;
-
 
     // Direction enum to index
     static int dirToIndex(Direction dir);

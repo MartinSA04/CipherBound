@@ -1,22 +1,19 @@
 #pragma once
-#include <string>
-#include <memory>
-#include <chrono>
-#include <thread>
-#include "GameMode.h"
-#include "../state/World.h"
-#include "../data/Pokedex.h"
-#include "../save/SaveManager.h"
-#include "../ui/GameUI.h"
-#include "StoryManager.h"
-#include "CutsceneRunner.h"
 #include "../audio/MusicManager.h"
 #include "../audio/SoundManager.h"
+#include "../data/Pokedex.h"
+#include "../save/SaveManager.h"
+#include "../state/World.h"
+#include "../ui/GameUI.h"
+#include "CutsceneRunner.h"
+#include "GameMode.h"
+#include "StoryManager.h"
+#include <chrono>
+#include <memory>
 
-class Session
-{
-public:
-    explicit Session(unsigned long seed);
+class Session {
+  public:
+    explicit Session(int seed);
 
     // Initialise game data and subsystems (call before run/tick)
     void init();
@@ -33,9 +30,7 @@ public:
     GameUI &getUI();
     SaveManager &getSaveManager();
 
-private:
-    unsigned long seed;
-
+  private:
     // Subsystems
     World world;
     Pokedex pokedex;
@@ -75,5 +70,6 @@ private:
     static ScreenType screenForState(GameState gs);
 
     static constexpr int targetFPS = 60;
-    static constexpr std::chrono::duration<double> targetFrameTime{1.0 / targetFPS};
+    static constexpr std::chrono::duration<double> targetFrameTime{1.0 /
+                                                                   targetFPS};
 };

@@ -1,15 +1,14 @@
 #pragma once
-#include <string>
-#include <vector>
-#include <set>
+#include "../audio/SoundManager.h"
 #include "../data/Cutscene.h"
 #include "../state/World.h"
 #include "../ui/GameUI.h"
-#include "../audio/SoundManager.h"
+#include <cstddef>
+#include <string>
+#include <vector>
 
-class CutsceneRunner
-{
-public:
+class CutsceneRunner {
+  public:
     CutsceneRunner() = default;
 
     // Load a cutscene from a .cutscene file
@@ -19,8 +18,10 @@ public:
     void start();
 
     // Update one frame. Returns true while the cutscene is still running.
-    // confirmPressed: whether the player pressed confirm this frame (for dialogue).
-    bool update(World &world, GameUI &ui, bool confirmPressed, SoundManager &sound);
+    // confirmPressed: whether the player pressed confirm this frame (for
+    // dialogue).
+    bool update(World &world, GameUI &ui, bool confirmPressed,
+                SoundManager &sound);
 
     // True if the cutscene has finished
     bool isFinished() const;
@@ -30,14 +31,13 @@ public:
 
     const std::string &getId() const;
 
-private:
+  private:
     Cutscene cutscene;
-    int currentStep{0};
+    std::size_t currentStep{0};
     bool finished{true};
 
     // --- Movement tracking ---
-    struct PendingMove
-    {
+    struct PendingMove {
         std::string targetId; // "player" or NPC id
         Position destination;
     };
@@ -59,12 +59,13 @@ private:
     bool allMovesComplete(const World &world) const;
 
     // Get current position of a target entity
-    Position getEntityPosition(const World &world, const std::string &targetId) const;
+    Position getEntityPosition(const World &world,
+                               const std::string &targetId) const;
 
     // Check if an entity is currently mid-walk-animation
     bool isEntityWalking(const World &world, const std::string &targetId) const;
 
     // Start a single tile step for an entity toward its destination
-    void stepEntityToward(World &world, const std::string &targetId, Position dest);
-
+    void stepEntityToward(World &world, const std::string &targetId,
+                          Position dest);
 };

@@ -1,13 +1,12 @@
 #pragma once
 #include "../GameMode.h"
 
-class OverworldMode : public GameMode
-{
-public:
+class OverworldMode : public GameMode {
+  public:
     void update(GameContext &ctx, InputManager &input) override;
     void render(GameContext &ctx) override;
 
-private:
+  private:
     // Wild encounter / warp-block / trainer check helpers
     bool wildBattleStarts(GameContext &ctx);
     bool warpBlockStarts(GameContext &ctx);

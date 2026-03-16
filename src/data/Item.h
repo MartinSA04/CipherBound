@@ -1,16 +1,14 @@
 #pragma once
 #include <string>
 
-enum class ItemCategory
-{
+enum class ItemCategory {
     healing,
     capture,
     battle,
     keyItem,
 };
 
-struct ItemData
-{
+struct ItemData {
     int id;
     std::string name;
     std::string description;

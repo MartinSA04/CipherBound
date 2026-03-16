@@ -1,75 +1,66 @@
 #include "OverworldRenderer.h"
-#include <algorithm>
 
-OverworldRenderer::OverworldRenderer(Renderer &renderer)
-    : renderer(renderer)
-{
+OverworldRenderer::OverworldRenderer(Renderer &renderer) : renderer(renderer) {
     // Walk frame source rectangles from player_sheet.png
     // 4x4 grid: rows = down/up/left/right, cols = 4 walk cycle frames
     // Each cell is 32x32 pixels
-    for (int dir = 0; dir < 4; ++dir)
-    {
-        for (int frame = 0; frame < 4; ++frame)
-        {
-            walkFrames[dir][frame] = {
-                frame * SPRITE_W, // x
-                dir * SPRITE_H,   // y
-                SPRITE_W,         // w
-                SPRITE_H          // h
-            };
+    for (int dir = 0; dir < 4; ++dir) {
+        for (int frame = 0; frame < 4; ++frame) {
+            walkFrames[static_cast<std::size_t>(dir)]
+                      [static_cast<std::size_t>(frame)] = {
+                          frame * SPRITE_W, // x
+                          dir * SPRITE_H,   // y
+                          SPRITE_W,         // w
+                          SPRITE_H          // h
+                      };
         }
     }
 }
 
-void OverworldRenderer::loadSprites()
-{
-    if (!spritesLoaded)
-    {
-        renderer.loadTexture("player", "assets/sprites/player/player_sheet.png");
-        renderer.loadTexture("prof_bart_iver", "assets/sprites/npcs/bart_iver/bart_iver_sheet.png");
-        renderer.loadTexture("daemon_ball", "assets/sprites/items/daemon_ball.png");
+void OverworldRenderer::loadSprites() {
+    if (!spritesLoaded) {
+        renderer.loadTexture("player",
+                             "assets/sprites/player/player_sheet.png");
+        renderer.loadTexture(
+            "prof_bart_iver",
+            "assets/sprites/npcs/bart_iver/bart_iver_sheet.png");
+        renderer.loadTexture("daemon_ball",
+                             "assets/sprites/items/daemon_ball.png");
         spritesLoaded = true;
     }
 }
 
-void OverworldRenderer::loadMapBackground(const std::string &mapId, const std::string &imagePath)
-{
+void OverworldRenderer::loadMapBackground(const std::string &mapId,
+                                          const std::string &imagePath) {
     std::string texId = "map_bg_" + mapId;
-    if (!renderer.hasTexture(texId))
-    {
+    if (!renderer.hasTexture(texId)) {
         renderer.loadTexture(texId, imagePath);
     }
 }
 
-void OverworldRenderer::loadMapBackgroundOverlay(const std::string &mapId, const std::string &imagePath)
-{
+void OverworldRenderer::loadMapBackgroundOverlay(const std::string &mapId,
+                                                 const std::string &imagePath) {
     std::string texId = "map_bg_o_" + mapId;
-    if (!renderer.hasTexture(texId))
-    {
+    if (!renderer.hasTexture(texId)) {
         renderer.loadTexture(texId, imagePath);
     }
 }
 
-void OverworldRenderer::loadMapBackgrounds(const World &world)
-{
-    for (const auto &mapId : world.getMapIds())
-    {
+void OverworldRenderer::loadMapBackgrounds(const World &world) {
+    for (const auto &mapId : world.getMapIds()) {
         const Map &map = world.getMap(mapId);
-        if (map.hasBackgroundImage())
-        {
+        if (map.hasBackgroundImage()) {
             loadMapBackground(map.getId(), map.getBackgroundImage());
         }
-        if (map.hasBackgroundImageOverlay())
-        {
-            loadMapBackgroundOverlay(map.getId(), map.getBackgroundImageOverlay());
+        if (map.hasBackgroundImageOverlay()) {
+            loadMapBackgroundOverlay(map.getId(),
+                                     map.getBackgroundImageOverlay());
         }
     }
 }
 
-int OverworldRenderer::dirToIndex(Direction dir)
-{
-    switch (dir)
-    {
+int OverworldRenderer::dirToIndex(Direction dir) {
+    switch (dir) {
     case Direction::down:
         return DIR_DOWN;
     case Direction::up:
@@ -83,65 +74,60 @@ int OverworldRenderer::dirToIndex(Direction dir)
     }
 }
 
-SpriteFrame OverworldRenderer::getPlayerFrame(const Player &player) const
-{
+SpriteFrame OverworldRenderer::getPlayerFrame(const Player &player) const {
     int dirIdx = dirToIndex(player.getFacing());
 
-    if (player.isMoving())
-    {
+    if (player.isMoving()) {
         // 4-frame walk cycle: 0-1-2-3, pick based on walkFrame
         int step = player.getWalkFrame() % 4;
-        return walkFrames[dirIdx][step];
-    }
-    else
-    {
+        return walkFrames[static_cast<std::size_t>(dirIdx)]
+                         [static_cast<std::size_t>(step)];
+    } else {
         // Idle: frame 0
-        return walkFrames[dirIdx][0];
+        return walkFrames[static_cast<std::size_t>(dirIdx)][0];
     }
 }
 
-SpriteFrame OverworldRenderer::getNPCFrame(const NPC &npc) const
-{
+SpriteFrame OverworldRenderer::getNPCFrame(const NPC &npc) const {
     int dirIdx = dirToIndex(npc.getFacing());
 
-    if (npc.isMoving())
-    {
+    if (npc.isMoving()) {
         int step = npc.getWalkFrame() % 4;
-        return walkFrames[dirIdx][step];
-    }
-    else
-    {
+        return walkFrames[static_cast<std::size_t>(dirIdx)]
+                         [static_cast<std::size_t>(step)];
+    } else {
         // Idle: frame 0
-        return walkFrames[dirIdx][0];
+        return walkFrames[static_cast<std::size_t>(dirIdx)][0];
     }
 }
 
 void OverworldRenderer::render(const Map &map, const Player &player,
-                               const std::vector<std::shared_ptr<NPC>> &npcs)
-{
+                               const std::vector<std::shared_ptr<NPC>> &npcs) {
     int cameraX, cameraY;
     calculateCamera(player, map, cameraX, cameraY);
 
     renderMap(map, cameraX, cameraY);
 
-    int playerSortY = player.getPosition().y * TILE_SIZE + player.getPixelOffsetY();
+    int playerSortY =
+        player.getPosition().y * TILE_SIZE + player.getPixelOffsetY();
 
     for (const auto &npc : npcs)
-        if (npc->getPosition().y * TILE_SIZE + npc->getPixelOffsetY() <= playerSortY)
+        if (npc->getPosition().y * TILE_SIZE + npc->getPixelOffsetY() <=
+            playerSortY)
             renderNPC(*npc, cameraX, cameraY);
 
     renderPlayer(player, cameraX, cameraY);
 
     for (const auto &npc : npcs)
-        if (npc->getPosition().y * TILE_SIZE + npc->getPixelOffsetY() > playerSortY)
+        if (npc->getPosition().y * TILE_SIZE + npc->getPixelOffsetY() >
+            playerSortY)
             renderNPC(*npc, cameraX, cameraY);
 
     renderMapOverlay(map, cameraX, cameraY);
 }
 
 void OverworldRenderer::calculateCamera(const Player &player, const Map &map,
-                                        int &cameraX, int &cameraY) const
-{
+                                        int &cameraX, int &cameraY) const {
     // Center camera on player (in pixels, accounting for animation offset)
     Position pos = player.getPosition();
     int playerPixelX = pos.x * TILE_SIZE + player.getPixelOffsetX();
@@ -176,22 +162,18 @@ void OverworldRenderer::calculateCamera(const Player &player, const Map &map,
     cameraY = camPixelY;
 }
 
-void OverworldRenderer::renderMap(const Map &map, int cameraX, int cameraY)
-{
+void OverworldRenderer::renderMap(const Map &map, int cameraX, int cameraY) {
     // Texture ID for this map's background
     std::string bgTexId = "map_bg_" + map.getId();
     bool hasBg = map.hasBackgroundImage() && renderer.hasTexture(bgTexId);
 
-    if (hasBg)
-    {
+    if (hasBg) {
         // Draw the entire background as a single scaled image
         int dstW = map.getWidth() * TILE_SIZE;
         int dstH = map.getHeight() * TILE_SIZE;
 
         renderer.drawSpriteRaw(bgTexId, -cameraX, -cameraY, dstW, dstH);
-    }
-    else
-    {
+    } else {
         // Fallback: draw colored tiles
         int startTileX = cameraX / TILE_SIZE;
         int startTileY = cameraY / TILE_SIZE;
@@ -200,10 +182,8 @@ void OverworldRenderer::renderMap(const Map &map, int cameraX, int cameraY)
         if (cameraY < 0)
             startTileY = cameraY / TILE_SIZE - 1;
 
-        for (int y = startTileY; y < startTileY + VIEW_TILES_Y + 2; ++y)
-        {
-            for (int x = startTileX; x < startTileX + VIEW_TILES_X + 2; ++x)
-            {
+        for (int y = startTileY; y < startTileY + VIEW_TILES_Y + 2; ++y) {
+            for (int x = startTileX; x < startTileX + VIEW_TILES_X + 2; ++x) {
                 Position pos{x, y};
                 if (!map.isInBounds(pos))
                     continue;
@@ -219,8 +199,8 @@ void OverworldRenderer::renderMap(const Map &map, int cameraX, int cameraY)
     }
 }
 
-void OverworldRenderer::renderMapOverlay(const Map &map, int cameraX, int cameraY)
-{
+void OverworldRenderer::renderMapOverlay(const Map &map, int cameraX,
+                                         int cameraY) {
     std::string overlayTexId = "map_bg_o_" + map.getId();
     if (!map.hasBackgroundImageOverlay() || !renderer.hasTexture(overlayTexId))
         return;
@@ -231,9 +211,9 @@ void OverworldRenderer::renderMapOverlay(const Map &map, int cameraX, int camera
     renderer.drawSpriteRaw(overlayTexId, -cameraX, -cameraY, dstW, dstH);
 }
 
-void OverworldRenderer::renderEntity(const Entity &entity, int cameraX, int cameraY,
-                                     TDT4102::Color color, int pixelOffsetX, int pixelOffsetY)
-{
+void OverworldRenderer::renderEntity(const Entity &entity, int cameraX,
+                                     int cameraY, TDT4102::Color color,
+                                     int pixelOffsetX, int pixelOffsetY) {
     Position pos = entity.getPosition();
     int sx = pos.x * TILE_SIZE + pixelOffsetX - cameraX;
     int sy = pos.y * TILE_SIZE + pixelOffsetY - cameraY;
@@ -243,14 +223,13 @@ void OverworldRenderer::renderEntity(const Entity &entity, int cameraX, int came
                                      TILE_SIZE / 2 - 2, color);
 }
 
-void OverworldRenderer::renderPlayer(const Player &player, int cameraX, int cameraY)
-{
+void OverworldRenderer::renderPlayer(const Player &player, int cameraX,
+                                     int cameraY) {
     Position pos = player.getPosition();
     int sx = pos.x * TILE_SIZE + player.getPixelOffsetX() - cameraX;
     int sy = pos.y * TILE_SIZE + player.getPixelOffsetY() - cameraY;
 
-    if (renderer.hasTexture("player"))
-    {
+    if (renderer.hasTexture("player")) {
         SpriteFrame frame = getPlayerFrame(player);
 
         // Scale sprite to 2x tile size so character fills one tile nicely
@@ -262,21 +241,18 @@ void OverworldRenderer::renderPlayer(const Player &player, int cameraX, int came
         int offsetX = (TILE_SIZE - dstW) / 2;
         int offsetY = TILE_SIZE - dstH;
 
-        renderer.drawSpriteRegion("player",
-                                  frame.x, frame.y, frame.w, frame.h,
+        renderer.drawSpriteRegion("player", frame.x, frame.y, frame.w, frame.h,
                                   sx + offsetX, sy + offsetY, dstW, dstH,
                                   false);
-    }
-    else
-    {
+    } else {
         // Placeholder: blue circle for player
-        renderer.getWindow().draw_circle({sx + TILE_SIZE / 2, sy + TILE_SIZE / 2},
-                                         TILE_SIZE / 2 - 2, TDT4102::Color::blue);
+        renderer.getWindow().draw_circle(
+            {sx + TILE_SIZE / 2, sy + TILE_SIZE / 2}, TILE_SIZE / 2 - 2,
+            TDT4102::Color::blue);
     }
 }
 
-void OverworldRenderer::renderNPC(const NPC &npc, int cameraX, int cameraY)
-{
+void OverworldRenderer::renderNPC(const NPC &npc, int cameraX, int cameraY) {
     if (npc.isHidden())
         return;
 
@@ -284,36 +260,31 @@ void OverworldRenderer::renderNPC(const NPC &npc, int cameraX, int cameraY)
     int sx = pos.x * TILE_SIZE + npc.getPixelOffsetX() - cameraX;
     int sy = pos.y * TILE_SIZE + npc.getPixelOffsetY() - cameraY;
 
-    if (npc.getId().rfind("pokeball_", 0) == 0)
-    {
+    if (npc.getId().rfind("pokeball_", 0) == 0) {
         constexpr int BALL_FRAME = 16;
         int dstSize = TILE_SIZE;
         int offsetX = (TILE_SIZE - dstSize) / 2;
         int offsetY = (TILE_SIZE - dstSize) / 2;
-        renderer.drawSpriteRegion("daemon_ball",
-                                  0, 0, BALL_FRAME, BALL_FRAME,
+        renderer.drawSpriteRegion("daemon_ball", 0, 0, BALL_FRAME, BALL_FRAME,
                                   sx + offsetX, sy + offsetY, dstSize, dstSize,
                                   false);
         return;
     }
 
-    if (renderer.hasTexture(npc.getId()))
-    {
+    if (renderer.hasTexture(npc.getId())) {
         SpriteFrame frame = getNPCFrame(npc);
         int dstW = TILE_SIZE * 2;
         int dstH = TILE_SIZE * 2;
         int offsetX = (TILE_SIZE - dstW) / 2;
         int offsetY = TILE_SIZE - dstH;
-        renderer.drawSpriteRegion(npc.getId(),
-                                  frame.x, frame.y, frame.w, frame.h,
-                                  sx + offsetX, sy + offsetY, dstW, dstH,
-                                  false);
+        renderer.drawSpriteRegion(npc.getId(), frame.x, frame.y, frame.w,
+                                  frame.h, sx + offsetX, sy + offsetY, dstW,
+                                  dstH, false);
         return;
     }
 
     TDT4102::Color color = TDT4102::Color::red;
-    switch (npc.getType())
-    {
+    switch (npc.getType()) {
     case NPCType::shopkeeper:
         color = TDT4102::Color::orange;
         break;
@@ -326,13 +297,12 @@ void OverworldRenderer::renderNPC(const NPC &npc, int cameraX, int cameraY)
     default:
         break;
     }
-    renderEntity(npc, cameraX, cameraY, color, npc.getPixelOffsetX(), npc.getPixelOffsetY());
+    renderEntity(npc, cameraX, cameraY, color, npc.getPixelOffsetX(),
+                 npc.getPixelOffsetY());
 }
 
-TDT4102::Color OverworldRenderer::getTileColor(TileType type) const
-{
-    switch (type)
-    {
+TDT4102::Color OverworldRenderer::getTileColor(TileType type) const {
+    switch (type) {
     case TileType::grass:
         return TDT4102::Color{100, 200, 80};
     case TileType::tallGrass:

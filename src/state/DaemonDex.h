@@ -1,10 +1,9 @@
 #pragma once
 #include <set>
 
-class DaemonDex
-{
+class DaemonDex {
 
-public:
+  public:
     void markSeen(int speciesId);
     void markCaught(int speciesId);
 
@@ -19,7 +18,7 @@ public:
 
     void clearDaemondex();
 
-private:
+  private:
     std::set<int> seenSpecies;
     std::set<int> caughtSpecies;
 };

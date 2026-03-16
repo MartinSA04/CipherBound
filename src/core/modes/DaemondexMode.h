@@ -1,15 +1,13 @@
 #pragma once
 #include "../GameMode.h"
 
-class DaemondexMode : public GameMode
-{
-public:
+class DaemondexMode : public GameMode {
+  public:
     void update(GameContext &ctx, InputManager &input) override;
     void render(GameContext &ctx) override;
 
-private:
-    enum class SubState
-    {
+  private:
+    enum class SubState {
         list,
         detail,
     };

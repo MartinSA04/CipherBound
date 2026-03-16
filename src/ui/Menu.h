@@ -2,23 +2,20 @@
 #include <string>
 #include <vector>
 
-struct TextBox
-{
+struct TextBox {
     int x, y;
     int width, height;
     std::string text;
     bool isVisible;
 };
 
-struct MenuItem
-{
+struct MenuItem {
     std::string label;
     bool enabled;
 };
 
-class Menu
-{
-public:
+class Menu {
+  public:
     Menu();
 
     void addItem(const std::string &label, bool enabled = true);
@@ -34,7 +31,7 @@ public:
     bool isVisible() const;
     void setVisible(bool visible);
 
-private:
+  private:
     std::vector<MenuItem> items;
     int selectedIndex;
     bool visible;

@@ -1,10 +1,9 @@
 #pragma once
+#include "Species.h"
 #include <string>
 #include <unordered_map>
-#include "Species.h"
 
-enum class MoveCategory
-{
+enum class MoveCategory {
     physical,
     special,
     status,
@@ -16,8 +15,7 @@ inline const std::unordered_map<std::string, MoveCategory> categoryMap = {
     {"status", MoveCategory::status},
 };
 
-enum class StatusEffect
-{
+enum class StatusEffect {
     none,
     overheated, // Thermal overload — damage over time
     entangled,  // Quantum entanglement — can't switch out
@@ -37,8 +35,7 @@ inline const std::unordered_map<std::string, StatusEffect> statusMap = {
     {"paradox", StatusEffect::paradox},
 };
 
-struct MoveData
-{
+struct MoveData {
     int id;
     std::string name;
     std::string description;

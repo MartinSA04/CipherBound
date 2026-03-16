@@ -1,43 +1,34 @@
 #include "BagMode.h"
-#include "bag/BrowsingState.h"
-#include "bag/TargetState.h"
-#include "bag/MessageState.h"
 #include "../../ui/GameUI.h"
+#include "bag/BrowsingState.h"
+#include "bag/MessageState.h"
+#include "bag/TargetState.h"
 
-BagMode::BagMode()
-    : currentSubState(std::make_unique<BrowsingState>())
-{
-}
+BagMode::BagMode() : currentSubState(std::make_unique<BrowsingState>()) {}
 
-void BagMode::update(GameContext &ctx, InputManager &input)
-{
+void BagMode::update(GameContext &ctx, InputManager &input) {
     if (currentSubState)
         currentSubState->update(*this, ctx, input);
 }
 
-void BagMode::render(GameContext &ctx)
-{
+void BagMode::render(GameContext &ctx) {
     if (currentSubState)
         currentSubState->render(*this, ctx);
 }
 
-void BagMode::switchSubState(SubStateType type)
-{
+void BagMode::switchSubState(SubStateType type) {
     currentSubState = createSubState(type);
 }
 
-void BagMode::showMessage(const std::string &msg, GameContext &ctx)
-{
+void BagMode::showMessage(const std::string &msg, GameContext &ctx) {
     message = msg;
     ctx.ui.setDialogueText(msg);
     returnAfterMessage = SubStateType::browsing;
     switchSubState(SubStateType::showingMessage);
 }
 
-std::unique_ptr<BagSubState> BagMode::createSubState(SubStateType type)
-{
-    switch (type)
-    {
+std::unique_ptr<BagSubState> BagMode::createSubState(SubStateType type) {
+    switch (type) {
     case SubStateType::browsing:
         return std::make_unique<BrowsingState>();
     case SubStateType::choosingTarget:

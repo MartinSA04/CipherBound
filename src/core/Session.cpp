@@ -1,46 +1,37 @@
 #include "Session.h"
 #include "../battle/Battle.h"
-#include "modes/OverworldMode.h"
-#include "modes/MenuMode.h"
-#include "modes/BattleMode.h"
-#include "modes/BattleIntroMode.h"
-#include "modes/TitleScreenMode.h"
-#include "modes/TransitionMode.h"
-#include "modes/PartyMode.h"
 #include "modes/BagMode.h"
-#include "modes/SaveMode.h"
-#include "modes/DialogueMode.h"
-#include "modes/DialogueChoiceMode.h"
-#include "modes/PCBoxMode.h"
+#include "modes/BattleIntroMode.h"
+#include "modes/BattleMode.h"
 #include "modes/CutSceneMode.h"
 #include "modes/DaemondexMode.h"
+#include "modes/DialogueChoiceMode.h"
+#include "modes/DialogueMode.h"
+#include "modes/MenuMode.h"
+#include "modes/OverworldMode.h"
+#include "modes/PCBoxMode.h"
+#include "modes/PartyMode.h"
+#include "modes/SaveMode.h"
+#include "modes/TitleScreenMode.h"
+#include "modes/TransitionMode.h"
+#include <thread>
 
-Session::Session(unsigned long seed)
-    : seed(seed),
-      world(seed),
-      pokedex(),
-      ui(),
-      saveManager(),
-      story(),
-      music(),
-      sound(),
+Session::Session(int seed)
+    : world(seed), pokedex(), ui(), saveManager(), story(), music(), sound(),
       cutsceneRunner(),
-      ctx{world, pokedex, ui, saveManager, story, music, cutsceneRunner, sound, nullptr, -1, false, {}}
-{
-}
+      ctx{world,          pokedex, ui,      saveManager, story, music,
+          cutsceneRunner, sound,   nullptr, -1,          false, {}} {}
 
-// ── Main loop ──────────────────────────────────────────────────────────────────
+// ── Main loop
+// ──────────────────────────────────────────────────────────────────
 
-void Session::run()
-{
-    while (!ui.shouldClose())
-    {
+void Session::run() {
+    while (!ui.shouldClose()) {
         tick();
     }
 }
 
-void Session::tick()
-{
+void Session::tick() {
 #ifndef __EMSCRIPTEN__
     auto frameStart = std::chrono::high_resolution_clock::now();
 #endif
@@ -69,10 +60,10 @@ void Session::tick()
 #endif
 }
 
-// ── Initialisation ─────────────────────────────────────────────────────────────
+// ── Initialisation
+// ─────────────────────────────────────────────────────────────
 
-void Session::init()
-{
+void Session::init() {
     pokedex.loadSpecies("assets/data/species.txt");
     pokedex.loadMoves("assets/data/moves.txt");
     pokedex.loadItems("assets/data/items.txt");
@@ -87,50 +78,43 @@ void Session::init()
     music.play(MusicTrack::titleScreen, ui.getRenderer().getWindow());
 }
 
-// ── Request processing (cross-mode orchestration) ──────────────────────────────
+// ── Request processing (cross-mode orchestration)
+// ──────────────────────────────
 
-void Session::processRequests()
-{
+void Session::processRequests() {
     // Drain all pending requests (a request may push more, but we process them
     // in order and stop after one pass to avoid infinite loops)
     std::vector<ModeRequest> requests;
     std::swap(requests, ctx.pendingRequests);
 
-    for (auto &req : requests)
-    {
-        switch (req.type)
-        {
-        case ModeRequest::Type::changeState:
-        {
-            if (req.targetState == GameState::battle)
-            {
-                // Special case: set up BattleMode with trainer info from BattleIntroMode
+    for (auto &req : requests) {
+        switch (req.type) {
+        case ModeRequest::Type::changeState: {
+            if (req.targetState == GameState::battle) {
+                // Special case: set up BattleMode with trainer info from
+                // BattleIntroMode
                 auto mode = std::make_unique<BattleMode>();
-                if (req.npc)
-                {
+                if (req.npc) {
                     mode->setTrainerNPCId(req.npc->getId());
                     mode->setTrainer(req.npc);
                 }
                 switchToMode(GameState::battle, std::move(mode));
-            }
-            else
-            {
+            } else {
                 switchMode(req.targetState);
             }
             break;
         }
 
-        case ModeRequest::Type::startWildBattle:
-        {
+        case ModeRequest::Type::startWildBattle: {
             ctx.ui.battleIntroFrame = 0;
-            switchToMode(GameState::battleIntro,
-                         std::make_unique<BattleIntroMode>(req.speciesId, req.level));
+            switchToMode(
+                GameState::battleIntro,
+                std::make_unique<BattleIntroMode>(req.speciesId, req.level));
             music.play(MusicTrack::wildBattle, ui.getRenderer().getWindow());
             break;
         }
 
-        case ModeRequest::Type::startTrainerBattle:
-        {
+        case ModeRequest::Type::startTrainerBattle: {
             ctx.ui.battleIntroFrame = 0;
             switchToMode(GameState::battleIntro,
                          std::make_unique<BattleIntroMode>(req.npc));
@@ -138,13 +122,11 @@ void Session::processRequests()
             break;
         }
 
-        case ModeRequest::Type::endBattle:
-        {
-            if (ctx.currentBattle)
-            {
-                auto *battleMode = dynamic_cast<BattleMode *>(currentMode.get());
-                if (battleMode && !battleMode->getTrainerNPCId().empty())
-                {
+        case ModeRequest::Type::endBattle: {
+            if (ctx.currentBattle) {
+                auto *battleMode =
+                    dynamic_cast<BattleMode *>(currentMode.get());
+                if (battleMode && !battleMode->getTrainerNPCId().empty()) {
                     BattleResult result = ctx.currentBattle->getResult();
                     if (result.playerWon)
                         world.setNPCDefeated(battleMode->getTrainerNPCId());
@@ -153,22 +135,23 @@ void Session::processRequests()
             ctx.currentBattle.reset();
             switchMode(GameState::overworld);
 
-            MusicTrack mapTrack = MusicManager::trackForMap(world.getCurrentMapId());
+            MusicTrack mapTrack =
+                MusicManager::trackForMap(world.getCurrentMapId());
             music.play(mapTrack, ui.getRenderer().getWindow());
             break;
         }
 
-        case ModeRequest::Type::transitionToMap:
-        {
+        case ModeRequest::Type::transitionToMap: {
             const std::string &mapId = world.getCurrentMapId();
-            world.getMap(mapId).setOccupied(world.getPlayer().getPosition(), false);
-            switchToMode(GameState::transition,
-                         std::make_unique<TransitionMode>(req.mapId, req.spawn));
+            world.getMap(mapId).setOccupied(world.getPlayer().getPosition(),
+                                            false);
+            switchToMode(
+                GameState::transition,
+                std::make_unique<TransitionMode>(req.mapId, req.spawn));
             break;
         }
 
-        case ModeRequest::Type::startDialogue:
-        {
+        case ModeRequest::Type::startDialogue: {
             dialogueReturnState = req.returnState;
             switchToMode(GameState::dialogue,
                          std::make_unique<DialogueMode>(
@@ -176,18 +159,16 @@ void Session::processRequests()
             break;
         }
 
-        case ModeRequest::Type::startDialogueChoice:
-        {
-            switchToMode(GameState::dialogueChoice,
-                         std::make_unique<DialogueChoiceMode>(
-                             req.choiceOptions, req.choiceContext, dialogueReturnState));
+        case ModeRequest::Type::startDialogueChoice: {
+            switchToMode(
+                GameState::dialogueChoice,
+                std::make_unique<DialogueChoiceMode>(
+                    req.choiceOptions, req.choiceContext, dialogueReturnState));
             break;
         }
 
-        case ModeRequest::Type::startCutscene:
-        {
-            if (cutsceneRunner.load(req.cutscenePath))
-            {
+        case ModeRequest::Type::startCutscene: {
+            if (cutsceneRunner.load(req.cutscenePath)) {
                 cutsceneRunner.start();
                 switchMode(GameState::cutscene);
             }
@@ -201,19 +182,18 @@ void Session::processRequests()
     }
 }
 
-// ── Story action dispatch ──────────────────────────────────────────────────────
+// ── Story action dispatch
+// ──────────────────────────────────────────────────────
 
-void Session::handleStoryAction(const StoryAction &action)
-{
-    switch (action.type)
-    {
+void Session::handleStoryAction(const StoryAction &action) {
+    switch (action.type) {
     case StoryAction::Type::startBattle:
         ctx.pushRequest(ModeRequest::trainerBattle(action.trainer));
         break;
 
     case StoryAction::Type::showChoice:
-        ctx.pushRequest(ModeRequest::dialogueChoice(action.options, action.choiceContext,
-                                                    dialogueReturnState));
+        ctx.pushRequest(ModeRequest::dialogueChoice(
+            action.options, action.choiceContext, dialogueReturnState));
         break;
 
     case StoryAction::Type::showDialogue:
@@ -227,8 +207,7 @@ void Session::handleStoryAction(const StoryAction &action)
 
     case StoryAction::Type::returnToState:
     default:
-        if (ctx.pendingPushBack)
-        {
+        if (ctx.pendingPushBack) {
             ctx.pendingPushBack = false;
             world.pushPlayerBack();
         }
@@ -237,15 +216,14 @@ void Session::handleStoryAction(const StoryAction &action)
     }
 }
 
-// ── Mode switching ─────────────────────────────────────────────────────────────
+// ── Mode switching
+// ─────────────────────────────────────────────────────────────
 
-void Session::switchMode(GameState newState)
-{
+void Session::switchMode(GameState newState) {
     switchToMode(newState, createMode(newState));
 }
 
-void Session::switchToMode(GameState newState, std::unique_ptr<GameMode> mode)
-{
+void Session::switchToMode(GameState newState, std::unique_ptr<GameMode> mode) {
     if (currentMode)
         currentMode->onExit(ctx);
 
@@ -257,10 +235,8 @@ void Session::switchToMode(GameState newState, std::unique_ptr<GameMode> mode)
         currentMode->onEnter(ctx);
 }
 
-std::unique_ptr<GameMode> Session::createMode(GameState state)
-{
-    switch (state)
-    {
+std::unique_ptr<GameMode> Session::createMode(GameState state) {
+    switch (state) {
     case GameState::titleScreen:
         return std::make_unique<TitleScreenMode>();
     case GameState::overworld:
@@ -286,12 +262,11 @@ std::unique_ptr<GameMode> Session::createMode(GameState state)
     }
 }
 
-// ── GameState → ScreenType ─────────────────────────────────────────────────────
+// ── GameState → ScreenType
+// ─────────────────────────────────────────────────────
 
-ScreenType Session::screenForState(GameState gs)
-{
-    switch (gs)
-    {
+ScreenType Session::screenForState(GameState gs) {
+    switch (gs) {
     case GameState::titleScreen:
         return ScreenType::title;
     case GameState::overworld:
@@ -325,7 +300,8 @@ ScreenType Session::screenForState(GameState gs)
     }
 }
 
-// ── Getters ────────────────────────────────────────────────────────────────────
+// ── Getters
+// ────────────────────────────────────────────────────────────────────
 
 World &Session::getWorld() { return world; }
 Pokedex &Session::getPokedex() { return pokedex; }

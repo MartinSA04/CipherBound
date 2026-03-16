@@ -1,22 +1,20 @@
 #pragma once
+#include "../state/Movement.h"
+#include <cctype>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
-#include <cctype>
-#include "../state/Map.h"
 
-namespace StringUtils
-{
+namespace StringUtils {
 
-inline std::string capitalize(std::string s)
-{
+inline std::string capitalize(std::string s) {
     if (!s.empty())
-        s[0] = static_cast<char>(std::toupper(static_cast<unsigned char>(s[0])));
+        s[0] =
+            static_cast<char>(std::toupper(static_cast<unsigned char>(s[0])));
     return s;
 }
 
-inline std::vector<std::string> splitPipe(const std::string &s)
-{
+inline std::vector<std::string> splitPipe(const std::string &s) {
     std::vector<std::string> parts;
     std::istringstream iss(s);
     std::string token;
@@ -25,8 +23,7 @@ inline std::vector<std::string> splitPipe(const std::string &s)
     return parts;
 }
 
-inline std::vector<std::string> splitSemicolon(const std::string &s)
-{
+inline std::vector<std::string> splitSemicolon(const std::string &s) {
     std::vector<std::string> parts;
     if (s.empty() || s == "-")
         return parts;
@@ -37,17 +34,14 @@ inline std::vector<std::string> splitSemicolon(const std::string &s)
     return parts;
 }
 
-inline std::vector<std::string> splitDoubleAt(const std::string &s)
-{
+inline std::vector<std::string> splitDoubleAt(const std::string &s) {
     std::vector<std::string> parts;
     if (s.empty())
         return parts;
     size_t start = 0;
-    while (true)
-    {
+    while (true) {
         size_t pos = s.find("@@", start);
-        if (pos == std::string::npos)
-        {
+        if (pos == std::string::npos) {
             parts.push_back(s.substr(start));
             break;
         }
@@ -57,8 +51,7 @@ inline std::vector<std::string> splitDoubleAt(const std::string &s)
     return parts;
 }
 
-inline Direction parseDirection(const std::string &s)
-{
+inline Direction parseDirection(const std::string &s) {
     if (s == "up")
         return Direction::up;
     if (s == "down")

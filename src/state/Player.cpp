@@ -1,25 +1,15 @@
 #include "Player.h"
-#include "../ui/Renderer.h"
-#include <algorithm>
 
 Player::Player(const std::string &name, Position position)
-    : Entity(name, position)
-{
-}
+    : Entity(name, position) {}
 
-void Player::update()
-{
-}
+void Player::update() {}
 
-void Player::addDaemon(Daemon daemon)
-{
+void Player::addDaemon(Daemon daemon) {
     markCaught(daemon.getSpeciesId());
-    if (partySize() < 6)
-    {
+    if (partySize() < 6) {
         party.push_back(std::move(daemon));
-    }
-    else
-    {
+    } else {
         addDaemonToBox(daemon);
     }
 }

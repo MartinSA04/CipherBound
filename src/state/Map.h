@@ -1,12 +1,9 @@
 #pragma once
-#include <vector>
-#include <string>
-#include <functional>
 #include "Movement.h"
+#include <string>
+#include <vector>
 
-
-enum class TileType
-{
+enum class TileType {
     grass,
     tallGrass, // wild encounters possible
     water,
@@ -21,32 +18,28 @@ enum class TileType
     ledgeRight,
 };
 
-struct WildEncounterSlot
-{
+struct WildEncounterSlot {
     int speciesId;
     int minLevel;
     int maxLevel;
     int weight; // relative probability
 };
 
-struct WarpPoint
-{
+struct WarpPoint {
     Position from;
     std::string targetMapId;
     Position targetPosition;
 };
 
-struct Tile
-{
+struct Tile {
     Position position;
     TileType type;
     bool isOccupied;
     bool hasCollision;
 };
 
-class Map
-{
-public:
+class Map {
+  public:
     Map();
     Map(const std::string &id, int width, int height);
 
@@ -83,7 +76,7 @@ public:
     const std::string &getBackgroundImageOverlay() const;
     bool hasBackgroundImageOverlay() const;
 
-private:
+  private:
     std::string id;
     int width;
     int height;

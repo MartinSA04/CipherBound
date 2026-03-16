@@ -4,11 +4,9 @@
 #include <memory>
 #include <string>
 
-class BagMode : public GameMode
-{
-public:
-    enum class SubStateType
-    {
+class BagMode : public GameMode {
+  public:
+    enum class SubStateType {
         browsing,
         choosingTarget,
         showingMessage,
@@ -32,7 +30,7 @@ public:
     // After a message, which sub-state to return to
     SubStateType returnAfterMessage{SubStateType::browsing};
 
-private:
+  private:
     std::unique_ptr<BagSubState> createSubState(SubStateType type);
     std::unique_ptr<BagSubState> currentSubState;
 };

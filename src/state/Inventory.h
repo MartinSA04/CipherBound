@@ -1,15 +1,13 @@
 #pragma once
 #include <vector>
 
-struct InventoryEntry
-{
+struct InventoryEntry {
     int itemId;
     int quantity;
 };
 
-class Inventory
-{
-public:
+class Inventory {
+  public:
     void addItem(int itemId, int quantity = 1);
     bool removeItem(int itemId, int quantity = 1);
     int getItemCount(int itemId) const;
@@ -22,8 +20,7 @@ public:
     bool spendMoney(int amount);
     void setMoney(int amount);
 
-
-private:
+  private:
     std::vector<InventoryEntry> inventory;
     int money{0};
 };

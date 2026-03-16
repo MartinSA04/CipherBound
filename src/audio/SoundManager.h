@@ -1,11 +1,9 @@
 #pragma once
-#include <string>
-#include <map>
 #include <AnimationWindow.h>
 #include <Audio.h>
+#include <map>
 
-enum class SoundEffect
-{
+enum class SoundEffect {
     confirm,        // SEQ_SE_DECIDE1 — menu confirm
     select,         // SEQ_SE_DP_SELECT — menu cursor move
     expTick,        // SEQ_SE_EXP — EXP gain tick
@@ -22,9 +20,8 @@ enum class SoundEffect
     attack,         // attack — move hit
 };
 
-class SoundManager
-{
-public:
+class SoundManager {
+  public:
     SoundManager();
 
     // Load all sound effect files
@@ -33,6 +30,6 @@ public:
     // Play a sound effect (fire-and-forget, no looping)
     void play(SoundEffect sfx, TDT4102::AnimationWindow &window);
 
-private:
+  private:
     std::map<SoundEffect, std::unique_ptr<TDT4102::Audio>> effects;
 };

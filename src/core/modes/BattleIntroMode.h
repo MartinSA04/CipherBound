@@ -4,9 +4,8 @@
 
 class NPC;
 
-class BattleIntroMode : public GameMode
-{
-public:
+class BattleIntroMode : public GameMode {
+  public:
     // Wild battle intro
     BattleIntroMode(int speciesId, int level);
     // Trainer battle intro
@@ -15,7 +14,7 @@ public:
     void update(GameContext &ctx, InputManager &input) override;
     void render(GameContext &ctx) override;
 
-private:
+  private:
     int speciesId{0};
     int level{0};
     std::shared_ptr<NPC> trainer;

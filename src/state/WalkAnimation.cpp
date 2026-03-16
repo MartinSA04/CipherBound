@@ -1,20 +1,20 @@
 #include "WalkAnimation.h"
-#include "Movement.h"
 #include "../ui/Renderer.h"
+#include "Movement.h"
 
 int WalkAnimation::getMoveDelay() const { return moveDelay; }
-void WalkAnimation::setMoveDelay(int delay) { moveDelay = delay; }
+void WalkAnimation::setMoveDelay(int delay) {
+    moveDelay = (delay <= 0) ? 1 : delay;
+}
 int WalkAnimation::getAnimationFrame() { return animFramesLeft; }
 int WalkAnimation::getPixelOffsetX() const { return pixelOffsetX; }
 int WalkAnimation::getPixelOffsetY() const { return pixelOffsetY; }
 int WalkAnimation::getWalkFrame() const { return walkFrame; }
 
-void WalkAnimation::startAnimation(const Direction &direction)
-{
+void WalkAnimation::startAnimation(const Direction &direction) {
     animFramesLeft = moveDelay;
     walkFrame++;
-    switch (direction)
-    {
+    switch (direction) {
     case Direction::up:
         pixelOffsetX = 0;
         pixelOffsetY = TILE_SIZE;
@@ -34,20 +34,12 @@ void WalkAnimation::startAnimation(const Direction &direction)
     }
 }
 
-bool WalkAnimation::isMoving() const
-{
-    return animFramesLeft > 0;
-}
+bool WalkAnimation::isMoving() const { return animFramesLeft > 0; }
 
-bool WalkAnimation::wasRecentlyMoving() const
-{
-    return wasMoving;
-}
+bool WalkAnimation::wasRecentlyMoving() const { return wasMoving; }
 
-void WalkAnimation::updateWalkAnimation(const Direction &facing)
-{
-    if (!isMoving())
-    {
+void WalkAnimation::updateWalkAnimation(const Direction &facing) {
+    if (!isMoving()) {
         wasMoving = false;
         return;
     }
@@ -58,21 +50,18 @@ void WalkAnimation::updateWalkAnimation(const Direction &facing)
     if (animFramesLeft == moveDelay / 2)
         walkFrame++;
 
-    if (!isMoving())
-    {
+    if (!isMoving()) {
         // Snap to grid
         pixelOffsetX = 0;
         pixelOffsetY = 0;
-    }
-    else
-    {
+    } else {
         // Linearly interpolate: offset goes from full tile toward 0
         // Total pixels to cover = TILE_SIZE, over moveDelay frames
-        double t = static_cast<double>(animFramesLeft) / moveDelay;
+        double t = static_cast<double>(animFramesLeft) /
+                   static_cast<double>(moveDelay);
         int totalOffset = static_cast<int>(t * TILE_SIZE);
 
-        switch (facing)
-        {
+        switch (facing) {
         case Direction::up:
             pixelOffsetX = 0;
             pixelOffsetY = totalOffset;

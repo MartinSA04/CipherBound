@@ -1,43 +1,39 @@
 #include "SaveMode.h"
-#include "../../ui/InputManager.h"
-#include "../../ui/GameUI.h"
+#include "../../audio/SoundManager.h"
 #include "../../save/SaveManager.h"
 #include "../../state/World.h"
-#include "../../state/Player.h"
-#include "../../audio/SoundManager.h"
+#include "../../ui/GameUI.h"
+#include "../../ui/InputManager.h"
 
-void SaveMode::onEnter(GameContext & /*ctx*/)
-{
+void SaveMode::onEnter(GameContext & /*ctx*/) {
     saveComplete = false;
     saveSuccess = false;
 }
 
-void SaveMode::update(GameContext &ctx, InputManager &input)
-{
-    if (!saveComplete)
-    {
-        saveSuccess = ctx.saveManager.saveGame(
-            ctx.saveManager.getSavePath(ctx.currentSaveSlot),
-            ctx.world.getPlayer(), ctx.world);
+void SaveMode::update(GameContext &ctx, InputManager &input) {
+    if (!saveComplete) {
+        if (ctx.currentSaveSlot < 0) {
+            saveSuccess = false;
+        } else {
+            saveSuccess = ctx.saveManager.saveGame(
+                ctx.saveManager.getSavePath(ctx.currentSaveSlot),
+                ctx.world.getPlayer(), ctx.world);
+        }
         saveComplete = true;
-        if (saveSuccess)
-        {
+        if (saveSuccess) {
             ctx.playSound(SoundEffect::save);
             ctx.ui.setDialogueText("Game saved!");
-        }
-        else
+        } else
             ctx.ui.setDialogueText("Save failed...");
     }
 
-    if (ctx.ui.updateTypewriter(input.isConfirmPressed()))
-    {
+    if (ctx.ui.updateTypewriter(input.isConfirmPressed())) {
         ctx.playSound(SoundEffect::select);
         ctx.pushRequest(ModeRequest::changeState(GameState::overworld));
     }
 }
 
-void SaveMode::render(GameContext &ctx)
-{
+void SaveMode::render(GameContext &ctx) {
     renderOverworld(ctx);
     ctx.ui.drawDialogueBox("", saveSuccess ? "Game saved!" : "Save failed...");
 }

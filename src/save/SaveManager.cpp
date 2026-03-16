@@ -1,37 +1,29 @@
 #include "SaveManager.h"
 #include <filesystem>
 #include <fstream>
-#include <sstream>
 #include <iostream>
+#include <sstream>
 
-SaveManager::SaveManager()
-    : baseSavePath("saves/")
-{
-}
+SaveManager::SaveManager() : baseSavePath("saves/") {}
 
 // --- BaseStats serialization ---
 
-std::string SaveManager::serializeBaseStats(const BaseStats &stats)
-{
-    return std::to_string(stats.hp) + "," +
-           std::to_string(stats.attack) + "," +
+std::string SaveManager::serializeBaseStats(const BaseStats &stats) {
+    return std::to_string(stats.hp) + "," + std::to_string(stats.attack) + "," +
            std::to_string(stats.defense) + "," +
            std::to_string(stats.specialAttack) + "," +
            std::to_string(stats.specialDefense) + "," +
            std::to_string(stats.speed);
 }
 
-BaseStats SaveManager::deserializeBaseStats(const std::string &s)
-{
+BaseStats SaveManager::deserializeBaseStats(const std::string &s) {
     BaseStats stats{0, 0, 0, 0, 0, 0};
     std::istringstream iss(s);
     std::string token;
     int idx = 0;
-    while (std::getline(iss, token, ',') && idx < 6)
-    {
+    while (std::getline(iss, token, ',') && idx < 6) {
         int val = std::stoi(token);
-        switch (idx)
-        {
+        switch (idx) {
         case 0:
             stats.hp = val;
             break;
@@ -57,23 +49,19 @@ BaseStats SaveManager::deserializeBaseStats(const std::string &s)
 }
 
 // --- Daemon serialization ---
-// Format: speciesId;level;exp;currentHP;nickname;status;iv_hp,iv_atk,...;ev_hp,ev_atk,...;moveId:curPP:maxPP,...
+// Format:
+// speciesId;level;exp;currentHP;nickname;status;iv_hp,iv_atk,...;ev_hp,ev_atk,...;moveId:curPP:maxPP,...
 
-std::string SaveManager::serializeDaemon(const Daemon &daemon)
-{
+std::string SaveManager::serializeDaemon(const Daemon &daemon) {
     std::ostringstream oss;
-    oss << daemon.getSpeciesId() << ";"
-        << daemon.getLevel() << ";"
-        << daemon.getExp() << ";"
-        << daemon.getCurrentHP() << ";"
-        << daemon.getNickname() << ";"
-        << static_cast<int>(daemon.getStatus()) << ";"
-        << serializeBaseStats(daemon.getIVs()) << ";"
+    oss << daemon.getSpeciesId() << ";" << daemon.getLevel() << ";"
+        << daemon.getExp() << ";" << daemon.getCurrentHP() << ";"
+        << daemon.getNickname() << ";" << static_cast<int>(daemon.getStatus())
+        << ";" << serializeBaseStats(daemon.getIVs()) << ";"
         << serializeBaseStats(daemon.getEVs()) << ";";
 
     const auto &moves = daemon.getMoves();
-    for (int i = 0; i < 4; ++i)
-    {
+    for (int i = 0; i < 4; ++i) {
         if (i > 0)
             oss << ",";
         oss << moves[static_cast<size_t>(i)].moveId << ":"
@@ -83,8 +71,8 @@ std::string SaveManager::serializeDaemon(const Daemon &daemon)
     return oss.str();
 }
 
-Daemon SaveManager::deserializeDaemon(const std::string &line, const Pokedex &pokedex)
-{
+Daemon SaveManager::deserializeDaemon(const std::string &line,
+                                      const Pokedex &pokedex) {
     std::istringstream iss(line);
     std::string token;
     std::vector<std::string> parts;
@@ -102,8 +90,7 @@ Daemon SaveManager::deserializeDaemon(const std::string &line, const Pokedex &po
 
     // Parse moves: "moveId:curPP:maxPP,moveId:curPP:maxPP,..."
     std::array<MoveSlot, 4> moves{};
-    for (auto &m : moves)
-    {
+    for (auto &m : moves) {
         m.moveId = -1;
         m.currentPP = 0;
         m.maxPP = 0;
@@ -112,28 +99,29 @@ Daemon SaveManager::deserializeDaemon(const std::string &line, const Pokedex &po
     std::istringstream moveSS(parts[8]);
     std::string moveToken;
     int slot = 0;
-    while (std::getline(moveSS, moveToken, ',') && slot < 4)
-    {
+    while (std::getline(moveSS, moveToken, ',') && slot < 4) {
         std::istringstream ms(moveToken);
         std::string mv;
         std::getline(ms, mv, ':');
-        moves[static_cast<size_t>(slot)].moveId = std::stoi(mv);
+        moves[static_cast<std::size_t>(slot)].moveId = std::stoi(mv);
         std::getline(ms, mv, ':');
-        moves[static_cast<size_t>(slot)].currentPP = std::stoi(mv);
+        moves[static_cast<std::size_t>(slot)].currentPP = std::stoi(mv);
         std::getline(ms, mv, ':');
-        moves[static_cast<size_t>(slot)].maxPP = std::stoi(mv);
+        moves[static_cast<std::size_t>(slot)].maxPP = std::stoi(mv);
         ++slot;
     }
 
     const Species &species = pokedex.getSpecies(speciesId);
-    return Daemon(species, level, exp, currentHP, nickname, status, ivs, evs, moves);
+    return Daemon(species, level, exp, currentHP, nickname, status, ivs, evs,
+                  moves);
 }
 
 // --- Save game ---
 
-bool SaveManager::saveGame(const std::string &filepath, const Player &player, const World &world)
-{
-    std::filesystem::create_directories(std::filesystem::path(filepath).parent_path());
+bool SaveManager::saveGame(const std::string &filepath, const Player &player,
+                           const World &world) {
+    std::filesystem::create_directories(
+        std::filesystem::path(filepath).parent_path());
     std::ofstream out(filepath);
     if (!out.is_open())
         return false;
@@ -142,7 +130,8 @@ bool SaveManager::saveGame(const std::string &filepath, const Player &player, co
     out << "[header]\n";
     out << "name|" << player.getName() << "\n";
     out << "map|" << world.getCurrentMapId() << "\n";
-    out << "pos|" << player.getPosition().x << "|" << player.getPosition().y << "\n";
+    out << "pos|" << player.getPosition().x << "|" << player.getPosition().y
+        << "\n";
     out << "facing|" << static_cast<int>(player.getFacing()) << "\n";
     out << "money|" << player.getMoney() << "\n";
 
@@ -169,8 +158,7 @@ bool SaveManager::saveGame(const std::string &filepath, const Player &player, co
     // [pc_boxes]
     out << "[pc_boxes]\n";
     out << "current_box|" << player.getCurrentBox() << "\n";
-    for (int b = 0; b < Player::NUM_BOXES; ++b)
-    {
+    for (int b = 0; b < Player::NUM_BOXES; ++b) {
         const auto &box = player.getBox(b);
         for (const auto &daemon : box)
             out << "box|" << b << "|" << serializeDaemon(daemon) << "\n";
@@ -178,11 +166,9 @@ bool SaveManager::saveGame(const std::string &filepath, const Player &player, co
 
     // [npcs] — save defeated state
     out << "[npcs]\n";
-    for (const auto &mapId : world.getMapIds())
-    {
+    for (const auto &mapId : world.getMapIds()) {
         const auto &npcs = world.getNPCs(mapId);
-        for (const auto &npc : npcs)
-        {
+        for (const auto &npc : npcs) {
             if (npc->isDefeated())
                 out << mapId << "|" << npc->getId() << "|defeated\n";
         }
@@ -200,8 +186,8 @@ bool SaveManager::saveGame(const std::string &filepath, const Player &player, co
 
 // --- Load game ---
 
-bool SaveManager::loadGame(const std::string &filepath, Player &player, World &world, const Pokedex &pokedex)
-{
+bool SaveManager::loadGame(const std::string &filepath, Player &player,
+                           World &world, const Pokedex &pokedex) {
     std::ifstream in(filepath);
     if (!in.is_open())
         return false;
@@ -219,8 +205,7 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
     Position pos{0, 0};
     Direction facing = Direction::down;
 
-    enum class Section
-    {
+    enum class Section {
         none,
         header,
         flags,
@@ -234,59 +219,48 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
     Section section = Section::none;
 
     std::string line;
-    while (std::getline(in, line))
-    {
+    while (std::getline(in, line)) {
         while (!line.empty() && (line.back() == '\r' || line.back() == ' '))
             line.pop_back();
 
         if (line.empty() || line[0] == '#')
             continue;
 
-        if (line == "[header]")
-        {
+        if (line == "[header]") {
             section = Section::header;
             continue;
         }
-        if (line == "[flags]")
-        {
+        if (line == "[flags]") {
             section = Section::flags;
             continue;
         }
-        if (line == "[badges]")
-        {
+        if (line == "[badges]") {
             section = Section::badges;
             continue;
         }
-        if (line == "[inventory]")
-        {
+        if (line == "[inventory]") {
             section = Section::inventory;
             continue;
         }
-        if (line == "[party]")
-        {
+        if (line == "[party]") {
             section = Section::party;
             continue;
         }
-        if (line == "[pc_boxes]")
-        {
+        if (line == "[pc_boxes]") {
             section = Section::pc_boxes;
             continue;
         }
-        if (line == "[npcs]")
-        {
+        if (line == "[npcs]") {
             section = Section::npcs;
             continue;
         }
-        if (line == "[daemondex]")
-        {
+        if (line == "[daemondex]") {
             section = Section::daemondex;
             continue;
         }
 
-        switch (section)
-        {
-        case Section::header:
-        {
+        switch (section) {
+        case Section::header: {
             auto sep = line.find('|');
             if (sep == std::string::npos)
                 break;
@@ -298,8 +272,7 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
                 player.setMoney(std::stoi(val));
             else if (key == "facing")
                 facing = static_cast<Direction>(std::stoi(val));
-            else if (key == "pos")
-            {
+            else if (key == "pos") {
                 auto sep2 = val.find('|');
                 pos.x = std::stoi(val.substr(0, sep2));
                 pos.y = std::stoi(val.substr(sep2 + 1));
@@ -312,60 +285,49 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
         case Section::badges:
             player.addBadge(line);
             break;
-        case Section::inventory:
-        {
+        case Section::inventory: {
             auto sep = line.find('|');
-            if (sep != std::string::npos)
-            {
+            if (sep != std::string::npos) {
                 int itemId = std::stoi(line.substr(0, sep));
                 int qty = std::stoi(line.substr(sep + 1));
                 player.addItem(itemId, qty);
             }
             break;
         }
-        case Section::party:
-        {
-            try
-            {
+        case Section::party: {
+            try {
                 Daemon c = deserializeDaemon(line, pokedex);
                 player.addDaemon(c);
-            }
-            catch (const std::exception &e)
-            {
-                std::cerr << "SaveManager: failed to load Daemon: " << e.what() << "\n";
+            } catch (const std::exception &e) {
+                std::cerr << "SaveManager: failed to load Daemon: " << e.what()
+                          << "\n";
             }
             break;
         }
-        case Section::pc_boxes:
-        {
-            if (line.starts_with("current_box|"))
-            {
+        case Section::pc_boxes: {
+            if (line.starts_with("current_box|")) {
                 player.setCurrentBox(std::stoi(line.substr(12)));
-            }
-            else if (line.starts_with("box|"))
-            {
+            } else if (line.starts_with("box|")) {
                 auto first = line.find('|');
                 auto second = line.find('|', first + 1);
-                // int boxIdx = std::stoi(line.substr(first + 1, second - first - 1));
+                // int boxIdx = std::stoi(line.substr(first + 1, second - first
+                // - 1));
                 std::string daemonData = line.substr(second + 1);
-                try
-                {
+                try {
                     Daemon c = deserializeDaemon(daemonData, pokedex);
                     player.addDaemon(c); // Overflows to PC boxes
-                }
-                catch (const std::exception &e)
-                {
-                    std::cerr << "SaveManager: failed to load PC Daemon: " << e.what() << "\n";
+                } catch (const std::exception &e) {
+                    std::cerr
+                        << "SaveManager: failed to load PC Daemon: " << e.what()
+                        << "\n";
                 }
             }
             break;
         }
-        case Section::npcs:
-        {
+        case Section::npcs: {
             auto sep1 = line.find('|');
             auto sep2 = line.find('|', sep1 + 1);
-            if (sep1 != std::string::npos && sep2 != std::string::npos)
-            {
+            if (sep1 != std::string::npos && sep2 != std::string::npos) {
                 std::string npcMapId = line.substr(0, sep1);
                 std::string npcId = line.substr(sep1 + 1, sep2 - sep1 - 1);
                 std::shared_ptr<NPC> npc = world.findNPCById(npcMapId, npcId);
@@ -374,11 +336,9 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
             }
             break;
         }
-        case Section::daemondex:
-        {
+        case Section::daemondex: {
             auto sep = line.find('|');
-            if (sep != std::string::npos)
-            {
+            if (sep != std::string::npos) {
                 std::string key = line.substr(0, sep);
                 int id = std::stoi(line.substr(sep + 1));
                 if (key == "seen")
@@ -394,8 +354,7 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
     }
 
     // Set map and position
-    if (!mapId.empty())
-    {
+    if (!mapId.empty()) {
         world.setCurrentMap(mapId);
         player.setPosition(pos);
         player.setFacing(facing);
@@ -404,28 +363,21 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
     return true;
 }
 
-bool SaveManager::saveFileExists(const std::string &filepath) const
-{
+bool SaveManager::saveFileExists(const std::string &filepath) const {
     return std::filesystem::exists(filepath);
 }
 
-bool SaveManager::deleteSave(const std::string &filepath)
-{
+bool SaveManager::deleteSave(const std::string &filepath) {
     return std::filesystem::remove(filepath);
 }
 
-std::string SaveManager::getSavePath(int slot) const
-{
+std::string SaveManager::getSavePath(int slot) const {
     return baseSavePath + "slot_" + std::to_string(slot) + ".sav";
 }
 
-int SaveManager::getSlotCount() const
-{
-    return MAX_SAVE_SLOTS;
-}
+int SaveManager::getSlotCount() const { return MAX_SAVE_SLOTS; }
 
-SaveManager::SlotInfo SaveManager::getSlotInfo(int slot) const
-{
+SaveManager::SlotInfo SaveManager::getSlotInfo(int slot) const {
     SlotInfo info;
     std::string path = getSavePath(slot);
     if (!std::filesystem::exists(path))
@@ -441,45 +393,38 @@ SaveManager::SlotInfo SaveManager::getSlotInfo(int slot) const
     bool inHeader = false;
     bool inParty = false;
     bool inBadges = false;
-    while (std::getline(in, line))
-    {
+    while (std::getline(in, line)) {
         while (!line.empty() && (line.back() == '\r' || line.back() == ' '))
             line.pop_back();
 
-        if (line == "[header]")
-        {
+        if (line == "[header]") {
             inHeader = true;
             inParty = false;
             inBadges = false;
             continue;
         }
-        if (line == "[party]")
-        {
+        if (line == "[party]") {
             inParty = true;
             inHeader = false;
             inBadges = false;
             continue;
         }
-        if (line == "[badges]")
-        {
+        if (line == "[badges]") {
             inBadges = true;
             inHeader = false;
             inParty = false;
             continue;
         }
-        if (!line.empty() && line[0] == '[')
-        {
+        if (!line.empty() && line[0] == '[') {
             inHeader = false;
             inParty = false;
             inBadges = false;
             continue;
         }
 
-        if (inHeader)
-        {
+        if (inHeader) {
             auto sep = line.find('|');
-            if (sep != std::string::npos)
-            {
+            if (sep != std::string::npos) {
                 std::string key = line.substr(0, sep);
                 std::string val = line.substr(sep + 1);
                 if (key == "name")
@@ -497,8 +442,7 @@ SaveManager::SlotInfo SaveManager::getSlotInfo(int slot) const
     return info;
 }
 
-std::vector<SaveManager::SlotInfo> SaveManager::getSlotInfos() const
-{
+std::vector<SaveManager::SlotInfo> SaveManager::getSlotInfos() const {
     std::vector<SlotInfo> info;
     for (int i = 0; i < getSlotCount(); ++i)
         info.push_back(getSlotInfo(i));

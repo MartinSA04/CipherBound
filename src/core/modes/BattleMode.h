@@ -1,15 +1,14 @@
 #pragma once
 #include "../GameMode.h"
-#include <string>
 #include <memory>
+#include <string>
 
 class Battle;
 class NPC;
 class Renderer;
 
-class BattleMode : public GameMode
-{
-public:
+class BattleMode : public GameMode {
+  public:
     void update(GameContext &ctx, InputManager &input) override;
     void render(GameContext &ctx) override;
 
@@ -17,7 +16,7 @@ public:
     void setTrainer(std::shared_ptr<NPC> trainer);
     const std::string &getTrainerNPCId() const;
 
-private:
+  private:
     void updateBattleIntroAnim(GameContext &ctx);
     void updateCaptureAnim(GameContext &ctx);
 
@@ -39,7 +38,8 @@ private:
     int partySelected{0};
     int bagSelected{0};
 
-    // Battle party sub-state (for viewing summary or action menu from party list)
+    // Battle party sub-state (for viewing summary or action menu from party
+    // list)
     bool viewingSummary{false};
     bool showingPartyAction{false};
     int partyActionSelected{0};

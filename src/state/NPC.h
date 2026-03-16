@@ -1,13 +1,12 @@
 #pragma once
-#include <vector>
-#include <string>
-#include <set>
-#include "Entity.h"
 #include "Daemon.h"
+#include "Entity.h"
 #include "Party.h"
+#include <set>
+#include <string>
+#include <vector>
 
-enum class NPCType
-{
+enum class NPCType {
     trainer,
     gymLeader,
     shopkeeper,
@@ -20,16 +19,15 @@ enum class NPCType
 
 // A dialogue stage: if the player has the required flag (or flag is empty),
 // use these lines. Stages are checked in order; first match wins.
-struct DialogueStage
-{
+struct DialogueStage {
     std::string requiredFlag; // empty = always matches (default)
     std::vector<std::string> lines;
 };
 
-class NPC : public Entity, public Party
-{
-public:
-    NPC(const std::string &id, const std::string &name, Position position, NPCType type);
+class NPC : public Entity, public Party {
+  public:
+    NPC(const std::string &id, const std::string &name, Position position,
+        NPCType type);
 
     void update() override;
 
@@ -42,8 +40,10 @@ public:
     void setDefeated(bool defeated);
 
     // Dialogue — returns best matching stage for the player's flags
-    const std::vector<std::string> &getDialogueLines(const std::set<std::string> &playerFlags) const;
-    void addDialogueStage(const std::string &requiredFlag, const std::vector<std::string> &lines);
+    const std::vector<std::string> &
+    getDialogueLines(const std::set<std::string> &playerFlags) const;
+    void addDialogueStage(const std::string &requiredFlag,
+                          const std::vector<std::string> &lines);
 
     // Sight range for trainer battles
     int getSightRange() const;
@@ -56,7 +56,7 @@ public:
     bool isHidden() const;
     void setHidden(bool h);
 
-private:
+  private:
     std::string id; // Unique identifier for event flags
     NPCType type;
     bool defeated;

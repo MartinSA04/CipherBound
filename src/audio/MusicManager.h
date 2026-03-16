@@ -1,13 +1,11 @@
 #pragma once
-#include <string>
-#include <map>
-#include <filesystem>
 #include <AnimationWindow.h>
 #include <Audio.h>
+#include <map>
+#include <string>
 
 // Identifies which music track should be playing
-enum class MusicTrack
-{
+enum class MusicTrack {
     none,
     titleScreen,
     town,
@@ -19,9 +17,8 @@ enum class MusicTrack
     trainerVictory,
 };
 
-class MusicManager
-{
-public:
+class MusicManager {
+  public:
     MusicManager();
 
     // Load all audio files up front
@@ -38,7 +35,7 @@ public:
 
     MusicTrack getCurrentTrack() const;
 
-private:
+  private:
     MusicTrack currentTrack{MusicTrack::none};
     std::map<MusicTrack, std::unique_ptr<TDT4102::Audio>> tracks;
 };

@@ -3,6 +3,18 @@
 #include <algorithm>
 #include <cmath>
 
+namespace {
+
+constexpr int moveSlotCount = 4;
+constexpr int fullRestoreThreshold = 9999;
+constexpr int guaranteedCaptureThreshold = 255;
+constexpr int captureShakeRollMax = 65535;
+constexpr int guaranteedCaptureShakes = 4;
+constexpr int aiMoveFuzzMin = 85;
+constexpr int aiMoveFuzzMax = 100;
+
+} // namespace
+
 Battle::Battle(Player &player, std::unique_ptr<Daemon> opponent, BattleType type, std::mt19937 &rng,
                const Pokedex &pokedex)
     : player(player), opponentDaemon(std::move(opponent)), type(type), state(BattleState::intro),
@@ -85,7 +97,7 @@ void Battle::chooseItem(int itemId) {
         player.removeItem(itemId, 1);
 
         int healBefore = pc.getCurrentHP();
-        if (item.effectValue >= 9999)
+        if (item.effectValue >= fullRestoreThreshold)
             pc.fullHeal();
         else
             pc.heal(item.effectValue);
@@ -150,7 +162,7 @@ void Battle::executeTurn() {
 
     if (currentAction == BattleAction::fight) {
         const auto &moves = playerDaemon.getMoves();
-        if (playerMoveSlot < 0 || playerMoveSlot >= 4 ||
+        if (playerMoveSlot < 0 || playerMoveSlot >= moveSlotCount ||
             moves[static_cast<std::size_t>(playerMoveSlot)].moveId < 0) {
             addMessage("No move selected!");
             pendingState = BattleState::choosingAction;
@@ -231,7 +243,7 @@ void Battle::executeOpponentTurn() {
     int bestSlot = -1;
     float bestScore = -1.0f;
 
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < moveSlotCount; ++i) {
         if (oppMoves[static_cast<std::size_t>(i)].moveId < 0 ||
             oppMoves[static_cast<std::size_t>(i)].currentPP <= 0)
             continue;
@@ -256,7 +268,7 @@ void Battle::executeOpponentTurn() {
             score = 40.0f; // Give status moves a moderate score
 
         // Add small random factor (0.85-1.0) to prevent complete predictability
-        std::uniform_int_distribution<int> fuzz(85, 100);
+        std::uniform_int_distribution<int> fuzz(aiMoveFuzzMin, aiMoveFuzzMax);
         score *= static_cast<float>(fuzz(rng)) / 100.0f;
 
         if (score > bestScore) {
@@ -267,7 +279,7 @@ void Battle::executeOpponentTurn() {
 
     // Fallback: use first available move if no good move found
     if (bestSlot < 0) {
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < moveSlotCount; ++i) {
             if (oppMoves[static_cast<std::size_t>(i)].moveId >= 0) {
                 bestSlot = i;
                 break;
@@ -381,11 +393,11 @@ bool Battle::attemptCapture(int itemId) {
     float a = ((3.0f * static_cast<float>(maxHP) - 2.0f * static_cast<float>(curHP)) *
                static_cast<float>(catchRate) * static_cast<float>(ballModifier)) /
               (3.0f * static_cast<float>(maxHP)) * statusBonus;
-    a = std::min(a, 255.0f);
+    a = std::min(a, static_cast<float>(guaranteedCaptureThreshold));
 
-    // If a >= 255, guaranteed catch
-    if (a >= 255.0f) {
-        captureShakes = 4;
+    // If a reaches the guaranteed threshold, capture always succeeds.
+    if (a >= static_cast<float>(guaranteedCaptureThreshold)) {
+        captureShakes = guaranteedCaptureShakes;
         captureSuccess = true;
         addMessage("Used " + ball.name + "!");
         addCaptureAnimMarker();
@@ -407,17 +419,17 @@ bool Battle::attemptCapture(int itemId) {
     float b = 1048560.0f / std::sqrt(std::sqrt(16711680.0f / a));
     int shakeThreshold = static_cast<int>(b);
 
-    std::uniform_int_distribution<int> dist(0, 65535);
+    std::uniform_int_distribution<int> dist(0, captureShakeRollMax);
     int shakes = 0;
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < guaranteedCaptureShakes; ++i) {
         if (dist(rng) < shakeThreshold)
             shakes++;
         else
             break;
     }
 
-    if (shakes == 4) {
-        captureShakes = 4;
+    if (shakes == guaranteedCaptureShakes) {
+        captureShakes = guaranteedCaptureShakes;
         captureSuccess = true;
         addMessage("Used " + ball.name + "!");
         addCaptureAnimMarker();
@@ -455,90 +467,36 @@ bool Battle::attemptCapture(int itemId) {
 }
 
 const std::string &Battle::getMessage() const {
-    if (!messages.empty())
-        return messages.front();
+    if (!eventQueue.empty() && eventQueue.front().type == QueueEntry::Type::message)
+        return eventQueue.front().text;
     return emptyMessage;
 }
 
-bool Battle::hasMessages() const { return !messages.empty(); }
+bool Battle::hasMessages() const { return !eventQueue.empty(); }
 
 void Battle::advanceMessage() {
-    if (!messages.empty())
-        messages.pop_front();
+    if (!eventQueue.empty() && eventQueue.front().type == QueueEntry::Type::message)
+        eventQueue.pop_front();
 
-    if (messages.empty()) {
-        state = pendingState;
-        return;
-    }
-
-    // Check if the next message is an animation marker
-    if (messages.front() == HP_ANIM_MARKER) {
-        messages.pop_front();
-        state = BattleState::animatingHP;
-        return;
-    }
-    if (messages.front() == EXP_ANIM_MARKER) {
-        messages.pop_front();
-        state = BattleState::animatingEXP;
-        return;
-    }
-    if (messages.front() == INTRO_ANIM_MARKER) {
-        messages.pop_front();
-        introPhase++;
-        state = BattleState::intro;
-        return;
-    }
-    if (messages.front() == CAPTURE_ANIM_MARKER) {
-        messages.pop_front();
-        state = BattleState::animatingCapture;
-        return;
-    }
-    if (messages.front() == ATTACK_ANIM_PLAYER_MARKER) {
-        messages.pop_front();
-        attackAnimIsPlayer = true;
-        state = BattleState::animatingAttack;
-        return;
-    }
-    if (messages.front() == ATTACK_ANIM_OPP_MARKER) {
-        messages.pop_front();
-        attackAnimIsPlayer = false;
-        state = BattleState::animatingAttack;
-        return;
-    }
+    transitionToQueuedState();
 }
 
 void Battle::finishIntroAnimation() {
-    if (messages.empty()) {
-        state = pendingState;
+    transitionToQueuedState();
+    if (eventQueue.empty()) {
         introComplete = true;
-    } else
-        state = BattleState::showingMessages;
+    }
 }
 
 int Battle::getIntroPhase() const { return introPhase; }
 
 bool Battle::isIntroComplete() const { return introComplete; }
 
-void Battle::finishHPAnimation() {
-    if (messages.empty())
-        state = pendingState;
-    else
-        state = BattleState::showingMessages;
-}
+void Battle::finishHPAnimation() { transitionToQueuedState(); }
 
-void Battle::finishEXPAnimation() {
-    if (messages.empty())
-        state = pendingState;
-    else
-        state = BattleState::showingMessages;
-}
+void Battle::finishEXPAnimation() { transitionToQueuedState(); }
 
-void Battle::finishCaptureAnimation() {
-    if (messages.empty())
-        state = pendingState;
-    else
-        state = BattleState::showingMessages;
-}
+void Battle::finishCaptureAnimation() { transitionToQueuedState(); }
 
 int Battle::getCaptureShakes() const { return captureShakes; }
 
@@ -547,45 +505,73 @@ bool Battle::getCaptureSuccess() const { return captureSuccess; }
 void Battle::addLevelUpMessage(const std::string &msg) {
     // Insert level-up message + EXP anim marker at front of queue
     // so we show the message, then resume EXP animation for remaining EXP
-    messages.push_front(EXP_ANIM_MARKER);
-    messages.push_front(msg);
+    eventQueue.push_front({QueueEntry::Type::expAnimation, ""});
+    eventQueue.push_front({QueueEntry::Type::message, msg});
     state = BattleState::showingMessages;
 }
 
-void Battle::addMessage(const std::string &msg) { messages.push_back(msg); }
-
-void Battle::addHPAnimMarker() { messages.push_back(HP_ANIM_MARKER); }
-
-void Battle::addEXPAnimMarker() { messages.push_back(EXP_ANIM_MARKER); }
-
-void Battle::addIntroAnimMarker() { messages.push_back(INTRO_ANIM_MARKER); }
-
-void Battle::addCaptureAnimMarker() { messages.push_back(CAPTURE_ANIM_MARKER); }
-
-void Battle::addAttackAnimMarker(bool isPlayer) {
-    messages.push_back(isPlayer ? ATTACK_ANIM_PLAYER_MARKER : ATTACK_ANIM_OPP_MARKER);
+void Battle::addMessage(const std::string &msg) {
+    eventQueue.push_back({QueueEntry::Type::message, msg});
 }
 
-void Battle::finishAttackAnimation() {
-    if (messages.empty()) {
+void Battle::addHPAnimMarker() { eventQueue.push_back({QueueEntry::Type::hpAnimation, ""}); }
+
+void Battle::addEXPAnimMarker() { eventQueue.push_back({QueueEntry::Type::expAnimation, ""}); }
+
+void Battle::addIntroAnimMarker() { eventQueue.push_back({QueueEntry::Type::introAnimation, ""}); }
+
+void Battle::addCaptureAnimMarker() {
+    eventQueue.push_back({QueueEntry::Type::captureAnimation, ""});
+}
+
+void Battle::addAttackAnimMarker(bool isPlayer) {
+    eventQueue.push_back({isPlayer ? QueueEntry::Type::attackAnimationPlayer
+                                   : QueueEntry::Type::attackAnimationOpponent,
+                          ""});
+}
+
+void Battle::transitionToQueuedState() {
+    if (eventQueue.empty()) {
         state = pendingState;
         return;
     }
 
-    // Check for markers at the front of the queue (same logic as
-    // advanceMessage)
-    if (messages.front() == HP_ANIM_MARKER) {
-        messages.pop_front();
+    const QueueEntry &entry = eventQueue.front();
+    switch (entry.type) {
+    case QueueEntry::Type::message:
+        state = BattleState::showingMessages;
+        return;
+    case QueueEntry::Type::hpAnimation:
+        eventQueue.pop_front();
         state = BattleState::animatingHP;
         return;
-    }
-    if (messages.front() == EXP_ANIM_MARKER) {
-        messages.pop_front();
+    case QueueEntry::Type::expAnimation:
+        eventQueue.pop_front();
         state = BattleState::animatingEXP;
         return;
+    case QueueEntry::Type::introAnimation:
+        eventQueue.pop_front();
+        introPhase++;
+        state = BattleState::intro;
+        return;
+    case QueueEntry::Type::captureAnimation:
+        eventQueue.pop_front();
+        state = BattleState::animatingCapture;
+        return;
+    case QueueEntry::Type::attackAnimationPlayer:
+        eventQueue.pop_front();
+        attackAnimIsPlayer = true;
+        state = BattleState::animatingAttack;
+        return;
+    case QueueEntry::Type::attackAnimationOpponent:
+        eventQueue.pop_front();
+        attackAnimIsPlayer = false;
+        state = BattleState::animatingAttack;
+        return;
     }
-    state = BattleState::showingMessages;
 }
+
+void Battle::finishAttackAnimation() { transitionToQueuedState(); }
 
 bool Battle::isPlayerAttacking() const { return attackAnimIsPlayer; }
 
@@ -625,7 +611,7 @@ int Battle::calculateDamage(const Daemon &attacker, const Daemon &defender,
     }
 
     // Random factor 85-100%
-    std::uniform_int_distribution<int> dist(85, 100);
+    std::uniform_int_distribution<int> dist(aiMoveFuzzMin, aiMoveFuzzMax);
     int roll = dist(rng);
     baseDamage = baseDamage * roll / 100;
 

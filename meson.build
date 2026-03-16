@@ -116,3 +116,17 @@ exe = executable(
   cpp_args : compiler_flags,
   link_args : ld_flags
 )
+
+string_utils_test = executable(
+  'string_utils_test',
+  'tests/StringUtilsTest.cpp'
+)
+
+test('string_utils', string_utils_test)
+
+battle_animation_utils_test = executable(
+  'battle_animation_utils_test',
+  'tests/BattleAnimationUtilsTest.cpp'
+)
+
+test('battle_animation_utils', battle_animation_utils_test)

@@ -94,12 +94,28 @@ class Battle {
     bool isPlayerAttacking() const; // Is the player the attacker in current attack anim?
 
   private:
+    struct QueueEntry {
+        enum class Type {
+            message,
+            hpAnimation,
+            expAnimation,
+            introAnimation,
+            captureAnimation,
+            attackAnimationPlayer,
+            attackAnimationOpponent,
+        };
+
+        Type type;
+        std::string text;
+    };
+
     void addMessage(const std::string &msg);
     void addHPAnimMarker();                  // Insert marker to trigger HP bar animation
     void addEXPAnimMarker();                 // Insert marker to trigger EXP bar animation
     void addIntroAnimMarker();               // Insert marker to continue intro animation
     void addCaptureAnimMarker();             // Insert marker to trigger capture animation
     void addAttackAnimMarker(bool isPlayer); // Insert marker to trigger attack animation
+    void transitionToQueuedState();
     void executeTurn();
 
     int calculateDamage(const Daemon &attacker, const Daemon &defender, const MoveData &move) const;
@@ -126,12 +142,6 @@ class Battle {
 
     std::mt19937 &rng;
     const Pokedex &pokedex;
-    std::deque<std::string> messages;
+    std::deque<QueueEntry> eventQueue;
     std::string emptyMessage; // Returned when queue is empty
-    static constexpr const char *HP_ANIM_MARKER = "__HP_ANIM__";
-    static constexpr const char *EXP_ANIM_MARKER = "__EXP_ANIM__";
-    static constexpr const char *INTRO_ANIM_MARKER = "__INTRO_ANIM__";
-    static constexpr const char *CAPTURE_ANIM_MARKER = "__CAPTURE_ANIM__";
-    static constexpr const char *ATTACK_ANIM_PLAYER_MARKER = "__ATTACK_ANIM_PLAYER__";
-    static constexpr const char *ATTACK_ANIM_OPP_MARKER = "__ATTACK_ANIM_OPP__";
 };

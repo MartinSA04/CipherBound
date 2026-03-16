@@ -1,5 +1,11 @@
 #include "core/Session.h"
 
+namespace {
+
+constexpr int defaultSeed = 42;
+
+}
+
 #ifdef __EMSCRIPTEN__
 #include <chrono>
 #include <emscripten.h>
@@ -10,8 +16,7 @@ static void emscriptenMainLoop() { g_session->tick(); }
 #endif
 
 int main() {
-    int seed = 42;
-    Session session(seed);
+    Session session(defaultSeed);
     session.init();
 
 #ifdef __EMSCRIPTEN__

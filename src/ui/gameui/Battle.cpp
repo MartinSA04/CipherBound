@@ -1,4 +1,5 @@
 #include "../GameUI.h"
+#include "BattleAnimationUtils.h"
 #include <algorithm>
 
 bool GameUI::tickHPAnimation(int targetPlayerHP, int targetOpponentHP, int maxPlayerHP,
@@ -38,8 +39,8 @@ EXPTickResult GameUI::tickEXPAnimation(int targetEXP, int expNeeded) {
         return EXPTickResult::reachedTarget;
     }
 
-    playerDisplayEXP =
-        expAnimStartEXP + (destination - expAnimStartEXP) * (expAnimFrame / EXP_ANIM_FRAMES);
+    playerDisplayEXP = BattleAnimationUtils::interpolateLinearInt(expAnimStartEXP, destination,
+                                                                  expAnimFrame, EXP_ANIM_FRAMES);
 
     if (playerDisplayEXP >= expNeeded) {
         playerDisplayEXP = expNeeded;

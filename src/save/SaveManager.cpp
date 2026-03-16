@@ -1,8 +1,11 @@
 #include "SaveManager.h"
+#include "../core/StringUtils.h"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+
+using StringUtils::trimRightInPlace;
 
 SaveManager::SaveManager() : baseSavePath("saves/") {}
 
@@ -202,8 +205,7 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
 
     std::string line;
     while (std::getline(in, line)) {
-        while (!line.empty() && (line.back() == '\r' || line.back() == ' '))
-            line.pop_back();
+        trimRightInPlace(line);
 
         if (line.empty() || line[0] == '#')
             continue;
@@ -373,8 +375,7 @@ SaveManager::SlotInfo SaveManager::getSlotInfo(int slot) const {
     bool inParty = false;
     bool inBadges = false;
     while (std::getline(in, line)) {
-        while (!line.empty() && (line.back() == '\r' || line.back() == ' '))
-            line.pop_back();
+        trimRightInPlace(line);
 
         if (line == "[header]") {
             inHeader = true;

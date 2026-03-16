@@ -7,6 +7,11 @@
 
 namespace StringUtils {
 
+inline void trimRightInPlace(std::string &s) {
+    while (!s.empty() && std::isspace(static_cast<unsigned char>(s.back())))
+        s.pop_back();
+}
+
 inline std::string capitalize(std::string s) {
     if (!s.empty())
         s[0] = static_cast<char>(std::toupper(static_cast<unsigned char>(s[0])));

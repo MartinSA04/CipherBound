@@ -1,6 +1,6 @@
-#include "../World.h"
 #include "../../core/StringUtils.h"
 #include "../../data/Pokedex.h"
+#include "../World.h"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -9,6 +9,7 @@ using StringUtils::parseDirection;
 using StringUtils::splitDoubleAt;
 using StringUtils::splitPipe;
 using StringUtils::splitSemicolon;
+using StringUtils::trimRightInPlace;
 
 namespace {
 
@@ -106,8 +107,7 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
 
     std::string line;
     while (std::getline(file, line)) {
-        while (!line.empty() && (line.back() == '\r' || line.back() == ' '))
-            line.pop_back();
+        trimRightInPlace(line);
 
         if (line.empty())
             continue;

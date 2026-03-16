@@ -7,6 +7,7 @@
 using StringUtils::parseDirection;
 using StringUtils::splitPipe;
 using StringUtils::splitSemicolon;
+using StringUtils::trimRightInPlace;
 
 bool CutsceneRunner::load(const std::string &path) {
     std::ifstream file(path);
@@ -27,9 +28,7 @@ bool CutsceneRunner::load(const std::string &path) {
 
     std::string line;
     while (std::getline(file, line)) {
-        // Trim trailing whitespace
-        while (!line.empty() && (line.back() == '\r' || line.back() == ' '))
-            line.pop_back();
+        trimRightInPlace(line);
 
         if (line.empty() || line[0] == '#')
             continue;

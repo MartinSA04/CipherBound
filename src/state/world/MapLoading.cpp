@@ -239,8 +239,8 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
     addMap(mapId, std::move(map));
 
     for (const auto &raw : rawNPCs) {
-        std::shared_ptr<NPC> npc = std::make_shared<NPC>(raw.id, raw.name, Position{raw.x, raw.y},
-                                                         parseNPCType(raw.typeStr));
+        auto npc = std::make_unique<NPC>(raw.id, raw.name, Position{raw.x, raw.y},
+                                         parseNPCType(raw.typeStr));
         npc->setFacing(parseDirection(raw.facingStr));
         npc->setSightRange(raw.sightRange);
 

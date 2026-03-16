@@ -14,6 +14,8 @@ class Pokedex; // forward declaration
 
 class World {
   public:
+    using NPCList = std::vector<std::unique_ptr<NPC>>;
+
     World(int seed);
 
     void generate(const Pokedex &pokedex);
@@ -35,14 +37,14 @@ class World {
     const Player &getPlayer() const;
     void setPlayer(Player player);
 
-    // NPCs on current map
-    void addNPC(const std::string &mapId, std::shared_ptr<NPC> npc);
-    std::vector<std::shared_ptr<NPC>> &getNPCs(const std::string &mapId);
-    const std::vector<std::shared_ptr<NPC>> &getNPCs(const std::string &mapId) const;
-    std::shared_ptr<NPC> findNPCAt(const std::string &mapId, const Position &pos);
-    std::shared_ptr<NPC> findNPCById(const std::string &npcId);
-    std::shared_ptr<NPC> findNPCById(const std::string &mapId, const std::string &npcId);
-    std::shared_ptr<NPC> NPCSeeingPlayer();
+    // NPCs are owned by the world and exposed through non-owning pointers.
+    void addNPC(const std::string &mapId, std::unique_ptr<NPC> npc);
+    NPCList &getNPCs(const std::string &mapId);
+    const NPCList &getNPCs(const std::string &mapId) const;
+    NPC *findNPCAt(const std::string &mapId, const Position &pos);
+    NPC *findNPCById(const std::string &npcId);
+    NPC *findNPCById(const std::string &mapId, const std::string &npcId);
+    NPC *NPCSeeingPlayer();
     void setNPCDefeated(const std::string &npcId);
 
     // Push the player one tile backwards (opposite of current facing)
@@ -60,6 +62,6 @@ class World {
     std::mt19937 rng;
     std::string currentMapId;
     std::map<std::string, Map> maps;
-    std::map<std::string, std::vector<std::shared_ptr<NPC>>> npcs;
+    std::map<std::string, NPCList> npcs;
     Player player;
 };

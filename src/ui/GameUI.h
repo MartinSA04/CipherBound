@@ -43,7 +43,7 @@ class GameUI {
     void updateInput();
 
     void drawOverworld(const Map &map, const Player &player,
-                       const std::vector<std::shared_ptr<NPC>> &npcs);
+                       const std::vector<std::unique_ptr<NPC>> &npcs);
 
     void loadBattleAssets();
     void loadDaemonSprite(const std::string &speciesName);

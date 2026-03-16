@@ -132,7 +132,7 @@ void BattleMode::drawBattleIntroSceneTrainer(GameContext &ctx) {
 
     const Daemon *playerDaemon = &battle.getPlayerDaemon();
     const Daemon *opponentDaemon = &battle.getOpponentDaemon();
-    NPC *opponent = battle.getOpponent().get();
+    NPC *opponent = battle.getOpponent();
 
     if (ui.battleIntroPhase == 0) {
         ui.drawOpponentBase();

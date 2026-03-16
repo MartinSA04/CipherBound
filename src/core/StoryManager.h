@@ -1,5 +1,4 @@
 #pragma once
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -32,7 +31,7 @@ struct StoryAction {
     std::string choiceContext;
 
     // For startBattle
-    std::shared_ptr<NPC> trainer;
+    NPC *trainer{nullptr};
 
     // For startCutscene
     std::string cutscenePath;
@@ -44,7 +43,7 @@ class StoryManager {
 
     // Called when a dialogue finishes — decides what happens next
     // npc: the NPC whose dialogue just ended (may be nullptr)
-    StoryAction onDialogueEnd(std::shared_ptr<NPC> npc, World &world);
+    StoryAction onDialogueEnd(NPC *npc, World &world);
 
     // Called when the player picks a choice — decides what happens next
     StoryAction onChoiceSelected(const std::string &context, int choice, World &world,

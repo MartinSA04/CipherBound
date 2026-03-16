@@ -11,7 +11,7 @@ class OverworldMode : public GameMode {
     bool wildBattleStarts(GameContext &ctx);
     bool warpBlockStarts(GameContext &ctx);
     bool trainerBattleStarts(GameContext &ctx);
-    bool dialogueStarts(GameContext &ctx, std::shared_ptr<NPC> npc);
+    bool dialogueStarts(GameContext &ctx, NPC *npc);
     void handlePlayerMove(GameContext &ctx, InputManager &input);
     void handlePlayerWarpAttempt(GameContext &ctx);
     void handlePlayerInteraction(GameContext &ctx);

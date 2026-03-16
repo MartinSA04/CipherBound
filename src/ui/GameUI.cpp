@@ -21,7 +21,7 @@ bool GameUI::shouldClose() const { return renderer.shouldClose(); }
 void GameUI::updateInput() { input.update(); }
 
 void GameUI::drawOverworld(const Map &map, const Player &player,
-                           const std::vector<std::shared_ptr<NPC>> &npcs) {
+                           const std::vector<std::unique_ptr<NPC>> &npcs) {
     overworldRenderer.render(map, player, npcs);
 }
 

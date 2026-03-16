@@ -1,15 +1,15 @@
-#include "../OverworldMode.h"
 #include "../../../audio/SoundManager.h"
 #include "../../../state/NPC.h"
 #include "../../../state/World.h"
 #include "../../../state/player/Player.h"
+#include "../OverworldMode.h"
 
 void OverworldMode::handlePlayerInteraction(GameContext &ctx) {
     Player &player = ctx.world.getPlayer();
     Position front = player.getPosition();
     front.moveDirection(player.getFacing());
 
-    std::shared_ptr<NPC> npc = ctx.world.findNPCAt(ctx.world.getCurrentMapId(), front);
+    NPC *npc = ctx.world.findNPCAt(ctx.world.getCurrentMapId(), front);
     if (!npc)
         return;
 

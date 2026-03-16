@@ -2,6 +2,6 @@
 
 void BattleMode::setTrainerNPCId(const std::string &id) { currentTrainerNPCId = id; }
 
-void BattleMode::setTrainer(std::shared_ptr<NPC> trainer) { battleTrainer = std::move(trainer); }
+void BattleMode::setTrainer(NPC *trainer) { battleTrainer = trainer; }
 
 const std::string &BattleMode::getTrainerNPCId() const { return currentTrainerNPCId; }

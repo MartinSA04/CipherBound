@@ -1,6 +1,5 @@
 #pragma once
 #include "../GameMode.h"
-#include <memory>
 #include <string>
 
 class NPC;
@@ -12,7 +11,7 @@ class BattleMode : public GameMode {
     void render(GameContext &ctx) override;
 
     void setTrainerNPCId(const std::string &id);
-    void setTrainer(std::shared_ptr<NPC> trainer);
+    void setTrainer(NPC *trainer);
     const std::string &getTrainerNPCId() const;
 
   private:
@@ -30,7 +29,7 @@ class BattleMode : public GameMode {
     void drawBallCentered(Renderer &renderer, int frame, int cx, int cy) const;
 
     std::string currentTrainerNPCId;
-    std::shared_ptr<NPC> battleTrainer;
+    NPC *battleTrainer{nullptr};
 
     int menuSelected{0};
     int moveSelected{0};

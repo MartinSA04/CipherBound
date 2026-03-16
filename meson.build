@@ -164,6 +164,29 @@ state_model_test = executable(
 
 test('state_model', state_model_test)
 
+world_npc_ownership_test = executable(
+  'world_npc_ownership_test',
+  [
+    'tests/WorldNpcOwnershipTest.cpp',
+    'src/state/Daemon.cpp',
+    'src/state/Entity.cpp',
+    'src/state/Map.cpp',
+    'src/state/Movement.cpp',
+    'src/state/NPC.cpp',
+    'src/state/World.cpp',
+    'src/state/world/NPCs.cpp',
+    'src/state/player/DaemonDex.cpp',
+    'src/state/player/EventFlags.cpp',
+    'src/state/player/Inventory.cpp',
+    'src/state/player/Party.cpp',
+    'src/state/player/Player.cpp',
+    'src/state/player/WalkAnimation.cpp',
+  ],
+  dependencies : [animationwindow_dep],
+)
+
+test('world_npc_ownership', world_npc_ownership_test)
+
 test(
   'tooling_smoke',
   test_bash,

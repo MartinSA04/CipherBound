@@ -46,7 +46,7 @@ bool OverworldMode::trainerBattleStarts(GameContext &ctx) {
     if (player.isMoving())
         return false;
 
-    std::shared_ptr<NPC> npc = ctx.world.NPCSeeingPlayer();
+    NPC *npc = ctx.world.NPCSeeingPlayer();
     if (!npc)
         return false;
 
@@ -55,7 +55,7 @@ bool OverworldMode::trainerBattleStarts(GameContext &ctx) {
     return true;
 }
 
-bool OverworldMode::dialogueStarts(GameContext &ctx, std::shared_ptr<NPC> npc) {
+bool OverworldMode::dialogueStarts(GameContext &ctx, NPC *npc) {
     Player &player = ctx.world.getPlayer();
 
     const auto &lines = npc->getDialogueLines(player.getFlags());

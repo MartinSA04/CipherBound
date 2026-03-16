@@ -20,7 +20,7 @@ Battle::Battle(Player &player, std::unique_ptr<Daemon> opponent, BattleType type
     : player(player), opponentDaemon(std::move(opponent)), type(type), state(BattleState::intro),
       pendingState(BattleState::choosingAction), playerMoveSlot(0), itemChoice(0), switchTarget(0),
       currentAction(BattleAction::fight), rng(rng), pokedex(pokedex) {}
-Battle::Battle(Player &player, std::shared_ptr<NPC> opponent, BattleType type, std::mt19937 &rng,
+Battle::Battle(Player &player, NPC *opponent, BattleType type, std::mt19937 &rng,
                const Pokedex &pokedex)
     : player(player), opponent(opponent), type(type), state(BattleState::intro),
       pendingState(BattleState::choosingAction), playerMoveSlot(0), itemChoice(0), switchTarget(0),
@@ -356,7 +356,7 @@ Daemon &Battle::getOpponentDaemon() {
         return opponent->getDaemon(0);
 }
 
-std::shared_ptr<NPC> Battle::getOpponent() { return opponent; }
+NPC *Battle::getOpponent() const { return opponent; }
 
 BattleType Battle::getType() const { return type; }
 

@@ -311,7 +311,7 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
             if (sep1 != std::string::npos && sep2 != std::string::npos) {
                 std::string npcMapId = line.substr(0, sep1);
                 std::string npcId = line.substr(sep1 + 1, sep2 - sep1 - 1);
-                std::shared_ptr<NPC> npc = world.findNPCById(npcMapId, npcId);
+                NPC *npc = world.findNPCById(npcMapId, npcId);
                 if (npc)
                     npc->setDefeated(true);
             }

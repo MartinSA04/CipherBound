@@ -5,6 +5,7 @@
 #include "../state/player/Player.h"
 #include "Renderer.h"
 #include <array>
+#include <memory>
 #include <vector>
 
 struct SpriteFrame {
@@ -23,7 +24,7 @@ class OverworldRenderer {
     void loadMapBackgrounds(const World &world);
 
     void render(const Map &map, const Player &player,
-                const std::vector<std::shared_ptr<NPC>> &npcs);
+                const std::vector<std::unique_ptr<NPC>> &npcs);
 
     void renderMap(const Map &map, int cameraX, int cameraY);
     void renderEntity(const Entity &entity, int cameraX, int cameraY,

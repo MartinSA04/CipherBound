@@ -202,13 +202,13 @@ void CutsceneRunner::processSteps(World &world, GameUI &ui) {
             if (step.target == "player") {
                 world.getPlayer().setFacing(step.direction);
             } else {
-                std::shared_ptr<NPC> npc =
+                NPC *npc =
                     world.findNPCAt(world.getCurrentMapId(), getEntityPosition(world, step.target));
                 // Also search by ID if position lookup fails
                 if (!npc) {
                     for (auto &n : world.getNPCs(world.getCurrentMapId())) {
                         if (n->getId() == step.target) {
-                            npc = n;
+                            npc = n.get();
                             break;
                         }
                     }

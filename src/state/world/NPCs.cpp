@@ -1,58 +1,71 @@
 #include "../World.h"
 
-void World::addNPC(const std::string &mapId, std::shared_ptr<NPC> npc) {
-    npcs[mapId].push_back(npc);
+void World::addNPC(const std::string &mapId, std::unique_ptr<NPC> npc) {
+    npcs[mapId].push_back(std::move(npc));
 }
 
-std::vector<std::shared_ptr<NPC>> &World::getNPCs(const std::string &mapId) { return npcs[mapId]; }
+World::NPCList &World::getNPCs(const std::string &mapId) { return npcs[mapId]; }
 
-const std::vector<std::shared_ptr<NPC>> &World::getNPCs(const std::string &mapId) const {
-    static const std::vector<std::shared_ptr<NPC>> empty;
+const World::NPCList &World::getNPCs(const std::string &mapId) const {
+    static const NPCList empty;
     auto it = npcs.find(mapId);
     return (it != npcs.end()) ? it->second : empty;
 }
 
-std::shared_ptr<NPC> World::findNPCById(const std::string &npcId) {
-    auto &npcList = npcs[getCurrentMapId()];
-    for (auto &npc : npcList) {
+NPC *World::findNPCById(const std::string &npcId) {
+    auto it = npcs.find(getCurrentMapId());
+    if (it == npcs.end())
+        return nullptr;
+
+    for (auto &npc : it->second) {
         if (npc->getId() == npcId)
-            return npc;
+            return npc.get();
     }
     return nullptr;
 }
 
-std::shared_ptr<NPC> World::findNPCById(const std::string &mapId, const std::string &npcId) {
-    auto &npcList = npcs[mapId];
-    for (auto &npc : npcList) {
+NPC *World::findNPCById(const std::string &mapId, const std::string &npcId) {
+    auto it = npcs.find(mapId);
+    if (it == npcs.end())
+        return nullptr;
+
+    for (auto &npc : it->second) {
         if (npc->getId() == npcId)
-            return npc;
+            return npc.get();
     }
     return nullptr;
 }
 
-std::shared_ptr<NPC> World::findNPCAt(const std::string &mapId, const Position &pos) {
-    auto &npcList = npcs[mapId];
-    for (auto &npc : npcList) {
+NPC *World::findNPCAt(const std::string &mapId, const Position &pos) {
+    auto it = npcs.find(mapId);
+    if (it == npcs.end())
+        return nullptr;
+
+    for (auto &npc : it->second) {
         if (npc->getPosition() == pos)
-            return npc;
+            return npc.get();
     }
     return nullptr;
 }
 
-std::shared_ptr<NPC> World::NPCSeeingPlayer() {
-    for (auto &npc : npcs[getCurrentMapId()]) {
+NPC *World::NPCSeeingPlayer() {
+    auto it = npcs.find(getCurrentMapId());
+    if (it == npcs.end())
+        return nullptr;
+
+    for (auto &npc : it->second) {
         if (!npc->willFight())
             continue;
 
         if (npc->canSeePlayer(player.getPosition()))
-            return npc;
+            return npc.get();
     }
     return nullptr;
 }
 
 void World::setNPCDefeated(const std::string &npcId) {
     getPlayer().setFlag("defeated_" + npcId);
-    std::shared_ptr<NPC> currentTrainerNPC = findNPCById(npcId);
+    NPC *currentTrainerNPC = findNPCById(npcId);
     if (currentTrainerNPC)
         currentTrainerNPC->setDefeated(true);
 }

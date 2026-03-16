@@ -58,7 +58,7 @@ struct ModeRequest {
     // Battle params
     int speciesId{0};
     int level{0};
-    std::shared_ptr<NPC> npc;
+    NPC *npc{nullptr};
 
     // Map params
     std::string mapId;
@@ -82,12 +82,11 @@ struct ModeRequest {
     // --- Factory helpers ---
     static ModeRequest changeState(GameState s);
     static ModeRequest wildBattle(int species, int level);
-    static ModeRequest trainerBattle(std::shared_ptr<NPC> t);
+    static ModeRequest trainerBattle(NPC *t);
     static ModeRequest endBattle();
     static ModeRequest transition(const std::string &mapId, const Position &spawn);
     static ModeRequest dialogue(const std::string &speaker, const std::vector<std::string> &lines,
-                                std::shared_ptr<NPC> npc = nullptr,
-                                GameState retState = GameState::overworld);
+                                NPC *npc = nullptr, GameState retState = GameState::overworld);
     static ModeRequest dialogueChoice(const std::vector<std::string> &options,
                                       const std::string &context,
                                       GameState retState = GameState::overworld);

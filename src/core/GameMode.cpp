@@ -64,10 +64,10 @@ ModeRequest ModeRequest::wildBattle(int species, int level) {
     return r;
 }
 
-ModeRequest ModeRequest::trainerBattle(std::shared_ptr<NPC> t) {
+ModeRequest ModeRequest::trainerBattle(NPC *t) {
     ModeRequest r{};
     r.type = Type::startTrainerBattle;
-    r.npc = std::move(t);
+    r.npc = t;
     return r;
 }
 
@@ -86,12 +86,12 @@ ModeRequest ModeRequest::transition(const std::string &mapId, const Position &sp
 }
 
 ModeRequest ModeRequest::dialogue(const std::string &speaker, const std::vector<std::string> &lines,
-                                  std::shared_ptr<NPC> npc, GameState retState) {
+                                  NPC *npc, GameState retState) {
     ModeRequest r{};
     r.type = Type::startDialogue;
     r.speaker = speaker;
     r.lines = lines;
-    r.npc = std::move(npc);
+    r.npc = npc;
     r.returnState = retState;
     return r;
 }

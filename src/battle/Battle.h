@@ -50,7 +50,7 @@ class Battle {
   public:
     Battle(Player &player, std::unique_ptr<Daemon> opponent, BattleType type, std::mt19937 &rng,
            const Pokedex &pokedex);
-    Battle(Player &player, std::shared_ptr<NPC> opponent, BattleType type, std::mt19937 &rng,
+    Battle(Player &player, NPC *opponent, BattleType type, std::mt19937 &rng,
            const Pokedex &pokedex);
 
     void start();
@@ -66,7 +66,7 @@ class Battle {
 
     Daemon &getPlayerDaemon();
     Daemon &getOpponentDaemon();
-    std::shared_ptr<NPC> getOpponent();
+    NPC *getOpponent() const;
     BattleType getType() const;
 
     bool canFlee() const;
@@ -125,7 +125,7 @@ class Battle {
 
     Player &player;
     std::unique_ptr<Daemon> opponentDaemon = nullptr;
-    std::shared_ptr<NPC> opponent = nullptr;
+    NPC *opponent = nullptr; // non-owning; world keeps NPC storage alive
     BattleType type;
     BattleState state;
     BattleState pendingState;      // State to go to after message queue is drained

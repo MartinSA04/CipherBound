@@ -9,7 +9,7 @@
 
 BattleIntroMode::BattleIntroMode(int speciesId, int level) : speciesId(speciesId), level(level) {}
 
-BattleIntroMode::BattleIntroMode(std::shared_ptr<NPC> trainer) : trainer(std::move(trainer)) {}
+BattleIntroMode::BattleIntroMode(NPC *trainer) : trainer(trainer) {}
 
 void BattleIntroMode::update(GameContext &ctx, InputManager & /*input*/) {
     ctx.ui.battleIntroFrame++;

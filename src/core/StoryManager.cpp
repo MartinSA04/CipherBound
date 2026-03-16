@@ -2,7 +2,7 @@
 #include "../data/Pokedex.h"
 #include "../state/World.h"
 
-StoryAction StoryManager::onDialogueEnd(std::shared_ptr<NPC> npc, World &world) {
+StoryAction StoryManager::onDialogueEnd(NPC *npc, World &world) {
     // Check for trainer battle
     if (npc && !npc->isDefeated() &&
         (npc->getType() == NPCType::trainer || npc->getType() == NPCType::gymLeader) &&

@@ -83,7 +83,7 @@ SpriteFrame OverworldRenderer::getNPCFrame(const NPC &npc) const {
 }
 
 void OverworldRenderer::render(const Map &map, const Player &player,
-                               const std::vector<std::shared_ptr<NPC>> &npcs) {
+                               const std::vector<std::unique_ptr<NPC>> &npcs) {
     int cameraX, cameraY;
     calculateCamera(player, map, cameraX, cameraY);
 

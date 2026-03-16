@@ -98,6 +98,23 @@ struct ModeRequest {
 // ── Shared context passed to every mode
 // ────────────────────────────────────────
 
+struct ModeMailbox {
+    std::vector<ModeRequest> pending;
+
+    void push(ModeRequest req);
+    std::vector<ModeRequest> drain();
+};
+
+struct BattleSessionState {
+    std::unique_ptr<Battle> active;
+};
+
+struct SessionFlowState {
+    int currentSaveSlot{-1};
+    bool pendingPushBack{false};
+    GameState dialogueReturnState{GameState::overworld};
+};
+
 struct GameContext {
     World &world;
     Pokedex &pokedex;
@@ -109,15 +126,21 @@ struct GameContext {
     SoundManager &sound;
 
     // Shared mutable state (owned here, used by multiple modes)
-    std::unique_ptr<Battle> currentBattle;
-    int currentSaveSlot{-1};
-    bool pendingPushBack{false};
+    BattleSessionState battleSession;
+    SessionFlowState flow;
+    ModeMailbox mailbox;
+
+    void setBattle(std::unique_ptr<Battle> battle);
+    bool hasBattle() const;
+    Battle *tryBattle();
+    const Battle *tryBattle() const;
+    Battle &battle();
+    const Battle &battle() const;
+    void clearBattle();
 
     // Play a sound effect (convenience wrapper)
     void playSound(SoundEffect sfx);
 
-    // Pending requests from the active mode
-    std::vector<ModeRequest> pendingRequests;
     void pushRequest(ModeRequest req);
 
     ~GameContext();

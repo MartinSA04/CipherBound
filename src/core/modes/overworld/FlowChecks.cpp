@@ -1,8 +1,8 @@
-#include "../OverworldMode.h"
 #include "../../../state/NPC.h"
 #include "../../../state/World.h"
 #include "../../../state/player/Player.h"
 #include "../../StoryManager.h"
+#include "../OverworldMode.h"
 
 bool OverworldMode::wildBattleStarts(GameContext &ctx) {
     Player &player = ctx.world.getPlayer();
@@ -33,7 +33,7 @@ bool OverworldMode::warpBlockStarts(GameContext &ctx) {
     if (!pendingWarpBlock || player.isMoving())
         return false;
     pendingWarpBlock = false;
-    ctx.pendingPushBack = true;
+    ctx.flow.pendingPushBack = true;
     ctx.pushRequest(ModeRequest::dialogue(pendingWarpBlockAction.speaker,
                                           pendingWarpBlockAction.lines, nullptr,
                                           GameState::overworld));

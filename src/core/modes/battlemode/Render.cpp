@@ -31,6 +31,7 @@ void BattleMode::drawBallCentered(Renderer &renderer, int frame, int cx, int cy)
 void BattleMode::drawBattleScene(GameContext &ctx) {
     GameUI &ui = ctx.ui;
     ui.loadBattleAssets();
+    Battle &battle = ctx.battle();
 
     Renderer &renderer = ui.getRenderer();
     renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT - UI_PANEL_HEIGHT,
@@ -39,8 +40,8 @@ void BattleMode::drawBattleScene(GameContext &ctx) {
     ui.drawOpponentBase();
     ui.drawPlayerBase();
 
-    const Daemon *playerDaemon = &ctx.currentBattle->getPlayerDaemon();
-    const Daemon *opponentDaemon = &ctx.currentBattle->getOpponentDaemon();
+    const Daemon *playerDaemon = &battle.getPlayerDaemon();
+    const Daemon *opponentDaemon = &battle.getOpponentDaemon();
 
     constexpr float BOB_PERIOD = 120.0f;
     constexpr float BOB_AMPLITUDE = 6.0f;
@@ -52,7 +53,7 @@ void BattleMode::drawBattleScene(GameContext &ctx) {
 
     int playerAttackOffsetX = 0;
     int opponentAttackOffsetX = 0;
-    BattleState bs = ctx.currentBattle->getState();
+    BattleState bs = battle.getState();
     if (bs == BattleState::animatingAttack) {
         constexpr int BACK_DIST = 16;
         constexpr int LUNGE_DIST = 24;
@@ -70,13 +71,13 @@ void BattleMode::drawBattleScene(GameContext &ctx) {
             offsetX = static_cast<int>(LUNGE_DIST * (1.0f - t));
         }
 
-        if (ctx.currentBattle->isPlayerAttacking())
+        if (battle.isPlayerAttacking())
             playerAttackOffsetX = offsetX;
         else
             opponentAttackOffsetX = -offsetX;
     }
 
-    if (captureAnimDone && ctx.currentBattle->getCaptureSuccess()) {
+    if (captureAnimDone && battle.getCaptureSuccess()) {
         auto [baseX, baseY, baseW, baseH] = ui.getOpponentBaseGeometry();
         drawBallCentered(renderer, 0, baseX + baseW / 2, baseY + baseH / 2);
     } else {
@@ -90,6 +91,7 @@ void BattleMode::drawBattleScene(GameContext &ctx) {
 void BattleMode::drawBattleIntroSceneWild(GameContext &ctx) {
     GameUI &ui = ctx.ui;
     ui.loadBattleAssets();
+    Battle &battle = ctx.battle();
 
     float t = static_cast<float>(ui.battleIntroFrame) /
               static_cast<float>(GameUI::BATTLE_INTRO_SCENE_DURATION);
@@ -98,8 +100,8 @@ void BattleMode::drawBattleIntroSceneWild(GameContext &ctx) {
 
     ui.drawBattleBackground();
 
-    const Daemon *playerDaemon = &ctx.currentBattle->getPlayerDaemon();
-    const Daemon *opponentDaemon = &ctx.currentBattle->getOpponentDaemon();
+    const Daemon *playerDaemon = &battle.getPlayerDaemon();
+    const Daemon *opponentDaemon = &battle.getOpponentDaemon();
 
     if (ui.battleIntroPhase == 0) {
         ui.drawOpponentBase();
@@ -119,6 +121,7 @@ void BattleMode::drawBattleIntroSceneWild(GameContext &ctx) {
 void BattleMode::drawBattleIntroSceneTrainer(GameContext &ctx) {
     GameUI &ui = ctx.ui;
     ui.loadBattleAssets();
+    Battle &battle = ctx.battle();
 
     float t = static_cast<float>(ui.battleIntroFrame) /
               static_cast<float>(GameUI::BATTLE_INTRO_SCENE_DURATION);
@@ -127,9 +130,9 @@ void BattleMode::drawBattleIntroSceneTrainer(GameContext &ctx) {
 
     ui.drawBattleBackground();
 
-    const Daemon *playerDaemon = &ctx.currentBattle->getPlayerDaemon();
-    const Daemon *opponentDaemon = &ctx.currentBattle->getOpponentDaemon();
-    NPC *opponent = ctx.currentBattle->getOpponent().get();
+    const Daemon *playerDaemon = &battle.getPlayerDaemon();
+    const Daemon *opponentDaemon = &battle.getOpponentDaemon();
+    NPC *opponent = battle.getOpponent().get();
 
     if (ui.battleIntroPhase == 0) {
         ui.drawOpponentBase();
@@ -185,7 +188,7 @@ void BattleMode::drawBattleMenu(GameContext &ctx) {
 void BattleMode::drawMoveSelectScreen(GameContext &ctx) {
     Renderer &renderer = ctx.ui.getRenderer();
     SpriteFont &spriteFont = ctx.ui.getSpriteFont();
-    const Daemon &daemon = ctx.currentBattle->getPlayerDaemon();
+    const Daemon &daemon = ctx.battle().getPlayerDaemon();
 
     int panelY = WINDOW_HEIGHT - UI_PANEL_HEIGHT;
     int scale = PIXEL_SCALE;
@@ -247,30 +250,31 @@ void BattleMode::drawMoveSelectScreen(GameContext &ctx) {
 }
 
 void BattleMode::render(GameContext &ctx) {
-    if (!ctx.currentBattle)
+    if (!ctx.hasBattle())
         return;
 
-    BattleState bs = ctx.currentBattle->getState();
+    Battle &battle = ctx.battle();
+    BattleState bs = battle.getState();
 
     if (bs == BattleState::intro) {
-        ctx.ui.battleIntroPhase = ctx.currentBattle->getIntroPhase();
-        if (ctx.currentBattle->getType() == BattleType::wild)
+        ctx.ui.battleIntroPhase = battle.getIntroPhase();
+        if (battle.getType() == BattleType::wild)
             drawBattleIntroSceneWild(ctx);
         else
             drawBattleIntroSceneTrainer(ctx);
         return;
     }
 
-    if (!ctx.currentBattle->isIntroComplete() && bs == BattleState::showingMessages) {
+    if (!battle.isIntroComplete() && bs == BattleState::showingMessages) {
         int savedFrame = ctx.ui.battleIntroFrame;
         ctx.ui.battleIntroFrame = GameUI::BATTLE_INTRO_SCENE_DURATION;
-        ctx.ui.battleIntroPhase = ctx.currentBattle->getIntroPhase();
-        if (ctx.currentBattle->getType() == BattleType::wild)
+        ctx.ui.battleIntroPhase = battle.getIntroPhase();
+        if (battle.getType() == BattleType::wild)
             drawBattleIntroSceneWild(ctx);
         else
             drawBattleIntroSceneTrainer(ctx);
         ctx.ui.battleIntroFrame = savedFrame;
-        ctx.ui.drawDialogueBox("", ctx.currentBattle->getMessage());
+        ctx.ui.drawDialogueBox("", battle.getMessage());
         return;
     }
 
@@ -298,6 +302,6 @@ void BattleMode::render(GameContext &ctx) {
     } else if (bs == BattleState::choosingItem) {
         ctx.ui.drawBagScreen(ctx.world.getPlayer(), ctx.pokedex, bagSelected);
     } else {
-        ctx.ui.drawDialogueBox("", ctx.currentBattle->getMessage());
+        ctx.ui.drawDialogueBox("", battle.getMessage());
     }
 }

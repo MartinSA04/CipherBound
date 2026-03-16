@@ -18,8 +18,7 @@
 
 Session::Session(int seed)
     : world(seed), pokedex(), ui(), saveManager(), story(), music(), sound(), cutsceneRunner(),
-      ctx{world,          pokedex, ui,      saveManager, story, music,
-          cutsceneRunner, sound,   nullptr, -1,          false, {}} {}
+      ctx{world, pokedex, ui, saveManager, story, music, cutsceneRunner, sound, {}, {}, {}} {}
 
 // ── Main loop
 // ──────────────────────────────────────────────────────────────────
@@ -83,8 +82,7 @@ void Session::init() {
 void Session::processRequests() {
     // Drain all pending requests (a request may push more, but we process them
     // in order and stop after one pass to avoid infinite loops)
-    std::vector<ModeRequest> requests;
-    std::swap(requests, ctx.pendingRequests);
+    std::vector<ModeRequest> requests = ctx.mailbox.drain();
 
     for (auto &req : requests) {
         switch (req.type) {
@@ -155,16 +153,16 @@ void Session::handleStartTrainerBattleRequest(const ModeRequest &req) {
 }
 
 void Session::handleEndBattleRequest() {
-    if (ctx.currentBattle) {
+    if (ctx.hasBattle()) {
         auto *battleMode = dynamic_cast<BattleMode *>(currentMode.get());
         if (battleMode && !battleMode->getTrainerNPCId().empty()) {
-            BattleResult result = ctx.currentBattle->getResult();
+            BattleResult result = ctx.battle().getResult();
             if (result.playerWon)
                 world.setNPCDefeated(battleMode->getTrainerNPCId());
         }
     }
 
-    ctx.currentBattle.reset();
+    ctx.clearBattle();
     switchMode(GameState::overworld);
 
     MusicTrack mapTrack = MusicManager::trackForMap(world.getCurrentMapId());
@@ -178,7 +176,7 @@ void Session::handleTransitionToMapRequest(const ModeRequest &req) {
 }
 
 void Session::handleStartDialogueRequest(const ModeRequest &req) {
-    dialogueReturnState = req.returnState;
+    ctx.flow.dialogueReturnState = req.returnState;
     switchToMode(GameState::dialogue,
                  std::make_unique<DialogueMode>(req.speaker, req.lines, req.npc, req.returnState));
 }
@@ -186,7 +184,7 @@ void Session::handleStartDialogueRequest(const ModeRequest &req) {
 void Session::handleStartDialogueChoiceRequest(const ModeRequest &req) {
     switchToMode(GameState::dialogueChoice,
                  std::make_unique<DialogueChoiceMode>(req.choiceOptions, req.choiceContext,
-                                                      dialogueReturnState));
+                                                      ctx.flow.dialogueReturnState));
 }
 
 void Session::handleStartCutsceneRequest(const ModeRequest &req) {
@@ -206,8 +204,8 @@ void Session::handleStoryAction(const StoryAction &action) {
         break;
 
     case StoryAction::Type::showChoice:
-        ctx.pushRequest(
-            ModeRequest::dialogueChoice(action.options, action.choiceContext, dialogueReturnState));
+        ctx.pushRequest(ModeRequest::dialogueChoice(action.options, action.choiceContext,
+                                                    ctx.flow.dialogueReturnState));
         break;
 
     case StoryAction::Type::showDialogue:
@@ -221,11 +219,11 @@ void Session::handleStoryAction(const StoryAction &action) {
 
     case StoryAction::Type::returnToState:
     default:
-        if (ctx.pendingPushBack) {
-            ctx.pendingPushBack = false;
+        if (ctx.flow.pendingPushBack) {
+            ctx.flow.pendingPushBack = false;
             world.pushPlayerBack();
         }
-        switchMode(dialogueReturnState);
+        switchMode(ctx.flow.dialogueReturnState);
         break;
     }
 }

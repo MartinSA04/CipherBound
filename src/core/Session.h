@@ -72,9 +72,6 @@ class Session {
     // Create the appropriate GameMode object for a state
     std::unique_ptr<GameMode> createMode(GameState state);
 
-    // Dialogue return state tracking (shared across dialogue/choice modes)
-    GameState dialogueReturnState{GameState::overworld};
-
     // Maps GameState → ScreenType for the UI
     static ScreenType screenForState(GameState gs);
 

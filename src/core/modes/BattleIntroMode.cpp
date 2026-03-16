@@ -16,9 +16,9 @@ void BattleIntroMode::update(GameContext &ctx, InputManager & /*input*/) {
     if (ctx.ui.battleIntroFrame >= GameUI::BATTLE_INTRO_DURATION) {
         // Transition complete — create the Battle object
         if (trainer && trainer->isTrainerType()) {
-            ctx.currentBattle =
-                std::make_unique<Battle>(ctx.world.getPlayer(), trainer, BattleType::trainer,
-                                         ctx.world.getRng(), ctx.pokedex);
+            ctx.setBattle(std::make_unique<Battle>(ctx.world.getPlayer(), trainer,
+                                                   BattleType::trainer, ctx.world.getRng(),
+                                                   ctx.pokedex));
 
             // Mark all trainer daemons as seen
             for (const auto &d : trainer->getParty())
@@ -26,17 +26,18 @@ void BattleIntroMode::update(GameContext &ctx, InputManager & /*input*/) {
         } else {
             const Species &sp = ctx.pokedex.getSpecies(speciesId);
             auto daemon = std::make_unique<Daemon>(sp, level);
-            ctx.currentBattle =
-                std::make_unique<Battle>(ctx.world.getPlayer(), std::move(daemon), BattleType::wild,
-                                         ctx.world.getRng(), ctx.pokedex);
+            ctx.setBattle(std::make_unique<Battle>(ctx.world.getPlayer(), std::move(daemon),
+                                                   BattleType::wild, ctx.world.getRng(),
+                                                   ctx.pokedex));
 
             ctx.world.getPlayer().markSeen(speciesId);
         }
 
-        ctx.ui.playerDisplayHP = ctx.currentBattle->getPlayerDaemon().getCurrentHP();
-        ctx.ui.opponentDisplayHP = ctx.currentBattle->getOpponentDaemon().getCurrentHP();
-        ctx.ui.playerDisplayEXP = ctx.currentBattle->getPlayerDaemon().getExp();
-        ctx.currentBattle->start();
+        Battle &battle = ctx.battle();
+        ctx.ui.playerDisplayHP = battle.getPlayerDaemon().getCurrentHP();
+        ctx.ui.opponentDisplayHP = battle.getOpponentDaemon().getCurrentHP();
+        ctx.ui.playerDisplayEXP = battle.getPlayerDaemon().getExp();
+        battle.start();
         ctx.ui.battleIntroPhase = 0;
         ctx.ui.battleIntroFrame = 0;
 

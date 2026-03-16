@@ -3,13 +3,46 @@
 #include "../battle/Battle.h"
 #include "../state/World.h"
 #include "../ui/GameUI.h"
+#include <stdexcept>
 
 // ── GameContext
 // ────────────────────────────────────────────────────────────────
 
 GameContext::~GameContext() = default;
 
-void GameContext::pushRequest(ModeRequest req) { pendingRequests.push_back(std::move(req)); }
+void ModeMailbox::push(ModeRequest req) { pending.push_back(std::move(req)); }
+
+std::vector<ModeRequest> ModeMailbox::drain() {
+    std::vector<ModeRequest> requests;
+    std::swap(requests, pending);
+    return requests;
+}
+
+void GameContext::setBattle(std::unique_ptr<Battle> battle) {
+    battleSession.active = std::move(battle);
+}
+
+bool GameContext::hasBattle() const { return static_cast<bool>(battleSession.active); }
+
+Battle *GameContext::tryBattle() { return battleSession.active.get(); }
+
+const Battle *GameContext::tryBattle() const { return battleSession.active.get(); }
+
+Battle &GameContext::battle() {
+    if (!battleSession.active)
+        throw std::logic_error("No active battle in GameContext");
+    return *battleSession.active;
+}
+
+const Battle &GameContext::battle() const {
+    if (!battleSession.active)
+        throw std::logic_error("No active battle in GameContext");
+    return *battleSession.active;
+}
+
+void GameContext::clearBattle() { battleSession.active.reset(); }
+
+void GameContext::pushRequest(ModeRequest req) { mailbox.push(std::move(req)); }
 
 void GameContext::playSound(SoundEffect sfx) { sound.play(sfx, ui.getRenderer().getWindow()); }
 

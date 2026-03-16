@@ -33,7 +33,7 @@ void TitleScreenMode::update(GameContext &ctx, InputManager &input) {
 
         if (input.isConfirmPressed()) {
             ctx.playSound(SoundEffect::select);
-            ctx.currentSaveSlot = selected;
+            ctx.flow.currentSaveSlot = selected;
             const auto &info = slotInfos[static_cast<std::size_t>(selected)];
 
             if (info.exists) {

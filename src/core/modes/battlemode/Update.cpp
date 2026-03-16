@@ -9,18 +9,19 @@
 void BattleMode::updateBattleIntroAnim(GameContext &ctx) {
     ctx.ui.battleIntroFrame++;
     if (ctx.ui.battleIntroFrame >= GameUI::BATTLE_INTRO_SCENE_DURATION) {
-        ctx.currentBattle->finishIntroAnimation();
+        ctx.battle().finishIntroAnimation();
         ctx.ui.battleIntroFrame = 0;
     }
 }
 
 void BattleMode::update(GameContext &ctx, InputManager &input) {
-    if (!ctx.currentBattle)
+    if (!ctx.hasBattle())
         return;
 
+    Battle &battle = ctx.battle();
     battleAnimFrame++;
 
-    BattleState bs = ctx.currentBattle->getState();
+    BattleState bs = battle.getState();
     switch (bs) {
     case BattleState::intro:
         updateBattleIntroAnim(ctx);
@@ -46,31 +47,30 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
         return;
 
     case BattleState::showingMessages:
-        if (!ctx.currentBattle->isIntroComplete())
+        if (!battle.isIntroComplete())
             ctx.ui.battleIntroFrame++;
 
         if (ctx.ui.updateTypewriter(input.isConfirmPressed())) {
             ctx.playSound(SoundEffect::select);
-            ctx.currentBattle->advanceMessage();
-            if (ctx.currentBattle->getState() == BattleState::intro) {
+            battle.advanceMessage();
+            if (battle.getState() == BattleState::intro) {
                 ctx.ui.battleIntroFrame = 0;
-                ctx.ui.battleIntroPhase = ctx.currentBattle->getIntroPhase();
+                ctx.ui.battleIntroPhase = battle.getIntroPhase();
             }
         }
         return;
 
     case BattleState::animatingHP: {
-        bool done = ctx.ui.tickHPAnimation(ctx.currentBattle->getPlayerDaemon().getCurrentHP(),
-                                           ctx.currentBattle->getOpponentDaemon().getCurrentHP(),
-                                           ctx.currentBattle->getPlayerDaemon().getMaxHP(),
-                                           ctx.currentBattle->getOpponentDaemon().getMaxHP());
+        bool done = ctx.ui.tickHPAnimation(
+            battle.getPlayerDaemon().getCurrentHP(), battle.getOpponentDaemon().getCurrentHP(),
+            battle.getPlayerDaemon().getMaxHP(), battle.getOpponentDaemon().getMaxHP());
         if (done)
-            ctx.currentBattle->finishHPAnimation();
+            battle.finishHPAnimation();
         return;
     }
 
     case BattleState::animatingEXP: {
-        BattleState bps = ctx.currentBattle->getPendingState();
+        BattleState bps = battle.getPendingState();
         if (bps == BattleState::victory || bps == BattleState::captured) {
             MusicTrack victoryTrack = (battleTrainer && battleTrainer->isTrainerType())
                                           ? MusicTrack::trainerVictory
@@ -78,7 +78,7 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
             ctx.music.play(victoryTrack, ctx.ui.getRenderer().getWindow());
         }
 
-        Daemon &daemon = ctx.currentBattle->getPlayerDaemon();
+        Daemon &daemon = battle.getPlayerDaemon();
         EXPTickResult result = ctx.ui.tickEXPAnimation(daemon.getExp(), daemon.getExpNeeded());
 
         if (!expSoundPlayed) {
@@ -92,19 +92,19 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
             ctx.ui.expAnimFrame = 0;
             ctx.ui.expAnimStartEXP = -1;
             expSoundPlayed = false;
-            ctx.currentBattle->addLevelUpMessage(daemon.getNickname() + " leveled up to Lv" +
-                                                 std::to_string(daemon.getLevel()) + "!");
+            battle.addLevelUpMessage(daemon.getNickname() + " leveled up to Lv" +
+                                     std::to_string(daemon.getLevel()) + "!");
             ctx.ui.playerDisplayHP = daemon.getCurrentHP();
         } else if (result == EXPTickResult::reachedTarget) {
             ctx.playSound(SoundEffect::expFull);
             expSoundPlayed = false;
-            ctx.currentBattle->finishEXPAnimation();
+            battle.finishEXPAnimation();
         }
         return;
     }
 
     case BattleState::opponentTurn:
-        ctx.currentBattle->executeOpponentTurn();
+        battle.executeOpponentTurn();
         return;
 
     case BattleState::animatingCapture:
@@ -118,7 +118,7 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
             ctx.playSound(SoundEffect::attack);
         if (attackAnimFrame >= ATTACK_TOTAL_FRAMES) {
             attackAnimFrame = 0;
-            ctx.currentBattle->finishAttackAnimation();
+            battle.finishAttackAnimation();
         }
         return;
     }
@@ -130,7 +130,7 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
             ctx.playSound(SoundEffect::select);
             BattleAction actions[] = {BattleAction::fight, BattleAction::item,
                                       BattleAction::switchDaemon, BattleAction::flee};
-            ctx.currentBattle->chooseAction(actions[static_cast<std::size_t>(menuSelected)]);
+            battle.chooseAction(actions[static_cast<std::size_t>(menuSelected)]);
             moveSelected = 0;
             partySelected = 0;
             bagSelected = 0;
@@ -145,10 +145,10 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
 
         if (input.isConfirmPressed()) {
             ctx.playSound(SoundEffect::select);
-            ctx.currentBattle->chooseMove(moveSelected);
+            battle.chooseMove(moveSelected);
         }
         if (input.isCancelPressed())
-            ctx.currentBattle->goBack();
+            battle.goBack();
         return;
 
     case BattleState::choosingSwitch:
@@ -181,7 +181,7 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
                     break;
                 case 1:
                     showingPartyAction = false;
-                    ctx.currentBattle->chooseSwitchTarget(partySelected);
+                    battle.chooseSwitchTarget(partySelected);
                     break;
                 case 2:
                     showingPartyAction = false;
@@ -202,7 +202,7 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
             partyActionSelected = 0;
         }
         if (input.isCancelPressed())
-            ctx.currentBattle->goBack();
+            battle.goBack();
         return;
 
     case BattleState::choosingItem: {
@@ -211,7 +211,7 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
         int itemCount = static_cast<int>(ctx.world.getPlayer().getInventory().size());
         if (itemCount == 0) {
             if (input.isCancelPressed())
-                ctx.currentBattle->goBack();
+                battle.goBack();
             return;
         }
 
@@ -221,7 +221,7 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
             if (bagSelected >= 0 && bagSelected < itemCount) {
                 ctx.playSound(SoundEffect::select);
                 const auto &inv = ctx.world.getPlayer().getInventory();
-                ctx.currentBattle->chooseItem(inv[static_cast<std::size_t>(bagSelected)].itemId);
+                battle.chooseItem(inv[static_cast<std::size_t>(bagSelected)].itemId);
                 int newSize = static_cast<int>(ctx.world.getPlayer().getInventory().size());
                 if (newSize == 0)
                     bagSelected = 0;
@@ -230,7 +230,7 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
             }
         }
         if (input.isCancelPressed())
-            ctx.currentBattle->goBack();
+            battle.goBack();
         return;
     }
     }

@@ -14,9 +14,10 @@ constexpr int CAPTURE_SHAKE_PAUSE = 16;
 } // namespace
 
 void BattleMode::updateCaptureAnim(GameContext &ctx) {
+    Battle &battle = ctx.battle();
     captureAnimFrame++;
 
-    int totalShakes = ctx.currentBattle->getCaptureShakes();
+    int totalShakes = battle.getCaptureShakes();
     int throwEnd = CAPTURE_THROW_FRAMES;
     int landEnd = throwEnd + CAPTURE_LAND_FRAMES;
 
@@ -37,32 +38,33 @@ void BattleMode::updateCaptureAnim(GameContext &ctx) {
     int totalEnd = shakesEnd + 20;
 
     if (captureAnimFrame >= totalEnd) {
-        if (!ctx.currentBattle->getCaptureSuccess())
+        if (!battle.getCaptureSuccess())
             ctx.playSound(SoundEffect::pokeballEscape);
 
         captureAnimFrame = 0;
         captureAnimShakesDone = 0;
         captureAnimDone = true;
-        ctx.currentBattle->finishCaptureAnimation();
+        battle.finishCaptureAnimation();
     }
 }
 
 void BattleMode::drawCaptureScene(GameContext &ctx) {
     GameUI &ui = ctx.ui;
     Renderer &renderer = ui.getRenderer();
+    Battle &battle = ctx.battle();
 
     ui.drawBattleBackground();
     ui.drawOpponentBase();
     ui.drawPlayerBase();
 
-    const Daemon *playerDaemon = &ctx.currentBattle->getPlayerDaemon();
-    const Daemon *opponentDaemon = &ctx.currentBattle->getOpponentDaemon();
+    const Daemon *playerDaemon = &battle.getPlayerDaemon();
+    const Daemon *opponentDaemon = &battle.getOpponentDaemon();
     ui.drawPlayerDaemon(playerDaemon);
     ui.drawPlayerInfoBar(playerDaemon);
     ui.drawOpponentInfoBar(opponentDaemon);
 
-    int totalShakes = ctx.currentBattle->getCaptureShakes();
-    bool success = ctx.currentBattle->getCaptureSuccess();
+    int totalShakes = battle.getCaptureShakes();
+    bool success = battle.getCaptureSuccess();
 
     int shakeGroupLen = CAPTURE_SHAKE_FRAMES + CAPTURE_SHAKE_PAUSE;
     int throwEnd = CAPTURE_THROW_FRAMES;

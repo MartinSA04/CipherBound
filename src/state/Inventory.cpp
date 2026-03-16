@@ -32,9 +32,7 @@ int Inventory::getItemCount(int itemId) const {
     return 0;
 }
 
-const std::vector<InventoryEntry> &Inventory::getInventory() const {
-    return inventory;
-}
+const std::vector<InventoryEntry> &Inventory::getInventory() const { return inventory; }
 
 void Inventory::clearInventory() { inventory.clear(); }
 

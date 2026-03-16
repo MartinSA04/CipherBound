@@ -1,7 +1,6 @@
 #include "Player.h"
 
-Player::Player(const std::string &name, Position position)
-    : Entity(name, position) {}
+Player::Player(const std::string &name, Position position) : Entity(name, position) {}
 
 void Player::update() {}
 

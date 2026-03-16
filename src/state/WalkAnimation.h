@@ -27,6 +27,6 @@ class WalkAnimation {
     int animFramesLeft{0}; // remaining animation frames
     int moveDelay{12};     // frames per tile movement (animation duration)
     int walkFrame{0};      // walk cycle counter (alternates feet each step)
-    bool wasMoving; // was the player walking last frame (for turn cooldown
-                    // logic)
+    bool wasMoving;        // was the player walking last frame (for turn cooldown
+                           // logic)
 };

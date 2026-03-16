@@ -8,11 +8,7 @@
 #include "Party.h"
 #include "WalkAnimation.h"
 
-class Player : public Entity,
-               public Inventory,
-               public EventFlags,
-               public PartyAndPCBoxes,
-               public DaemonDex {
+class Player : public Entity, public Inventory, public EventFlags, public PartyAndPCBoxes, public DaemonDex {
   public:
     Player(const std::string &name, Position position);
 

@@ -18,9 +18,7 @@ const std::vector<std::string> &EventFlags::getBadges() const { return badges; }
 // --- Event flags ---
 
 void EventFlags::setFlag(const std::string &flag) { eventFlags.insert(flag); }
-bool EventFlags::hasFlag(const std::string &flag) const {
-    return eventFlags.count(flag) > 0;
-}
+bool EventFlags::hasFlag(const std::string &flag) const { return eventFlags.count(flag) > 0; }
 void EventFlags::clearFlag(const std::string &flag) { eventFlags.erase(flag); }
 const std::set<std::string> &EventFlags::getFlags() const { return eventFlags; }
 

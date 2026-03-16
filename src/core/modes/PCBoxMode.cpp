@@ -67,22 +67,19 @@ void PCBoxMode::update(GameContext &ctx, InputManager &input) {
     if (input.isConfirmPressed()) {
         if (viewingParty) {
             // Deposit: party → box
-            if (player.partySize() > 0 && selected >= 0 &&
-                selected < player.partySize()) {
+            if (player.partySize() > 0 && selected >= 0 && selected < player.partySize()) {
                 if (!player.canDeposit()) {
                     message = "Can't deposit your last Daemon!";
                     showingMessage = true;
                     ctx.ui.setDialogueText(message);
-                } else if (player.getBoxCount(player.getCurrentBox()) >=
-                           Player::BOX_SIZE) {
+                } else if (player.getBoxCount(player.getCurrentBox()) >= Player::BOX_SIZE) {
                     message = "This box is full!";
                     showingMessage = true;
                     ctx.ui.setDialogueText(message);
                 } else {
                     std::string name = player.getDaemon(selected).getNickname();
                     player.depositDaemon(selected);
-                    message = name + " deposited to Box " +
-                              std::to_string(player.getCurrentBox() + 1) + ".";
+                    message = name + " deposited to Box " + std::to_string(player.getCurrentBox() + 1) + ".";
                     showingMessage = true;
                     ctx.ui.setDialogueText(message);
                     int partySize = player.partySize();
@@ -102,8 +99,7 @@ void PCBoxMode::update(GameContext &ctx, InputManager &input) {
                     ctx.ui.setDialogueText(message);
                 } else {
                     const auto &box = player.getBox(player.getCurrentBox());
-                    std::string name =
-                        box[static_cast<std::size_t>(selected)].getNickname();
+                    std::string name = box[static_cast<std::size_t>(selected)].getNickname();
                     player.withdrawDaemon(player.getCurrentBox(), selected);
                     message = name + " withdrawn to party.";
                     showingMessage = true;
@@ -134,12 +130,10 @@ void PCBoxMode::render(GameContext &ctx) {
     int halfW = WINDOW_WIDTH / 2;
 
     // Background
-    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
-                            TDT4102::Color{50, 60, 90});
+    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{50, 60, 90});
 
     // Title: "Box N" with left/right arrows
-    std::string boxTitle =
-        "< Box " + std::to_string(player.getCurrentBox() + 1) + " >";
+    std::string boxTitle = "< Box " + std::to_string(player.getCurrentBox() + 1) + " >";
     int titleX = halfW - spriteFont.getTextWidth(boxTitle, scale) / 2;
     spriteFont.drawText(renderer, boxTitle, titleX, 8, scale);
 
@@ -161,19 +155,15 @@ void PCBoxMode::render(GameContext &ctx) {
             bg = TDT4102::Color{140, 160, 220};
 
         renderer.drawFilledRect(10, sy, halfW - 20, slotH, bg);
-        renderer.drawRect(10, sy, halfW - 20, slotH,
-                          TDT4102::Color::transparent,
-                          TDT4102::Color{100, 110, 140});
+        renderer.drawRect(10, sy, halfW - 20, slotH, TDT4102::Color::transparent, TDT4102::Color{100, 110, 140});
 
         if (hasDaemon) {
             const Daemon &c = party[static_cast<std::size_t>(i)];
             if (viewingParty && i == selected)
                 ctx.ui.drawSelectionArrow(16, sy + 2 * scale, scale);
 
-            spriteFont.drawText(renderer, c.getNickname(), 16 + 6 * scale,
-                                sy + 2, scale);
-            spriteFont.drawText(renderer, "Lv" + std::to_string(c.getLevel()),
-                                halfW - 80 - 12 * scale, sy + 2, scale);
+            spriteFont.drawText(renderer, c.getNickname(), 16 + 6 * scale, sy + 2, scale);
+            spriteFont.drawText(renderer, "Lv" + std::to_string(c.getLevel()), halfW - 80 - 12 * scale, sy + 2, scale);
         } else {
             spriteFont.drawText(renderer, "---", 16 + 6 * scale, sy + 2, scale);
         }
@@ -192,9 +182,7 @@ void PCBoxMode::render(GameContext &ctx) {
     if (!viewingParty && selected >= maxVisible)
         scrollOffset = selected - maxVisible + 1;
 
-    for (int i = 0; i < maxVisible &&
-                    (i + scrollOffset) < static_cast<int>(Player::BOX_SIZE);
-         ++i) {
+    for (int i = 0; i < maxVisible && (i + scrollOffset) < static_cast<int>(Player::BOX_SIZE); ++i) {
         int idx = i + scrollOffset;
         int sy = boxPanelY + i * (slotH + slotGap);
         bool hasDaemon = idx >= 0 && idx < boxCount;
@@ -204,33 +192,27 @@ void PCBoxMode::render(GameContext &ctx) {
             bg = TDT4102::Color{140, 160, 220};
 
         renderer.drawFilledRect(boxPanelX, sy, halfW - 20, slotH, bg);
-        renderer.drawRect(boxPanelX, sy, halfW - 20, slotH,
-                          TDT4102::Color::transparent,
-                          TDT4102::Color{100, 110, 140});
+        renderer.drawRect(boxPanelX, sy, halfW - 20, slotH, TDT4102::Color::transparent, TDT4102::Color{100, 110, 140});
 
         if (hasDaemon) {
             const Daemon &c = box[static_cast<std::size_t>(idx)];
             if (!viewingParty && idx == selected)
                 ctx.ui.drawSelectionArrow(boxPanelX + 6, sy + 2 * scale, scale);
 
-            spriteFont.drawText(renderer, c.getNickname(),
-                                boxPanelX + 6 + 6 * scale, sy + 2, scale);
-            spriteFont.drawText(renderer, "Lv" + std::to_string(c.getLevel()),
-                                WINDOW_WIDTH - 80 - 12 * scale, sy + 2, scale);
+            spriteFont.drawText(renderer, c.getNickname(), boxPanelX + 6 + 6 * scale, sy + 2, scale);
+            spriteFont.drawText(renderer, "Lv" + std::to_string(c.getLevel()), WINDOW_WIDTH - 80 - 12 * scale, sy + 2,
+                                scale);
         } else {
-            spriteFont.drawText(renderer, "---", boxPanelX + 6 + 6 * scale,
-                                sy + 2, scale);
+            spriteFont.drawText(renderer, "---", boxPanelX + 6 + 6 * scale, sy + 2, scale);
         }
     }
 
     // Status bar at bottom
     int statusY = WINDOW_HEIGHT - 10 * scale;
     if (viewingParty)
-        spriteFont.drawText(renderer, "A:Deposit  LR:Switch Box  B:Exit", 20,
-                            statusY, scale - 1);
+        spriteFont.drawText(renderer, "A:Deposit  LR:Switch Box  B:Exit", 20, statusY, scale - 1);
     else
-        spriteFont.drawText(renderer, "A:Withdraw  LR:Switch Box  B:Exit", 20,
-                            statusY, scale - 1);
+        spriteFont.drawText(renderer, "A:Withdraw  LR:Switch Box  B:Exit", 20, statusY, scale - 1);
 
     if (showingMessage) {
         ctx.ui.drawDialogueBox("PC", message);

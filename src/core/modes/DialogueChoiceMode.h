@@ -5,8 +5,7 @@
 
 class DialogueChoiceMode : public GameMode {
   public:
-    DialogueChoiceMode(const std::vector<std::string> &options,
-                       const std::string &context, GameState returnState);
+    DialogueChoiceMode(const std::vector<std::string> &options, const std::string &context, GameState returnState);
 
     void update(GameContext &ctx, InputManager &input) override;
     void render(GameContext &ctx) override;

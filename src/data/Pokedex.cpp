@@ -35,8 +35,7 @@ void Pokedex::loadSpecies(const std::string &path) {
             tokens.push_back(token);
 
         if (tokens.size() < 14) {
-            std::cerr << "Malformed species line (expected 14 fields): " << line
-                      << std::endl;
+            std::cerr << "Malformed species line (expected 14 fields): " << line << std::endl;
             continue;
         }
 
@@ -127,8 +126,7 @@ void Pokedex::loadMoves(const std::string &path) {
             tokens.push_back(token);
 
         if (tokens.size() < 10) {
-            std::cerr << "Malformed move line (expected 10 fields): " << line
-                      << std::endl;
+            std::cerr << "Malformed move line (expected 10 fields): " << line << std::endl;
             continue;
         }
 
@@ -139,16 +137,14 @@ void Pokedex::loadMoves(const std::string &path) {
 
         auto typeIt = typeMap.find(tokens[3]);
         if (typeIt == typeMap.end()) {
-            std::cerr << "Unknown type '" << tokens[3] << "' for move "
-                      << move.name << std::endl;
+            std::cerr << "Unknown type '" << tokens[3] << "' for move " << move.name << std::endl;
             continue;
         }
         move.type = typeIt->second;
 
         auto catIt = categoryMap.find(tokens[4]);
         if (catIt == categoryMap.end()) {
-            std::cerr << "Unknown category '" << tokens[4] << "' for move "
-                      << move.name << std::endl;
+            std::cerr << "Unknown category '" << tokens[4] << "' for move " << move.name << std::endl;
             continue;
         }
         move.category = catIt->second;
@@ -159,8 +155,7 @@ void Pokedex::loadMoves(const std::string &path) {
 
         auto statusIt = statusMap.find(tokens[8]);
         if (statusIt == statusMap.end()) {
-            std::cerr << "Unknown status '" << tokens[8] << "' for move "
-                      << move.name << std::endl;
+            std::cerr << "Unknown status '" << tokens[8] << "' for move " << move.name << std::endl;
             continue;
         }
         move.statusEffect = statusIt->second;
@@ -207,8 +202,7 @@ void Pokedex::loadItems(const std::string &path) {
             tokens.push_back(token);
 
         if (tokens.size() < 6) {
-            std::cerr << "Malformed item line (expected 6 fields): " << line
-                      << std::endl;
+            std::cerr << "Malformed item line (expected 6 fields): " << line << std::endl;
             continue;
         }
 
@@ -219,8 +213,7 @@ void Pokedex::loadItems(const std::string &path) {
 
         auto catIt = catMap.find(tokens[3]);
         if (catIt == catMap.end()) {
-            std::cerr << "Unknown item category '" << tokens[3] << "' for item "
-                      << item.name << std::endl;
+            std::cerr << "Unknown item category '" << tokens[3] << "' for item " << item.name << std::endl;
             continue;
         }
         item.category = catIt->second;
@@ -241,12 +234,10 @@ void Pokedex::loadItems(const std::string &path) {
 
 const Species &Pokedex::getSpecies(int id) const {
     if (id <= 0)
-        throw std::out_of_range("Species id out of range: " +
-                                std::to_string(id));
+        throw std::out_of_range("Species id out of range: " + std::to_string(id));
     std::size_t speciesIndex = static_cast<std::size_t>(id);
     if (speciesIndex >= species.size())
-        throw std::out_of_range("Species id out of range: " +
-                                std::to_string(id));
+        throw std::out_of_range("Species id out of range: " + std::to_string(id));
     return species[speciesIndex];
 }
 

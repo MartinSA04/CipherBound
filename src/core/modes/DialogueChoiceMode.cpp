@@ -6,11 +6,9 @@
 #include "../../ui/InputManager.h"
 #include "../StoryManager.h"
 
-DialogueChoiceMode::DialogueChoiceMode(const std::vector<std::string> &options,
-                                       const std::string &context,
+DialogueChoiceMode::DialogueChoiceMode(const std::vector<std::string> &options, const std::string &context,
                                        GameState returnState)
-    : choiceOptions(options), choiceContext(context), returnState(returnState) {
-}
+    : choiceOptions(options), choiceContext(context), returnState(returnState) {}
 
 void DialogueChoiceMode::update(GameContext &ctx, InputManager &input) {
     int count = static_cast<int>(choiceOptions.size());
@@ -18,8 +16,8 @@ void DialogueChoiceMode::update(GameContext &ctx, InputManager &input) {
 
     if (input.isConfirmPressed()) {
         ctx.playSound(SoundEffect::select);
-        ctx.pushRequest(ModeRequest::storyAction(ctx.story.onChoiceSelected(
-            choiceContext, choiceSelected, ctx.world, ctx.pokedex)));
+        ctx.pushRequest(ModeRequest::storyAction(
+            ctx.story.onChoiceSelected(choiceContext, choiceSelected, ctx.world, ctx.pokedex)));
     }
 }
 
@@ -43,14 +41,12 @@ void DialogueChoiceMode::render(GameContext &ctx) {
                 int panelY = WINDOW_HEIGHT - UI_PANEL_HEIGHT;
                 int spriteY = panelY - spriteSize - 8;
 
-                r.drawSpriteRaw(spriteId, spriteX, spriteY, spriteSize,
-                                spriteSize);
+                r.drawSpriteRaw(spriteId, spriteX, spriteY, spriteSize, spriteSize);
 
                 // Draw name + type label below sprite
                 int labelY = spriteY + spriteSize + 4;
                 SpriteFont &font = ctx.ui.getSpriteFont();
-                int labelX = WINDOW_WIDTH / 2 -
-                             font.getTextWidth(sp.name, PIXEL_SCALE) / 2;
+                int labelX = WINDOW_WIDTH / 2 - font.getTextWidth(sp.name, PIXEL_SCALE) / 2;
                 font.drawText(r, sp.name, labelX, labelY, PIXEL_SCALE);
             }
         }
@@ -58,8 +54,7 @@ void DialogueChoiceMode::render(GameContext &ctx) {
 
     // Draw the last dialogue line underneath
     if (ctx.ui.isDialogueActive())
-        ctx.ui.drawDialogueBox(ctx.ui.getDialogueSpeaker(),
-                               ctx.ui.getCurrentDialogueLine());
+        ctx.ui.drawDialogueBox(ctx.ui.getDialogueSpeaker(), ctx.ui.getCurrentDialogueLine());
 
     // Draw the choice box on top
     ctx.ui.drawChoiceBox(choiceOptions, choiceSelected);

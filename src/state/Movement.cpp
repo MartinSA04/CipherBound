@@ -1,8 +1,7 @@
 #include "Movement.h"
 #include "Map.h"
 
-Movement::Movement(Position position)
-    : position(position), facing(Direction::down) {}
+Movement::Movement(Position position) : position(position), facing(Direction::down) {}
 
 bool Movement::canStep() const { return (!isMoving()) && turnCooldown <= 0; }
 
@@ -15,8 +14,7 @@ bool Movement::canMove(Direction direction, const Map &map) const {
 }
 
 void Movement::startTurnCooldown() {
-    turnCooldown =
-        4; // Number of frames to wait after turning before allowing movement
+    turnCooldown = 4; // Number of frames to wait after turning before allowing movement
 }
 
 void Movement::updateAnimation() {

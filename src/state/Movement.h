@@ -13,9 +13,7 @@ enum class Direction {
 struct Position {
     int x, y;
 
-    bool operator==(const Position &other) const {
-        return x == other.x && y == other.y;
-    }
+    bool operator==(const Position &other) const { return x == other.x && y == other.y; }
     bool operator!=(const Position &other) const { return !(*this == other); }
     void moveDirection(const Direction &dir) {
         switch (dir) {

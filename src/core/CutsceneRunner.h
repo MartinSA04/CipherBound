@@ -20,8 +20,7 @@ class CutsceneRunner {
     // Update one frame. Returns true while the cutscene is still running.
     // confirmPressed: whether the player pressed confirm this frame (for
     // dialogue).
-    bool update(World &world, GameUI &ui, bool confirmPressed,
-                SoundManager &sound);
+    bool update(World &world, GameUI &ui, bool confirmPressed, SoundManager &sound);
 
     // True if the cutscene has finished
     bool isFinished() const;
@@ -59,13 +58,11 @@ class CutsceneRunner {
     bool allMovesComplete(const World &world) const;
 
     // Get current position of a target entity
-    Position getEntityPosition(const World &world,
-                               const std::string &targetId) const;
+    Position getEntityPosition(const World &world, const std::string &targetId) const;
 
     // Check if an entity is currently mid-walk-animation
     bool isEntityWalking(const World &world, const std::string &targetId) const;
 
     // Start a single tile step for an entity toward its destination
-    void stepEntityToward(World &world, const std::string &targetId,
-                          Position dest);
+    void stepEntityToward(World &world, const std::string &targetId, Position dest);
 };

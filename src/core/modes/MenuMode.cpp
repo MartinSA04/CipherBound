@@ -41,8 +41,7 @@ void MenuMode::render(GameContext &ctx) {
     Renderer &renderer = ctx.ui.getRenderer();
     SpriteFont &spriteFont = ctx.ui.getSpriteFont();
 
-    static const std::vector<std::string> menuItems = {"Daemondex", "Daemons",
-                                                       "Bag", "Save", "Exit"};
+    static const std::vector<std::string> menuItems = {"Daemondex", "Daemons", "Bag", "Save", "Exit"};
     int scale = PIXEL_SCALE;
 
     int maxTextW = 0;
@@ -61,10 +60,8 @@ void MenuMode::render(GameContext &ctx) {
     for (int i = 0; i < menuItemCount; ++i)
         menuHeight += itemHeight;
 
-    renderer.drawFilledRect(menuX, menuY, menuWidth, menuHeight,
-                            TDT4102::Color{240, 245, 255});
-    renderer.drawRect(menuX, menuY, menuWidth, menuHeight,
-                      TDT4102::Color::transparent, TDT4102::Color{60, 70, 100});
+    renderer.drawFilledRect(menuX, menuY, menuWidth, menuHeight, TDT4102::Color{240, 245, 255});
+    renderer.drawRect(menuX, menuY, menuWidth, menuHeight, TDT4102::Color::transparent, TDT4102::Color{60, 70, 100});
 
     for (int i = 0; i < menuItemCount; ++i) {
         int oy = menuY + 8 + i * itemHeight;
@@ -73,7 +70,6 @@ void MenuMode::render(GameContext &ctx) {
             ctx.ui.drawSelectionArrow(menuX + 2 * scale, oy + 4 * scale, scale);
         }
 
-        spriteFont.drawText(renderer, menuItems[static_cast<std::size_t>(i)],
-                            menuX + 6 * scale, oy, scale);
+        spriteFont.drawText(renderer, menuItems[static_cast<std::size_t>(i)], menuX + 6 * scale, oy, scale);
     }
 }

@@ -26,12 +26,9 @@ enum class StatusEffect {
 };
 
 inline const std::unordered_map<std::string, StatusEffect> statusMap = {
-    {"none", StatusEffect::none},
-    {"overheated", StatusEffect::overheated},
-    {"entangled", StatusEffect::entangled},
-    {"decayed", StatusEffect::decayed},
-    {"segfault", StatusEffect::segfault},
-    {"deadlocked", StatusEffect::deadlocked},
+    {"none", StatusEffect::none},           {"overheated", StatusEffect::overheated},
+    {"entangled", StatusEffect::entangled}, {"decayed", StatusEffect::decayed},
+    {"segfault", StatusEffect::segfault},   {"deadlocked", StatusEffect::deadlocked},
     {"paradox", StatusEffect::paradox},
 };
 

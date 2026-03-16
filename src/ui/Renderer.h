@@ -41,30 +41,25 @@ class Renderer {
     bool hasTexture(const std::string &id) const;
 
     // Drawing primitives (world coordinates → screen coordinates)
-    void drawSprite(const std::string &textureId, int worldX, int worldY,
-                    int cameraX, int cameraY, int srcWidth = TILE_SIZE,
-                    int srcHeight = TILE_SIZE);
+    void drawSprite(const std::string &textureId, int worldX, int worldY, int cameraX, int cameraY,
+                    int srcWidth = TILE_SIZE, int srcHeight = TILE_SIZE);
 
-    void drawSpriteRaw(const std::string &textureId, int screenX, int screenY,
-                       int width = TILE_SIZE, int height = TILE_SIZE);
+    void drawSpriteRaw(const std::string &textureId, int screenX, int screenY, int width = TILE_SIZE,
+                       int height = TILE_SIZE);
 
     // Draw a sub-region of a sprite sheet, scaled to destination size
-    void drawSpriteRegion(const std::string &textureId, int srcX, int srcY,
-                          int srcW, int srcH, int dstX, int dstY, int dstW,
-                          int dstH, bool flipH = false);
+    void drawSpriteRegion(const std::string &textureId, int srcX, int srcY, int srcW, int srcH, int dstX, int dstY,
+                          int dstW, int dstH, bool flipH = false);
 
     // Tile rendering
-    void drawTile(int spriteId, int worldX, int worldY, int cameraX,
-                  int cameraY);
+    void drawTile(int spriteId, int worldX, int worldY, int cameraX, int cameraY);
 
     // Text rendering
-    void drawText(const std::string &text, int screenX, int screenY,
-                  TDT4102::Color color = TDT4102::Color::white,
+    void drawText(const std::string &text, int screenX, int screenY, TDT4102::Color color = TDT4102::Color::white,
                   int fontSize = 16);
 
     // Shape helpers for UI
-    void drawRect(int x, int y, int w, int h, TDT4102::Color fill,
-                  TDT4102::Color border = TDT4102::Color::transparent);
+    void drawRect(int x, int y, int w, int h, TDT4102::Color fill, TDT4102::Color border = TDT4102::Color::transparent);
 
     void drawFilledRect(int x, int y, int w, int h, TDT4102::Color color);
 

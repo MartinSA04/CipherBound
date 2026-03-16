@@ -64,8 +64,7 @@ bool OverworldMode::warpBlockStarts(GameContext &ctx) {
         return false;
     pendingWarpBlock = false;
     ctx.pendingPushBack = true;
-    ctx.pushRequest(ModeRequest::dialogue(pendingWarpBlockAction.speaker,
-                                          pendingWarpBlockAction.lines, nullptr,
+    ctx.pushRequest(ModeRequest::dialogue(pendingWarpBlockAction.speaker, pendingWarpBlockAction.lines, nullptr,
                                           GameState::overworld));
     return true;
 }
@@ -93,8 +92,7 @@ bool OverworldMode::dialogueStarts(GameContext &ctx, std::shared_ptr<NPC> npc) {
     if (lines.empty())
         return false;
 
-    ctx.pushRequest(ModeRequest::dialogue(npc->getName(), lines, npc,
-                                          GameState::overworld));
+    ctx.pushRequest(ModeRequest::dialogue(npc->getName(), lines, npc, GameState::overworld));
     return true;
 }
 
@@ -157,8 +155,7 @@ void OverworldMode::handlePlayerWarpAttempt(GameContext &ctx) {
         return;
     }
 
-    ctx.pushRequest(
-        ModeRequest::transition(warp->targetMapId, warp->targetPosition));
+    ctx.pushRequest(ModeRequest::transition(warp->targetMapId, warp->targetPosition));
 }
 
 void OverworldMode::handlePlayerInteraction(GameContext &ctx) {
@@ -166,8 +163,7 @@ void OverworldMode::handlePlayerInteraction(GameContext &ctx) {
     Position front = player.getPosition();
     front.moveDirection(player.getFacing());
 
-    std::shared_ptr<NPC> npc =
-        ctx.world.findNPCAt(ctx.world.getCurrentMapId(), front);
+    std::shared_ptr<NPC> npc = ctx.world.findNPCAt(ctx.world.getCurrentMapId(), front);
     if (!npc)
         return;
 

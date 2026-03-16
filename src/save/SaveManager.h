@@ -9,10 +9,8 @@ class SaveManager {
   public:
     SaveManager();
 
-    bool saveGame(const std::string &filepath, const Player &player,
-                  const World &world);
-    bool loadGame(const std::string &filepath, Player &player, World &world,
-                  const Pokedex &pokedex);
+    bool saveGame(const std::string &filepath, const Player &player, const World &world);
+    bool loadGame(const std::string &filepath, Player &player, World &world, const Pokedex &pokedex);
     bool saveFileExists(const std::string &filepath) const;
     bool deleteSave(const std::string &filepath);
 
@@ -37,8 +35,7 @@ class SaveManager {
 
     // Daemon serialization helpers
     static std::string serializeDaemon(const Daemon &daemon);
-    static Daemon deserializeDaemon(const std::string &line,
-                                    const Pokedex &pokedex);
+    static Daemon deserializeDaemon(const std::string &line, const Pokedex &pokedex);
     static std::string serializeBaseStats(const BaseStats &stats);
     static BaseStats deserializeBaseStats(const std::string &s);
 };

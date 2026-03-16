@@ -3,18 +3,16 @@
 #include <algorithm>
 #include <cmath>
 
-Battle::Battle(Player &player, std::unique_ptr<Daemon> opponent,
-               BattleType type, std::mt19937 &rng, const Pokedex &pokedex)
-    : player(player), opponentDaemon(std::move(opponent)), type(type),
-      state(BattleState::intro), pendingState(BattleState::choosingAction),
-      playerMoveSlot(0), itemChoice(0), switchTarget(0),
+Battle::Battle(Player &player, std::unique_ptr<Daemon> opponent, BattleType type, std::mt19937 &rng,
+               const Pokedex &pokedex)
+    : player(player), opponentDaemon(std::move(opponent)), type(type), state(BattleState::intro),
+      pendingState(BattleState::choosingAction), playerMoveSlot(0), itemChoice(0), switchTarget(0),
       currentAction(BattleAction::fight), rng(rng), pokedex(pokedex) {}
-Battle::Battle(Player &player, std::shared_ptr<NPC> opponent, BattleType type,
-               std::mt19937 &rng, const Pokedex &pokedex)
+Battle::Battle(Player &player, std::shared_ptr<NPC> opponent, BattleType type, std::mt19937 &rng,
+               const Pokedex &pokedex)
     : player(player), opponent(opponent), type(type), state(BattleState::intro),
-      pendingState(BattleState::choosingAction), playerMoveSlot(0),
-      itemChoice(0), switchTarget(0), currentAction(BattleAction::fight),
-      rng(rng), pokedex(pokedex) {}
+      pendingState(BattleState::choosingAction), playerMoveSlot(0), itemChoice(0), switchTarget(0),
+      currentAction(BattleAction::fight), rng(rng), pokedex(pokedex) {}
 
 void Battle::start() {
     // Battle already starts in BattleState::intro (from constructor).
@@ -23,14 +21,12 @@ void Battle::start() {
 
     if (opponent == nullptr) {
         // Wild: after phase 0 anim, show message then player sends out
-        addMessage("A wild " + getOpponentDaemon().getNickname() +
-                   " appeared!");
+        addMessage("A wild " + getOpponentDaemon().getNickname() + " appeared!");
     } else {
         // Trainer: after phase 0 (NPC appears), show lines, then phase 1 (NPC
         // out, Daemon in)
         addMessage(opponent->getName() + " wants to fight!");
-        addMessage(opponent->getName() + " sent out " +
-                   getOpponentDaemon().getNickname() + "!");
+        addMessage(opponent->getName() + " sent out " + getOpponentDaemon().getNickname() + "!");
         addIntroAnimMarker(); // phase 1: NPC slides out, their Daemon comes in
     }
 
@@ -97,8 +93,7 @@ void Battle::chooseItem(int itemId) {
 
         addMessage("Used " + item.name + "!");
         addHPAnimMarker();
-        addMessage(pc.getNickname() + " recovered " + std::to_string(healed) +
-                   " HP!");
+        addMessage(pc.getNickname() + " recovered " + std::to_string(healed) + " HP!");
 
         // Opponent gets a turn after using an item
         pendingState = BattleState::opponentTurn;
@@ -144,8 +139,7 @@ void Battle::chooseSwitchTarget(int partyIndex) {
 }
 
 void Battle::goBack() {
-    if (state == BattleState::choosingMove ||
-        state == BattleState::choosingItem ||
+    if (state == BattleState::choosingMove || state == BattleState::choosingItem ||
         state == BattleState::choosingSwitch) {
         state = BattleState::choosingAction;
     }
@@ -156,8 +150,7 @@ void Battle::executeTurn() {
 
     if (currentAction == BattleAction::fight) {
         const auto &moves = playerDaemon.getMoves();
-        if (playerMoveSlot < 0 || playerMoveSlot >= 4 ||
-            moves[static_cast<std::size_t>(playerMoveSlot)].moveId < 0) {
+        if (playerMoveSlot < 0 || playerMoveSlot >= 4 || moves[static_cast<std::size_t>(playerMoveSlot)].moveId < 0) {
             addMessage("No move selected!");
             pendingState = BattleState::choosingAction;
             state = BattleState::showingMessages;
@@ -172,33 +165,27 @@ void Battle::executeTurn() {
         }
 
         // Player attacks
-        const MoveData &moveData = pokedex.getMove(
-            moves[static_cast<std::size_t>(playerMoveSlot)].moveId);
+        const MoveData &moveData = pokedex.getMove(moves[static_cast<std::size_t>(playerMoveSlot)].moveId);
 
         // Accuracy check
         if (!accuracyCheck(moveData.accuracy)) {
-            addMessage(playerDaemon.getNickname() + " used " + moveData.name +
-                       "!");
+            addMessage(playerDaemon.getNickname() + " used " + moveData.name + "!");
             addMessage("But it missed!");
             pendingState = BattleState::opponentTurn;
             state = BattleState::showingMessages;
             return;
         }
 
-        int damage =
-            calculateDamage(playerDaemon, getOpponentDaemon(), moveData);
+        int damage = calculateDamage(playerDaemon, getOpponentDaemon(), moveData);
         getOpponentDaemon().takeDamage(damage);
         addMessage(playerDaemon.getNickname() + " used " + moveData.name + "!");
         addAttackAnimMarker(true);
         addHPAnimMarker();
 
         // Type effectiveness message
-        float eff = getTypeEffectiveness(
-            moveData.type, getOpponentDaemon().getSpecies().primaryType);
-        if (getOpponentDaemon().getSpecies().secondaryType !=
-            getOpponentDaemon().getSpecies().primaryType)
-            eff *= getTypeEffectiveness(
-                moveData.type, getOpponentDaemon().getSpecies().secondaryType);
+        float eff = getTypeEffectiveness(moveData.type, getOpponentDaemon().getSpecies().primaryType);
+        if (getOpponentDaemon().getSpecies().secondaryType != getOpponentDaemon().getSpecies().primaryType)
+            eff *= getTypeEffectiveness(moveData.type, getOpponentDaemon().getSpecies().secondaryType);
 
         if (eff >= 2.0f)
             addMessage("It's super effective!");
@@ -212,8 +199,7 @@ void Battle::executeTurn() {
         if (getOpponentDaemon().isFainted()) {
             int exp = calculateExpYield(getOpponentDaemon());
             playerDaemon.addExp(exp);
-            addMessage("The opposing " + getOpponentDaemon().getNickname() +
-                       " fainted!");
+            addMessage("The opposing " + getOpponentDaemon().getNickname() + " fainted!");
             addMessage("Gained " + std::to_string(exp) + " EXP!");
             addEXPAnimMarker();
             addMessage("You won!");
@@ -241,21 +227,16 @@ void Battle::executeOpponentTurn() {
     float bestScore = -1.0f;
 
     for (int i = 0; i < 4; ++i) {
-        if (oppMoves[static_cast<std::size_t>(i)].moveId < 0 ||
-            oppMoves[static_cast<std::size_t>(i)].currentPP <= 0)
+        if (oppMoves[static_cast<std::size_t>(i)].moveId < 0 || oppMoves[static_cast<std::size_t>(i)].currentPP <= 0)
             continue;
 
-        const MoveData &move =
-            pokedex.getMove(oppMoves[static_cast<std::size_t>(i)].moveId);
+        const MoveData &move = pokedex.getMove(oppMoves[static_cast<std::size_t>(i)].moveId);
         float score = static_cast<float>(move.power);
 
         // Factor in type effectiveness
-        float eff = getTypeEffectiveness(move.type,
-                                         playerDaemon.getSpecies().primaryType);
-        if (playerDaemon.getSpecies().secondaryType !=
-            playerDaemon.getSpecies().primaryType)
-            eff *= getTypeEffectiveness(
-                move.type, playerDaemon.getSpecies().secondaryType);
+        float eff = getTypeEffectiveness(move.type, playerDaemon.getSpecies().primaryType);
+        if (playerDaemon.getSpecies().secondaryType != playerDaemon.getSpecies().primaryType)
+            eff *= getTypeEffectiveness(move.type, playerDaemon.getSpecies().secondaryType);
         score *= eff;
 
         // STAB bonus consideration
@@ -299,29 +280,23 @@ void Battle::executeOpponentTurn() {
 
     // Accuracy check
     if (!accuracyCheck(oppMoveData.accuracy)) {
-        addMessage("Foe " + getOpponentDaemon().getNickname() + " used " +
-                   oppMoveData.name + "!");
+        addMessage("Foe " + getOpponentDaemon().getNickname() + " used " + oppMoveData.name + "!");
         addMessage("But it missed!");
         pendingState = BattleState::choosingAction;
         state = BattleState::showingMessages;
         return;
     }
 
-    int oppDamage =
-        calculateDamage(getOpponentDaemon(), playerDaemon, oppMoveData);
+    int oppDamage = calculateDamage(getOpponentDaemon(), playerDaemon, oppMoveData);
     playerDaemon.takeDamage(oppDamage);
-    addMessage("Foe " + getOpponentDaemon().getNickname() + " used " +
-               oppMoveData.name + "!");
+    addMessage("Foe " + getOpponentDaemon().getNickname() + " used " + oppMoveData.name + "!");
     addAttackAnimMarker(false);
     addHPAnimMarker();
 
     // Type effectiveness for opponent's attack
-    float oppEff = getTypeEffectiveness(oppMoveData.type,
-                                        playerDaemon.getSpecies().primaryType);
-    if (playerDaemon.getSpecies().secondaryType !=
-        playerDaemon.getSpecies().primaryType)
-        oppEff *= getTypeEffectiveness(oppMoveData.type,
-                                       playerDaemon.getSpecies().secondaryType);
+    float oppEff = getTypeEffectiveness(oppMoveData.type, playerDaemon.getSpecies().primaryType);
+    if (playerDaemon.getSpecies().secondaryType != playerDaemon.getSpecies().primaryType)
+        oppEff *= getTypeEffectiveness(oppMoveData.type, playerDaemon.getSpecies().secondaryType);
 
     if (oppEff >= 2.0f)
         addMessage("It's super effective!");
@@ -346,8 +321,7 @@ BattleState Battle::getPendingState() const { return pendingState; }
 
 BattleResult Battle::getResult() const {
     BattleResult result{};
-    result.playerWon =
-        (state == BattleState::victory || state == BattleState::captured);
+    result.playerWon = (state == BattleState::victory || state == BattleState::captured);
     result.playerFled = (state == BattleState::fled);
     result.captured = (state == BattleState::captured);
     result.expGained = 0;
@@ -390,18 +364,16 @@ bool Battle::attemptCapture(int itemId) {
 
     // Status bonus: sleeping/frozen = 2x, paralyzed/poisoned/burned = 1.5x
     float statusBonus = 1.0f;
-    if (target.getStatus() == StatusEffect::deadlocked ||
-        target.getStatus() == StatusEffect::entangled)
+    if (target.getStatus() == StatusEffect::deadlocked || target.getStatus() == StatusEffect::entangled)
         statusBonus = 2.0f;
     else if (target.getStatus() != StatusEffect::none)
         statusBonus = 1.5f;
 
     // Modified catch rate: ((3*maxHP - 2*curHP) * catchRate * ballMod) /
     // (3*maxHP) * statusBonus
-    float a =
-        ((3.0f * static_cast<float>(maxHP) - 2.0f * static_cast<float>(curHP)) *
-         static_cast<float>(catchRate) * static_cast<float>(ballModifier)) /
-        (3.0f * static_cast<float>(maxHP)) * statusBonus;
+    float a = ((3.0f * static_cast<float>(maxHP) - 2.0f * static_cast<float>(curHP)) * static_cast<float>(catchRate) *
+               static_cast<float>(ballModifier)) /
+              (3.0f * static_cast<float>(maxHP)) * statusBonus;
     a = std::min(a, 255.0f);
 
     // If a >= 255, guaranteed catch
@@ -447,10 +419,9 @@ bool Battle::attemptCapture(int itemId) {
         state = BattleState::showingMessages;
 
         // Add Daemon to player's party
-        player.addDaemon(Daemon(species, target.getLevel(), target.getExp(),
-                                target.getCurrentHP(), target.getNickname(),
-                                target.getStatus(), target.getIVs(),
-                                target.getEVs(), target.getMoves()));
+        player.addDaemon(Daemon(species, target.getLevel(), target.getExp(), target.getCurrentHP(),
+                                target.getNickname(), target.getStatus(), target.getIVs(), target.getEVs(),
+                                target.getMoves()));
         player.markCaught(target.getSpeciesId());
         return true;
     }
@@ -585,8 +556,7 @@ void Battle::addIntroAnimMarker() { messages.push_back(INTRO_ANIM_MARKER); }
 void Battle::addCaptureAnimMarker() { messages.push_back(CAPTURE_ANIM_MARKER); }
 
 void Battle::addAttackAnimMarker(bool isPlayer) {
-    messages.push_back(isPlayer ? ATTACK_ANIM_PLAYER_MARKER
-                                : ATTACK_ANIM_OPP_MARKER);
+    messages.push_back(isPlayer ? ATTACK_ANIM_PLAYER_MARKER : ATTACK_ANIM_OPP_MARKER);
 }
 
 void Battle::finishAttackAnimation() {
@@ -614,8 +584,7 @@ bool Battle::isPlayerAttacking() const { return attackAnimIsPlayer; }
 
 // --- Private helpers ---
 
-int Battle::calculateDamage(const Daemon &attacker, const Daemon &defender,
-                            const MoveData &move) const {
+int Battle::calculateDamage(const Daemon &attacker, const Daemon &defender, const MoveData &move) const {
     if (move.power <= 0)
         return 0;
 
@@ -636,17 +605,13 @@ int Battle::calculateDamage(const Daemon &attacker, const Daemon &defender,
     int baseDamage = ((2 * level / 5 + 2) * power * attack / defense / 50) + 2;
 
     // Type effectiveness
-    float eff =
-        getTypeEffectiveness(move.type, defender.getSpecies().primaryType);
-    if (defender.getSpecies().secondaryType !=
-        defender.getSpecies().primaryType)
-        eff *= getTypeEffectiveness(move.type,
-                                    defender.getSpecies().secondaryType);
+    float eff = getTypeEffectiveness(move.type, defender.getSpecies().primaryType);
+    if (defender.getSpecies().secondaryType != defender.getSpecies().primaryType)
+        eff *= getTypeEffectiveness(move.type, defender.getSpecies().secondaryType);
     baseDamage = static_cast<int>(static_cast<float>(baseDamage) * eff);
 
     // STAB (Same Type Attack Bonus)
-    if (move.type == attacker.getSpecies().primaryType ||
-        move.type == attacker.getSpecies().secondaryType) {
+    if (move.type == attacker.getSpecies().primaryType || move.type == attacker.getSpecies().secondaryType) {
         baseDamage = baseDamage * 3 / 2;
     }
 
@@ -658,8 +623,7 @@ int Battle::calculateDamage(const Daemon &attacker, const Daemon &defender,
     return std::max(1, baseDamage);
 }
 
-float Battle::getTypeEffectiveness(ElementType attackType,
-                                   ElementType defenseType) const {
+float Battle::getTypeEffectiveness(ElementType attackType, ElementType defenseType) const {
     return TypeChart::getEffectiveness(attackType, defenseType);
 }
 

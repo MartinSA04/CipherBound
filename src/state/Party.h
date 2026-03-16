@@ -38,5 +38,5 @@ class PartyAndPCBoxes : public Party {
 
   private:
     std::vector<std::vector<Daemon>> pcBoxes{NUM_BOXES}; // PC storage boxes
-    int currentBox{0}; // Currently selected box
+    int currentBox{0};                                   // Currently selected box
 };

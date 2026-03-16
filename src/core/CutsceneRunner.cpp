@@ -112,8 +112,7 @@ bool CutsceneRunner::isFinished() const { return finished; }
 bool CutsceneRunner::isShowingDialogue() const { return inDialogue; }
 const std::string &CutsceneRunner::getId() const { return cutscene.id; }
 
-bool CutsceneRunner::update(World &world, GameUI &ui, bool confirmPressed,
-                            SoundManager &sound) {
+bool CutsceneRunner::update(World &world, GameUI &ui, bool confirmPressed, SoundManager &sound) {
     if (finished)
         return false;
 
@@ -147,8 +146,7 @@ bool CutsceneRunner::update(World &world, GameUI &ui, bool confirmPressed,
     }
 
     // If we're syncing (waiting for all moves to finish)
-    if (currentStep < cutscene.steps.size() &&
-        cutscene.steps[currentStep].type == CutsceneStep::Type::sync) {
+    if (currentStep < cutscene.steps.size() && cutscene.steps[currentStep].type == CutsceneStep::Type::sync) {
         tickMovements(world);
         if (allMovesComplete(world)) {
             pendingMoves.clear();
@@ -205,8 +203,7 @@ void CutsceneRunner::processSteps(World &world, GameUI &ui) {
                 world.getPlayer().setFacing(step.direction);
             } else {
                 std::shared_ptr<NPC> npc =
-                    world.findNPCAt(world.getCurrentMapId(),
-                                    getEntityPosition(world, step.target));
+                    world.findNPCAt(world.getCurrentMapId(), getEntityPosition(world, step.target));
                 // Also search by ID if position lookup fails
                 if (!npc) {
                     for (auto &n : world.getNPCs(world.getCurrentMapId())) {
@@ -278,8 +275,7 @@ void CutsceneRunner::processSteps(World &world, GameUI &ui) {
 
 // ---- movement helpers ----
 
-Position CutsceneRunner::getEntityPosition(const World &world,
-                                           const std::string &targetId) const {
+Position CutsceneRunner::getEntityPosition(const World &world, const std::string &targetId) const {
     if (targetId == "player")
         return world.getPlayer().getPosition();
 
@@ -290,8 +286,7 @@ Position CutsceneRunner::getEntityPosition(const World &world,
     return {0, 0};
 }
 
-bool CutsceneRunner::isEntityWalking(const World &world,
-                                     const std::string &targetId) const {
+bool CutsceneRunner::isEntityWalking(const World &world, const std::string &targetId) const {
     if (targetId == "player")
         return world.getPlayer().isMoving();
 
@@ -302,8 +297,7 @@ bool CutsceneRunner::isEntityWalking(const World &world,
     return false;
 }
 
-void CutsceneRunner::stepEntityToward(World &world, const std::string &targetId,
-                                      Position dest) {
+void CutsceneRunner::stepEntityToward(World &world, const std::string &targetId, Position dest) {
     Position cur = getEntityPosition(world, targetId);
 
     // Decide direction: prefer X first, then Y

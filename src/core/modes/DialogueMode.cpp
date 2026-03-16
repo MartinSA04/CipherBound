@@ -4,23 +4,18 @@
 #include "../../ui/InputManager.h"
 #include "../StoryManager.h"
 
-DialogueMode::DialogueMode(const std::string &speaker,
-                           const std::vector<std::string> &lines,
-                           std::shared_ptr<NPC> npc, GameState returnState)
-    : dialogueNPC(std::move(npc)), returnState(returnState),
-      savedSpeaker(speaker), savedLines(lines) {}
+DialogueMode::DialogueMode(const std::string &speaker, const std::vector<std::string> &lines, std::shared_ptr<NPC> npc,
+                           GameState returnState)
+    : dialogueNPC(std::move(npc)), returnState(returnState), savedSpeaker(speaker), savedLines(lines) {}
 
-void DialogueMode::onEnter(GameContext &ctx) {
-    ctx.ui.startDialogue(savedSpeaker, savedLines);
-}
+void DialogueMode::onEnter(GameContext &ctx) { ctx.ui.startDialogue(savedSpeaker, savedLines); }
 
 void DialogueMode::update(GameContext &ctx, InputManager &input) {
     if (ctx.ui.updateTypewriter(input.isConfirmPressed())) {
         ctx.playSound(SoundEffect::select);
         if (!ctx.ui.advanceDialogueLine()) {
             // Dialogue finished — ask StoryManager what to do
-            StoryAction action =
-                ctx.story.onDialogueEnd(dialogueNPC, ctx.world);
+            StoryAction action = ctx.story.onDialogueEnd(dialogueNPC, ctx.world);
             dialogueNPC = nullptr;
             ctx.pushRequest(ModeRequest::storyAction(action));
         }
@@ -32,6 +27,5 @@ void DialogueMode::render(GameContext &ctx) {
         renderOverworld(ctx);
 
     if (ctx.ui.isDialogueActive())
-        ctx.ui.drawDialogueBox(ctx.ui.getDialogueSpeaker(),
-                               ctx.ui.getCurrentDialogueLine());
+        ctx.ui.drawDialogueBox(ctx.ui.getDialogueSpeaker(), ctx.ui.getCurrentDialogueLine());
 }

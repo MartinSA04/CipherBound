@@ -70,6 +70,5 @@ class Session {
     static ScreenType screenForState(GameState gs);
 
     static constexpr int targetFPS = 60;
-    static constexpr std::chrono::duration<double> targetFrameTime{1.0 /
-                                                                   targetFPS};
+    static constexpr std::chrono::duration<double> targetFrameTime{1.0 / targetFPS};
 };

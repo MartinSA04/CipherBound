@@ -53,9 +53,7 @@ static float chartValueToMultiplier(int value) {
     }
 }
 
-static std::size_t typeToIndex(ElementType t) {
-    return static_cast<std::size_t>(t);
-}
+static std::size_t typeToIndex(ElementType t) { return static_cast<std::size_t>(t); }
 
 float getEffectiveness(ElementType attackType, ElementType defenseType) {
     std::size_t atk = typeToIndex(attackType);
@@ -65,10 +63,8 @@ float getEffectiveness(ElementType attackType, ElementType defenseType) {
     return chartValueToMultiplier(chart[atk][def]);
 }
 
-float getEffectiveness(ElementType attackType, ElementType primaryDef,
-                       ElementType secondaryDef) {
-    return getEffectiveness(attackType, primaryDef) *
-           getEffectiveness(attackType, secondaryDef);
+float getEffectiveness(ElementType attackType, ElementType primaryDef, ElementType secondaryDef) {
+    return getEffectiveness(attackType, primaryDef) * getEffectiveness(attackType, secondaryDef);
 }
 
 bool isImmune(ElementType attackType, ElementType defenseType) {

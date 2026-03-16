@@ -1,27 +1,23 @@
 #include "Map.h"
 #include <stdexcept>
 std::out_of_range out_of_range_error(const Position &position) {
-    return std::out_of_range("Tile position out of bounds: (" +
-                             std::to_string(position.x) + ", " +
+    return std::out_of_range("Tile position out of bounds: (" + std::to_string(position.x) + ", " +
                              std::to_string(position.y) + ")");
 }
 
 Map::Map() : id(""), width(0), height(0) {}
 
-Map::Map(const std::string &id, int width, int height)
-    : id(id), width(width), height(height) {
+Map::Map(const std::string &id, int width, int height) : id(id), width(width), height(height) {
     grid.resize(static_cast<std::size_t>(height));
     for (int y = 0; y < height; ++y) {
-        grid[static_cast<std::size_t>(y)].resize(
-            static_cast<std::size_t>(width));
+        grid[static_cast<std::size_t>(y)].resize(static_cast<std::size_t>(width));
         for (int x = 0; x < width; ++x) {
             Tile tile;
             tile.position = {x, y};
             tile.type = TileType::grass;
             tile.isOccupied = false;
             tile.hasCollision = false;
-            grid[static_cast<std::size_t>(y)][static_cast<std::size_t>(x)] =
-                tile;
+            grid[static_cast<std::size_t>(y)][static_cast<std::size_t>(x)] = tile;
         }
     }
 }
@@ -33,35 +29,29 @@ int Map::getHeight() const { return height; }
 Tile &Map::getTile(const Position &position) {
     if (!isInBounds(position))
         throw out_of_range_error(position);
-    return grid[static_cast<std::size_t>(position.y)]
-               [static_cast<std::size_t>(position.x)];
+    return grid[static_cast<std::size_t>(position.y)][static_cast<std::size_t>(position.x)];
 }
 
 const Tile &Map::getTile(const Position &position) const {
     if (!isInBounds(position))
         throw out_of_range_error(position);
-    return grid[static_cast<std::size_t>(position.y)]
-               [static_cast<std::size_t>(position.x)];
+    return grid[static_cast<std::size_t>(position.y)][static_cast<std::size_t>(position.x)];
 }
 
 void Map::setTile(const Position &position, Tile tile) {
     if (!isInBounds(position))
         throw out_of_range_error(position);
     tile.position = position; // ensure position consistency
-    grid[static_cast<std::size_t>(position.y)]
-        [static_cast<std::size_t>(position.x)] = tile;
+    grid[static_cast<std::size_t>(position.y)][static_cast<std::size_t>(position.x)] = tile;
 }
 
 void Map::setOccupied(const Position &position, bool occupied) {
     if (isInBounds(position))
-        grid[static_cast<std::size_t>(position.y)]
-            [static_cast<std::size_t>(position.x)]
-                .isOccupied = occupied;
+        grid[static_cast<std::size_t>(position.y)][static_cast<std::size_t>(position.x)].isOccupied = occupied;
 }
 
 bool Map::isInBounds(const Position &position) const {
-    return position.x >= 0 && position.x < width && position.y >= 0 &&
-           position.y < height;
+    return position.x >= 0 && position.x < width && position.y >= 0 && position.y < height;
 }
 
 bool Map::isWalkable(const Position &position) const {
@@ -114,13 +104,9 @@ bool Map::isWalkable(const Position &position, Direction fromDirection) const {
     }
 }
 
-void Map::addEncounterSlot(WildEncounterSlot slot) {
-    encounterSlots.push_back(slot);
-}
+void Map::addEncounterSlot(WildEncounterSlot slot) { encounterSlots.push_back(slot); }
 
-const std::vector<WildEncounterSlot> &Map::getEncounterSlots() const {
-    return encounterSlots;
-}
+const std::vector<WildEncounterSlot> &Map::getEncounterSlots() const { return encounterSlots; }
 
 bool Map::hasWildEncounters() const { return !encounterSlots.empty(); }
 
@@ -134,24 +120,14 @@ const WarpPoint *Map::getWarp(const Position &position) const {
     return nullptr;
 }
 
-void Map::setBackgroundImage(const std::string &path) {
-    backgroundImagePath = path;
-}
+void Map::setBackgroundImage(const std::string &path) { backgroundImagePath = path; }
 
-const std::string &Map::getBackgroundImage() const {
-    return backgroundImagePath;
-}
+const std::string &Map::getBackgroundImage() const { return backgroundImagePath; }
 
 bool Map::hasBackgroundImage() const { return !backgroundImagePath.empty(); }
 
-void Map::setBackgroundImageOverlay(const std::string &path) {
-    backgroundImageOverlayPath = path;
-}
+void Map::setBackgroundImageOverlay(const std::string &path) { backgroundImageOverlayPath = path; }
 
-const std::string &Map::getBackgroundImageOverlay() const {
-    return backgroundImageOverlayPath;
-}
+const std::string &Map::getBackgroundImageOverlay() const { return backgroundImageOverlayPath; }
 
-bool Map::hasBackgroundImageOverlay() const {
-    return !backgroundImageOverlayPath.empty();
-}
+bool Map::hasBackgroundImageOverlay() const { return !backgroundImageOverlayPath.empty(); }

@@ -16,9 +16,7 @@ void BagMode::render(GameContext &ctx) {
         currentSubState->render(*this, ctx);
 }
 
-void BagMode::switchSubState(SubStateType type) {
-    currentSubState = createSubState(type);
-}
+void BagMode::switchSubState(SubStateType type) { currentSubState = createSubState(type); }
 
 void BagMode::showMessage(const std::string &msg, GameContext &ctx) {
     message = msg;

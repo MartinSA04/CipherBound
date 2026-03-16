@@ -20,29 +20,24 @@ class OverworldRenderer {
     void loadSprites();
 
     // Load a background image for a map (call when entering a map)
-    void loadMapBackground(const std::string &mapId,
-                           const std::string &imagePath);
-    void loadMapBackgroundOverlay(const std::string &mapId,
-                                  const std::string &imagePath);
+    void loadMapBackground(const std::string &mapId, const std::string &imagePath);
+    void loadMapBackgroundOverlay(const std::string &mapId, const std::string &imagePath);
 
     void loadMapBackgrounds(const World &world);
 
     // Render the full overworld scene
-    void render(const Map &map, const Player &player,
-                const std::vector<std::shared_ptr<NPC>> &npcs);
+    void render(const Map &map, const Player &player, const std::vector<std::shared_ptr<NPC>> &npcs);
 
     // Individual layers (called by render in order)
     void renderMap(const Map &map, int cameraX, int cameraY);
-    void renderEntity(const Entity &entity, int cameraX, int cameraY,
-                      TDT4102::Color color = TDT4102::Color::red,
+    void renderEntity(const Entity &entity, int cameraX, int cameraY, TDT4102::Color color = TDT4102::Color::red,
                       int pixelOffsetX = 0, int pixelOffsetY = 0);
     void renderPlayer(const Player &player, int cameraX, int cameraY);
     void renderNPC(const NPC &npc, int cameraX, int cameraY);
     void renderMapOverlay(const Map &map, int cameraX, int cameraY);
 
     // Camera follows the player, centered on screen
-    void calculateCamera(const Player &player, const Map &map, int &cameraX,
-                         int &cameraY) const;
+    void calculateCamera(const Player &player, const Map &map, int &cameraX, int &cameraY) const;
 
   private:
     Renderer &renderer;

@@ -3,9 +3,7 @@
 #include "Movement.h"
 
 int WalkAnimation::getMoveDelay() const { return moveDelay; }
-void WalkAnimation::setMoveDelay(int delay) {
-    moveDelay = (delay <= 0) ? 1 : delay;
-}
+void WalkAnimation::setMoveDelay(int delay) { moveDelay = (delay <= 0) ? 1 : delay; }
 int WalkAnimation::getAnimationFrame() { return animFramesLeft; }
 int WalkAnimation::getPixelOffsetX() const { return pixelOffsetX; }
 int WalkAnimation::getPixelOffsetY() const { return pixelOffsetY; }
@@ -57,8 +55,7 @@ void WalkAnimation::updateWalkAnimation(const Direction &facing) {
     } else {
         // Linearly interpolate: offset goes from full tile toward 0
         // Total pixels to cover = TILE_SIZE, over moveDelay frames
-        double t = static_cast<double>(animFramesLeft) /
-                   static_cast<double>(moveDelay);
+        double t = static_cast<double>(animFramesLeft) / static_cast<double>(moveDelay);
         int totalOffset = static_cast<int>(t * TILE_SIZE);
 
         switch (facing) {

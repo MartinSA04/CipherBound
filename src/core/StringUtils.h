@@ -9,8 +9,7 @@ namespace StringUtils {
 
 inline std::string capitalize(std::string s) {
     if (!s.empty())
-        s[0] =
-            static_cast<char>(std::toupper(static_cast<unsigned char>(s[0])));
+        s[0] = static_cast<char>(std::toupper(static_cast<unsigned char>(s[0])));
     return s;
 }
 

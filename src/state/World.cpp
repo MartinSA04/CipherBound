@@ -11,8 +11,7 @@ using StringUtils::splitPipe;
 using StringUtils::splitSemicolon;
 
 World::World(int seed)
-    : rng(static_cast<std::mt19937::result_type>(seed)), currentMapId(""),
-      player("Player", {5, 5}) {}
+    : rng(static_cast<std::mt19937::result_type>(seed)), currentMapId(""), player("Player", {5, 5}) {}
 
 namespace {
 
@@ -76,8 +75,7 @@ NPCType parseNPCType(const std::string &s) {
 
 } // namespace
 
-std::string World::loadMap(const std::filesystem::path &path,
-                           const Pokedex &pokedex) {
+std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pokedex) {
     std::ifstream file(path);
     if (!file.is_open())
         throw std::runtime_error("Cannot open map file: " + path.string());
@@ -177,8 +175,7 @@ std::string World::loadMap(const std::filesystem::path &path,
                 WarpPoint warp;
                 warp.from = {std::stoi(parts[0]), std::stoi(parts[1])};
                 warp.targetMapId = parts[2];
-                warp.targetPosition = {std::stoi(parts[3]),
-                                       std::stoi(parts[4])};
+                warp.targetPosition = {std::stoi(parts[3]), std::stoi(parts[4])};
                 warps.push_back(warp);
             }
             break;
@@ -219,8 +216,7 @@ std::string World::loadMap(const std::filesystem::path &path,
     }
 
     if (mapId.empty() || mapWidth <= 0 || mapHeight <= 0)
-        throw std::runtime_error(
-            "Invalid map file (missing id/width/height): " + path.string());
+        throw std::runtime_error("Invalid map file (missing id/width/height): " + path.string());
 
     // Build the Map object
     Map map(mapId, mapWidth, mapHeight);
@@ -231,8 +227,7 @@ std::string World::loadMap(const std::filesystem::path &path,
         map.setBackgroundImageOverlay(bgImageOverlay);
 
     // Apply tile grid
-    for (int y = 0; y < mapHeight && y < static_cast<int>(tileRows.size());
-         ++y) {
+    for (int y = 0; y < mapHeight && y < static_cast<int>(tileRows.size()); ++y) {
         const std::string &row = tileRows[static_cast<std::size_t>(y)];
         for (int x = 0; x < mapWidth && x < static_cast<int>(row.size()); ++x) {
             TileType type = charToTileType(row[static_cast<std::size_t>(x)]);
@@ -260,8 +255,7 @@ std::string World::loadMap(const std::filesystem::path &path,
     // Create NPCs from raw data
     for (const auto &raw : rawNPCs) {
         std::shared_ptr<NPC> npc =
-            std::make_shared<NPC>(raw.id, raw.name, Position{raw.x, raw.y},
-                                  parseNPCType(raw.typeStr));
+            std::make_shared<NPC>(raw.id, raw.name, Position{raw.x, raw.y}, parseNPCType(raw.typeStr));
         npc->setFacing(parseDirection(raw.facingStr));
         npc->setSightRange(raw.sightRange);
 
@@ -328,9 +322,7 @@ void World::generate(const Pokedex &pokedex) {
 
 // --- Map management ---
 
-void World::addMap(const std::string &id, Map map) {
-    maps.emplace(id, std::move(map));
-}
+void World::addMap(const std::string &id, Map map) { maps.emplace(id, std::move(map)); }
 
 Map &World::getMap(const std::string &id) {
     auto it = maps.find(id);
@@ -370,16 +362,11 @@ void World::setPlayer(Player p) { player = std::move(p); }
 
 // --- NPCs ---
 
-void World::addNPC(const std::string &mapId, std::shared_ptr<NPC> npc) {
-    npcs[mapId].push_back(npc);
-}
+void World::addNPC(const std::string &mapId, std::shared_ptr<NPC> npc) { npcs[mapId].push_back(npc); }
 
-std::vector<std::shared_ptr<NPC>> &World::getNPCs(const std::string &mapId) {
-    return npcs[mapId];
-}
+std::vector<std::shared_ptr<NPC>> &World::getNPCs(const std::string &mapId) { return npcs[mapId]; }
 
-const std::vector<std::shared_ptr<NPC>> &
-World::getNPCs(const std::string &mapId) const {
+const std::vector<std::shared_ptr<NPC>> &World::getNPCs(const std::string &mapId) const {
     static const std::vector<std::shared_ptr<NPC>> empty;
     auto it = npcs.find(mapId);
     return (it != npcs.end()) ? it->second : empty;
@@ -394,8 +381,7 @@ std::shared_ptr<NPC> World::findNPCById(const std::string &npcId) {
     return nullptr;
 }
 
-std::shared_ptr<NPC> World::findNPCById(const std::string &mapId,
-                                        const std::string &npcId) {
+std::shared_ptr<NPC> World::findNPCById(const std::string &mapId, const std::string &npcId) {
     auto &npcList = npcs[mapId];
     for (auto &npc : npcList) {
         if (npc->getId() == npcId)
@@ -404,8 +390,7 @@ std::shared_ptr<NPC> World::findNPCById(const std::string &mapId,
     return nullptr;
 }
 
-std::shared_ptr<NPC> World::findNPCAt(const std::string &mapId,
-                                      const Position &pos) {
+std::shared_ptr<NPC> World::findNPCAt(const std::string &mapId, const Position &pos) {
     auto &npcList = npcs[mapId];
     for (auto &npc : npcList) {
         if (npc->getPosition() == pos)

@@ -3,10 +3,8 @@
 
 const std::vector<std::string> NPC::emptyLines = {};
 
-NPC::NPC(const std::string &id, const std::string &name, Position position,
-         NPCType type)
-    : Entity(name, position), id(id), type(type), defeated(false),
-      sightRange(4) {}
+NPC::NPC(const std::string &id, const std::string &name, Position position, NPCType type)
+    : Entity(name, position), id(id), type(type), defeated(false), sightRange(4) {}
 
 void NPC::update() {
     // NPC AI (turn toward player, patrol, etc.) — future use
@@ -16,14 +14,11 @@ void NPC::addDaemon(Daemon daemon) { party.push_back(std::move(daemon)); }
 
 const std::string &NPC::getId() const { return id; }
 NPCType NPC::getType() const { return type; }
-bool NPC::isTrainerType() const {
-    return type == NPCType::trainer || type == NPCType::gymLeader;
-}
+bool NPC::isTrainerType() const { return type == NPCType::trainer || type == NPCType::gymLeader; }
 bool NPC::isDefeated() const { return defeated; }
 void NPC::setDefeated(bool d) { defeated = d; }
 
-const std::vector<std::string> &
-NPC::getDialogueLines(const std::set<std::string> &playerFlags) const {
+const std::vector<std::string> &NPC::getDialogueLines(const std::set<std::string> &playerFlags) const {
     // Check stages in order; first match wins
     for (const auto &stage : dialogueStages) {
         if (stage.requiredFlag.empty() || playerFlags.count(stage.requiredFlag))
@@ -32,8 +27,7 @@ NPC::getDialogueLines(const std::set<std::string> &playerFlags) const {
     return emptyLines;
 }
 
-void NPC::addDialogueStage(const std::string &requiredFlag,
-                           const std::vector<std::string> &lines) {
+void NPC::addDialogueStage(const std::string &requiredFlag, const std::vector<std::string> &lines) {
     dialogueStages.push_back({requiredFlag, lines});
 }
 

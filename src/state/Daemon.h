@@ -15,10 +15,8 @@ class Daemon {
     Daemon(const Species &species, int level);
 
     // Rehydrate from saved data
-    Daemon(const Species &species, int level, int exp, int currentHP,
-           const std::string &nickname, StatusEffect status,
-           const BaseStats &ivs, const BaseStats &evs,
-           const std::array<MoveSlot, 4> &moves);
+    Daemon(const Species &species, int level, int exp, int currentHP, const std::string &nickname, StatusEffect status,
+           const BaseStats &ivs, const BaseStats &evs, const std::array<MoveSlot, 4> &moves);
 
     const std::string &getNickname() const;
     void setNickname(const std::string &name);

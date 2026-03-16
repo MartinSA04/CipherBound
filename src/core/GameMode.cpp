@@ -6,13 +6,9 @@
 
 GameContext::~GameContext() = default;
 
-void GameContext::pushRequest(ModeRequest req) {
-    pendingRequests.push_back(std::move(req));
-}
+void GameContext::pushRequest(ModeRequest req) { pendingRequests.push_back(std::move(req)); }
 
-void GameContext::playSound(SoundEffect sfx) {
-    sound.play(sfx, ui.getRenderer().getWindow());
-}
+void GameContext::playSound(SoundEffect sfx) { sound.play(sfx, ui.getRenderer().getWindow()); }
 
 // ── ModeRequest factory helpers
 // ────────────────────────────────────────────────
@@ -45,8 +41,7 @@ ModeRequest ModeRequest::endBattle() {
     return r;
 }
 
-ModeRequest ModeRequest::transition(const std::string &mapId,
-                                    const Position &spawn) {
+ModeRequest ModeRequest::transition(const std::string &mapId, const Position &spawn) {
     ModeRequest r{};
     r.type = Type::transitionToMap;
     r.mapId = mapId;
@@ -54,10 +49,8 @@ ModeRequest ModeRequest::transition(const std::string &mapId,
     return r;
 }
 
-ModeRequest ModeRequest::dialogue(const std::string &speaker,
-                                  const std::vector<std::string> &lines,
-                                  std::shared_ptr<NPC> npc,
-                                  GameState retState) {
+ModeRequest ModeRequest::dialogue(const std::string &speaker, const std::vector<std::string> &lines,
+                                  std::shared_ptr<NPC> npc, GameState retState) {
     ModeRequest r{};
     r.type = Type::startDialogue;
     r.speaker = speaker;
@@ -67,8 +60,7 @@ ModeRequest ModeRequest::dialogue(const std::string &speaker,
     return r;
 }
 
-ModeRequest ModeRequest::dialogueChoice(const std::vector<std::string> &options,
-                                        const std::string &context,
+ModeRequest ModeRequest::dialogueChoice(const std::vector<std::string> &options, const std::string &context,
                                         GameState retState) {
     ModeRequest r{};
     r.type = Type::startDialogueChoice;
@@ -97,6 +89,5 @@ ModeRequest ModeRequest::storyAction(const StoryAction &action) {
 
 void GameMode::renderOverworld(GameContext &ctx) {
     const std::string &mapId = ctx.world.getCurrentMapId();
-    ctx.ui.drawOverworld(ctx.world.getMap(mapId), ctx.world.getPlayer(),
-                         ctx.world.getNPCs(mapId));
+    ctx.ui.drawOverworld(ctx.world.getMap(mapId), ctx.world.getPlayer(), ctx.world.getNPCs(mapId));
 }

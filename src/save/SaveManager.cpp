@@ -9,10 +9,8 @@ SaveManager::SaveManager() : baseSavePath("saves/") {}
 // --- BaseStats serialization ---
 
 std::string SaveManager::serializeBaseStats(const BaseStats &stats) {
-    return std::to_string(stats.hp) + "," + std::to_string(stats.attack) + "," +
-           std::to_string(stats.defense) + "," +
-           std::to_string(stats.specialAttack) + "," +
-           std::to_string(stats.specialDefense) + "," +
+    return std::to_string(stats.hp) + "," + std::to_string(stats.attack) + "," + std::to_string(stats.defense) + "," +
+           std::to_string(stats.specialAttack) + "," + std::to_string(stats.specialDefense) + "," +
            std::to_string(stats.speed);
 }
 
@@ -54,25 +52,21 @@ BaseStats SaveManager::deserializeBaseStats(const std::string &s) {
 
 std::string SaveManager::serializeDaemon(const Daemon &daemon) {
     std::ostringstream oss;
-    oss << daemon.getSpeciesId() << ";" << daemon.getLevel() << ";"
-        << daemon.getExp() << ";" << daemon.getCurrentHP() << ";"
-        << daemon.getNickname() << ";" << static_cast<int>(daemon.getStatus())
-        << ";" << serializeBaseStats(daemon.getIVs()) << ";"
-        << serializeBaseStats(daemon.getEVs()) << ";";
+    oss << daemon.getSpeciesId() << ";" << daemon.getLevel() << ";" << daemon.getExp() << ";" << daemon.getCurrentHP()
+        << ";" << daemon.getNickname() << ";" << static_cast<int>(daemon.getStatus()) << ";"
+        << serializeBaseStats(daemon.getIVs()) << ";" << serializeBaseStats(daemon.getEVs()) << ";";
 
     const auto &moves = daemon.getMoves();
     for (int i = 0; i < 4; ++i) {
         if (i > 0)
             oss << ",";
-        oss << moves[static_cast<size_t>(i)].moveId << ":"
-            << moves[static_cast<size_t>(i)].currentPP << ":"
+        oss << moves[static_cast<size_t>(i)].moveId << ":" << moves[static_cast<size_t>(i)].currentPP << ":"
             << moves[static_cast<size_t>(i)].maxPP;
     }
     return oss.str();
 }
 
-Daemon SaveManager::deserializeDaemon(const std::string &line,
-                                      const Pokedex &pokedex) {
+Daemon SaveManager::deserializeDaemon(const std::string &line, const Pokedex &pokedex) {
     std::istringstream iss(line);
     std::string token;
     std::vector<std::string> parts;
@@ -112,16 +106,13 @@ Daemon SaveManager::deserializeDaemon(const std::string &line,
     }
 
     const Species &species = pokedex.getSpecies(speciesId);
-    return Daemon(species, level, exp, currentHP, nickname, status, ivs, evs,
-                  moves);
+    return Daemon(species, level, exp, currentHP, nickname, status, ivs, evs, moves);
 }
 
 // --- Save game ---
 
-bool SaveManager::saveGame(const std::string &filepath, const Player &player,
-                           const World &world) {
-    std::filesystem::create_directories(
-        std::filesystem::path(filepath).parent_path());
+bool SaveManager::saveGame(const std::string &filepath, const Player &player, const World &world) {
+    std::filesystem::create_directories(std::filesystem::path(filepath).parent_path());
     std::ofstream out(filepath);
     if (!out.is_open())
         return false;
@@ -130,8 +121,7 @@ bool SaveManager::saveGame(const std::string &filepath, const Player &player,
     out << "[header]\n";
     out << "name|" << player.getName() << "\n";
     out << "map|" << world.getCurrentMapId() << "\n";
-    out << "pos|" << player.getPosition().x << "|" << player.getPosition().y
-        << "\n";
+    out << "pos|" << player.getPosition().x << "|" << player.getPosition().y << "\n";
     out << "facing|" << static_cast<int>(player.getFacing()) << "\n";
     out << "money|" << player.getMoney() << "\n";
 
@@ -186,8 +176,7 @@ bool SaveManager::saveGame(const std::string &filepath, const Player &player,
 
 // --- Load game ---
 
-bool SaveManager::loadGame(const std::string &filepath, Player &player,
-                           World &world, const Pokedex &pokedex) {
+bool SaveManager::loadGame(const std::string &filepath, Player &player, World &world, const Pokedex &pokedex) {
     std::ifstream in(filepath);
     if (!in.is_open())
         return false;
@@ -205,17 +194,7 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player,
     Position pos{0, 0};
     Direction facing = Direction::down;
 
-    enum class Section {
-        none,
-        header,
-        flags,
-        badges,
-        inventory,
-        party,
-        pc_boxes,
-        npcs,
-        daemondex
-    };
+    enum class Section { none, header, flags, badges, inventory, party, pc_boxes, npcs, daemondex };
     Section section = Section::none;
 
     std::string line;
@@ -299,8 +278,7 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player,
                 Daemon c = deserializeDaemon(line, pokedex);
                 player.addDaemon(c);
             } catch (const std::exception &e) {
-                std::cerr << "SaveManager: failed to load Daemon: " << e.what()
-                          << "\n";
+                std::cerr << "SaveManager: failed to load Daemon: " << e.what() << "\n";
             }
             break;
         }
@@ -317,9 +295,7 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player,
                     Daemon c = deserializeDaemon(daemonData, pokedex);
                     player.addDaemon(c); // Overflows to PC boxes
                 } catch (const std::exception &e) {
-                    std::cerr
-                        << "SaveManager: failed to load PC Daemon: " << e.what()
-                        << "\n";
+                    std::cerr << "SaveManager: failed to load PC Daemon: " << e.what() << "\n";
                 }
             }
             break;
@@ -363,17 +339,11 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player,
     return true;
 }
 
-bool SaveManager::saveFileExists(const std::string &filepath) const {
-    return std::filesystem::exists(filepath);
-}
+bool SaveManager::saveFileExists(const std::string &filepath) const { return std::filesystem::exists(filepath); }
 
-bool SaveManager::deleteSave(const std::string &filepath) {
-    return std::filesystem::remove(filepath);
-}
+bool SaveManager::deleteSave(const std::string &filepath) { return std::filesystem::remove(filepath); }
 
-std::string SaveManager::getSavePath(int slot) const {
-    return baseSavePath + "slot_" + std::to_string(slot) + ".sav";
-}
+std::string SaveManager::getSavePath(int slot) const { return baseSavePath + "slot_" + std::to_string(slot) + ".sav"; }
 
 int SaveManager::getSlotCount() const { return MAX_SAVE_SLOTS; }
 

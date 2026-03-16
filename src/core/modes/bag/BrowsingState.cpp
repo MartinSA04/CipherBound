@@ -6,8 +6,7 @@
 #include "../../../ui/InputManager.h"
 #include "../BagMode.h"
 
-void BrowsingState::update(BagMode &bag, GameContext &ctx,
-                           InputManager &input) {
+void BrowsingState::update(BagMode &bag, GameContext &ctx, InputManager &input) {
     Player &player = ctx.world.getPlayer();
     int itemCount = static_cast<int>(player.getInventory().size());
 
@@ -21,13 +20,10 @@ void BrowsingState::update(BagMode &bag, GameContext &ctx,
 
     if (input.isConfirmPressed()) {
         const auto &inv = player.getInventory();
-        if (bag.selected >= 0 &&
-            static_cast<std::size_t>(bag.selected) < inv.size()) {
-            const ItemData &item = ctx.pokedex.getItem(
-                inv[static_cast<std::size_t>(bag.selected)].itemId);
+        if (bag.selected >= 0 && static_cast<std::size_t>(bag.selected) < inv.size()) {
+            const ItemData &item = ctx.pokedex.getItem(inv[static_cast<std::size_t>(bag.selected)].itemId);
             if (item.category == ItemCategory::healing) {
-                bag.useItemId =
-                    inv[static_cast<std::size_t>(bag.selected)].itemId;
+                bag.useItemId = inv[static_cast<std::size_t>(bag.selected)].itemId;
                 bag.partySelected = 0;
                 bag.switchSubState(BagMode::SubStateType::choosingTarget);
             } else {

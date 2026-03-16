@@ -26,8 +26,7 @@ struct DialogueStage {
 
 class NPC : public Entity, public Party {
   public:
-    NPC(const std::string &id, const std::string &name, Position position,
-        NPCType type);
+    NPC(const std::string &id, const std::string &name, Position position, NPCType type);
 
     void update() override;
 
@@ -40,10 +39,8 @@ class NPC : public Entity, public Party {
     void setDefeated(bool defeated);
 
     // Dialogue — returns best matching stage for the player's flags
-    const std::vector<std::string> &
-    getDialogueLines(const std::set<std::string> &playerFlags) const;
-    void addDialogueStage(const std::string &requiredFlag,
-                          const std::vector<std::string> &lines);
+    const std::vector<std::string> &getDialogueLines(const std::set<std::string> &playerFlags) const;
+    void addDialogueStage(const std::string &requiredFlag, const std::vector<std::string> &lines);
 
     // Sight range for trainer battles
     int getSightRange() const;

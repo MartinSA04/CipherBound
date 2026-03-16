@@ -15,9 +15,8 @@ void SaveMode::update(GameContext &ctx, InputManager &input) {
         if (ctx.currentSaveSlot < 0) {
             saveSuccess = false;
         } else {
-            saveSuccess = ctx.saveManager.saveGame(
-                ctx.saveManager.getSavePath(ctx.currentSaveSlot),
-                ctx.world.getPlayer(), ctx.world);
+            saveSuccess = ctx.saveManager.saveGame(ctx.saveManager.getSavePath(ctx.currentSaveSlot),
+                                                   ctx.world.getPlayer(), ctx.world);
         }
         saveComplete = true;
         if (saveSuccess) {

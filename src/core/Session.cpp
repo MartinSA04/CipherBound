@@ -17,10 +17,8 @@
 #include <thread>
 
 Session::Session(int seed)
-    : world(seed), pokedex(), ui(), saveManager(), story(), music(), sound(),
-      cutsceneRunner(),
-      ctx{world,          pokedex, ui,      saveManager, story, music,
-          cutsceneRunner, sound,   nullptr, -1,          false, {}} {}
+    : world(seed), pokedex(), ui(), saveManager(), story(), music(), sound(), cutsceneRunner(),
+      ctx{world, pokedex, ui, saveManager, story, music, cutsceneRunner, sound, nullptr, -1, false, {}} {}
 
 // ── Main loop
 // ──────────────────────────────────────────────────────────────────
@@ -107,25 +105,21 @@ void Session::processRequests() {
 
         case ModeRequest::Type::startWildBattle: {
             ctx.ui.battleIntroFrame = 0;
-            switchToMode(
-                GameState::battleIntro,
-                std::make_unique<BattleIntroMode>(req.speciesId, req.level));
+            switchToMode(GameState::battleIntro, std::make_unique<BattleIntroMode>(req.speciesId, req.level));
             music.play(MusicTrack::wildBattle, ui.getRenderer().getWindow());
             break;
         }
 
         case ModeRequest::Type::startTrainerBattle: {
             ctx.ui.battleIntroFrame = 0;
-            switchToMode(GameState::battleIntro,
-                         std::make_unique<BattleIntroMode>(req.npc));
+            switchToMode(GameState::battleIntro, std::make_unique<BattleIntroMode>(req.npc));
             music.play(MusicTrack::trainerBattle, ui.getRenderer().getWindow());
             break;
         }
 
         case ModeRequest::Type::endBattle: {
             if (ctx.currentBattle) {
-                auto *battleMode =
-                    dynamic_cast<BattleMode *>(currentMode.get());
+                auto *battleMode = dynamic_cast<BattleMode *>(currentMode.get());
                 if (battleMode && !battleMode->getTrainerNPCId().empty()) {
                     BattleResult result = ctx.currentBattle->getResult();
                     if (result.playerWon)
@@ -135,35 +129,28 @@ void Session::processRequests() {
             ctx.currentBattle.reset();
             switchMode(GameState::overworld);
 
-            MusicTrack mapTrack =
-                MusicManager::trackForMap(world.getCurrentMapId());
+            MusicTrack mapTrack = MusicManager::trackForMap(world.getCurrentMapId());
             music.play(mapTrack, ui.getRenderer().getWindow());
             break;
         }
 
         case ModeRequest::Type::transitionToMap: {
             const std::string &mapId = world.getCurrentMapId();
-            world.getMap(mapId).setOccupied(world.getPlayer().getPosition(),
-                                            false);
-            switchToMode(
-                GameState::transition,
-                std::make_unique<TransitionMode>(req.mapId, req.spawn));
+            world.getMap(mapId).setOccupied(world.getPlayer().getPosition(), false);
+            switchToMode(GameState::transition, std::make_unique<TransitionMode>(req.mapId, req.spawn));
             break;
         }
 
         case ModeRequest::Type::startDialogue: {
             dialogueReturnState = req.returnState;
             switchToMode(GameState::dialogue,
-                         std::make_unique<DialogueMode>(
-                             req.speaker, req.lines, req.npc, req.returnState));
+                         std::make_unique<DialogueMode>(req.speaker, req.lines, req.npc, req.returnState));
             break;
         }
 
         case ModeRequest::Type::startDialogueChoice: {
-            switchToMode(
-                GameState::dialogueChoice,
-                std::make_unique<DialogueChoiceMode>(
-                    req.choiceOptions, req.choiceContext, dialogueReturnState));
+            switchToMode(GameState::dialogueChoice, std::make_unique<DialogueChoiceMode>(
+                                                        req.choiceOptions, req.choiceContext, dialogueReturnState));
             break;
         }
 
@@ -192,13 +179,11 @@ void Session::handleStoryAction(const StoryAction &action) {
         break;
 
     case StoryAction::Type::showChoice:
-        ctx.pushRequest(ModeRequest::dialogueChoice(
-            action.options, action.choiceContext, dialogueReturnState));
+        ctx.pushRequest(ModeRequest::dialogueChoice(action.options, action.choiceContext, dialogueReturnState));
         break;
 
     case StoryAction::Type::showDialogue:
-        ctx.pushRequest(ModeRequest::dialogue(action.speaker, action.lines,
-                                              nullptr, GameState::overworld));
+        ctx.pushRequest(ModeRequest::dialogue(action.speaker, action.lines, nullptr, GameState::overworld));
         break;
 
     case StoryAction::Type::startCutscene:
@@ -219,9 +204,7 @@ void Session::handleStoryAction(const StoryAction &action) {
 // ── Mode switching
 // ─────────────────────────────────────────────────────────────
 
-void Session::switchMode(GameState newState) {
-    switchToMode(newState, createMode(newState));
-}
+void Session::switchMode(GameState newState) { switchToMode(newState, createMode(newState)); }
 
 void Session::switchToMode(GameState newState, std::unique_ptr<GameMode> mode) {
     if (currentMode)

@@ -82,16 +82,11 @@ struct ModeRequest {
     static ModeRequest wildBattle(int species, int level);
     static ModeRequest trainerBattle(std::shared_ptr<NPC> t);
     static ModeRequest endBattle();
-    static ModeRequest transition(const std::string &mapId,
-                                  const Position &spawn);
-    static ModeRequest dialogue(const std::string &speaker,
-                                const std::vector<std::string> &lines,
-                                std::shared_ptr<NPC> npc = nullptr,
-                                GameState retState = GameState::overworld);
-    static ModeRequest
-    dialogueChoice(const std::vector<std::string> &options,
-                   const std::string &context,
-                   GameState retState = GameState::overworld);
+    static ModeRequest transition(const std::string &mapId, const Position &spawn);
+    static ModeRequest dialogue(const std::string &speaker, const std::vector<std::string> &lines,
+                                std::shared_ptr<NPC> npc = nullptr, GameState retState = GameState::overworld);
+    static ModeRequest dialogueChoice(const std::vector<std::string> &options, const std::string &context,
+                                      GameState retState = GameState::overworld);
     static ModeRequest cutscene(const std::string &path);
     static ModeRequest storyAction(const StoryAction &action);
 };

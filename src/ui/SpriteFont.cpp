@@ -1,8 +1,5 @@
 #include "SpriteFont.h"
 
-// Auto-generated glyph lookup table from font.png analysis
-// Maps each character to its source rect {srcX, srcY, width, height}
-
 constexpr int START_WIDTH = 8;
 constexpr int START_HEIGHT = 2;
 constexpr int COLUMN_WIDTH = 16;
@@ -113,116 +110,92 @@ const GlyphInfo *SpriteFont::getGlyph(char c) const {
 }
 
 void SpriteFont::getBattleDigitRect(int digit, int &srcX, int &srcY, int &srcW, int &srcH) const {
-    // battle_numbers.png layout:
-    // 5 digits per row, 2 rows
-    // Each digit: 8px wide x 7px tall
-    // Row separator at y=0 and y=8
-    // Column separators at x=8, 17, 26, 35
     int col = digit % 5;
     int row = digit / 5;
-    srcX = col * 9;     // 9px stride (8px glyph + 1px separator)
-    srcY = 1 + row * 8; // rows at y=1 and y=9
+    srcX = col * 9;
+    srcY = 1 + row * 8;
     srcW = BNUM_GLYPH_W;
     srcH = BNUM_GLYPH_H;
 }
 
-void SpriteFont::drawText(Renderer &renderer, const std::string &text, int screenX, int screenY, int scale,
-                          int spacing) const {
+void SpriteFont::drawTextChar(Renderer &renderer, char c, int &cursorX, int cursorY, int scale,
+                              int spacing, std::size_t &drawn) const {
+    ++drawn;
+
+    if (c == ' ') {
+        cursorX += SPACE_WIDTH * scale;
+        return;
+    }
+
+    const GlyphInfo *glyph = getGlyph(c);
+    if (glyph) {
+        int dstW = glyph->width * scale;
+        int dstH = glyph->height * scale;
+        renderer.drawSpriteRegion(FONT_TEXTURE, glyph->srcX, glyph->srcY, glyph->width,
+                                  glyph->height, cursorX, cursorY, dstW, dstH);
+        cursorX += (glyph->width + spacing) * scale;
+    } else {
+        cursorX += (6 + spacing) * scale;
+    }
+}
+
+void SpriteFont::drawText(Renderer &renderer, const std::string &text, int screenX, int screenY,
+                          int scale, int spacing) const {
     drawTextPartial(renderer, text, text.size(), screenX, screenY, scale, spacing);
 }
 
-void SpriteFont::drawTextPartial(Renderer &renderer, const std::string &text, std::size_t charCount, int screenX,
-                                 int screenY, int scale, int spacing, int maxWidth) const {
+void SpriteFont::drawTextPartial(Renderer &renderer, const std::string &text, std::size_t charCount,
+                                 int screenX, int screenY, int scale, int spacing,
+                                 int maxWidth) const {
     int cursorX = screenX;
     int cursorY = screenY;
     int lineHeight = (FONT_GLYPH_H + 2) * scale;
     std::size_t drawn = 0;
 
-    // If wrapping enabled, break at word boundaries
-    if (maxWidth > 0) {
-        // Split into words, draw word by word
-        std::size_t i = 0;
-        while (i < text.size() && drawn < charCount) {
-            // Find next word (including leading space)
-            std::size_t wordStart = i;
-            // Skip leading spaces
-            while (i < text.size() && text[i] == ' ')
-                ++i;
-            // Consume non-space characters
-            std::size_t textStart = i;
-            while (i < text.size() && text[i] != ' ')
-                ++i;
-
-            // Measure the word (without leading spaces for wrap check)
-            std::string word = text.substr(textStart, i - textStart);
-            int wordWidth = getTextWidth(word, scale, spacing);
-            std::size_t spaceCount = textStart - wordStart;
-            int spacesWidth = 0;
-            for (std::size_t s = 0; s < spaceCount; ++s) {
-                spacesWidth += SPACE_WIDTH * scale;
-            }
-
-            // Check if word fits on current line
-            if (cursorX + spacesWidth + wordWidth > screenX + maxWidth && cursorX > screenX) {
-                // Wrap to next line
-                cursorX = screenX;
-                cursorY += lineHeight;
-                // Skip leading spaces at line start
-                spaceCount = 0;
-                spacesWidth = 0;
-            }
-
-            // Draw leading spaces
-            for (std::size_t s = 0; s < spaceCount && drawn < charCount; ++s) {
-                cursorX += SPACE_WIDTH * scale;
-                ++drawn;
-            }
-
-            // Draw word characters
-            for (char c : word) {
-                if (drawn >= charCount)
-                    break;
-                ++drawn;
-
-                const GlyphInfo *glyph = getGlyph(c);
-                if (glyph) {
-                    int dstW = glyph->width * scale;
-                    int dstH = glyph->height * scale;
-                    renderer.drawSpriteRegion(FONT_TEXTURE, glyph->srcX, glyph->srcY, glyph->width, glyph->height,
-                                              cursorX, cursorY, dstW, dstH);
-                    cursorX += (glyph->width + spacing) * scale;
-                } else {
-                    cursorX += (6 + spacing) * scale;
-                }
-            }
-        }
-    } else {
-        // No wrapping — original single-line behavior
+    if (maxWidth <= 0) {
         for (char c : text) {
             if (drawn >= charCount)
                 break;
-            ++drawn;
+            drawTextChar(renderer, c, cursorX, cursorY, scale, spacing, drawn);
+        }
+        return;
+    }
 
-            if (c == ' ') {
-                cursorX += SPACE_WIDTH * scale;
-                continue;
-            }
+    std::size_t i = 0;
+    while (i < text.size() && drawn < charCount) {
+        std::size_t spaceCount = 0;
+        while (i < text.size() && text[i] == ' ') {
+            ++spaceCount;
+            ++i;
+        }
 
-            const GlyphInfo *glyph = getGlyph(c);
-            if (glyph) {
-                int dstW = glyph->width * scale;
-                int dstH = glyph->height * scale;
-                renderer.drawSpriteRegion(FONT_TEXTURE, glyph->srcX, glyph->srcY, glyph->width, glyph->height, cursorX,
-                                          cursorY, dstW, dstH);
-                cursorX += (glyph->width + spacing) * scale;
-            } else {
-                cursorX += (6 + spacing) * scale;
-            }
+        std::size_t wordStart = i;
+        while (i < text.size() && text[i] != ' ') {
+            ++i;
+        }
+        std::size_t wordLength = i - wordStart;
+
+        int spacesWidth = static_cast<int>(spaceCount) * SPACE_WIDTH * scale;
+        int wordWidth = getTextWidth(text.substr(wordStart, wordLength), scale, spacing);
+
+        if (cursorX + spacesWidth + wordWidth > screenX + maxWidth && cursorX > screenX) {
+            cursorX = screenX;
+            cursorY += lineHeight;
+            spaceCount = 0;
+        }
+
+        for (std::size_t s = 0; s < spaceCount && drawn < charCount; ++s) {
+            drawTextChar(renderer, ' ', cursorX, cursorY, scale, spacing, drawn);
+        }
+
+        for (std::size_t j = 0; j < wordLength && drawn < charCount; ++j) {
+            drawTextChar(renderer, text[wordStart + j], cursorX, cursorY, scale, spacing, drawn);
         }
     }
 }
 
-void SpriteFont::drawContinueIndicator(Renderer &renderer, int screenX, int screenY, int scale) const {
+void SpriteFont::drawContinueIndicator(Renderer &renderer, int screenX, int screenY,
+                                       int scale) const {
     constexpr int arrowSrcX = 103;
     constexpr int arrowSrcY = 80;
     constexpr int arrowSrcW = 6;
@@ -231,19 +204,20 @@ void SpriteFont::drawContinueIndicator(Renderer &renderer, int screenX, int scre
     int dstW = arrowSrcW * scale;
     int dstH = arrowSrcH * scale;
 
-    renderer.drawSpriteRegion(FONT_TEXTURE, arrowSrcX, arrowSrcY, arrowSrcW, arrowSrcH, screenX, screenY, dstW, dstH);
+    renderer.drawSpriteRegion(FONT_TEXTURE, arrowSrcX, arrowSrcY, arrowSrcW, arrowSrcH, screenX,
+                              screenY, dstW, dstH);
 }
 
-void SpriteFont::drawBattleNumber(Renderer &renderer, int number, int screenX, int screenY, int scale,
-                                  bool rightAlign) const {
+void SpriteFont::drawBattleNumber(Renderer &renderer, int number, int screenX, int screenY,
+                                  int scale, bool rightAlign) const {
     std::string numStr = std::to_string(number);
     if (rightAlign)
         screenX -= getBattleNumberWidth(numStr);
     drawBattleNumberString(renderer, numStr, screenX, screenY, scale);
 }
 
-void SpriteFont::drawBattleNumberString(Renderer &renderer, const std::string &text, int screenX, int screenY,
-                                        int scale) const {
+void SpriteFont::drawBattleNumberString(Renderer &renderer, const std::string &text, int screenX,
+                                        int screenY, int scale) const {
     int cursorX = screenX;
     int dstW = BNUM_GLYPH_W * scale;
     int dstH = BNUM_GLYPH_H * scale;
@@ -253,7 +227,8 @@ void SpriteFont::drawBattleNumberString(Renderer &renderer, const std::string &t
             int digit = c - '0';
             int srcX, srcY, srcW, srcH;
             getBattleDigitRect(digit, srcX, srcY, srcW, srcH);
-            renderer.drawSpriteRegion(BNUM_TEXTURE, srcX, srcY, srcW, srcH, cursorX, screenY, dstW, dstH);
+            renderer.drawSpriteRegion(BNUM_TEXTURE, srcX, srcY, srcW, srcH, cursorX, screenY, dstW,
+                                      dstH);
             cursorX += dstW;
         } else if (c == ' ') {
             cursorX += SPACE_WIDTH * scale;

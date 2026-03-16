@@ -2,7 +2,8 @@
 
 StoryAction StoryManager::onDialogueEnd(std::shared_ptr<NPC> npc, World &world) {
     // Check for trainer battle
-    if (npc && !npc->isDefeated() && (npc->getType() == NPCType::trainer || npc->getType() == NPCType::gymLeader) &&
+    if (npc && !npc->isDefeated() &&
+        (npc->getType() == NPCType::trainer || npc->getType() == NPCType::gymLeader) &&
         !npc->partyEmpty()) {
         StoryAction action;
         action.type = StoryAction::Type::startBattle;
@@ -25,7 +26,8 @@ StoryAction StoryManager::onDialogueEnd(std::shared_ptr<NPC> npc, World &world) 
     return action;
 }
 
-StoryAction StoryManager::onChoiceSelected(const std::string &context, int choice, World &world, Pokedex &pokedex) {
+StoryAction StoryManager::onChoiceSelected(const std::string &context, int choice, World &world,
+                                           Pokedex &pokedex) {
     // Pokeball yes/no choice: choice 0 = Yes, 1 = No
     if (context.starts_with("pokeball_") && choice == 0) {
         // Extract species id from "pokeball_N"

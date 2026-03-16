@@ -47,7 +47,8 @@ void Map::setTile(const Position &position, Tile tile) {
 
 void Map::setOccupied(const Position &position, bool occupied) {
     if (isInBounds(position))
-        grid[static_cast<std::size_t>(position.y)][static_cast<std::size_t>(position.x)].isOccupied = occupied;
+        grid[static_cast<std::size_t>(position.y)][static_cast<std::size_t>(position.x)]
+            .isOccupied = occupied;
 }
 
 bool Map::isInBounds(const Position &position) const {

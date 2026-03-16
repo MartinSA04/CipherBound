@@ -50,7 +50,8 @@ class Battle {
   public:
     Battle(Player &player, std::unique_ptr<Daemon> opponent, BattleType type, std::mt19937 &rng,
            const Pokedex &pokedex);
-    Battle(Player &player, std::shared_ptr<NPC> opponent, BattleType type, std::mt19937 &rng, const Pokedex &pokedex);
+    Battle(Player &player, std::shared_ptr<NPC> opponent, BattleType type, std::mt19937 &rng,
+           const Pokedex &pokedex);
 
     void start();
     void chooseAction(BattleAction action);

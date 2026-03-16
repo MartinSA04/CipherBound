@@ -4,9 +4,10 @@
 #include "../../ui/InputManager.h"
 #include "../StoryManager.h"
 
-DialogueMode::DialogueMode(const std::string &speaker, const std::vector<std::string> &lines, std::shared_ptr<NPC> npc,
-                           GameState returnState)
-    : dialogueNPC(std::move(npc)), returnState(returnState), savedSpeaker(speaker), savedLines(lines) {}
+DialogueMode::DialogueMode(const std::string &speaker, const std::vector<std::string> &lines,
+                           std::shared_ptr<NPC> npc, GameState returnState)
+    : dialogueNPC(std::move(npc)), returnState(returnState), savedSpeaker(speaker),
+      savedLines(lines) {}
 
 void DialogueMode::onEnter(GameContext &ctx) { ctx.ui.startDialogue(savedSpeaker, savedLines); }
 

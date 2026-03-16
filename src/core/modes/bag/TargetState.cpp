@@ -35,7 +35,8 @@ void TargetState::update(BagMode &bag, GameContext &ctx, InputManager &input) {
             else if (bag.selected >= newSize)
                 bag.selected = newSize - 1;
 
-            bag.showMessage(target.getNickname() + " recovered " + std::to_string(healed) + " HP!", ctx);
+            bag.showMessage(target.getNickname() + " recovered " + std::to_string(healed) + " HP!",
+                            ctx);
             ctx.playSound(SoundEffect::recovery);
             // After using item, return to browsing (via message)
             bag.returnAfterMessage = BagMode::SubStateType::browsing;

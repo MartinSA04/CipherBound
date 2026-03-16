@@ -46,8 +46,9 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
     case BattleState::fled:
     case BattleState::captured:
         if (bs == BattleState::victory || bs == BattleState::captured) {
-            MusicTrack victoryTrack = (battleTrainer && battleTrainer->isTrainerType()) ? MusicTrack::trainerVictory
-                                                                                        : MusicTrack::wildVictory;
+            MusicTrack victoryTrack = (battleTrainer && battleTrainer->isTrainerType())
+                                          ? MusicTrack::trainerVictory
+                                          : MusicTrack::wildVictory;
             ctx.music.play(victoryTrack, ctx.ui.getRenderer().getWindow());
         } else if (bs == BattleState::defeat) {
             ctx.music.stop();
@@ -74,9 +75,10 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
         return;
 
     case BattleState::animatingHP: {
-        bool done = ctx.ui.tickHPAnimation(
-            ctx.currentBattle->getPlayerDaemon().getCurrentHP(), ctx.currentBattle->getOpponentDaemon().getCurrentHP(),
-            ctx.currentBattle->getPlayerDaemon().getMaxHP(), ctx.currentBattle->getOpponentDaemon().getMaxHP());
+        bool done = ctx.ui.tickHPAnimation(ctx.currentBattle->getPlayerDaemon().getCurrentHP(),
+                                           ctx.currentBattle->getOpponentDaemon().getCurrentHP(),
+                                           ctx.currentBattle->getPlayerDaemon().getMaxHP(),
+                                           ctx.currentBattle->getOpponentDaemon().getMaxHP());
         if (done)
             ctx.currentBattle->finishHPAnimation();
         return;
@@ -85,8 +87,9 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
     case BattleState::animatingEXP: {
         BattleState bps = ctx.currentBattle->getPendingState();
         if (bps == BattleState::victory || bps == BattleState::captured) {
-            MusicTrack victoryTrack = (battleTrainer && battleTrainer->isTrainerType()) ? MusicTrack::trainerVictory
-                                                                                        : MusicTrack::wildVictory;
+            MusicTrack victoryTrack = (battleTrainer && battleTrainer->isTrainerType())
+                                          ? MusicTrack::trainerVictory
+                                          : MusicTrack::wildVictory;
             ctx.music.play(victoryTrack, ctx.ui.getRenderer().getWindow());
         }
 
@@ -143,8 +146,8 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
 
         if (input.isConfirmPressed()) {
             ctx.playSound(SoundEffect::select);
-            BattleAction actions[] = {BattleAction::fight, BattleAction::item, BattleAction::switchDaemon,
-                                      BattleAction::flee};
+            BattleAction actions[] = {BattleAction::fight, BattleAction::item,
+                                      BattleAction::switchDaemon, BattleAction::flee};
             ctx.currentBattle->chooseAction(actions[static_cast<std::size_t>(menuSelected)]);
             moveSelected = 0;
             partySelected = 0;
@@ -261,8 +264,8 @@ static constexpr int BALL_FRAME_W = 16;
 static constexpr int BALL_FRAME_H = 16;
 
 void BattleMode::drawBall(Renderer &renderer, int frame, int x, int y) const {
-    renderer.drawSpriteRegion("daemon_ball", frame * BALL_FRAME_W, 0, BALL_FRAME_W, BALL_FRAME_H, x, y,
-                              BALL_FRAME_W * PIXEL_SCALE, BALL_FRAME_H * PIXEL_SCALE);
+    renderer.drawSpriteRegion("daemon_ball", frame * BALL_FRAME_W, 0, BALL_FRAME_W, BALL_FRAME_H, x,
+                              y, BALL_FRAME_W * PIXEL_SCALE, BALL_FRAME_H * PIXEL_SCALE);
 }
 
 void BattleMode::drawBallCentered(Renderer &renderer, int frame, int cx, int cy) const {
@@ -276,7 +279,8 @@ void BattleMode::drawBattleScene(GameContext &ctx) {
     ui.loadBattleAssets();
 
     Renderer &renderer = ui.getRenderer();
-    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT - UI_PANEL_HEIGHT, TDT4102::Color{200, 220, 200});
+    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT - UI_PANEL_HEIGHT,
+                            TDT4102::Color{200, 220, 200});
 
     ui.drawOpponentBase();
     ui.drawPlayerBase();
@@ -288,10 +292,11 @@ void BattleMode::drawBattleScene(GameContext &ctx) {
     // period
     constexpr float BOB_PERIOD = 120.0f;
     constexpr float BOB_AMPLITUDE = 6.0f;
-    int playerBobY =
-        static_cast<int>(std::sin(static_cast<float>(battleAnimFrame) * 6.2832f / BOB_PERIOD) * BOB_AMPLITUDE);
+    int playerBobY = static_cast<int>(
+        std::sin(static_cast<float>(battleAnimFrame) * 6.2832f / BOB_PERIOD) * BOB_AMPLITUDE);
     int opponentBobY = static_cast<int>(
-        std::sin((static_cast<float>(battleAnimFrame) + BOB_PERIOD / 2.0f) * 6.2832f / BOB_PERIOD) * BOB_AMPLITUDE);
+        std::sin((static_cast<float>(battleAnimFrame) + BOB_PERIOD / 2.0f) * 6.2832f / BOB_PERIOD) *
+        BOB_AMPLITUDE);
 
     // Attack animation offsets (player attacks right, opponent attacks left)
     int playerAttackOffsetX = 0;
@@ -340,7 +345,8 @@ void BattleMode::drawBattleIntroSceneWild(GameContext &ctx) {
     GameUI &ui = ctx.ui;
     ui.loadBattleAssets();
 
-    float t = static_cast<float>(ui.battleIntroFrame) / static_cast<float>(GameUI::BATTLE_INTRO_SCENE_DURATION);
+    float t = static_cast<float>(ui.battleIntroFrame) /
+              static_cast<float>(GameUI::BATTLE_INTRO_SCENE_DURATION);
     if (t > 1.0f)
         t = 1.0f;
 
@@ -368,7 +374,8 @@ void BattleMode::drawBattleIntroSceneTrainer(GameContext &ctx) {
     GameUI &ui = ctx.ui;
     ui.loadBattleAssets();
 
-    float t = static_cast<float>(ui.battleIntroFrame) / static_cast<float>(GameUI::BATTLE_INTRO_SCENE_DURATION);
+    float t = static_cast<float>(ui.battleIntroFrame) /
+              static_cast<float>(GameUI::BATTLE_INTRO_SCENE_DURATION);
     if (t > 1.0f)
         t = 1.0f;
 
@@ -483,8 +490,9 @@ void BattleMode::drawMoveSelectScreen(GameContext &ctx) {
         int labelY1 = infoY + 5 * scale;
         int labelY2 = infoY + 24 * scale;
 
-        std::string ppText = "PP " + std::to_string(moves[static_cast<std::size_t>(moveSelected)].currentPP) + "-" +
-                             std::to_string(moves[static_cast<std::size_t>(moveSelected)].maxPP);
+        std::string ppText =
+            "PP " + std::to_string(moves[static_cast<std::size_t>(moveSelected)].currentPP) + "-" +
+            std::to_string(moves[static_cast<std::size_t>(moveSelected)].maxPP);
         spriteFont.drawText(renderer, ppText, labelX, labelY1, scale);
 
         std::string typeName = StringUtils::capitalize(elementTypeName(selectedMove->type));
@@ -665,8 +673,10 @@ void BattleMode::drawCaptureScene(GameContext &ctx) {
         // Wobble left-right only during the active shake portion
         int wobble = 0;
         if (currentShake < std::min(totalShakes, 4) && frameInGroup < CAPTURE_SHAKE_FRAMES) {
-            float shakeT = static_cast<float>(frameInGroup) / static_cast<float>(CAPTURE_SHAKE_FRAMES);
-            wobble = static_cast<int>(std::sin(shakeT * 6.283f) * 8.0f * static_cast<float>(PIXEL_SCALE));
+            float shakeT =
+                static_cast<float>(frameInGroup) / static_cast<float>(CAPTURE_SHAKE_FRAMES);
+            wobble = static_cast<int>(std::sin(shakeT * 6.283f) * 8.0f *
+                                      static_cast<float>(PIXEL_SCALE));
         }
 
         // Frame 0 = closed ball

@@ -2,8 +2,8 @@
 #include <algorithm>
 
 Daemon::Daemon(const Species &species, int level)
-    : speciesId(species.id), level(level), exp(0), currentHP(0), status(StatusEffect::none), ivs{0, 0, 0, 0, 0, 0},
-      evs{0, 0, 0, 0, 0, 0}, speciesRef(&species) {
+    : speciesId(species.id), level(level), exp(0), currentHP(0), status(StatusEffect::none),
+      ivs{0, 0, 0, 0, 0, 0}, evs{0, 0, 0, 0, 0, 0}, speciesRef(&species) {
     nickname = species.name;
 
     // Init moves to empty
@@ -22,16 +22,18 @@ Daemon::Daemon(const Species &species, int level)
     int availableCount = static_cast<int>(available.size());
     int start = (availableCount > 4) ? (availableCount - 4) : 0;
     for (int i = start; i < availableCount && slot < 4; ++i, ++slot) {
-        moves[static_cast<std::size_t>(slot)] = {available[static_cast<std::size_t>(i)].moveId, 15, 15};
+        moves[static_cast<std::size_t>(slot)] = {available[static_cast<std::size_t>(i)].moveId, 15,
+                                                 15};
     }
 
     currentHP = calculateStat(species.baseStats.hp, ivs.hp, evs.hp, true);
 }
 
-Daemon::Daemon(const Species &species, int level, int exp, int currentHP, const std::string &nickname,
-               StatusEffect status, const BaseStats &ivs, const BaseStats &evs, const std::array<MoveSlot, 4> &moves)
-    : speciesId(species.id), level(level), exp(exp), currentHP(currentHP), status(status), ivs(ivs), evs(evs),
-      moves(moves), speciesRef(&species) {
+Daemon::Daemon(const Species &species, int level, int exp, int currentHP,
+               const std::string &nickname, StatusEffect status, const BaseStats &ivs,
+               const BaseStats &evs, const std::array<MoveSlot, 4> &moves)
+    : speciesId(species.id), level(level), exp(exp), currentHP(currentHP), status(status), ivs(ivs),
+      evs(evs), moves(moves), speciesRef(&species) {
     this->nickname = nickname;
 }
 
@@ -42,7 +44,9 @@ int Daemon::calculateStat(int base, int iv, int ev, bool isHP) const {
     return ((2 * base + iv + ev / 4) * level / 100) + 5;
 }
 
-int Daemon::getMaxHP() const { return calculateStat(speciesRef->baseStats.hp, ivs.hp, evs.hp, true); }
+int Daemon::getMaxHP() const {
+    return calculateStat(speciesRef->baseStats.hp, ivs.hp, evs.hp, true);
+}
 
 int Daemon::getCurrentHP() const { return currentHP; }
 

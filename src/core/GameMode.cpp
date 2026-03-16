@@ -60,8 +60,8 @@ ModeRequest ModeRequest::dialogue(const std::string &speaker, const std::vector<
     return r;
 }
 
-ModeRequest ModeRequest::dialogueChoice(const std::vector<std::string> &options, const std::string &context,
-                                        GameState retState) {
+ModeRequest ModeRequest::dialogueChoice(const std::vector<std::string> &options,
+                                        const std::string &context, GameState retState) {
     ModeRequest r{};
     r.type = Type::startDialogueChoice;
     r.choiceOptions = options;

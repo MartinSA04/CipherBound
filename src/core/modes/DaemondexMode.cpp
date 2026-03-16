@@ -76,8 +76,8 @@ void DaemondexMode::drawList(GameContext &ctx) {
     font.drawText(renderer, "DAEMONDEX", 8 * scale, 1 * scale, scale);
 
     // Seen/caught counts
-    std::string countsText =
-        "Seen: " + std::to_string(player.seenCount()) + "  Caught: " + std::to_string(player.caughtCount());
+    std::string countsText = "Seen: " + std::to_string(player.seenCount()) +
+                             "  Caught: " + std::to_string(player.caughtCount());
     int countsW = font.getTextWidth(countsText, scale);
     font.drawText(renderer, countsText, WINDOW_WIDTH - countsW - 8 * scale, 1 * scale, scale);
 
@@ -97,8 +97,8 @@ void DaemondexMode::drawList(GameContext &ctx) {
 
         // Highlight selected row
         if (isSelected) {
-            renderer.drawFilledRect(listX - 2 * scale, rowY, WINDOW_WIDTH - 12 * scale, rowHeight - 2,
-                                    TDT4102::Color{180, 200, 240});
+            renderer.drawFilledRect(listX - 2 * scale, rowY, WINDOW_WIDTH - 12 * scale,
+                                    rowHeight - 2, TDT4102::Color{180, 200, 240});
         }
 
         // Dex number
@@ -135,7 +135,8 @@ void DaemondexMode::drawList(GameContext &ctx) {
         int barX = WINDOW_WIDTH - 4 * scale;
         int barTop = listY;
         int barFullH = static_cast<int>(VISIBLE_ROWS) * rowHeight;
-        int thumbH = std::max(8, barFullH * static_cast<int>(VISIBLE_ROWS) / static_cast<int>(totalEntries));
+        int thumbH =
+            std::max(8, barFullH * static_cast<int>(VISIBLE_ROWS) / static_cast<int>(totalEntries));
         int thumbY = barTop + (barFullH - thumbH) * static_cast<int>(scrollOffset) /
                                   static_cast<int>(totalEntries - VISIBLE_ROWS);
 
@@ -190,21 +191,26 @@ void DaemondexMode::drawDetail(GameContext &ctx) {
 
     if (sp.secondaryType != sp.primaryType) {
         std::string type2 = StringUtils::capitalize(elementTypeName(sp.secondaryType));
-        font.drawText(renderer, " / " + type2, infoX + font.getTextWidth("Type: " + type1, scale), infoY, scale);
+        font.drawText(renderer, " / " + type2, infoX + font.getTextWidth("Type: " + type1, scale),
+                      infoY, scale);
     }
 
     if (player.hasCaught(speciesId)) {
         // Base stats
         int statsY = infoY + 16 * scale;
         font.drawText(renderer, "HP:  " + std::to_string(sp.baseStats.hp), infoX, statsY, scale);
-        font.drawText(renderer, "ATK: " + std::to_string(sp.baseStats.attack), infoX, statsY + 14 * scale, scale);
-        font.drawText(renderer, "DEF: " + std::to_string(sp.baseStats.defense), infoX, statsY + 28 * scale, scale);
+        font.drawText(renderer, "ATK: " + std::to_string(sp.baseStats.attack), infoX,
+                      statsY + 14 * scale, scale);
+        font.drawText(renderer, "DEF: " + std::to_string(sp.baseStats.defense), infoX,
+                      statsY + 28 * scale, scale);
 
         int col2X = infoX + 60 * scale;
-        font.drawText(renderer, "SPA: " + std::to_string(sp.baseStats.specialAttack), col2X, statsY, scale);
-        font.drawText(renderer, "SPD: " + std::to_string(sp.baseStats.specialDefense), col2X, statsY + 14 * scale,
+        font.drawText(renderer, "SPA: " + std::to_string(sp.baseStats.specialAttack), col2X, statsY,
                       scale);
-        font.drawText(renderer, "SPE: " + std::to_string(sp.baseStats.speed), col2X, statsY + 28 * scale, scale);
+        font.drawText(renderer, "SPD: " + std::to_string(sp.baseStats.specialDefense), col2X,
+                      statsY + 14 * scale, scale);
+        font.drawText(renderer, "SPE: " + std::to_string(sp.baseStats.speed), col2X,
+                      statsY + 28 * scale, scale);
     } else {
         int statsY = infoY + 16 * scale;
         font.drawText(renderer, "Catch this Daemon to", infoX, statsY, scale);

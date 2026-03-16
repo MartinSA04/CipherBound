@@ -6,8 +6,8 @@
 #include "../../ui/InputManager.h"
 #include "../StoryManager.h"
 
-DialogueChoiceMode::DialogueChoiceMode(const std::vector<std::string> &options, const std::string &context,
-                                       GameState returnState)
+DialogueChoiceMode::DialogueChoiceMode(const std::vector<std::string> &options,
+                                       const std::string &context, GameState returnState)
     : choiceOptions(options), choiceContext(context), returnState(returnState) {}
 
 void DialogueChoiceMode::update(GameContext &ctx, InputManager &input) {

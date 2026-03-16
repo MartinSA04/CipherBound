@@ -12,13 +12,16 @@ void SoundManager::loadAll() {
     effects[SoundEffect::expFull] = std::make_unique<TDT4102::Audio>(base + "SEQ_SE_EXPMAX.wav");
     effects[SoundEffect::levelUp] = std::make_unique<TDT4102::Audio>(base + "SEQ_SE_LVUP.wav");
     effects[SoundEffect::pcLogin] = std::make_unique<TDT4102::Audio>(base + "SEQ_SE_PC_LOGIN.wav");
-    effects[SoundEffect::pcLogoff] = std::make_unique<TDT4102::Audio>(base + "SEQ_SE_PC_LOGOFF.wav");
+    effects[SoundEffect::pcLogoff] =
+        std::make_unique<TDT4102::Audio>(base + "SEQ_SE_PC_LOGOFF.wav");
     effects[SoundEffect::pcOn] = std::make_unique<TDT4102::Audio>(base + "SEQ_SE_PC_ON.wav");
     effects[SoundEffect::recovery] = std::make_unique<TDT4102::Audio>(base + "SEQ_SE_RECOVERY.wav");
     effects[SoundEffect::save] = std::make_unique<TDT4102::Audio>(base + "SEQ_SE_SAVE.wav");
     effects[SoundEffect::wallHit] = std::make_unique<TDT4102::Audio>(base + "SEQ_SE_WALL_HIT.wav");
-    effects[SoundEffect::pokeballEscape] = std::make_unique<TDT4102::Audio>(base + "pokeball_escape.wav");
-    effects[SoundEffect::pokeballShake] = std::make_unique<TDT4102::Audio>(base + "pokeball_shake.wav");
+    effects[SoundEffect::pokeballEscape] =
+        std::make_unique<TDT4102::Audio>(base + "pokeball_escape.wav");
+    effects[SoundEffect::pokeballShake] =
+        std::make_unique<TDT4102::Audio>(base + "pokeball_shake.wav");
     effects[SoundEffect::attack] = std::make_unique<TDT4102::Audio>(base + "attack.wav");
 }
 

@@ -144,7 +144,8 @@ void Pokedex::loadMoves(const std::string &path) {
 
         auto catIt = categoryMap.find(tokens[4]);
         if (catIt == categoryMap.end()) {
-            std::cerr << "Unknown category '" << tokens[4] << "' for move " << move.name << std::endl;
+            std::cerr << "Unknown category '" << tokens[4] << "' for move " << move.name
+                      << std::endl;
             continue;
         }
         move.category = catIt->second;
@@ -213,7 +214,8 @@ void Pokedex::loadItems(const std::string &path) {
 
         auto catIt = catMap.find(tokens[3]);
         if (catIt == catMap.end()) {
-            std::cerr << "Unknown item category '" << tokens[3] << "' for item " << item.name << std::endl;
+            std::cerr << "Unknown item category '" << tokens[3] << "' for item " << item.name
+                      << std::endl;
             continue;
         }
         item.category = catIt->second;

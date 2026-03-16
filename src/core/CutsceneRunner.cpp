@@ -146,7 +146,8 @@ bool CutsceneRunner::update(World &world, GameUI &ui, bool confirmPressed, Sound
     }
 
     // If we're syncing (waiting for all moves to finish)
-    if (currentStep < cutscene.steps.size() && cutscene.steps[currentStep].type == CutsceneStep::Type::sync) {
+    if (currentStep < cutscene.steps.size() &&
+        cutscene.steps[currentStep].type == CutsceneStep::Type::sync) {
         tickMovements(world);
         if (allMovesComplete(world)) {
             pendingMoves.clear();

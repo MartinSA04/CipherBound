@@ -65,6 +65,9 @@ src = [
   'src/ui/InputManager.cpp',
   'src/ui/OverworldRenderer.cpp',
   'src/ui/GameUI.cpp',
+  'src/ui/gameui/MenuScreens.cpp',
+  'src/ui/gameui/Dialogue.cpp',
+  'src/ui/gameui/Battle.cpp',
   'src/ui/SpriteFont.cpp',
 ]
 

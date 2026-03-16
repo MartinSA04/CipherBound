@@ -10,7 +10,8 @@ class SaveManager {
     SaveManager();
 
     bool saveGame(const std::string &filepath, const Player &player, const World &world);
-    bool loadGame(const std::string &filepath, Player &player, World &world, const Pokedex &pokedex);
+    bool loadGame(const std::string &filepath, Player &player, World &world,
+                  const Pokedex &pokedex);
     bool saveFileExists(const std::string &filepath) const;
     bool deleteSave(const std::string &filepath);
 

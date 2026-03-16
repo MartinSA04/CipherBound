@@ -42,7 +42,8 @@ class StoryManager {
     StoryAction onDialogueEnd(std::shared_ptr<NPC> npc, World &world);
 
     // Called when the player picks a choice — decides what happens next
-    StoryAction onChoiceSelected(const std::string &context, int choice, World &world, Pokedex &pokedex);
+    StoryAction onChoiceSelected(const std::string &context, int choice, World &world,
+                                 Pokedex &pokedex);
 
     // Called when the player steps on a warp — returns blockWarp action if
     // blocked

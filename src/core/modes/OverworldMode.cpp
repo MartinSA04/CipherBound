@@ -64,7 +64,8 @@ bool OverworldMode::warpBlockStarts(GameContext &ctx) {
         return false;
     pendingWarpBlock = false;
     ctx.pendingPushBack = true;
-    ctx.pushRequest(ModeRequest::dialogue(pendingWarpBlockAction.speaker, pendingWarpBlockAction.lines, nullptr,
+    ctx.pushRequest(ModeRequest::dialogue(pendingWarpBlockAction.speaker,
+                                          pendingWarpBlockAction.lines, nullptr,
                                           GameState::overworld));
     return true;
 }

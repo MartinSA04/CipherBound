@@ -18,7 +18,8 @@ bool NPC::isTrainerType() const { return type == NPCType::trainer || type == NPC
 bool NPC::isDefeated() const { return defeated; }
 void NPC::setDefeated(bool d) { defeated = d; }
 
-const std::vector<std::string> &NPC::getDialogueLines(const std::set<std::string> &playerFlags) const {
+const std::vector<std::string> &
+NPC::getDialogueLines(const std::set<std::string> &playerFlags) const {
     // Check stages in order; first match wins
     for (const auto &stage : dialogueStages) {
         if (stage.requiredFlag.empty() || playerFlags.count(stage.requiredFlag))

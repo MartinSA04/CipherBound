@@ -1,5 +1,4 @@
 #include "Renderer.h"
-#include <algorithm>
 
 Renderer::Renderer() : window{50, 50, WINDOW_WIDTH, WINDOW_HEIGHT, "CipherBound"} {
     window.setBackgroundColor(TDT4102::Color::black);
@@ -16,8 +15,6 @@ void Renderer::endFrame() { window.next_frame(); }
 
 bool Renderer::shouldClose() const { return window.should_close(); }
 
-// --- Texture management ---
-
 void Renderer::loadTexture(const std::string &id, const std::filesystem::path &path) {
     textures.emplace(id, TDT4102::Image{path});
 }
@@ -26,8 +23,6 @@ TDT4102::Image &Renderer::getTexture(const std::string &id) { return textures.at
 
 bool Renderer::hasTexture(const std::string &id) const { return textures.count(id) > 0; }
 
-// --- Drawing ---
-
 int Renderer::worldToScreenX(int worldX, int cameraX) { return (worldX - cameraX) * TILE_SIZE; }
 
 int Renderer::worldToScreenY(int worldY, int cameraY) { return (worldY - cameraY) * TILE_SIZE; }
@@ -35,11 +30,12 @@ int Renderer::worldToScreenY(int worldY, int cameraY) { return (worldY - cameraY
 bool Renderer::isOnScreen(int worldX, int worldY, int cameraX, int cameraY) {
     int sx = worldToScreenX(worldX, cameraX);
     int sy = worldToScreenY(worldY, cameraY);
-    return sx >= -TILE_SIZE && sx < WINDOW_WIDTH + TILE_SIZE && sy >= -TILE_SIZE && sy < WINDOW_HEIGHT + TILE_SIZE;
+    return sx >= -TILE_SIZE && sx < WINDOW_WIDTH + TILE_SIZE && sy >= -TILE_SIZE &&
+           sy < WINDOW_HEIGHT + TILE_SIZE;
 }
 
-void Renderer::drawSprite(const std::string &textureId, int worldX, int worldY, int cameraX, int cameraY, int srcWidth,
-                          int srcHeight) {
+void Renderer::drawSprite(const std::string &textureId, int worldX, int worldY, int cameraX,
+                          int cameraY, int srcWidth, int srcHeight) {
     if (!isOnScreen(worldX, worldY, cameraX, cameraY))
         return;
 
@@ -54,16 +50,18 @@ void Renderer::drawSprite(const std::string &textureId, int worldX, int worldY, 
     }
 }
 
-void Renderer::drawSpriteRaw(const std::string &textureId, int screenX, int screenY, int width, int height) {
+void Renderer::drawSpriteRaw(const std::string &textureId, int screenX, int screenY, int width,
+                             int height) {
     if (hasTexture(textureId)) {
         window.draw_image({screenX, screenY}, textures.at(textureId), width, height);
     }
 }
 
-void Renderer::drawSpriteRegion(const std::string &textureId, int srcX, int srcY, int srcW, int srcH, int dstX,
-                                int dstY, int dstW, int dstH, bool flipH) {
+void Renderer::drawSpriteRegion(const std::string &textureId, int srcX, int srcY, int srcW,
+                                int srcH, int dstX, int dstY, int dstW, int dstH, bool flipH) {
     if (hasTexture(textureId)) {
-        window.draw_image_region({dstX, dstY}, textures.at(textureId), dstW, dstH, {srcX, srcY}, srcW, srcH,
+        window.draw_image_region({dstX, dstY}, textures.at(textureId), dstW, dstH, {srcX, srcY},
+                                 srcW, srcH,
                                  flipH ? TDT4102::FlipImage::HORIZONTAL : TDT4102::FlipImage::NONE);
     }
 }
@@ -110,7 +108,8 @@ void Renderer::drawTile(int spriteId, int worldX, int worldY, int cameraX, int c
     window.draw_rectangle({sx, sy}, TILE_SIZE, TILE_SIZE, color);
 }
 
-void Renderer::drawText(const std::string &text, int screenX, int screenY, TDT4102::Color color, int fontSize) {
+void Renderer::drawText(const std::string &text, int screenX, int screenY, TDT4102::Color color,
+                        int fontSize) {
     int clampedFontSize = std::max(fontSize, 1);
     window.draw_text({screenX, screenY}, text, color, static_cast<unsigned int>(clampedFontSize));
 }

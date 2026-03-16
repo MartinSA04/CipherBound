@@ -79,7 +79,8 @@ void PCBoxMode::update(GameContext &ctx, InputManager &input) {
                 } else {
                     std::string name = player.getDaemon(selected).getNickname();
                     player.depositDaemon(selected);
-                    message = name + " deposited to Box " + std::to_string(player.getCurrentBox() + 1) + ".";
+                    message = name + " deposited to Box " +
+                              std::to_string(player.getCurrentBox() + 1) + ".";
                     showingMessage = true;
                     ctx.ui.setDialogueText(message);
                     int partySize = player.partySize();
@@ -155,7 +156,8 @@ void PCBoxMode::render(GameContext &ctx) {
             bg = TDT4102::Color{140, 160, 220};
 
         renderer.drawFilledRect(10, sy, halfW - 20, slotH, bg);
-        renderer.drawRect(10, sy, halfW - 20, slotH, TDT4102::Color::transparent, TDT4102::Color{100, 110, 140});
+        renderer.drawRect(10, sy, halfW - 20, slotH, TDT4102::Color::transparent,
+                          TDT4102::Color{100, 110, 140});
 
         if (hasDaemon) {
             const Daemon &c = party[static_cast<std::size_t>(i)];
@@ -163,7 +165,8 @@ void PCBoxMode::render(GameContext &ctx) {
                 ctx.ui.drawSelectionArrow(16, sy + 2 * scale, scale);
 
             spriteFont.drawText(renderer, c.getNickname(), 16 + 6 * scale, sy + 2, scale);
-            spriteFont.drawText(renderer, "Lv" + std::to_string(c.getLevel()), halfW - 80 - 12 * scale, sy + 2, scale);
+            spriteFont.drawText(renderer, "Lv" + std::to_string(c.getLevel()),
+                                halfW - 80 - 12 * scale, sy + 2, scale);
         } else {
             spriteFont.drawText(renderer, "---", 16 + 6 * scale, sy + 2, scale);
         }
@@ -182,7 +185,8 @@ void PCBoxMode::render(GameContext &ctx) {
     if (!viewingParty && selected >= maxVisible)
         scrollOffset = selected - maxVisible + 1;
 
-    for (int i = 0; i < maxVisible && (i + scrollOffset) < static_cast<int>(Player::BOX_SIZE); ++i) {
+    for (int i = 0; i < maxVisible && (i + scrollOffset) < static_cast<int>(Player::BOX_SIZE);
+         ++i) {
         int idx = i + scrollOffset;
         int sy = boxPanelY + i * (slotH + slotGap);
         bool hasDaemon = idx >= 0 && idx < boxCount;
@@ -192,16 +196,18 @@ void PCBoxMode::render(GameContext &ctx) {
             bg = TDT4102::Color{140, 160, 220};
 
         renderer.drawFilledRect(boxPanelX, sy, halfW - 20, slotH, bg);
-        renderer.drawRect(boxPanelX, sy, halfW - 20, slotH, TDT4102::Color::transparent, TDT4102::Color{100, 110, 140});
+        renderer.drawRect(boxPanelX, sy, halfW - 20, slotH, TDT4102::Color::transparent,
+                          TDT4102::Color{100, 110, 140});
 
         if (hasDaemon) {
             const Daemon &c = box[static_cast<std::size_t>(idx)];
             if (!viewingParty && idx == selected)
                 ctx.ui.drawSelectionArrow(boxPanelX + 6, sy + 2 * scale, scale);
 
-            spriteFont.drawText(renderer, c.getNickname(), boxPanelX + 6 + 6 * scale, sy + 2, scale);
-            spriteFont.drawText(renderer, "Lv" + std::to_string(c.getLevel()), WINDOW_WIDTH - 80 - 12 * scale, sy + 2,
+            spriteFont.drawText(renderer, c.getNickname(), boxPanelX + 6 + 6 * scale, sy + 2,
                                 scale);
+            spriteFont.drawText(renderer, "Lv" + std::to_string(c.getLevel()),
+                                WINDOW_WIDTH - 80 - 12 * scale, sy + 2, scale);
         } else {
             spriteFont.drawText(renderer, "---", boxPanelX + 6 + 6 * scale, sy + 2, scale);
         }

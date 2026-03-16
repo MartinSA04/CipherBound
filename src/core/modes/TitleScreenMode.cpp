@@ -37,8 +37,8 @@ void TitleScreenMode::update(GameContext &ctx, InputManager &input) {
             const auto &info = slotInfos[static_cast<std::size_t>(selected)];
 
             if (info.exists) {
-                ctx.saveManager.loadGame(ctx.saveManager.getSavePath(selected), ctx.world.getPlayer(), ctx.world,
-                                         ctx.pokedex);
+                ctx.saveManager.loadGame(ctx.saveManager.getSavePath(selected),
+                                         ctx.world.getPlayer(), ctx.world, ctx.pokedex);
                 ctx.pushRequest(ModeRequest::changeState(GameState::overworld));
             } else {
                 // New game — give starter items
@@ -46,9 +46,10 @@ void TitleScreenMode::update(GameContext &ctx, InputManager &input) {
                 constexpr int daemonBallId = 5;
                 ctx.world.getPlayer().addItem(potionId, 5);
                 ctx.world.getPlayer().addItem(daemonBallId, 10);
-                ctx.pushRequest(ModeRequest::dialogue("", {"What a good night sleep!",
-                                                           "Its finally my birthday and time to start my adventure!",
-                                                           "I should go see Bart Iver in his lab"}));
+                ctx.pushRequest(ModeRequest::dialogue(
+                    "", {"What a good night sleep!",
+                         "Its finally my birthday and time to start my adventure!",
+                         "I should go see Bart Iver in his lab"}));
             }
 
             MusicTrack mapTrack = MusicManager::trackForMap(ctx.world.getCurrentMapId());
@@ -72,7 +73,8 @@ void TitleScreenMode::render(GameContext &ctx) {
         (void)alpha; // Used conceptually — we just draw when visible
 
         if (titleTimer > 5) {
-            ctx.ui.getSpriteFont().drawText(r, "CIPHERBOUND", WINDOW_WIDTH / 2 - 11 * 8 * PIXEL_SCALE / 2,
+            ctx.ui.getSpriteFont().drawText(r, "CIPHERBOUND",
+                                            WINDOW_WIDTH / 2 - 11 * 8 * PIXEL_SCALE / 2,
                                             WINDOW_HEIGHT / 2 - 60, PIXEL_SCALE, 1);
 
             // Subtitle
@@ -94,10 +96,12 @@ void TitleScreenMode::render(GameContext &ctx) {
         renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{20, 20, 60});
 
         // Title
-        spriteFont.drawText(renderer, "CIPHERBOUND", WINDOW_WIDTH / 2 - 11 * 8 * PIXEL_SCALE / 2, 40, PIXEL_SCALE, 1);
+        spriteFont.drawText(renderer, "CIPHERBOUND", WINDOW_WIDTH / 2 - 11 * 8 * PIXEL_SCALE / 2,
+                            40, PIXEL_SCALE, 1);
 
         // Subtitle
-        renderer.drawText("Select a save slot", WINDOW_WIDTH / 2 - 70, 90, TDT4102::Color::light_gray, 14);
+        renderer.drawText("Select a save slot", WINDOW_WIDTH / 2 - 70, 90,
+                          TDT4102::Color::light_gray, 14);
 
         // Draw save slots
         int slotBoxW = 600;
@@ -111,14 +115,17 @@ void TitleScreenMode::render(GameContext &ctx) {
             int y = startY + i * (slotBoxH + spacing);
             bool isSelected = i == selected;
 
-            TDT4102::Color bgColor = isSelected ? TDT4102::Color{60, 60, 120} : TDT4102::Color{35, 35, 80};
+            TDT4102::Color bgColor =
+                isSelected ? TDT4102::Color{60, 60, 120} : TDT4102::Color{35, 35, 80};
             renderer.drawFilledRect(startX, y, slotBoxW, slotBoxH, bgColor);
 
-            TDT4102::Color borderColor = isSelected ? TDT4102::Color{200, 200, 255} : TDT4102::Color{80, 80, 130};
+            TDT4102::Color borderColor =
+                isSelected ? TDT4102::Color{200, 200, 255} : TDT4102::Color{80, 80, 130};
             renderer.drawRect(startX, y, slotBoxW, slotBoxH, borderColor);
 
             if (isSelected)
-                ctx.ui.drawSelectionArrow(startX + 8, y + slotBoxH / 2 - PIXEL_SCALE * 3, PIXEL_SCALE);
+                ctx.ui.drawSelectionArrow(startX + 8, y + slotBoxH / 2 - PIXEL_SCALE * 3,
+                                          PIXEL_SCALE);
 
             int textX = startX + 40;
             int textY = y + 10;
@@ -140,8 +147,8 @@ void TitleScreenMode::render(GameContext &ctx) {
         }
 
         // Controls hint
-        renderer.drawText("Arrow keys to select, Z or Enter to confirm", WINDOW_WIDTH / 2 - 160, WINDOW_HEIGHT - 40,
-                          TDT4102::Color{100, 100, 150}, 12);
+        renderer.drawText("Arrow keys to select, Z or Enter to confirm", WINDOW_WIDTH / 2 - 160,
+                          WINDOW_HEIGHT - 40, TDT4102::Color{100, 100, 150}, 12);
         break;
     }
     }

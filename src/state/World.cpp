@@ -11,7 +11,8 @@ using StringUtils::splitPipe;
 using StringUtils::splitSemicolon;
 
 World::World(int seed)
-    : rng(static_cast<std::mt19937::result_type>(seed)), currentMapId(""), player("Player", {5, 5}) {}
+    : rng(static_cast<std::mt19937::result_type>(seed)), currentMapId(""),
+      player("Player", {5, 5}) {}
 
 namespace {
 
@@ -254,8 +255,8 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
 
     // Create NPCs from raw data
     for (const auto &raw : rawNPCs) {
-        std::shared_ptr<NPC> npc =
-            std::make_shared<NPC>(raw.id, raw.name, Position{raw.x, raw.y}, parseNPCType(raw.typeStr));
+        std::shared_ptr<NPC> npc = std::make_shared<NPC>(raw.id, raw.name, Position{raw.x, raw.y},
+                                                         parseNPCType(raw.typeStr));
         npc->setFacing(parseDirection(raw.facingStr));
         npc->setSightRange(raw.sightRange);
 
@@ -362,7 +363,9 @@ void World::setPlayer(Player p) { player = std::move(p); }
 
 // --- NPCs ---
 
-void World::addNPC(const std::string &mapId, std::shared_ptr<NPC> npc) { npcs[mapId].push_back(npc); }
+void World::addNPC(const std::string &mapId, std::shared_ptr<NPC> npc) {
+    npcs[mapId].push_back(npc);
+}
 
 std::vector<std::shared_ptr<NPC>> &World::getNPCs(const std::string &mapId) { return npcs[mapId]; }
 

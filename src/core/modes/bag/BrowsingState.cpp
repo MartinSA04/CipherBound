@@ -21,7 +21,8 @@ void BrowsingState::update(BagMode &bag, GameContext &ctx, InputManager &input) 
     if (input.isConfirmPressed()) {
         const auto &inv = player.getInventory();
         if (bag.selected >= 0 && static_cast<std::size_t>(bag.selected) < inv.size()) {
-            const ItemData &item = ctx.pokedex.getItem(inv[static_cast<std::size_t>(bag.selected)].itemId);
+            const ItemData &item =
+                ctx.pokedex.getItem(inv[static_cast<std::size_t>(bag.selected)].itemId);
             if (item.category == ItemCategory::healing) {
                 bag.useItemId = inv[static_cast<std::size_t>(bag.selected)].itemId;
                 bag.partySelected = 0;

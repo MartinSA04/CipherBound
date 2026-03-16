@@ -16,8 +16,9 @@ void BattleIntroMode::update(GameContext &ctx, InputManager & /*input*/) {
     if (ctx.ui.battleIntroFrame >= GameUI::BATTLE_INTRO_DURATION) {
         // Transition complete — create the Battle object
         if (trainer && trainer->isTrainerType()) {
-            ctx.currentBattle = std::make_unique<Battle>(ctx.world.getPlayer(), trainer, BattleType::trainer,
-                                                         ctx.world.getRng(), ctx.pokedex);
+            ctx.currentBattle =
+                std::make_unique<Battle>(ctx.world.getPlayer(), trainer, BattleType::trainer,
+                                         ctx.world.getRng(), ctx.pokedex);
 
             // Mark all trainer daemons as seen
             for (const auto &d : trainer->getParty())
@@ -25,8 +26,9 @@ void BattleIntroMode::update(GameContext &ctx, InputManager & /*input*/) {
         } else {
             const Species &sp = ctx.pokedex.getSpecies(speciesId);
             auto daemon = std::make_unique<Daemon>(sp, level);
-            ctx.currentBattle = std::make_unique<Battle>(ctx.world.getPlayer(), std::move(daemon), BattleType::wild,
-                                                         ctx.world.getRng(), ctx.pokedex);
+            ctx.currentBattle =
+                std::make_unique<Battle>(ctx.world.getPlayer(), std::move(daemon), BattleType::wild,
+                                         ctx.world.getRng(), ctx.pokedex);
 
             ctx.world.getPlayer().markSeen(speciesId);
         }
@@ -66,7 +68,8 @@ void BattleIntroMode::render(GameContext &ctx) {
         int flashCycle = frame % 4;
         if (flashCycle < 2) {
             unsigned char a = 200;
-            renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{255, 255, 255, a});
+            renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
+                                    TDT4102::Color{255, 255, 255, a});
         }
     } else if (frame < BARS_END) {
         // Phase 2: Horizontal bars sweep in from alternating sides
@@ -81,14 +84,16 @@ void BattleIntroMode::render(GameContext &ctx) {
             if (barProgress < 0)
                 continue;
 
-            float t = std::min(1.0f, static_cast<float>(barProgress) / static_cast<float>(totalBarFrames - barDelay));
+            float t = std::min(1.0f, static_cast<float>(barProgress) /
+                                         static_cast<float>(totalBarFrames - barDelay));
             int barWidth = static_cast<int>(t * WINDOW_WIDTH);
 
             int barY = i * barHeight;
             if (i % 2 == 0) {
                 renderer.drawFilledRect(0, barY, barWidth, barHeight, TDT4102::Color::black);
             } else {
-                renderer.drawFilledRect(WINDOW_WIDTH - barWidth, barY, barWidth, barHeight, TDT4102::Color::black);
+                renderer.drawFilledRect(WINDOW_WIDTH - barWidth, barY, barWidth, barHeight,
+                                        TDT4102::Color::black);
             }
         }
     } else {

@@ -39,7 +39,8 @@ class NPC : public Entity, public Party {
     void setDefeated(bool defeated);
 
     // Dialogue — returns best matching stage for the player's flags
-    const std::vector<std::string> &getDialogueLines(const std::set<std::string> &playerFlags) const;
+    const std::vector<std::string> &
+    getDialogueLines(const std::set<std::string> &playerFlags) const;
     void addDialogueStage(const std::string &requiredFlag, const std::vector<std::string> &lines);
 
     // Sight range for trainer battles

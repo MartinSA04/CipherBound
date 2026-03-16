@@ -129,6 +129,10 @@ struct GameContext {
     SessionFlowState flow;
     ModeMailbox mailbox;
 
+    GameContext(World &world, Pokedex &pokedex, GameUI &ui, SaveManager &saveManager,
+                StoryManager &story, MusicManager &music, CutsceneRunner &cutsceneRunner,
+                SoundManager &sound);
+
     void setBattle(std::unique_ptr<Battle> battle);
     bool hasBattle() const;
     Battle *tryBattle();

@@ -23,6 +23,7 @@ endif
 src = [
   'src/main.cpp',
   'src/core/Session.cpp',
+  'src/core/SessionCoordinator.cpp',
   'src/core/GameMode.cpp',
   'src/core/StoryManager.cpp',
   'src/core/CutsceneRunner.cpp',

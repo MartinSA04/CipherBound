@@ -8,6 +8,12 @@
 // ── GameContext
 // ────────────────────────────────────────────────────────────────
 
+GameContext::GameContext(World &world, Pokedex &pokedex, GameUI &ui, SaveManager &saveManager,
+                         StoryManager &story, MusicManager &music, CutsceneRunner &cutsceneRunner,
+                         SoundManager &sound)
+    : world(world), pokedex(pokedex), ui(ui), saveManager(saveManager), story(story), music(music),
+      cutsceneRunner(cutsceneRunner), sound(sound) {}
+
 GameContext::~GameContext() = default;
 
 void ModeMailbox::push(ModeRequest req) { pending.push_back(std::move(req)); }

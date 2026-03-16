@@ -88,89 +88,111 @@ void Session::processRequests() {
 
     for (auto &req : requests) {
         switch (req.type) {
-        case ModeRequest::Type::changeState: {
-            if (req.targetState == GameState::battle) {
-                // Special case: set up BattleMode with trainer info from
-                // BattleIntroMode
-                auto mode = std::make_unique<BattleMode>();
-                if (req.npc) {
-                    mode->setTrainerNPCId(req.npc->getId());
-                    mode->setTrainer(req.npc);
-                }
-                switchToMode(GameState::battle, std::move(mode));
-            } else {
-                switchMode(req.targetState);
-            }
+        case ModeRequest::Type::changeState:
+            handleChangeStateRequest(req);
             break;
-        }
 
-        case ModeRequest::Type::startWildBattle: {
-            ctx.ui.battleIntroFrame = 0;
-            switchToMode(GameState::battleIntro,
-                         std::make_unique<BattleIntroMode>(req.speciesId, req.level));
-            music.play(MusicTrack::wildBattle, ui.getRenderer().getWindow());
+        case ModeRequest::Type::startWildBattle:
+            handleStartWildBattleRequest(req);
             break;
-        }
 
-        case ModeRequest::Type::startTrainerBattle: {
-            ctx.ui.battleIntroFrame = 0;
-            switchToMode(GameState::battleIntro, std::make_unique<BattleIntroMode>(req.npc));
-            music.play(MusicTrack::trainerBattle, ui.getRenderer().getWindow());
+        case ModeRequest::Type::startTrainerBattle:
+            handleStartTrainerBattleRequest(req);
             break;
-        }
 
-        case ModeRequest::Type::endBattle: {
-            if (ctx.currentBattle) {
-                auto *battleMode = dynamic_cast<BattleMode *>(currentMode.get());
-                if (battleMode && !battleMode->getTrainerNPCId().empty()) {
-                    BattleResult result = ctx.currentBattle->getResult();
-                    if (result.playerWon)
-                        world.setNPCDefeated(battleMode->getTrainerNPCId());
-                }
-            }
-            ctx.currentBattle.reset();
-            switchMode(GameState::overworld);
-
-            MusicTrack mapTrack = MusicManager::trackForMap(world.getCurrentMapId());
-            music.play(mapTrack, ui.getRenderer().getWindow());
+        case ModeRequest::Type::endBattle:
+            handleEndBattleRequest();
             break;
-        }
 
-        case ModeRequest::Type::transitionToMap: {
-            const std::string &mapId = world.getCurrentMapId();
-            world.getMap(mapId).setOccupied(world.getPlayer().getPosition(), false);
-            switchToMode(GameState::transition,
-                         std::make_unique<TransitionMode>(req.mapId, req.spawn));
+        case ModeRequest::Type::transitionToMap:
+            handleTransitionToMapRequest(req);
             break;
-        }
 
-        case ModeRequest::Type::startDialogue: {
-            dialogueReturnState = req.returnState;
-            switchToMode(
-                GameState::dialogue,
-                std::make_unique<DialogueMode>(req.speaker, req.lines, req.npc, req.returnState));
+        case ModeRequest::Type::startDialogue:
+            handleStartDialogueRequest(req);
             break;
-        }
 
-        case ModeRequest::Type::startDialogueChoice: {
-            switchToMode(GameState::dialogueChoice,
-                         std::make_unique<DialogueChoiceMode>(req.choiceOptions, req.choiceContext,
-                                                              dialogueReturnState));
+        case ModeRequest::Type::startDialogueChoice:
+            handleStartDialogueChoiceRequest(req);
             break;
-        }
 
-        case ModeRequest::Type::startCutscene: {
-            if (cutsceneRunner.load(req.cutscenePath)) {
-                cutsceneRunner.start();
-                switchMode(GameState::cutscene);
-            }
+        case ModeRequest::Type::startCutscene:
+            handleStartCutsceneRequest(req);
             break;
-        }
 
         case ModeRequest::Type::handleStoryAction:
             handleStoryAction(req.storyActionData);
             break;
         }
+    }
+}
+
+void Session::handleChangeStateRequest(const ModeRequest &req) {
+    if (req.targetState == GameState::battle) {
+        auto mode = std::make_unique<BattleMode>();
+        if (req.npc) {
+            mode->setTrainerNPCId(req.npc->getId());
+            mode->setTrainer(req.npc);
+        }
+        switchToMode(GameState::battle, std::move(mode));
+        return;
+    }
+
+    switchMode(req.targetState);
+}
+
+void Session::handleStartWildBattleRequest(const ModeRequest &req) {
+    ctx.ui.battleIntroFrame = 0;
+    switchToMode(GameState::battleIntro,
+                 std::make_unique<BattleIntroMode>(req.speciesId, req.level));
+    music.play(MusicTrack::wildBattle, ui.getRenderer().getWindow());
+}
+
+void Session::handleStartTrainerBattleRequest(const ModeRequest &req) {
+    ctx.ui.battleIntroFrame = 0;
+    switchToMode(GameState::battleIntro, std::make_unique<BattleIntroMode>(req.npc));
+    music.play(MusicTrack::trainerBattle, ui.getRenderer().getWindow());
+}
+
+void Session::handleEndBattleRequest() {
+    if (ctx.currentBattle) {
+        auto *battleMode = dynamic_cast<BattleMode *>(currentMode.get());
+        if (battleMode && !battleMode->getTrainerNPCId().empty()) {
+            BattleResult result = ctx.currentBattle->getResult();
+            if (result.playerWon)
+                world.setNPCDefeated(battleMode->getTrainerNPCId());
+        }
+    }
+
+    ctx.currentBattle.reset();
+    switchMode(GameState::overworld);
+
+    MusicTrack mapTrack = MusicManager::trackForMap(world.getCurrentMapId());
+    music.play(mapTrack, ui.getRenderer().getWindow());
+}
+
+void Session::handleTransitionToMapRequest(const ModeRequest &req) {
+    const std::string &mapId = world.getCurrentMapId();
+    world.getMap(mapId).setOccupied(world.getPlayer().getPosition(), false);
+    switchToMode(GameState::transition, std::make_unique<TransitionMode>(req.mapId, req.spawn));
+}
+
+void Session::handleStartDialogueRequest(const ModeRequest &req) {
+    dialogueReturnState = req.returnState;
+    switchToMode(GameState::dialogue,
+                 std::make_unique<DialogueMode>(req.speaker, req.lines, req.npc, req.returnState));
+}
+
+void Session::handleStartDialogueChoiceRequest(const ModeRequest &req) {
+    switchToMode(GameState::dialogueChoice,
+                 std::make_unique<DialogueChoiceMode>(req.choiceOptions, req.choiceContext,
+                                                      dialogueReturnState));
+}
+
+void Session::handleStartCutsceneRequest(const ModeRequest &req) {
+    if (cutsceneRunner.load(req.cutscenePath)) {
+        cutsceneRunner.start();
+        switchMode(GameState::cutscene);
     }
 }
 

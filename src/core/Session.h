@@ -51,6 +51,15 @@ class Session {
     // Process pending requests from the active mode
     void processRequests();
 
+    void handleChangeStateRequest(const ModeRequest &req);
+    void handleStartWildBattleRequest(const ModeRequest &req);
+    void handleStartTrainerBattleRequest(const ModeRequest &req);
+    void handleEndBattleRequest();
+    void handleTransitionToMapRequest(const ModeRequest &req);
+    void handleStartDialogueRequest(const ModeRequest &req);
+    void handleStartDialogueChoiceRequest(const ModeRequest &req);
+    void handleStartCutsceneRequest(const ModeRequest &req);
+
     // Handle a StoryAction result (cross-mode orchestration)
     void handleStoryAction(const StoryAction &action);
 

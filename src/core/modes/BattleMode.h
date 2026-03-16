@@ -3,7 +3,6 @@
 #include <memory>
 #include <string>
 
-class Battle;
 class NPC;
 class Renderer;
 

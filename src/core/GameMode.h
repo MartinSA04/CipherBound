@@ -1,12 +1,14 @@
 #pragma once
 #include "../audio/SoundManager.h"
-#include "../battle/Battle.h"
+#include "../data/Pokedex.h"
+#include "../state/World.h"
 #include "StoryManager.h"
 #include <memory>
 #include <string>
 #include <vector>
 
 // Forward declarations for types not included through StoryManager.h
+class NPC;
 class MusicManager;
 class CutsceneRunner;
 class Battle;

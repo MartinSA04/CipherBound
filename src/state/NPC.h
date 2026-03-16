@@ -24,13 +24,19 @@ struct DialogueStage {
     std::vector<std::string> lines;
 };
 
-class NPC : public Entity, public Party {
+class NPC : public Entity {
   public:
     NPC(const std::string &id, const std::string &name, Position position, NPCType type);
 
     void update() override;
 
-    void addDaemon(Daemon daemon) override;
+    void addDaemon(Daemon daemon);
+    Daemon &getDaemon(int index);
+    const Daemon &getDaemon(int index) const;
+    const std::vector<Daemon> &getParty() const;
+    int partySize() const;
+    bool partyEmpty() const;
+    void clearParty();
 
     const std::string &getId() const;
     NPCType getType() const;
@@ -60,6 +66,7 @@ class NPC : public Entity, public Party {
     bool defeated;
     int sightRange;
     std::vector<DialogueStage> dialogueStages;
+    Party party;
 
     bool hidden{false};
 

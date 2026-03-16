@@ -1,7 +1,8 @@
-#include "../BattleMode.h"
 #include "../../../audio/SoundManager.h"
+#include "../../../battle/Battle.h"
 #include "../../../ui/GameUI.h"
 #include "../../../ui/Renderer.h"
+#include "../BattleMode.h"
 #include <algorithm>
 #include <cmath>
 
@@ -10,7 +11,7 @@ constexpr int CAPTURE_THROW_FRAMES = 30;
 constexpr int CAPTURE_LAND_FRAMES = 10;
 constexpr int CAPTURE_SHAKE_FRAMES = 24;
 constexpr int CAPTURE_SHAKE_PAUSE = 16;
-}
+} // namespace
 
 void BattleMode::updateCaptureAnim(GameContext &ctx) {
     captureAnimFrame++;

@@ -117,6 +117,8 @@ exe = executable(
   link_args : ld_flags
 )
 
+test_bash = find_program('bash')
+
 string_utils_test = executable(
   'string_utils_test',
   'tests/StringUtilsTest.cpp'
@@ -130,3 +132,44 @@ battle_animation_utils_test = executable(
 )
 
 test('battle_animation_utils', battle_animation_utils_test)
+
+map_model_test = executable(
+  'map_model_test',
+  [
+    'tests/MapModelTest.cpp',
+    'src/state/Map.cpp',
+  ],
+)
+
+test('map_model', map_model_test)
+
+state_model_test = executable(
+  'state_model_test',
+  [
+    'tests/StateModelTest.cpp',
+    'src/state/Daemon.cpp',
+    'src/state/Entity.cpp',
+    'src/state/Map.cpp',
+    'src/state/Movement.cpp',
+    'src/state/NPC.cpp',
+    'src/state/player/DaemonDex.cpp',
+    'src/state/player/EventFlags.cpp',
+    'src/state/player/Inventory.cpp',
+    'src/state/player/Party.cpp',
+    'src/state/player/Player.cpp',
+    'src/state/player/WalkAnimation.cpp',
+  ],
+  dependencies : [animationwindow_dep],
+)
+
+test('state_model', state_model_test)
+
+test(
+  'tooling_smoke',
+  test_bash,
+  args : [
+    meson.project_source_root() / 'tests' / 'check_tooling.sh',
+    meson.project_source_root(),
+    meson.project_build_root(),
+  ],
+)

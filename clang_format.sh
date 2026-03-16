@@ -7,13 +7,18 @@ if ! command -v clang-format &> /dev/null; then
     exit 1
 fi
 
-# Check if src directory exists
+# Check if source directories exist
 if [ ! -d "./src" ]; then
     echo "Error: ./src directory not found"
     exit 1
 fi
 
-find ./src \( -name '*.h' -o -name '*.cpp' \) -print0 | xargs -0 clang-format -i
+paths=(./src)
+if [ -d "./tests" ]; then
+    paths+=(./tests)
+fi
 
-echo "Formatting C++ files in ./src directory..."
+find "${paths[@]}" \( -name '*.h' -o -name '*.cpp' \) -print0 | xargs -0 clang-format -i
+
+echo "Formatting C++ files in ${paths[*]}..."
 echo "Done formatting files."

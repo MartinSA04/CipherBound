@@ -1,6 +1,12 @@
 #include "Party.h"
 
+void Party::addDaemon(Daemon daemon) { party.push_back(std::move(daemon)); }
+
 Daemon &Party::getDaemon(int index) { return party.at(static_cast<std::size_t>(index)); }
+
+const Daemon &Party::getDaemon(int index) const {
+    return party.at(static_cast<std::size_t>(index));
+}
 
 const std::vector<Daemon> &Party::getParty() const { return party; }
 int Party::partySize() const { return static_cast<int>(party.size()); }

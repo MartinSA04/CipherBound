@@ -1,9 +1,10 @@
-#include "../BattleMode.h"
 #include "../../../audio/MusicManager.h"
+#include "../../../battle/Battle.h"
 #include "../../../state/World.h"
 #include "../../../state/player/Player.h"
 #include "../../../ui/GameUI.h"
 #include "../../../ui/InputManager.h"
+#include "../BattleMode.h"
 
 void BattleMode::updateBattleIntroAnim(GameContext &ctx) {
     ctx.ui.battleIntroFrame++;

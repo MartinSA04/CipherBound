@@ -1,8 +1,13 @@
 #pragma once
-#include "../data/Pokedex.h"
-#include "../state/World.h"
+#include <memory>
 #include <string>
 #include <vector>
+
+class NPC;
+class Pokedex;
+class Player;
+class World;
+struct WarpPoint;
 
 // Result of a story check — tells Session what to do next
 struct StoryAction {

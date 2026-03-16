@@ -10,7 +10,19 @@ void NPC::update() {
     // NPC AI (turn toward player, patrol, etc.) — future use
 }
 
-void NPC::addDaemon(Daemon daemon) { party.push_back(std::move(daemon)); }
+void NPC::addDaemon(Daemon daemon) { party.addDaemon(std::move(daemon)); }
+
+Daemon &NPC::getDaemon(int index) { return party.getDaemon(index); }
+
+const Daemon &NPC::getDaemon(int index) const { return party.getDaemon(index); }
+
+const std::vector<Daemon> &NPC::getParty() const { return party.getParty(); }
+
+int NPC::partySize() const { return party.partySize(); }
+
+bool NPC::partyEmpty() const { return party.partyEmpty(); }
+
+void NPC::clearParty() { party.clearParty(); }
 
 const std::string &NPC::getId() const { return id; }
 NPCType NPC::getType() const { return type; }

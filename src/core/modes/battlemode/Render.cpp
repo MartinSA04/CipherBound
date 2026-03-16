@@ -1,4 +1,4 @@
-#include "../BattleMode.h"
+#include "../../../battle/Battle.h"
 #include "../../../data/Pokedex.h"
 #include "../../../data/Species.h"
 #include "../../../state/NPC.h"
@@ -8,13 +8,14 @@
 #include "../../../ui/Renderer.h"
 #include "../../../ui/SpriteFont.h"
 #include "../../StringUtils.h"
+#include "../BattleMode.h"
 #include <algorithm>
 #include <cmath>
 
 namespace {
 constexpr int BALL_FRAME_W = 16;
 constexpr int BALL_FRAME_H = 16;
-}
+} // namespace
 
 void BattleMode::drawBall(Renderer &renderer, int frame, int x, int y) const {
     renderer.drawSpriteRegion("daemon_ball", frame * BALL_FRAME_W, 0, BALL_FRAME_W, BALL_FRAME_H, x,

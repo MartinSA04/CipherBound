@@ -1,4 +1,6 @@
 #include "StoryManager.h"
+#include "../data/Pokedex.h"
+#include "../state/World.h"
 
 StoryAction StoryManager::onDialogueEnd(std::shared_ptr<NPC> npc, World &world) {
     // Check for trainer battle

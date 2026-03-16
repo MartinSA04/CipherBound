@@ -4,8 +4,10 @@
 
 class Party {
   public:
-    virtual void addDaemon(Daemon daemon) = 0;
+    virtual ~Party() = default;
+    virtual void addDaemon(Daemon daemon);
     Daemon &getDaemon(int index);
+    const Daemon &getDaemon(int index) const;
     const std::vector<Daemon> &getParty() const;
     int partySize() const;
     bool partyEmpty() const;

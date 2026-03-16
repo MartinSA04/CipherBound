@@ -1,4 +1,7 @@
 #include "GameMode.h"
+#include "../audio/SoundManager.h"
+#include "../battle/Battle.h"
+#include "../state/World.h"
 #include "../ui/GameUI.h"
 
 // ── GameContext

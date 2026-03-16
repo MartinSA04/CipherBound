@@ -118,10 +118,7 @@ class Battle {
     void transitionToQueuedState();
     void executeTurn();
 
-    int calculateDamage(const Daemon &attacker, const Daemon &defender, const MoveData &move) const;
-    float getTypeEffectiveness(ElementType attackType, ElementType defenseType) const;
     bool accuracyCheck(int accuracy) const;
-    int calculateExpYield(const Daemon &defeated) const;
 
     Player &player;
     std::unique_ptr<Daemon> opponentDaemon = nullptr;

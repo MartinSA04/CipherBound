@@ -1,6 +1,8 @@
 #include "Battle.h"
-#include "TypeChart.h"
+#include "BattleAI.h"
+#include "BattleRules.h"
 #include <algorithm>
+#include <array>
 #include <cmath>
 
 namespace {
@@ -10,8 +12,8 @@ constexpr int fullRestoreThreshold = 9999;
 constexpr int guaranteedCaptureThreshold = 255;
 constexpr int captureShakeRollMax = 65535;
 constexpr int guaranteedCaptureShakes = 4;
-constexpr int aiMoveFuzzMin = 85;
-constexpr int aiMoveFuzzMax = 100;
+constexpr int damageRollMinPercent = 85;
+constexpr int damageRollMaxPercent = 100;
 
 } // namespace
 
@@ -190,7 +192,9 @@ void Battle::executeTurn() {
             return;
         }
 
-        int damage = calculateDamage(playerDaemon, getOpponentDaemon(), moveData);
+        std::uniform_int_distribution<int> damageRoll(damageRollMinPercent, damageRollMaxPercent);
+        int damage = BattleRules::calculateDamage(playerDaemon, getOpponentDaemon(), moveData,
+                                                  damageRoll(rng));
         getOpponentDaemon().takeDamage(damage);
         addMessage(playerDaemon.getNickname() + " used " + moveData.name + "!");
         addAttackAnimMarker(true);
@@ -198,11 +202,7 @@ void Battle::executeTurn() {
 
         // Type effectiveness message
         float eff =
-            getTypeEffectiveness(moveData.type, getOpponentDaemon().getSpecies().primaryType);
-        if (getOpponentDaemon().getSpecies().secondaryType !=
-            getOpponentDaemon().getSpecies().primaryType)
-            eff *=
-                getTypeEffectiveness(moveData.type, getOpponentDaemon().getSpecies().secondaryType);
+            BattleRules::effectivenessMultiplier(moveData.type, getOpponentDaemon().getSpecies());
 
         if (eff >= 2.0f)
             addMessage("It's super effective!");
@@ -214,7 +214,7 @@ void Battle::executeTurn() {
         addMessage("It dealt " + std::to_string(damage) + " damage!");
 
         if (getOpponentDaemon().isFainted()) {
-            int exp = calculateExpYield(getOpponentDaemon());
+            int exp = BattleRules::calculateExpYield(getOpponentDaemon());
             playerDaemon.addExp(exp);
             addMessage("The opposing " + getOpponentDaemon().getNickname() + " fainted!");
             addMessage("Gained " + std::to_string(exp) + " EXP!");
@@ -237,58 +237,16 @@ void Battle::executeTurn() {
 
 void Battle::executeOpponentTurn() {
     Daemon &playerDaemon = player.getDaemon(0);
-
-    // Smart AI: pick the best move based on effectiveness and power
     const auto &oppMoves = getOpponentDaemon().getMoves();
-    int bestSlot = -1;
-    float bestScore = -1.0f;
-
+    std::array<BattleAI::MoveCandidate, moveSlotCount> candidates{};
     for (int i = 0; i < moveSlotCount; ++i) {
-        if (oppMoves[static_cast<std::size_t>(i)].moveId < 0 ||
-            oppMoves[static_cast<std::size_t>(i)].currentPP <= 0)
-            continue;
-
-        const MoveData &move = pokedex.getMove(oppMoves[static_cast<std::size_t>(i)].moveId);
-        float score = static_cast<float>(move.power);
-
-        // Factor in type effectiveness
-        float eff = getTypeEffectiveness(move.type, playerDaemon.getSpecies().primaryType);
-        if (playerDaemon.getSpecies().secondaryType != playerDaemon.getSpecies().primaryType)
-            eff *= getTypeEffectiveness(move.type, playerDaemon.getSpecies().secondaryType);
-        score *= eff;
-
-        // STAB bonus consideration
-        if (move.type == getOpponentDaemon().getSpecies().primaryType ||
-            move.type == getOpponentDaemon().getSpecies().secondaryType)
-            score *= 1.5f;
-
-        // Status moves get a base score if they have a useful effect
-        if (move.power <= 0 && move.statusEffect != StatusEffect::none &&
-            playerDaemon.getStatus() == StatusEffect::none)
-            score = 40.0f; // Give status moves a moderate score
-
-        // Add small random factor (0.85-1.0) to prevent complete predictability
-        std::uniform_int_distribution<int> fuzz(aiMoveFuzzMin, aiMoveFuzzMax);
-        score *= static_cast<float>(fuzz(rng)) / 100.0f;
-
-        if (score > bestScore) {
-            bestScore = score;
-            bestSlot = i;
-        }
+        const MoveSlot &slot = oppMoves[static_cast<std::size_t>(i)];
+        if (slot.moveId >= 0)
+            candidates[static_cast<std::size_t>(i)] =
+                BattleAI::MoveCandidate{&pokedex.getMove(slot.moveId), slot.currentPP};
     }
-
-    // Fallback: use first available move if no good move found
-    if (bestSlot < 0) {
-        for (int i = 0; i < moveSlotCount; ++i) {
-            if (oppMoves[static_cast<std::size_t>(i)].moveId >= 0) {
-                bestSlot = i;
-                break;
-            }
-        }
-    }
-
-    if (bestSlot < 0)
-        bestSlot = 0;
+    int bestSlot =
+        BattleAI::chooseMoveSlot(candidates, getOpponentDaemon().getSpecies(), playerDaemon, rng);
 
     int oppMoveId = oppMoves[static_cast<std::size_t>(bestSlot)].moveId;
     if (oppMoveId < 0)
@@ -305,16 +263,17 @@ void Battle::executeOpponentTurn() {
         return;
     }
 
-    int oppDamage = calculateDamage(getOpponentDaemon(), playerDaemon, oppMoveData);
+    std::uniform_int_distribution<int> damageRoll(damageRollMinPercent, damageRollMaxPercent);
+    int oppDamage = BattleRules::calculateDamage(getOpponentDaemon(), playerDaemon, oppMoveData,
+                                                 damageRoll(rng));
     playerDaemon.takeDamage(oppDamage);
     addMessage("Foe " + getOpponentDaemon().getNickname() + " used " + oppMoveData.name + "!");
     addAttackAnimMarker(false);
     addHPAnimMarker();
 
     // Type effectiveness for opponent's attack
-    float oppEff = getTypeEffectiveness(oppMoveData.type, playerDaemon.getSpecies().primaryType);
-    if (playerDaemon.getSpecies().secondaryType != playerDaemon.getSpecies().primaryType)
-        oppEff *= getTypeEffectiveness(oppMoveData.type, playerDaemon.getSpecies().secondaryType);
+    float oppEff =
+        BattleRules::effectivenessMultiplier(oppMoveData.type, playerDaemon.getSpecies());
 
     if (oppEff >= 2.0f)
         addMessage("It's super effective!");
@@ -577,56 +536,7 @@ bool Battle::isPlayerAttacking() const { return attackAnimIsPlayer; }
 
 // --- Private helpers ---
 
-int Battle::calculateDamage(const Daemon &attacker, const Daemon &defender,
-                            const MoveData &move) const {
-    if (move.power <= 0)
-        return 0;
-
-    // Use physical or special stats based on move category
-    int attack, defense;
-    if (move.category == MoveCategory::special) {
-        attack = attacker.getStat(3);  // special attack
-        defense = defender.getStat(4); // special defense
-    } else {
-        attack = attacker.getStat(1);  // attack
-        defense = defender.getStat(2); // defense
-    }
-
-    int level = attacker.getLevel();
-    int power = move.power;
-
-    // Standard Pokémon damage formula
-    int baseDamage = ((2 * level / 5 + 2) * power * attack / defense / 50) + 2;
-
-    // Type effectiveness
-    float eff = getTypeEffectiveness(move.type, defender.getSpecies().primaryType);
-    if (defender.getSpecies().secondaryType != defender.getSpecies().primaryType)
-        eff *= getTypeEffectiveness(move.type, defender.getSpecies().secondaryType);
-    baseDamage = static_cast<int>(static_cast<float>(baseDamage) * eff);
-
-    // STAB (Same Type Attack Bonus)
-    if (move.type == attacker.getSpecies().primaryType ||
-        move.type == attacker.getSpecies().secondaryType) {
-        baseDamage = baseDamage * 3 / 2;
-    }
-
-    // Random factor 85-100%
-    std::uniform_int_distribution<int> dist(aiMoveFuzzMin, aiMoveFuzzMax);
-    int roll = dist(rng);
-    baseDamage = baseDamage * roll / 100;
-
-    return std::max(1, baseDamage);
-}
-
-float Battle::getTypeEffectiveness(ElementType attackType, ElementType defenseType) const {
-    return TypeChart::getEffectiveness(attackType, defenseType);
-}
-
 bool Battle::accuracyCheck(int accuracy) const {
     std::uniform_int_distribution<int> dist(1, 100);
     return dist(rng) <= accuracy;
-}
-
-int Battle::calculateExpYield(const Daemon &defeated) const {
-    return defeated.getSpecies().baseExpYield * defeated.getLevel() / 7;
 }

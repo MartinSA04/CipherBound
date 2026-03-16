@@ -68,6 +68,8 @@ src = [
   'src/state/player/WalkAnimation.cpp',
   'src/data/Pokedex.cpp',
   'src/battle/Battle.cpp',
+  'src/battle/BattleAI.cpp',
+  'src/battle/BattleRules.cpp',
   'src/battle/TypeChart.cpp',
   'src/save/SaveManager.cpp',
   'src/audio/MusicManager.cpp',
@@ -133,6 +135,30 @@ battle_animation_utils_test = executable(
 )
 
 test('battle_animation_utils', battle_animation_utils_test)
+
+battle_ai_test = executable(
+  'battle_ai_test',
+  [
+    'tests/BattleAITest.cpp',
+    'src/battle/BattleAI.cpp',
+    'src/battle/TypeChart.cpp',
+    'src/state/Daemon.cpp',
+  ],
+)
+
+test('battle_ai', battle_ai_test)
+
+battle_rules_test = executable(
+  'battle_rules_test',
+  [
+    'tests/BattleRulesTest.cpp',
+    'src/battle/BattleRules.cpp',
+    'src/battle/TypeChart.cpp',
+    'src/state/Daemon.cpp',
+  ],
+)
+
+test('battle_rules', battle_rules_test)
 
 map_model_test = executable(
   'map_model_test',

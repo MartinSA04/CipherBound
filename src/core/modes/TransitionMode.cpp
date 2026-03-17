@@ -30,7 +30,7 @@ void TransitionMode::update(GameContext &ctx, InputManager & /*input*/) {
             // Check if entering this map triggers a cutscene
             StoryAction mapAction =
                 ctx.story.checkMapEnter(ctx.world.getCurrentMapId(), ctx.world.getPlayer());
-            if (mapAction.type != StoryAction::Type::none)
+            if (!mapAction.is<StoryNoAction>())
                 ctx.pushRequest(ModeRequest::storyAction(mapAction));
 
             targetMapId.clear();

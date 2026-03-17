@@ -68,8 +68,11 @@ src = [
   'src/state/player/WalkAnimation.cpp',
   'src/data/Pokedex.cpp',
   'src/battle/Battle.cpp',
+  'src/battle/BattleCapture.cpp',
+  'src/battle/BattleEventQueue.cpp',
   'src/battle/BattleAI.cpp',
   'src/battle/BattleRules.cpp',
+  'src/battle/BattleTurnResolver.cpp',
   'src/battle/TypeChart.cpp',
   'src/save/SaveManager.cpp',
   'src/audio/MusicManager.cpp',
@@ -136,6 +139,13 @@ mode_request_test = executable(
 
 test('mode_request', mode_request_test)
 
+story_action_test = executable(
+  'story_action_test',
+  'tests/StoryActionTest.cpp'
+)
+
+test('story_action', story_action_test)
+
 text_parse_test = executable(
   'text_parse_test',
   'tests/TextParseTest.cpp'
@@ -143,12 +153,48 @@ text_parse_test = executable(
 
 test('text_parse', text_parse_test)
 
+battle_event_queue_test = executable(
+  'battle_event_queue_test',
+  [
+    'tests/BattleEventQueueTest.cpp',
+    'src/battle/BattleEventQueue.cpp',
+  ],
+)
+
+test('battle_event_queue', battle_event_queue_test)
+
 battle_animation_utils_test = executable(
   'battle_animation_utils_test',
   'tests/BattleAnimationUtilsTest.cpp'
 )
 
 test('battle_animation_utils', battle_animation_utils_test)
+
+battle_capture_test = executable(
+  'battle_capture_test',
+  [
+    'tests/BattleCaptureTest.cpp',
+    'src/battle/BattleCapture.cpp',
+    'src/state/Daemon.cpp',
+  ],
+)
+
+test('battle_capture', battle_capture_test)
+
+battle_turn_resolver_test = executable(
+  'battle_turn_resolver_test',
+  [
+    'tests/BattleTurnResolverTest.cpp',
+    'src/battle/BattleTurnResolver.cpp',
+    'src/battle/BattleAI.cpp',
+    'src/battle/BattleRules.cpp',
+    'src/battle/TypeChart.cpp',
+    'src/data/Pokedex.cpp',
+    'src/state/Daemon.cpp',
+  ],
+)
+
+test('battle_turn_resolver', battle_turn_resolver_test)
 
 battle_ai_test = executable(
   'battle_ai_test',

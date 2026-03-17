@@ -1,5 +1,6 @@
 #pragma once
 #include "../GameMode.h"
+#include "../StoryAction.h"
 
 class OverworldMode : public GameMode {
   public:
@@ -18,7 +19,7 @@ class OverworldMode : public GameMode {
 
     // Pending warp block (deferred until walk animation finishes)
     bool pendingWarpBlock{false};
-    StoryAction pendingWarpBlockAction;
+    StoryBlockWarpAction pendingWarpBlockAction;
 
     // Wild encounters are only checked once per step.
     // Set to true when the player finishes a step; cleared after a check.

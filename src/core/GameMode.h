@@ -2,7 +2,7 @@
 #include "../audio/SoundEffects.h"
 #include "../data/Pokedex.h"
 #include "../state/World.h"
-#include "StoryManager.h"
+#include "StoryAction.h"
 #include <memory>
 #include <string>
 #include <utility>
@@ -18,6 +18,7 @@ class SaveManager;
 class GameUI;
 class InputManager;
 class SoundManager;
+class StoryManager;
 
 // ── Game states
 // ────────────────────────────────────────────────────────────────

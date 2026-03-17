@@ -1,41 +1,12 @@
 #pragma once
+#include "StoryAction.h"
 #include <string>
-#include <vector>
 
 class NPC;
 class Pokedex;
 class Player;
 class World;
 struct WarpPoint;
-
-// Result of a story check — tells Session what to do next
-struct StoryAction {
-    enum class Type {
-        none,          // No special action
-        blockWarp,     // Prevent the warp and show dialogue
-        showChoice,    // Show a choice box after dialogue ends
-        startBattle,   // Start a trainer battle
-        showDialogue,  // Show new dialogue lines
-        returnToState, // Return to the dialogue-return state
-        startCutscene, // Start a cutscene from file
-    };
-
-    Type type{Type::none};
-
-    // For blockWarp / showDialogue
-    std::string speaker;
-    std::vector<std::string> lines;
-
-    // For showChoice
-    std::vector<std::string> options;
-    std::string choiceContext;
-
-    // For startBattle
-    NPC *trainer{nullptr};
-
-    // For startCutscene
-    std::string cutscenePath;
-};
 
 class StoryManager {
   public:

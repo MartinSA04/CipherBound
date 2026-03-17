@@ -57,9 +57,9 @@ void OverworldMode::handlePlayerWarpAttempt(GameContext &ctx) {
         return;
 
     StoryAction block = ctx.story.checkWarp(*warp, player);
-    if (block.type == StoryAction::Type::blockWarp) {
+    if (const auto *blocked = block.tryGet<StoryBlockWarpAction>()) {
         pendingWarpBlock = true;
-        pendingWarpBlockAction = block;
+        pendingWarpBlockAction = *blocked;
         return;
     }
 

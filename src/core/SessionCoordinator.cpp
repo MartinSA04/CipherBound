@@ -3,6 +3,7 @@
 #include "../battle/Battle.h"
 #include "../ui/GameUI.h"
 #include "CutsceneRunner.h"
+#include "VariantUtils.h"
 #include "modes/BagMode.h"
 #include "modes/BattleIntroMode.h"
 #include "modes/BattleMode.h"
@@ -17,14 +18,6 @@
 #include "modes/SaveMode.h"
 #include "modes/TitleScreenMode.h"
 #include "modes/TransitionMode.h"
-
-namespace {
-template <class... Ts> struct Overloaded : Ts... {
-    using Ts::operator()...;
-};
-
-template <class... Ts> Overloaded(Ts...) -> Overloaded<Ts...>;
-} // namespace
 
 SessionCoordinator::SessionCoordinator(GameContext &ctx) : ctx(ctx) {}
 
@@ -44,32 +37,27 @@ void SessionCoordinator::processRequests() {
     std::vector<ModeRequest> requests = ctx.mailbox.drain();
 
     for (auto &req : requests) {
-        std::visit(Overloaded{[this](const ChangeStateRequest &request) { handleRequest(request); },
-                              [this](const EnterBattleModeRequest &request) {
-                                  handleRequest(request);
-                              },
-                              [this](const StartWildBattleRequest &request) {
-                                  handleRequest(request);
-                              },
-                              [this](const StartTrainerBattleRequest &request) {
-                                  handleRequest(request);
-                              },
-                              [this](const EndBattleRequest &request) { handleRequest(request); },
-                              [this](const TransitionToMapRequest &request) {
-                                  handleRequest(request);
-                              },
-                              [this](const StartDialogueRequest &request) {
-                                  handleRequest(request);
-                              },
-                              [this](const StartDialogueChoiceRequest &request) {
-                                  handleRequest(request);
-                              },
-                              [this](const StartCutsceneRequest &request) {
-                                  handleRequest(request);
-                              },
-                              [this](const StoryActionRequest &request) {
-                                  handleRequest(request);
-                              }},
+        std::visit(VariantUtils::Overloaded{
+                       [this](const ChangeStateRequest &request) { handleRequest(request); },
+                       [this](const EnterBattleModeRequest &request) { handleRequest(request); },
+                       [this](const StartWildBattleRequest &request) { handleRequest(request); },
+                       [this](const StartTrainerBattleRequest &request) {
+                           handleRequest(request);
+                       },
+                       [this](const EndBattleRequest &request) { handleRequest(request); },
+                       [this](const TransitionToMapRequest &request) {
+                           handleRequest(request);
+                       },
+                       [this](const StartDialogueRequest &request) {
+                           handleRequest(request);
+                       },
+                       [this](const StartDialogueChoiceRequest &request) {
+                           handleRequest(request);
+                       },
+                       [this](const StartCutsceneRequest &request) {
+                           handleRequest(request);
+                       },
+                       [this](const StoryActionRequest &request) { handleRequest(request); }},
                    req.payload);
     }
 }
@@ -141,38 +129,50 @@ void SessionCoordinator::handleRequest(const StartCutsceneRequest &req) {
 }
 
 void SessionCoordinator::handleRequest(const StoryActionRequest &req) {
-    handleStoryAction(req.action);
+    std::visit(
+        VariantUtils::Overloaded{
+            [this](const StoryNoAction &action) { handleStoryAction(action); },
+            [this](const StoryBlockWarpAction &action) { handleStoryAction(action); },
+            [this](const StoryShowChoiceAction &action) { handleStoryAction(action); },
+            [this](const StoryStartBattleAction &action) { handleStoryAction(action); },
+            [this](const StoryShowDialogueAction &action) { handleStoryAction(action); },
+            [this](const StoryReturnToStateAction &action) { handleStoryAction(action); },
+            [this](const StoryStartCutsceneAction &action) { handleStoryAction(action); }},
+        req.action.payload);
 }
 
-void SessionCoordinator::handleStoryAction(const StoryAction &action) {
-    switch (action.type) {
-    case StoryAction::Type::startBattle:
-        ctx.pushRequest(ModeRequest::trainerBattle(action.trainer));
-        break;
+void SessionCoordinator::handleStoryAction(const StoryNoAction & /*action*/) {}
 
-    case StoryAction::Type::showChoice:
-        ctx.pushRequest(ModeRequest::dialogueChoice(action.options, action.choiceContext,
-                                                    ctx.flow.dialogueReturnState));
-        break;
+void SessionCoordinator::handleStoryAction(const StoryBlockWarpAction &action) {
+    ctx.flow.pendingPushBack = true;
+    ctx.pushRequest(
+        ModeRequest::dialogue(action.speaker, action.lines, nullptr, GameState::overworld));
+}
 
-    case StoryAction::Type::showDialogue:
-        ctx.pushRequest(
-            ModeRequest::dialogue(action.speaker, action.lines, nullptr, GameState::overworld));
-        break;
+void SessionCoordinator::handleStoryAction(const StoryShowChoiceAction &action) {
+    ctx.pushRequest(
+        ModeRequest::dialogueChoice(action.options, action.choiceContext, ctx.flow.dialogueReturnState));
+}
 
-    case StoryAction::Type::startCutscene:
-        ctx.pushRequest(ModeRequest::cutscene(action.cutscenePath));
-        break;
+void SessionCoordinator::handleStoryAction(const StoryStartBattleAction &action) {
+    ctx.pushRequest(ModeRequest::trainerBattle(action.trainer));
+}
 
-    case StoryAction::Type::returnToState:
-    default:
-        if (ctx.flow.pendingPushBack) {
-            ctx.flow.pendingPushBack = false;
-            ctx.world.pushPlayerBack();
-        }
-        switchMode(ctx.flow.dialogueReturnState);
-        break;
+void SessionCoordinator::handleStoryAction(const StoryShowDialogueAction &action) {
+    ctx.pushRequest(ModeRequest::dialogue(action.speaker, action.lines, nullptr,
+                                          GameState::overworld));
+}
+
+void SessionCoordinator::handleStoryAction(const StoryReturnToStateAction & /*action*/) {
+    if (ctx.flow.pendingPushBack) {
+        ctx.flow.pendingPushBack = false;
+        ctx.world.pushPlayerBack();
     }
+    switchMode(ctx.flow.dialogueReturnState);
+}
+
+void SessionCoordinator::handleStoryAction(const StoryStartCutsceneAction &action) {
+    ctx.pushRequest(ModeRequest::cutscene(action.cutscenePath));
 }
 
 void SessionCoordinator::switchToMode(GameState newState, std::unique_ptr<GameMode> mode) {

@@ -26,7 +26,13 @@ class SessionCoordinator {
     void handleRequest(const StartDialogueChoiceRequest &req);
     void handleRequest(const StartCutsceneRequest &req);
     void handleRequest(const StoryActionRequest &req);
-    void handleStoryAction(const StoryAction &action);
+    void handleStoryAction(const StoryNoAction &action);
+    void handleStoryAction(const StoryBlockWarpAction &action);
+    void handleStoryAction(const StoryShowChoiceAction &action);
+    void handleStoryAction(const StoryStartBattleAction &action);
+    void handleStoryAction(const StoryShowDialogueAction &action);
+    void handleStoryAction(const StoryReturnToStateAction &action);
+    void handleStoryAction(const StoryStartCutsceneAction &action);
 
     void switchToMode(GameState newState, std::unique_ptr<GameMode> mode);
     std::unique_ptr<GameMode> createMode(GameState state);

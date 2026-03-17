@@ -1,19 +1,22 @@
 #include "Battle.h"
-#include "BattleAI.h"
+#include "BattleCapture.h"
 #include "BattleRules.h"
-#include <algorithm>
-#include <array>
-#include <cmath>
+#include "BattleTurnResolver.h"
+#include <string_view>
 
 namespace {
 
-constexpr int moveSlotCount = 4;
 constexpr int fullRestoreThreshold = 9999;
-constexpr int guaranteedCaptureThreshold = 255;
-constexpr int captureShakeRollMax = 65535;
-constexpr int guaranteedCaptureShakes = 4;
-constexpr int damageRollMinPercent = 85;
-constexpr int damageRollMaxPercent = 100;
+
+std::string_view effectivenessMessage(float effectiveness) {
+    if (effectiveness >= 2.0f)
+        return "It's super effective!";
+    if (effectiveness > 0.0f && effectiveness <= 0.5f)
+        return "It's not very effective...";
+    if (effectiveness == 0.0f)
+        return "It has no effect!";
+    return {};
+}
 
 } // namespace
 
@@ -163,28 +166,27 @@ void Battle::executeTurn() {
     Daemon &playerDaemon = player.getDaemon(0); // active Daemon
 
     if (currentAction == BattleAction::fight) {
-        const auto &moves = playerDaemon.getMoves();
-        if (playerMoveSlot < 0 || playerMoveSlot >= moveSlotCount ||
-            moves[static_cast<std::size_t>(playerMoveSlot)].moveId < 0) {
+        const BattleMoveSelection selection =
+            BattleTurnResolver::preparePlayerMove(playerDaemon, playerMoveSlot, pokedex);
+
+        if (selection.error == BattleMoveSelectionError::invalidSelection) {
             addMessage("No move selected!");
             pendingState = BattleState::choosingAction;
             state = BattleState::showingMessages;
             return;
         }
-
-        if (!playerDaemon.useMove(playerMoveSlot)) {
+        if (selection.error == BattleMoveSelectionError::noPP) {
             addMessage("No PP left for that move!");
             pendingState = BattleState::choosingAction;
             state = BattleState::showingMessages;
             return;
         }
 
-        // Player attacks
-        const MoveData &moveData =
-            pokedex.getMove(moves[static_cast<std::size_t>(playerMoveSlot)].moveId);
+        const MoveData &moveData = *selection.move;
+        const BattleAttackResolution resolution =
+            BattleTurnResolver::resolveAttack(playerDaemon, getOpponentDaemon(), moveData, rng);
 
-        // Accuracy check
-        if (!accuracyCheck(moveData.accuracy)) {
+        if (!resolution.hit) {
             addMessage(playerDaemon.getNickname() + " used " + moveData.name + "!");
             addMessage("But it missed!");
             pendingState = BattleState::opponentTurn;
@@ -192,29 +194,19 @@ void Battle::executeTurn() {
             return;
         }
 
-        std::uniform_int_distribution<int> damageRoll(damageRollMinPercent, damageRollMaxPercent);
-        int damage = BattleRules::calculateDamage(playerDaemon, getOpponentDaemon(), moveData,
-                                                  damageRoll(rng));
-        getOpponentDaemon().takeDamage(damage);
         addMessage(playerDaemon.getNickname() + " used " + moveData.name + "!");
         addAttackAnimMarker(true);
         addHPAnimMarker();
 
-        // Type effectiveness message
-        float eff =
-            BattleRules::effectivenessMultiplier(moveData.type, getOpponentDaemon().getSpecies());
+        if (const std::string_view message = effectivenessMessage(resolution.effectiveness);
+            !message.empty()) {
+            addMessage(std::string(message));
+        }
 
-        if (eff >= 2.0f)
-            addMessage("It's super effective!");
-        else if (eff > 0.0f && eff <= 0.5f)
-            addMessage("It's not very effective...");
-        else if (eff == 0.0f)
-            addMessage("It has no effect!");
+        addMessage("It dealt " + std::to_string(resolution.damage) + " damage!");
 
-        addMessage("It dealt " + std::to_string(damage) + " damage!");
-
-        if (getOpponentDaemon().isFainted()) {
-            int exp = BattleRules::calculateExpYield(getOpponentDaemon());
+        if (resolution.defenderFainted) {
+            const int exp = BattleRules::calculateExpYield(getOpponentDaemon());
             playerDaemon.addExp(exp);
             addMessage("The opposing " + getOpponentDaemon().getNickname() + " fainted!");
             addMessage("Gained " + std::to_string(exp) + " EXP!");
@@ -237,25 +229,19 @@ void Battle::executeTurn() {
 
 void Battle::executeOpponentTurn() {
     Daemon &playerDaemon = player.getDaemon(0);
-    const auto &oppMoves = getOpponentDaemon().getMoves();
-    std::array<BattleAI::MoveCandidate, moveSlotCount> candidates{};
-    for (int i = 0; i < moveSlotCount; ++i) {
-        const MoveSlot &slot = oppMoves[static_cast<std::size_t>(i)];
-        if (slot.moveId >= 0)
-            candidates[static_cast<std::size_t>(i)] =
-                BattleAI::MoveCandidate{&pokedex.getMove(slot.moveId), slot.currentPP};
+    BattleMoveSelection selection =
+        BattleTurnResolver::prepareOpponentMove(getOpponentDaemon(), playerDaemon, pokedex, rng);
+    if (selection.error != BattleMoveSelectionError::none || selection.move == nullptr) {
+        pendingState = BattleState::choosingAction;
+        state = BattleState::showingMessages;
+        return;
     }
-    int bestSlot =
-        BattleAI::chooseMoveSlot(candidates, getOpponentDaemon().getSpecies(), playerDaemon, rng);
 
-    int oppMoveId = oppMoves[static_cast<std::size_t>(bestSlot)].moveId;
-    if (oppMoveId < 0)
-        oppMoveId = 0;
-    getOpponentDaemon().useMove(bestSlot);
-    const MoveData &oppMoveData = pokedex.getMove(oppMoveId);
+    const MoveData &oppMoveData = *selection.move;
+    const BattleAttackResolution resolution =
+        BattleTurnResolver::resolveAttack(getOpponentDaemon(), playerDaemon, oppMoveData, rng);
 
-    // Accuracy check
-    if (!accuracyCheck(oppMoveData.accuracy)) {
+    if (!resolution.hit) {
         addMessage("Foe " + getOpponentDaemon().getNickname() + " used " + oppMoveData.name + "!");
         addMessage("But it missed!");
         pendingState = BattleState::choosingAction;
@@ -263,28 +249,18 @@ void Battle::executeOpponentTurn() {
         return;
     }
 
-    std::uniform_int_distribution<int> damageRoll(damageRollMinPercent, damageRollMaxPercent);
-    int oppDamage = BattleRules::calculateDamage(getOpponentDaemon(), playerDaemon, oppMoveData,
-                                                 damageRoll(rng));
-    playerDaemon.takeDamage(oppDamage);
     addMessage("Foe " + getOpponentDaemon().getNickname() + " used " + oppMoveData.name + "!");
     addAttackAnimMarker(false);
     addHPAnimMarker();
 
-    // Type effectiveness for opponent's attack
-    float oppEff =
-        BattleRules::effectivenessMultiplier(oppMoveData.type, playerDaemon.getSpecies());
+    if (const std::string_view message = effectivenessMessage(resolution.effectiveness);
+        !message.empty()) {
+        addMessage(std::string(message));
+    }
 
-    if (oppEff >= 2.0f)
-        addMessage("It's super effective!");
-    else if (oppEff > 0.0f && oppEff <= 0.5f)
-        addMessage("It's not very effective...");
-    else if (oppEff == 0.0f)
-        addMessage("It has no effect!");
+    addMessage("It dealt " + std::to_string(resolution.damage) + " damage!");
 
-    addMessage("It dealt " + std::to_string(oppDamage) + " damage!");
-
-    if (playerDaemon.isFainted()) {
+    if (resolution.defenderFainted) {
         addMessage(playerDaemon.getNickname() + " fainted!");
         pendingState = BattleState::defeat;
     } else {
@@ -329,95 +305,26 @@ bool Battle::attemptCapture(int itemId) {
         return false;
     }
 
-    // Proper capture algorithm (based on Gen III-IV formula)
     const Daemon &target = getOpponentDaemon();
-    const Species &species = target.getSpecies();
     const ItemData &ball = pokedex.getItem(itemId);
+    const BattleCaptureOutcome outcome = BattleCapture::resolve(target, ball, rng);
 
-    int maxHP = target.getMaxHP();
-    int curHP = target.getCurrentHP();
-    int catchRate = species.catchRate;   // Species base catch rate (0-255)
-    int ballModifier = ball.effectValue; // 1 = normal, 2 = great, 3 = ultra
-
-    // Status bonus: sleeping/frozen = 2x, paralyzed/poisoned/burned = 1.5x
-    float statusBonus = 1.0f;
-    if (target.getStatus() == StatusEffect::deadlocked ||
-        target.getStatus() == StatusEffect::entangled)
-        statusBonus = 2.0f;
-    else if (target.getStatus() != StatusEffect::none)
-        statusBonus = 1.5f;
-
-    // Modified catch rate: ((3*maxHP - 2*curHP) * catchRate * ballMod) /
-    // (3*maxHP) * statusBonus
-    float a = ((3.0f * static_cast<float>(maxHP) - 2.0f * static_cast<float>(curHP)) *
-               static_cast<float>(catchRate) * static_cast<float>(ballModifier)) /
-              (3.0f * static_cast<float>(maxHP)) * statusBonus;
-    a = std::min(a, static_cast<float>(guaranteedCaptureThreshold));
-
-    // If a reaches the guaranteed threshold, capture always succeeds.
-    if (a >= static_cast<float>(guaranteedCaptureThreshold)) {
-        captureShakes = guaranteedCaptureShakes;
-        captureSuccess = true;
-        addMessage("Used " + ball.name + "!");
-        addCaptureAnimMarker();
-        addMessage("Gotcha! " + target.getNickname() + " was caught!");
-        pendingState = BattleState::captured;
-        state = BattleState::showingMessages;
-
-        // Add Daemon to player's party
-        Daemon caught(species, target.getLevel());
-        caught = target; // copy current state
-        player.addDaemon(std::move(caught));
-        player.markCaught(target.getSpeciesId());
-        return true;
-    }
-
-    // Shake probability: b = 1048560 / sqrt(sqrt(16711680 / a))
-    // Each shake succeeds with probability b/65536
-    // 4 successful shakes = capture
-    float b = 1048560.0f / std::sqrt(std::sqrt(16711680.0f / a));
-    int shakeThreshold = static_cast<int>(b);
-
-    std::uniform_int_distribution<int> dist(0, captureShakeRollMax);
-    int shakes = 0;
-    for (int i = 0; i < guaranteedCaptureShakes; ++i) {
-        if (dist(rng) < shakeThreshold)
-            shakes++;
-        else
-            break;
-    }
-
-    if (shakes == guaranteedCaptureShakes) {
-        captureShakes = guaranteedCaptureShakes;
-        captureSuccess = true;
-        addMessage("Used " + ball.name + "!");
-        addCaptureAnimMarker();
-        addMessage("Gotcha! " + target.getNickname() + " was caught!");
-        pendingState = BattleState::captured;
-        state = BattleState::showingMessages;
-
-        // Add Daemon to player's party
-        player.addDaemon(Daemon(species, target.getLevel(), target.getExp(), target.getCurrentHP(),
-                                target.getNickname(), target.getStatus(), target.getIVs(),
-                                target.getEVs(), target.getMoves()));
-        player.markCaught(target.getSpeciesId());
-        return true;
-    }
-
-    // Show appropriate failure message based on number of shakes
-    captureShakes = shakes;
-    captureSuccess = false;
+    captureShakes = outcome.shakes;
+    captureSuccess = outcome.success;
     addMessage("Used " + ball.name + "!");
     addCaptureAnimMarker();
 
-    if (shakes == 0)
-        addMessage("Oh no! The Daemon broke free immediately!");
-    else if (shakes == 1)
-        addMessage("The ball shook once... but it broke free!");
-    else if (shakes == 2)
-        addMessage("The ball shook twice... but it broke free!");
-    else
-        addMessage("The ball shook three times... So close!");
+    if (outcome.success) {
+        addMessage("Gotcha! " + target.getNickname() + " was caught!");
+        pendingState = BattleState::captured;
+        state = BattleState::showingMessages;
+
+        player.addDaemon(BattleCapture::caughtDaemon(target));
+        player.markCaught(target.getSpeciesId());
+        return true;
+    }
+
+    addMessage(std::string(BattleCapture::failureMessage(outcome.shakes)));
 
     // Opponent gets a turn after failed capture
     pendingState = BattleState::opponentTurn;
@@ -426,17 +333,15 @@ bool Battle::attemptCapture(int itemId) {
 }
 
 const std::string &Battle::getMessage() const {
-    if (!eventQueue.empty() && eventQueue.front().type == QueueEntry::Type::message)
-        return eventQueue.front().text;
+    if (const std::string *message = eventQueue.currentMessage())
+        return *message;
     return emptyMessage;
 }
 
 bool Battle::hasMessages() const { return !eventQueue.empty(); }
 
 void Battle::advanceMessage() {
-    if (!eventQueue.empty() && eventQueue.front().type == QueueEntry::Type::message)
-        eventQueue.pop_front();
-
+    eventQueue.popCurrentMessage();
     transitionToQueuedState();
 }
 
@@ -462,81 +367,27 @@ int Battle::getCaptureShakes() const { return captureShakes; }
 bool Battle::getCaptureSuccess() const { return captureSuccess; }
 
 void Battle::addLevelUpMessage(const std::string &msg) {
-    // Insert level-up message + EXP anim marker at front of queue
-    // so we show the message, then resume EXP animation for remaining EXP
-    eventQueue.push_front({QueueEntry::Type::expAnimation, ""});
-    eventQueue.push_front({QueueEntry::Type::message, msg});
+    // Show the message, then resume EXP animation for remaining EXP.
+    eventQueue.pushLevelUpResume(msg);
     state = BattleState::showingMessages;
 }
 
-void Battle::addMessage(const std::string &msg) {
-    eventQueue.push_back({QueueEntry::Type::message, msg});
-}
+void Battle::addMessage(const std::string &msg) { eventQueue.pushMessage(msg); }
 
-void Battle::addHPAnimMarker() { eventQueue.push_back({QueueEntry::Type::hpAnimation, ""}); }
+void Battle::addHPAnimMarker() { eventQueue.pushHPAnimation(); }
 
-void Battle::addEXPAnimMarker() { eventQueue.push_back({QueueEntry::Type::expAnimation, ""}); }
+void Battle::addEXPAnimMarker() { eventQueue.pushEXPAnimation(); }
 
-void Battle::addIntroAnimMarker() { eventQueue.push_back({QueueEntry::Type::introAnimation, ""}); }
+void Battle::addIntroAnimMarker() { eventQueue.pushIntroAnimation(); }
 
-void Battle::addCaptureAnimMarker() {
-    eventQueue.push_back({QueueEntry::Type::captureAnimation, ""});
-}
+void Battle::addCaptureAnimMarker() { eventQueue.pushCaptureAnimation(); }
 
-void Battle::addAttackAnimMarker(bool isPlayer) {
-    eventQueue.push_back({isPlayer ? QueueEntry::Type::attackAnimationPlayer
-                                   : QueueEntry::Type::attackAnimationOpponent,
-                          ""});
-}
+void Battle::addAttackAnimMarker(bool isPlayer) { eventQueue.pushAttackAnimation(isPlayer); }
 
 void Battle::transitionToQueuedState() {
-    if (eventQueue.empty()) {
-        state = pendingState;
-        return;
-    }
-
-    const QueueEntry &entry = eventQueue.front();
-    switch (entry.type) {
-    case QueueEntry::Type::message:
-        state = BattleState::showingMessages;
-        return;
-    case QueueEntry::Type::hpAnimation:
-        eventQueue.pop_front();
-        state = BattleState::animatingHP;
-        return;
-    case QueueEntry::Type::expAnimation:
-        eventQueue.pop_front();
-        state = BattleState::animatingEXP;
-        return;
-    case QueueEntry::Type::introAnimation:
-        eventQueue.pop_front();
-        introPhase++;
-        state = BattleState::intro;
-        return;
-    case QueueEntry::Type::captureAnimation:
-        eventQueue.pop_front();
-        state = BattleState::animatingCapture;
-        return;
-    case QueueEntry::Type::attackAnimationPlayer:
-        eventQueue.pop_front();
-        attackAnimIsPlayer = true;
-        state = BattleState::animatingAttack;
-        return;
-    case QueueEntry::Type::attackAnimationOpponent:
-        eventQueue.pop_front();
-        attackAnimIsPlayer = false;
-        state = BattleState::animatingAttack;
-        return;
-    }
+    state = eventQueue.consume(pendingState, introPhase, attackAnimIsPlayer);
 }
 
 void Battle::finishAttackAnimation() { transitionToQueuedState(); }
 
 bool Battle::isPlayerAttacking() const { return attackAnimIsPlayer; }
-
-// --- Private helpers ---
-
-bool Battle::accuracyCheck(int accuracy) const {
-    std::uniform_int_distribution<int> dist(1, 100);
-    return dist(rng) <= accuracy;
-}

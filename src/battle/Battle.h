@@ -1,50 +1,12 @@
 #pragma once
+#include "BattleEventQueue.h"
+#include "BattleTypes.h"
 #include "../data/Pokedex.h"
 #include "../state/Daemon.h"
 #include "../state/NPC.h"
 #include "../state/player/Player.h"
-#include <deque>
 #include <memory>
 #include <random>
-
-enum class BattleState {
-    intro,
-    choosingAction,
-    choosingMove,
-    choosingItem,
-    choosingSwitch,
-    showingMessages,
-    animatingHP,
-    animatingEXP,
-    animatingCapture,
-    animatingAttack,
-    opponentTurn,
-    victory,
-    defeat,
-    fled,
-    captured,
-};
-
-enum class BattleAction {
-    fight,
-    item,
-    switchDaemon,
-    flee,
-};
-
-struct BattleResult {
-    bool playerWon;
-    bool playerFled;
-    bool captured;
-    int expGained;
-    int moneyGained;
-};
-
-enum class BattleType {
-    wild,
-    trainer,
-    gymLeader,
-};
 
 class Battle {
   public:
@@ -94,21 +56,6 @@ class Battle {
     bool isPlayerAttacking() const; // Is the player the attacker in current attack anim?
 
   private:
-    struct QueueEntry {
-        enum class Type {
-            message,
-            hpAnimation,
-            expAnimation,
-            introAnimation,
-            captureAnimation,
-            attackAnimationPlayer,
-            attackAnimationOpponent,
-        };
-
-        Type type;
-        std::string text;
-    };
-
     void addMessage(const std::string &msg);
     void addHPAnimMarker();                  // Insert marker to trigger HP bar animation
     void addEXPAnimMarker();                 // Insert marker to trigger EXP bar animation
@@ -117,8 +64,6 @@ class Battle {
     void addAttackAnimMarker(bool isPlayer); // Insert marker to trigger attack animation
     void transitionToQueuedState();
     void executeTurn();
-
-    bool accuracyCheck(int accuracy) const;
 
     Player &player;
     std::unique_ptr<Daemon> opponentDaemon = nullptr;
@@ -139,6 +84,6 @@ class Battle {
 
     std::mt19937 &rng;
     const Pokedex &pokedex;
-    std::deque<QueueEntry> eventQueue;
+    BattleEventQueue eventQueue;
     std::string emptyMessage; // Returned when queue is empty
 };

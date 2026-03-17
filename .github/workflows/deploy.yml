@@ -42,7 +42,7 @@ jobs:
         run: |
           source emsdk/emsdk_env.sh
           chmod +x ./build_web.sh
-          ./build_web.sh
+          SITE_URL=https://cipherbound.com/ ./build_web.sh
 
       - name: Rewrite asset base for production
         run: |
@@ -60,6 +60,12 @@ jobs:
 
       - name: Show deploy output
         run: ls -lah buildw/deploy
+
+      - name: Verify SEO deploy artifacts
+        run: |
+          test -f buildw/deploy/robots.txt
+          test -f buildw/deploy/sitemap.xml
+          grep -q 'https://cipherbound.com/' buildw/deploy/index.html
 
       - name: Upload hashed .data file(s) to R2
         run: |

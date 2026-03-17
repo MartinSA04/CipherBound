@@ -5,7 +5,6 @@ BUILD_DIR="buildw"
 DEPLOY_DIR="$BUILD_DIR/deploy"
 BASENAME="index"
 MESON_CROSS_FILE="emscripten-cross.ini"
-
 if ! command -v emcc >/dev/null 2>&1; then
     echo "Error: emcc not found. Activate Emscripten first:"
     echo "  source /path/to/emsdk/emsdk_env.sh"
@@ -18,6 +17,28 @@ for tool in meson sha256sum sed cp rm mkdir python3; do
         exit 1
     fi
 done
+
+DEFAULT_SITE_URL="https://cipherbound.com/"
+SITE_URL="${SITE_URL:-$DEFAULT_SITE_URL}"
+
+case "$SITE_URL" in
+    http://*|https://*) ;;
+    *)
+        echo "Error: SITE_URL must start with http:// or https://"
+        exit 1
+        ;;
+esac
+
+case "$SITE_URL" in
+    */) SITE_ROOT_URL="$SITE_URL" ;;
+    *) SITE_ROOT_URL="$SITE_URL/" ;;
+esac
+
+SITE_ROOT_URL_SED="$(printf '%s' "$SITE_ROOT_URL" | sed 's/[&|]/\\&/g')"
+
+if [ "$SITE_ROOT_URL" = "$DEFAULT_SITE_URL" ]; then
+    echo "Using default production SITE_URL: $SITE_ROOT_URL"
+fi
 
 if [ ! -f "$BUILD_DIR/build.ninja" ]; then
     echo "=== Configuring Emscripten build ==="
@@ -81,7 +102,26 @@ cp "$SRC_HTML"               "$DEPLOY_DIR/index.html"
 sed -i \
     -e "s|src=\"${BASENAME}\.js\"|src=\"${HASHED_JS}\"|g" \
     -e "s|src='${BASENAME}\.js'|src='${HASHED_JS}'|g" \
+    -e "s|__SITE_URL__|${SITE_ROOT_URL_SED}|g" \
     "$DEPLOY_DIR/index.html"
+
+cat > "$DEPLOY_DIR/robots.txt" <<EOF
+User-agent: *
+Allow: /
+
+Sitemap: ${SITE_ROOT_URL}sitemap.xml
+EOF
+
+cat > "$DEPLOY_DIR/sitemap.xml" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${SITE_ROOT_URL}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
+EOF
 
 echo
 echo "Build complete."
@@ -91,6 +131,8 @@ echo "  $DEPLOY_DIR/index.html"
 echo "  $DEPLOY_DIR/$HASHED_JS"
 echo "  $DEPLOY_DIR/$HASHED_WASM"
 echo "  $DEPLOY_DIR/$HASHED_DATA"
+echo "  $DEPLOY_DIR/robots.txt"
+echo "  $DEPLOY_DIR/sitemap.xml"
 
 if [ "${1:-}" = "serve" ] || [ "${1:-}" = "--serve" ]; then
     echo

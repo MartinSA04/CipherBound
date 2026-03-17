@@ -92,7 +92,7 @@ A helper script is provided:
 # Activate the Emscripten SDK first
 source /path/to/emsdk/emsdk_env.sh
 
-# Build
+# Build for production (defaults SEO URLs to https://cipherbound.com/ if SITE_URL is unset)
 ./build_web.sh
 
 # Build and serve locally on port 8080
@@ -101,12 +101,16 @@ source /path/to/emsdk/emsdk_env.sh
 
 This cross-compiles to WebAssembly using `emscripten-cross.ini`, bundles game assets into a `.data` file, and produces a deployable site in `buildw/deploy/` from the custom `shell.html` template.
 
+The build defaults `SITE_URL` to `https://cipherbound.com/`. Override it only if you need a different deploy root, for example `SITE_URL=https://staging.cipherbound.com/ ./build_web.sh`. The build uses it for the canonical URL, structured data, `robots.txt`, and `sitemap.xml`.
+
 To **deploy**, upload the files from `buildw/deploy/` to a web server:
 
 - `index.html`
 - `index.<hash>.js`
 - `index.<hash>.wasm`
 - `index.<hash>.data`
+- `robots.txt`
+- `sitemap.xml`
 
 The server must serve `.wasm` files with MIME type `application/wasm`.
 

@@ -109,4 +109,6 @@ jobs:
       - name: Verify web build output
         run: |
           test -f buildw/deploy/index.html
+          test -f buildw/deploy/robots.txt
+          test -f buildw/deploy/sitemap.xml
           ls -lah buildw/deploy

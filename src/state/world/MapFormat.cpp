@@ -84,12 +84,12 @@ std::vector<NPCPartyMember> parseNPCParty(std::string_view encoded) {
 
 std::optional<NPCDefinition> parseNPC(std::string_view line) {
     const auto parts = TextParse::splitView(line, '|');
-    if (parts.size() < 8)
+    if (parts.size() != 10)
         return std::nullopt;
 
     const auto coords = TextParse::parseFixedIntFields<2>(parts, 3);
     const auto sightRange = TextParse::parseInt(parts[6]);
-    if (!coords.has_value() || !sightRange.has_value())
+    if (!coords.has_value() || !sightRange.has_value() || parts[0].find('@') != std::string_view::npos)
         return std::nullopt;
 
     NPCDefinition npc;
@@ -100,8 +100,9 @@ std::optional<NPCDefinition> parseNPC(std::string_view line) {
     npc.facing = parseDirection(std::string(parts[5]));
     npc.sightRange = *sightRange;
     npc.dialogueStages = parseDialogueStages(parts[7]);
-    if (parts.size() > 8)
-        npc.party = parseNPCParty(parts[8]);
+    if (!parts[8].empty() && parts[8] != "-")
+        npc.spriteType = std::string(parts[8]);
+    npc.party = parseNPCParty(parts[9]);
     return npc;
 }
 

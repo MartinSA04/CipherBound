@@ -1,4 +1,6 @@
 #include "OverworldRenderer.h"
+#include "../common/FilePaths.h"
+#include <array>
 
 OverworldRenderer::OverworldRenderer(Renderer &renderer) : renderer(renderer) {
     for (int dir = 0; dir < 4; ++dir) {
@@ -12,7 +14,6 @@ OverworldRenderer::OverworldRenderer(Renderer &renderer) : renderer(renderer) {
 void OverworldRenderer::loadSprites() {
     if (!spritesLoaded) {
         renderer.loadTexture("player", "assets/sprites/player/player_sheet.png");
-        renderer.loadTexture("prof_bart_iver", "assets/sprites/npcs/bart_iver/bart_iver_sheet.png");
         renderer.loadTexture("daemon_ball", "assets/sprites/items/daemon_ball.png");
         spritesLoaded = true;
     }
@@ -80,6 +81,53 @@ SpriteFrame OverworldRenderer::getNPCFrame(const NPC &npc) const {
     } else {
         return walkFrames[static_cast<std::size_t>(dirIdx)][0];
     }
+}
+
+std::string OverworldRenderer::getNPCTextureId(const NPC &npc) const {
+    const std::string &spriteType = npc.getSpriteType().empty() ? npc.getId() : npc.getSpriteType();
+    if (spriteType.empty())
+        return {};
+    return "npc_" + spriteType;
+}
+
+std::filesystem::path OverworldRenderer::findNPCSpritePath(const NPC &npc) const {
+    const std::string &spriteType = npc.getSpriteType().empty() ? npc.getId() : npc.getSpriteType();
+    if (spriteType.empty())
+        return {};
+
+    const std::array<std::filesystem::path, 4> candidates = {
+        std::filesystem::path{"assets/sprites/npcs"} / spriteType / (spriteType + "_sheet.png"),
+        std::filesystem::path{"assets/sprites/npcs"} / (spriteType + "_sheet.png"),
+        std::filesystem::path{"assets/sprites/npcs"} / spriteType / (spriteType + ".png"),
+        std::filesystem::path{"assets/sprites/npcs"} / (spriteType + ".png"),
+    };
+
+    for (const auto &candidate : candidates) {
+        const std::filesystem::path resolved = FilePaths::resolveExistingPath(candidate);
+        if (std::filesystem::exists(resolved))
+            return resolved;
+    }
+
+    return {};
+}
+
+bool OverworldRenderer::ensureNPCSpriteLoaded(const NPC &npc) {
+    const std::string textureId = getNPCTextureId(npc);
+    if (textureId.empty())
+        return false;
+    if (renderer.hasTexture(textureId))
+        return true;
+    if (missingNPCTextures.count(textureId) > 0)
+        return false;
+
+    const std::filesystem::path path = findNPCSpritePath(npc);
+    if (path.empty()) {
+        missingNPCTextures.insert(textureId);
+        return false;
+    }
+
+    renderer.loadTexture(textureId, path);
+    return true;
 }
 
 void OverworldRenderer::render(const Map &map, const Player &player,
@@ -236,14 +284,14 @@ void OverworldRenderer::renderNPC(const NPC &npc, int cameraX, int cameraY) {
         return;
     }
 
-    if (renderer.hasTexture(npc.getId())) {
+    if (ensureNPCSpriteLoaded(npc)) {
         SpriteFrame frame = getNPCFrame(npc);
         int dstW = TILE_SIZE * 2;
         int dstH = TILE_SIZE * 2;
         int offsetX = (TILE_SIZE - dstW) / 2;
         int offsetY = TILE_SIZE - dstH;
-        renderer.drawSpriteRegion(npc.getId(), frame.x, frame.y, frame.w, frame.h, sx + offsetX,
-                                  sy + offsetY, dstW, dstH, false);
+        renderer.drawSpriteRegion(getNPCTextureId(npc), frame.x, frame.y, frame.w, frame.h,
+                                  sx + offsetX, sy + offsetY, dstW, dstH, false);
         return;
     }
 

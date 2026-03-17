@@ -27,4 +27,4 @@ player_spawn|2|3
 
 [npcs]
 # PC terminal
-pc_bedroom|PC|pc|1|1|down|0||
+pc_bedroom|PC|pc|1|1|down|0||-|

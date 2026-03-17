@@ -20,8 +20,8 @@ player_spawn|1|2
 1|2|4|30
 broken|entry
 [npcs]
-guide|Guide|normal|1|1|left|0|hello there@@quest_done?thanks for helping|
-trainer_1|Trainer|trainer|2|2|up|4|Ready?;Let's battle!|1:5,7:8
+guide|Guide|normal|1|1|left|0|hello there@@quest_done?thanks for helping|villager_f|
+trainer_1|Trainer|trainer|2|2|up|4|Ready?;Let's battle!|bart_iver|1:5,7:8
 )");
 
     const MapFormat::ParseResult parsed = MapFormat::parse(input);
@@ -42,6 +42,8 @@ trainer_1|Trainer|trainer|2|2|up|4|Ready?;Let's battle!|1:5,7:8
     assert(definition.npcs.size() == 2);
 
     const auto &guide = definition.npcs[0];
+    assert(guide.id == "guide");
+    assert(guide.spriteType == "villager_f");
     assert(guide.type == NPCType::normal);
     assert(guide.facing == Direction::left);
     assert(guide.dialogueStages.size() == 2);
@@ -50,6 +52,7 @@ trainer_1|Trainer|trainer|2|2|up|4|Ready?;Let's battle!|1:5,7:8
     assert(guide.dialogueStages[1].requiredFlag == "quest_done");
 
     const auto &trainer = definition.npcs[1];
+    assert(trainer.spriteType == "bart_iver");
     assert(trainer.type == NPCType::trainer);
     assert(trainer.sightRange == 4);
     assert(trainer.party.size() == 2);

@@ -16,6 +16,7 @@ struct NPCPartyMember {
 
 struct NPCDefinition {
     std::string id;
+    std::string spriteType;
     std::string name;
     NPCType type{NPCType::normal};
     Position position{0, 0};

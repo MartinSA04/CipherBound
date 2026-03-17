@@ -3,8 +3,10 @@
 
 const std::vector<std::string> NPC::emptyLines = {};
 
-NPC::NPC(const std::string &id, const std::string &name, Position position, NPCType type)
-    : Entity(name, position), id(id), type(type), defeated(false), sightRange(4) {}
+NPC::NPC(const std::string &id, const std::string &name, Position position, NPCType type,
+         std::string spriteType)
+    : Entity(name, position), id(id), spriteType(std::move(spriteType)), type(type),
+      defeated(false), sightRange(4) {}
 
 void NPC::update() {
     // NPC AI (turn toward player, patrol, etc.) — future use
@@ -25,6 +27,7 @@ bool NPC::partyEmpty() const { return party.partyEmpty(); }
 void NPC::clearParty() { party.clearParty(); }
 
 const std::string &NPC::getId() const { return id; }
+const std::string &NPC::getSpriteType() const { return spriteType; }
 NPCType NPC::getType() const { return type; }
 bool NPC::isTrainerType() const { return type == NPCType::trainer || type == NPCType::gymLeader; }
 bool NPC::isDefeated() const { return defeated; }

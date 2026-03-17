@@ -26,7 +26,8 @@ struct DialogueStage {
 
 class NPC : public Entity {
   public:
-    NPC(const std::string &id, const std::string &name, Position position, NPCType type);
+    NPC(const std::string &id, const std::string &name, Position position, NPCType type,
+        std::string spriteType = {});
 
     void update() override;
 
@@ -39,6 +40,7 @@ class NPC : public Entity {
     void clearParty();
 
     const std::string &getId() const;
+    const std::string &getSpriteType() const;
     NPCType getType() const;
     bool isTrainerType() const;
     bool isDefeated() const;
@@ -62,6 +64,7 @@ class NPC : public Entity {
 
   private:
     std::string id; // Unique identifier for event flags
+    std::string spriteType;
     NPCType type;
     bool defeated;
     int sightRange;

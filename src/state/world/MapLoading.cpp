@@ -96,7 +96,7 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
 
     for (const auto &npcDefinition : definition.npcs) {
         auto npc = std::make_unique<NPC>(npcDefinition.id, npcDefinition.name, npcDefinition.position,
-                                         npcDefinition.type);
+                                         npcDefinition.type, npcDefinition.spriteType);
         npc->setFacing(npcDefinition.facing);
         npc->setSightRange(npcDefinition.sightRange);
 

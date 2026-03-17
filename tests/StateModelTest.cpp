@@ -75,6 +75,7 @@ int main() {
     assert(player.getFlags().empty());
 
     NPC trainer("npc_1", "Trainer", {2, 2}, NPCType::trainer);
+    assert(trainer.getSpriteType().empty());
     assert(!trainer.willFight());
     trainer.addDaemon(Daemon(species[0], 5));
     assert(trainer.partySize() == 1);
@@ -83,6 +84,9 @@ int main() {
     assert(!trainer.willFight());
     trainer.setHidden(true);
     assert(trainer.isHidden());
+
+    NPC villager("npc_2", "Villager", {1, 2}, NPCType::normal, "villager_f");
+    assert(villager.getSpriteType() == "villager_f");
 
     return 0;
 }

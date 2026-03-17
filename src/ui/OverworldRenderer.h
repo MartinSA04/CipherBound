@@ -5,7 +5,9 @@
 #include "../state/player/Player.h"
 #include "Renderer.h"
 #include <array>
+#include <filesystem>
 #include <memory>
+#include <unordered_set>
 #include <vector>
 
 struct SpriteFrame {
@@ -53,8 +55,12 @@ class OverworldRenderer {
 
     SpriteFrame getPlayerFrame(const Player &player) const;
     SpriteFrame getNPCFrame(const NPC &npc) const;
+    std::string getNPCTextureId(const NPC &npc) const;
+    std::filesystem::path findNPCSpritePath(const NPC &npc) const;
+    bool ensureNPCSpriteLoaded(const NPC &npc);
 
     static int dirToIndex(Direction dir);
 
     TDT4102::Color getTileColor(TileType type) const;
+    std::unordered_set<std::string> missingNPCTextures;
 };

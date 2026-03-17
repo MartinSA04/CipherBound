@@ -1,9 +1,19 @@
 project('animationwindow', ['c', 'cpp'], version: '0.01', default_options: ['cpp_std=c++20', 'c_std=c11', 'default_library=static', 'buildtype=debugoptimized'])
 
 if host_machine.system() == 'windows'
-    sdl2_dep = subproject('sdl2_windows').get_variable('sdl2_windows_dep')
-    sdl2image_dep = subproject('sdl2_image_windows').get_variable('sdl2_image_windows_dep')
-    sdl2mixer_dep = subproject('sdl2_mixer_windows').get_variable('sdl2_mixer_windows_dep')
+    # Prefer normal dependency resolution on Windows so MSYS2 packages work in
+    # CI and local builds. Meson can still fall back to vendored SDL wraps.
+    sdl2_dep = dependency('sdl2')
+
+    sdl2image_dep = dependency('sdl2_image', required: false)
+    if not sdl2image_dep.found()
+        sdl2image_dep = dependency('SDL2_image')
+    endif
+
+    sdl2mixer_dep = dependency('SDL2_mixer', required: false)
+    if not sdl2mixer_dep.found()
+        sdl2mixer_dep = dependency('sdl2_mixer')
+    endif
 elif host_machine.system() == 'emscripten'
     # Emscripten provides SDL2 as built-in ports; we declare them as empty
     # dependencies since the compiler/linker flags are set at the top level.

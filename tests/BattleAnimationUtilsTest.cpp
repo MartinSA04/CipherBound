@@ -1,4 +1,4 @@
-#include "../src/ui/gameui/BattleAnimationUtils.h"
+#include "../src/battle/ui/BattleAnimationUtils.h"
 #include <cassert>
 
 int main() {

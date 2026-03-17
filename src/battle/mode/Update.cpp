@@ -1,16 +1,18 @@
-#include "../../../audio/MusicManager.h"
-#include "../../../battle/Battle.h"
-#include "../../../state/World.h"
-#include "../../../state/player/Player.h"
-#include "../../../ui/GameUI.h"
-#include "../../../ui/InputManager.h"
-#include "../BattleMode.h"
+#include "../../audio/MusicManager.h"
+#include "../Battle.h"
+#include "../ui/BattlePresentationState.h"
+#include "../../state/World.h"
+#include "../../state/player/Player.h"
+#include "../../ui/GameUI.h"
+#include "../../ui/InputManager.h"
+#include "BattleMode.h"
 
 void BattleMode::updateBattleIntroAnim(GameContext &ctx) {
-    ctx.ui.battleIntroFrame++;
-    if (ctx.ui.battleIntroFrame >= GameUI::BATTLE_INTRO_SCENE_DURATION) {
+    BattlePresentationState &presentation = ctx.battlePresentation();
+    presentation.introFrame++;
+    if (presentation.introFrame >= BattlePresentationState::introSceneDuration) {
         ctx.battle().finishIntroAnimation();
-        ctx.ui.battleIntroFrame = 0;
+        presentation.introFrame = 0;
     }
 }
 
@@ -19,6 +21,7 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
         return;
 
     Battle &battle = ctx.battle();
+    BattlePresentationState &presentation = ctx.battlePresentation();
     battleAnimFrame++;
 
     BattleState bs = battle.getState();
@@ -48,22 +51,24 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
 
     case BattleState::showingMessages:
         if (!battle.isIntroComplete())
-            ctx.ui.battleIntroFrame++;
+            presentation.introFrame++;
 
         if (ctx.ui.updateTypewriter(input.isConfirmPressed())) {
             ctx.playSound(SoundEffect::select);
             battle.advanceMessage();
             if (battle.getState() == BattleState::intro) {
-                ctx.ui.battleIntroFrame = 0;
-                ctx.ui.battleIntroPhase = battle.getIntroPhase();
+                presentation.introFrame = 0;
+                presentation.introPhase = battle.getIntroPhase();
             }
         }
         return;
 
     case BattleState::animatingHP: {
-        bool done = ctx.ui.tickHPAnimation(
-            battle.getPlayerDaemon().getCurrentHP(), battle.getOpponentDaemon().getCurrentHP(),
-            battle.getPlayerDaemon().getMaxHP(), battle.getOpponentDaemon().getMaxHP());
+        const bool done =
+            presentation.tickHPAnimation(battle.getPlayerDaemon().getCurrentHP(),
+                                         battle.getOpponentDaemon().getCurrentHP(),
+                                         battle.getPlayerDaemon().getMaxHP(),
+                                         battle.getOpponentDaemon().getMaxHP());
         if (done)
             battle.finishHPAnimation();
         return;
@@ -79,7 +84,8 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
         }
 
         Daemon &daemon = battle.getPlayerDaemon();
-        EXPTickResult result = ctx.ui.tickEXPAnimation(daemon.getExp(), daemon.getExpNeeded());
+        const EXPTickResult result =
+            presentation.tickEXPAnimation(daemon.getExp(), daemon.getExpNeeded());
 
         if (!expSoundPlayed) {
             ctx.playSound(SoundEffect::expTick);
@@ -88,13 +94,12 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
 
         if (result == EXPTickResult::filledBar && daemon.checkLevelUp()) {
             ctx.playSound(SoundEffect::levelUp);
-            ctx.ui.playerDisplayEXP = 0;
-            ctx.ui.expAnimFrame = 0;
-            ctx.ui.expAnimStartEXP = -1;
+            presentation.playerDisplayEXP = 0;
+            presentation.resetExpAnimation();
             expSoundPlayed = false;
             battle.addLevelUpMessage(daemon.getNickname() + " leveled up to Lv" +
                                      std::to_string(daemon.getLevel()) + "!");
-            ctx.ui.playerDisplayHP = daemon.getCurrentHP();
+            presentation.playerDisplayHP = daemon.getCurrentHP();
         } else if (result == EXPTickResult::reachedTarget) {
             ctx.playSound(SoundEffect::expFull);
             expSoundPlayed = false;

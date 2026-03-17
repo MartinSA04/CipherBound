@@ -46,11 +46,6 @@ app_src = [
   'src/app/modes/overworld/FlowChecks.cpp',
   'src/app/modes/MenuMode.cpp',
   'src/app/modes/menu/Render.cpp',
-  'src/app/modes/BattleMode.cpp',
-  'src/app/modes/battlemode/Update.cpp',
-  'src/app/modes/battlemode/Render.cpp',
-  'src/app/modes/battlemode/CaptureAnimation.cpp',
-  'src/app/modes/BattleIntroMode.cpp',
   'src/app/modes/TitleScreenMode.cpp',
   'src/app/modes/TransitionMode.cpp',
   'src/app/modes/PartyMode.cpp',
@@ -89,7 +84,7 @@ state_src = [
   'src/state/player/WalkAnimation.cpp',
 ]
 
-battle_src = [
+battle_core_src = [
   'src/battle/Battle.cpp',
   'src/battle/BattleCapture.cpp',
   'src/battle/BattleEventQueue.cpp',
@@ -97,6 +92,19 @@ battle_src = [
   'src/battle/BattleRules.cpp',
   'src/battle/BattleTurnResolver.cpp',
   'src/battle/TypeChart.cpp',
+]
+
+battle_mode_src = [
+  'src/battle/mode/BattleMode.cpp',
+  'src/battle/mode/Update.cpp',
+  'src/battle/mode/Render.cpp',
+  'src/battle/mode/CaptureAnimation.cpp',
+  'src/battle/mode/BattleIntroMode.cpp',
+]
+
+battle_ui_src = [
+  'src/battle/ui/BattleRenderer.cpp',
+  'src/battle/ui/BattlePresentationState.cpp',
 ]
 
 save_src = [
@@ -116,7 +124,7 @@ ui_src = [
   'src/ui/GameUI.cpp',
   'src/ui/gameui/MenuScreens.cpp',
   'src/ui/gameui/Dialogue.cpp',
-  'src/ui/gameui/Battle.cpp',
+  'src/ui/gameui/StatusWidgets.cpp',
   'src/ui/SpriteFont.cpp',
 ]
 
@@ -127,7 +135,9 @@ src += cutscene_src
 src += app_src
 src += game_data_src
 src += state_src
-src += battle_src
+src += battle_core_src
+src += battle_mode_src
+src += battle_ui_src
 src += save_src
 src += audio_src
 src += ui_src
@@ -302,6 +312,16 @@ battle_animation_utils_test = executable(
 )
 
 test('battle_animation_utils', battle_animation_utils_test)
+
+battle_presentation_state_test = executable(
+  'battle_presentation_state_test',
+  [
+    'tests/BattlePresentationStateTest.cpp',
+    'src/battle/ui/BattlePresentationState.cpp',
+  ],
+)
+
+test('battle_presentation_state', battle_presentation_state_test)
 
 battle_capture_test = executable(
   'battle_capture_test',

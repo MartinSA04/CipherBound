@@ -6,14 +6,16 @@
 #include "../../state/player/Player.h"
 #include "../../ui/GameUI.h"
 #include "../../ui/Renderer.h"
+#include <algorithm>
 
 BattleIntroMode::BattleIntroMode(int speciesId, int level) : speciesId(speciesId), level(level) {}
 
 BattleIntroMode::BattleIntroMode(NPC *trainer) : trainer(trainer) {}
 
 void BattleIntroMode::update(GameContext &ctx, InputManager & /*input*/) {
-    ctx.ui.battleIntroFrame++;
-    if (ctx.ui.battleIntroFrame >= GameUI::BATTLE_INTRO_DURATION) {
+    BattlePresentationState &presentation = ctx.battlePresentation();
+    presentation.introFrame++;
+    if (presentation.introFrame >= BattlePresentationState::introTransitionDuration) {
         // Transition complete — create the Battle object
         if (trainer && trainer->isTrainerType()) {
             ctx.setBattle(std::make_unique<Battle>(ctx.world.getPlayer(), trainer,
@@ -35,12 +37,10 @@ void BattleIntroMode::update(GameContext &ctx, InputManager & /*input*/) {
         }
 
         Battle &battle = ctx.battle();
-        ctx.ui.playerDisplayHP = battle.getPlayerDaemon().getCurrentHP();
-        ctx.ui.opponentDisplayHP = battle.getOpponentDaemon().getCurrentHP();
-        ctx.ui.playerDisplayEXP = battle.getPlayerDaemon().getExp();
+        presentation.beginBattle(battle.getPlayerDaemon().getCurrentHP(),
+                                 battle.getOpponentDaemon().getCurrentHP(),
+                                 battle.getPlayerDaemon().getExp());
         battle.start();
-        ctx.ui.battleIntroPhase = 0;
-        ctx.ui.battleIntroFrame = 0;
 
         ctx.pushRequest(ModeRequest::enterBattleMode());
     }
@@ -59,7 +59,7 @@ void BattleIntroMode::render(GameContext &ctx) {
 
     constexpr int FLASH_END = 12;
     constexpr int BARS_END = 50;
-    const int frame = ctx.ui.battleIntroFrame;
+    const int frame = ctx.battlePresentation().introFrame;
 
     if (frame < FLASH_END) {
         // Phase 1: Quick white flashes (3 flashes, 4 frames each at 60fps)

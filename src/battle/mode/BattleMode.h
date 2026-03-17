@@ -1,7 +1,6 @@
 #pragma once
-#include "../GameMode.h"
-
-class Renderer;
+#include "../../app/GameMode.h"
+#include "../ui/BattleRenderer.h"
 
 class BattleMode : public GameMode {
   public:
@@ -11,16 +10,6 @@ class BattleMode : public GameMode {
   private:
     void updateBattleIntroAnim(GameContext &ctx);
     void updateCaptureAnim(GameContext &ctx);
-
-    // Battle rendering helpers (moved from GameUI)
-    void drawBattleScene(GameContext &ctx);
-    void drawBattleIntroSceneWild(GameContext &ctx);
-    void drawBattleIntroSceneTrainer(GameContext &ctx);
-    void drawBattleMenu(GameContext &ctx);
-    void drawMoveSelectScreen(GameContext &ctx);
-    void drawCaptureScene(GameContext &ctx);
-    void drawBall(Renderer &renderer, int frame, int x, int y) const;
-    void drawBallCentered(Renderer &renderer, int frame, int cx, int cy) const;
 
     int menuSelected{0};
     int moveSelected{0};
@@ -36,7 +25,6 @@ class BattleMode : public GameMode {
 
     // Capture animation state
     int captureAnimFrame{0};
-    int captureAnimShakesDone{0};
     bool captureAnimDone{false};
 
     // Attack animation state
@@ -47,4 +35,6 @@ class BattleMode : public GameMode {
 
     // EXP animation sound state
     bool expSoundPlayed{false};
+
+    BattleRenderer battleRenderer;
 };

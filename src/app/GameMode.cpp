@@ -41,9 +41,18 @@ const Battle &GameContext::battle() const {
 
 const std::string &GameContext::battleTrainerNPCId() const { return battleSession.trainerNPCId; }
 
+BattlePresentationState &GameContext::battlePresentation() { return battleSession.presentation; }
+
+const BattlePresentationState &GameContext::battlePresentation() const {
+    return battleSession.presentation;
+}
+
+void GameContext::resetBattlePresentation() { battleSession.presentation.reset(); }
+
 void GameContext::clearBattle() {
     battleSession.active.reset();
     battleSession.trainerNPCId.clear();
+    battleSession.presentation.reset();
 }
 
 void GameContext::pushRequest(ModeRequest req) { mailbox.push(std::move(req)); }

@@ -1,5 +1,6 @@
 #pragma once
 #include "../audio/SoundEffects.h"
+#include "../battle/ui/BattlePresentationState.h"
 #include "../game_data/Pokedex.h"
 #include "../state/World.h"
 #include "../story/StoryAction.h"
@@ -153,6 +154,7 @@ struct ModeMailbox {
 struct BattleSessionState {
     std::unique_ptr<Battle> active;
     std::string trainerNPCId;
+    BattlePresentationState presentation;
 };
 
 struct SessionFlowState {
@@ -187,6 +189,9 @@ struct GameContext {
     Battle &battle();
     const Battle &battle() const;
     const std::string &battleTrainerNPCId() const;
+    BattlePresentationState &battlePresentation();
+    const BattlePresentationState &battlePresentation() const;
+    void resetBattlePresentation();
     void clearBattle();
 
     // Play a sound effect (convenience wrapper)

@@ -1,12 +1,12 @@
 #include "SessionCoordinator.h"
 #include "../audio/MusicManager.h"
 #include "../battle/Battle.h"
+#include "../battle/mode/BattleIntroMode.h"
+#include "../battle/mode/BattleMode.h"
 #include "../common/VariantUtils.h"
 #include "../cutscene/CutsceneRunner.h"
 #include "../ui/GameUI.h"
 #include "modes/BagMode.h"
-#include "modes/BattleIntroMode.h"
-#include "modes/BattleMode.h"
 #include "modes/CutSceneMode.h"
 #include "modes/DaemondexMode.h"
 #include "modes/DialogueChoiceMode.h"
@@ -83,14 +83,14 @@ void SessionCoordinator::handleRequest(const EnterBattleModeRequest & /*req*/) {
 }
 
 void SessionCoordinator::handleRequest(const StartWildBattleRequest &req) {
-    ctx.ui.battleIntroFrame = 0;
+    ctx.resetBattlePresentation();
     switchToMode(GameState::battleIntro,
                  std::make_unique<BattleIntroMode>(req.speciesId, req.level));
     ctx.music.play(MusicTrack::wildBattle, ctx.ui.getRenderer().getWindow());
 }
 
 void SessionCoordinator::handleRequest(const StartTrainerBattleRequest &req) {
-    ctx.ui.battleIntroFrame = 0;
+    ctx.resetBattlePresentation();
     switchToMode(GameState::battleIntro, std::make_unique<BattleIntroMode>(req.npc));
     ctx.music.play(MusicTrack::trainerBattle, ctx.ui.getRenderer().getWindow());
 }

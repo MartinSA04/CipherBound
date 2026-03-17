@@ -22,7 +22,7 @@ fi
 
 grep -q -- '"file": "../src/main.cpp"' "$compile_db"
 grep -q -- '"file": "../src/app/Session.cpp"' "$compile_db"
-grep -q -- '"file": "../src/ui/gameui/Battle.cpp"' "$compile_db"
+grep -q -- '"file": "../src/battle/ui/BattleRenderer.cpp"' "$compile_db"
 grep -q -- '-std=c++20' "$compile_db"
 
 echo "Tooling smoke checks passed."

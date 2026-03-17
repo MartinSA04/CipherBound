@@ -20,12 +20,6 @@ enum class ScreenType {
     dialogue,
 };
 
-enum class EXPTickResult {
-    inProgress,
-    reachedTarget,
-    filledBar,
-};
-
 class GameUI {
   public:
     GameUI();
@@ -55,15 +49,6 @@ class GameUI {
     void navigateVertical(int &selected, int count);
     void navigate2x2(int &selected);
 
-    int playerDisplayHP{0};
-    int opponentDisplayHP{0};
-    int playerDisplayEXP{0};
-    int expAnimFrame{0};
-    int expAnimStartEXP{-1};
-
-    int battleIntroFrame{0};
-    int battleIntroPhase{0};
-
     void drawDialogueBox(const std::string &speaker, const std::string &text);
     void drawChoiceBox(const std::vector<std::string> &options, int selected);
 
@@ -73,36 +58,13 @@ class GameUI {
     const std::string &getCurrentDialogueLine() const;
     const std::string &getDialogueSpeaker() const;
 
-    bool tickHPAnimation(int targetPlayerHP, int targetOpponentHP, int maxPlayerHP,
-                         int maxOpponentHP);
-    EXPTickResult tickEXPAnimation(int targetEXP, int expNeeded);
-
     void setDialogueText(const std::string &text);
     bool updateTypewriter(const bool inputConfirm);
     bool isTextFullyRevealed() const;
     void revealAllText();
 
-    static constexpr int BATTLE_INTRO_DURATION = 90;
-    static constexpr int BATTLE_INTRO_SCENE_DURATION = 46;
-
     SpriteFont &getSpriteFont();
     void drawSelectionArrow(int x, int y, int scale = PIXEL_SCALE);
-    struct BattleBaseGeometry {
-        int x, y, w, h;
-    };
-    void drawOpponentInfoBar(const Daemon *opponentDaemon, int offsetX = 0);
-    void drawPlayerInfoBar(const Daemon *playerDaemon, int offsetX = 0);
-    void drawOpponentDaemon(const Daemon *opponentDaemon, int offsetX = 0, int offsetY = 0);
-    void drawPlayerDaemon(const Daemon *playerDaemon, int offsetX = 0, int offsetY = 0);
-    void drawPlayerBackSprite(int x, int y, int dstW, int dstH, int frame);
-    void drawBattleBackground();
-    void drawPlayerBackOnBase(int offsetX = 0, int frame = 0);
-    void drawPlayerSendOutPhase(const Daemon *playerDaemon, float t);
-    BattleBaseGeometry getPlayerBaseGeometry() const;
-    BattleBaseGeometry getOpponentBaseGeometry() const;
-    void drawPlayerBase();
-    void drawOpponentBase(int offsetX = 0);
-    void drawOpponentTrainer(const NPC *opponent, int offsetX = 0);
 
     void drawSpriteHPBar(int x, int y, int width, int currentHP, int maxHP,
                          int scale = PIXEL_SCALE);

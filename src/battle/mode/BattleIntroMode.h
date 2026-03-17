@@ -1,5 +1,5 @@
 #pragma once
-#include "../GameMode.h"
+#include "../../app/GameMode.h"
 class NPC;
 
 class BattleIntroMode : public GameMode {

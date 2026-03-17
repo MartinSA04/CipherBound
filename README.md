@@ -152,7 +152,9 @@ src/
 │   ├── BattleAI.cpp/h       Opponent move scoring and selection
 │   ├── BattleRules.cpp/h    Damage and EXP rules
 │   ├── BattleCapture.cpp/h  Capture resolution
-│   └── BattleTurnResolver.cpp/h Move preparation and attack resolution
+│   ├── BattleTurnResolver.cpp/h Move preparation and attack resolution
+│   ├── mode/                BattleMode, BattleIntroMode, and battle-specific mode flow
+│   └── ui/                  BattleRenderer and battle presentation state
 ├── save/
 │   ├── SaveFormat.cpp/h     Parsed save-file model and serializers
 │   └── SaveManager.cpp/h    Multi-slot save/load orchestration

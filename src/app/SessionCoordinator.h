@@ -20,6 +20,7 @@ class SessionCoordinator {
     void handleRequest(const EnterBattleModeRequest &req);
     void handleRequest(const StartWildBattleRequest &req);
     void handleRequest(const StartTrainerBattleRequest &req);
+    void handleRequest(const StartTrainerBattleIntroRequest &req);
     void handleRequest(const EndBattleRequest &req);
     void handleRequest(const TransitionToMapRequest &req);
     void handleRequest(const StartDialogueRequest &req);

@@ -50,8 +50,7 @@ bool OverworldMode::trainerBattleStarts(GameContext &ctx) {
     if (!npc)
         return false;
 
-    if (!dialogueStarts(ctx, npc))
-        ctx.pushRequest(ModeRequest::trainerBattle(npc));
+    ctx.pushRequest(ModeRequest::trainerBattle(npc, true));
     return true;
 }
 

@@ -1,6 +1,7 @@
 #include "SessionCoordinator.h"
 #include "../audio/MusicManager.h"
 #include "../battle/Battle.h"
+#include "../battle/TrainerApproachCutscene.h"
 #include "../battle/mode/BattleIntroMode.h"
 #include "../battle/mode/BattleMode.h"
 #include "../common/VariantUtils.h"
@@ -19,6 +20,18 @@
 #include "modes/TitleScreenMode.h"
 #include "modes/TransitionMode.h"
 #include <iostream>
+
+namespace {
+
+bool isAdjacentToPlayer(const NPC &trainer, const Player &player) {
+    const Position trainerPosition = trainer.getPosition();
+    const Position playerPosition = player.getPosition();
+    const int distance =
+        std::abs(trainerPosition.x - playerPosition.x) + std::abs(trainerPosition.y - playerPosition.y);
+    return distance == 1;
+}
+
+} // namespace
 
 SessionCoordinator::SessionCoordinator(GameContext &ctx) : ctx(ctx) {}
 
@@ -46,6 +59,9 @@ void SessionCoordinator::processRequests() {
                            [this](const EnterBattleModeRequest &request) { handleRequest(request); },
                            [this](const StartWildBattleRequest &request) { handleRequest(request); },
                            [this](const StartTrainerBattleRequest &request) {
+                               handleRequest(request);
+                           },
+                           [this](const StartTrainerBattleIntroRequest &request) {
                                handleRequest(request);
                            },
                            [this](const EndBattleRequest &request) { handleRequest(request); },
@@ -90,6 +106,28 @@ void SessionCoordinator::handleRequest(const StartWildBattleRequest &req) {
 }
 
 void SessionCoordinator::handleRequest(const StartTrainerBattleRequest &req) {
+    if (req.npc == nullptr)
+        return;
+
+    if (!req.includePreBattleDialogue && isAdjacentToPlayer(*req.npc, ctx.world.getPlayer())) {
+        handleRequest(StartTrainerBattleIntroRequest{req.npc});
+        return;
+    }
+
+    ctx.flow.cutsceneEndRequest = ModeRequest::trainerBattleIntro(req.npc);
+
+    if (ctx.cutsceneRunner.load(
+            TrainerApproachCutscene::build(*req.npc, ctx.world.getPlayer(),
+                                           req.includePreBattleDialogue))) {
+        ctx.cutsceneRunner.start();
+        switchMode(GameState::cutscene);
+    } else {
+        ctx.flow.cutsceneEndRequest.reset();
+        handleRequest(StartTrainerBattleIntroRequest{req.npc});
+    }
+}
+
+void SessionCoordinator::handleRequest(const StartTrainerBattleIntroRequest &req) {
     ctx.resetBattlePresentation();
     switchToMode(GameState::battleIntro, std::make_unique<BattleIntroMode>(req.npc));
     ctx.music.play(MusicTrack::trainerBattle, ctx.ui.getRenderer().getWindow());
@@ -130,6 +168,7 @@ void SessionCoordinator::handleRequest(const StartDialogueChoiceRequest &req) {
 }
 
 void SessionCoordinator::handleRequest(const StartCutsceneRequest &req) {
+    ctx.flow.cutsceneEndRequest.reset();
     if (ctx.cutsceneRunner.load(req.cutscenePath)) {
         ctx.cutsceneRunner.start();
         switchMode(GameState::cutscene);

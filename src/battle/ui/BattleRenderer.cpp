@@ -1,14 +1,16 @@
 #include "BattleRenderer.h"
-#include "BattlePresentationState.h"
-#include "../Battle.h"
+#include "../../common/FilePaths.h"
 #include "../../common/StringUtils.h"
 #include "../../game_data/Pokedex.h"
 #include "../../state/NPC.h"
 #include "../../ui/GameUI.h"
 #include "../../ui/Renderer.h"
 #include "../../ui/SpriteFont.h"
+#include "../Battle.h"
+#include "BattlePresentationState.h"
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
 #include <vector>
 
 namespace {
@@ -18,6 +20,31 @@ constexpr int captureThrowFrames = 30;
 constexpr int captureLandFrames = 10;
 constexpr int captureShakeFrames = 24;
 constexpr int captureShakePause = 16;
+
+std::string getTrainerFrontTextureId(const NPC &opponent) {
+    if (opponent.getSpriteType().empty())
+        return {};
+    return "npc_front_" + opponent.getSpriteType();
+}
+
+std::filesystem::path findTrainerFrontSpritePath(const NPC &opponent) {
+    if (opponent.getSpriteType().empty())
+        return {};
+
+    const std::string &spriteType = opponent.getSpriteType();
+    const std::array<std::filesystem::path, 2> candidates = {
+        std::filesystem::path{"assets/sprites/npcs"} / spriteType / (spriteType + "_front.png"),
+        std::filesystem::path{"assets/sprites/npcs"} / (spriteType + "_front.png"),
+    };
+
+    for (const auto &candidate : candidates) {
+        const std::filesystem::path resolved = FilePaths::resolveExistingPath(candidate);
+        if (std::filesystem::exists(resolved))
+            return resolved;
+    }
+
+    return {};
+}
 } // namespace
 
 void BattleRenderer::drawBall(Renderer &renderer, int frame, int x, int y) const {
@@ -79,6 +106,25 @@ void BattleRenderer::drawOpponentTrainer(GameUI &ui, const NPC *opponent, int of
     SpriteFont &spriteFont = ui.getSpriteFont();
     const int scale = PIXEL_SCALE;
     const auto [baseX, baseY, baseW, baseH] = getOpponentBaseGeometry();
+
+    if (opponent) {
+        const std::string textureId = getTrainerFrontTextureId(*opponent);
+        if (!textureId.empty() && !renderer.hasTexture(textureId)) {
+            const std::filesystem::path spritePath = findTrainerFrontSpritePath(*opponent);
+            if (!spritePath.empty())
+                renderer.loadTexture(textureId, spritePath);
+        }
+
+        if (!textureId.empty() && renderer.hasTexture(textureId)) {
+            TDT4102::Image &sprite = renderer.getTexture(textureId);
+            const int trainerW = sprite.width * scale;
+            const int trainerH = sprite.height * scale;
+            const int trainerX = baseX + baseW / 2 - trainerW / 2 + offsetX;
+            const int trainerY = baseY - trainerH + baseH / 2;
+            renderer.drawSpriteRaw(textureId, trainerX, trainerY, trainerW, trainerH);
+            return;
+        }
+    }
 
     const int trainerW = 40 * scale;
     const int trainerH = 56 * scale;
@@ -248,13 +294,11 @@ void BattleRenderer::drawBattleScene(GameUI &ui, Battle &battle,
 
     constexpr float bobPeriod = 120.0f;
     constexpr float bobAmplitude = 6.0f;
-    const int playerBobY =
-        static_cast<int>(std::sin(static_cast<float>(battleAnimFrame) * 6.2832f / bobPeriod) *
-                         bobAmplitude);
-    const int opponentBobY =
-        static_cast<int>(std::sin((static_cast<float>(battleAnimFrame) + bobPeriod / 2.0f) *
-                                      6.2832f / bobPeriod) *
-                         bobAmplitude);
+    const int playerBobY = static_cast<int>(
+        std::sin(static_cast<float>(battleAnimFrame) * 6.2832f / bobPeriod) * bobAmplitude);
+    const int opponentBobY = static_cast<int>(
+        std::sin((static_cast<float>(battleAnimFrame) + bobPeriod / 2.0f) * 6.2832f / bobPeriod) *
+        bobAmplitude);
 
     int playerAttackOffsetX = 0;
     int opponentAttackOffsetX = 0;
@@ -320,8 +364,8 @@ void BattleRenderer::drawBattleIntroSceneWild(GameUI &ui, Battle &battle,
     }
 }
 
-void BattleRenderer::drawBattleIntroSceneTrainer(GameUI &ui, Battle &battle,
-                                                 const BattlePresentationState &presentation) const {
+void BattleRenderer::drawBattleIntroSceneTrainer(
+    GameUI &ui, Battle &battle, const BattlePresentationState &presentation) const {
     ui.loadBattleAssets();
     Renderer &renderer = ui.getRenderer();
     drawBattleBackground(renderer);
@@ -439,8 +483,7 @@ void BattleRenderer::drawMoveSelectScreen(GameUI &ui, const Daemon &daemon, cons
             std::to_string(moves[static_cast<std::size_t>(moveSelected)].maxPP);
         spriteFont.drawText(renderer, ppText, labelX, labelY1, scale);
 
-        const std::string typeName =
-            StringUtils::capitalize(elementTypeName(selectedMove->type));
+        const std::string typeName = StringUtils::capitalize(elementTypeName(selectedMove->type));
         spriteFont.drawText(renderer, typeName, labelX, labelY2, scale);
     }
 }
@@ -477,8 +520,7 @@ void BattleRenderer::drawCaptureScene(GameUI &ui, Battle &battle,
         drawOpponentDaemon(ui, opponentDaemon);
 
         const float t = static_cast<float>(captureAnimFrame) / static_cast<float>(throwEnd);
-        const int ballX =
-            ballSrcX + static_cast<int>(static_cast<float>(ballDstX - ballSrcX) * t);
+        const int ballX = ballSrcX + static_cast<int>(static_cast<float>(ballDstX - ballSrcX) * t);
         int ballY = ballSrcY + static_cast<int>(static_cast<float>(ballDstY - ballSrcY) * t);
         ballY -= static_cast<int>(120.0f * t * (1.0f - t));
 
@@ -494,8 +536,8 @@ void BattleRenderer::drawCaptureScene(GameUI &ui, Battle &battle,
         if (currentShake < std::min(totalShakes, 4) && frameInGroup < captureShakeFrames) {
             const float shakeT =
                 static_cast<float>(frameInGroup) / static_cast<float>(captureShakeFrames);
-            wobble =
-                static_cast<int>(std::sin(shakeT * 6.283f) * 8.0f * static_cast<float>(PIXEL_SCALE));
+            wobble = static_cast<int>(std::sin(shakeT * 6.283f) * 8.0f *
+                                      static_cast<float>(PIXEL_SCALE));
         }
 
         drawBallCentered(renderer, 0, ballDstX + wobble, ballDstY);

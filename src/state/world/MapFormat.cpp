@@ -28,6 +28,21 @@ NPCType parseNPCType(std::string_view value) {
     return NPCType::normal;
 }
 
+bool isDialogueFlagPrefix(std::string_view prefix) {
+    if (prefix.empty())
+        return false;
+
+    for (const char ch : prefix) {
+        const bool isIdentifierChar =
+            (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') ||
+            ch == '_';
+        if (!isIdentifierChar)
+            return false;
+    }
+
+    return true;
+}
+
 std::optional<WarpPoint> parseWarp(std::string_view line) {
     const auto parts = TextParse::splitView(line, '|');
     if (parts.size() != 5)
@@ -57,7 +72,8 @@ std::vector<DialogueStage> parseDialogueStages(std::string_view encoded) {
             continue;
 
         const auto questionMark = stageString.find('?');
-        if (questionMark == std::string::npos) {
+        if (questionMark == std::string::npos ||
+            !isDialogueFlagPrefix(std::string_view(stageString).substr(0, questionMark))) {
             stages.push_back(DialogueStage{"", splitSemicolon(stageString)});
             continue;
         }

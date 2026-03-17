@@ -7,7 +7,12 @@ void CutSceneMode::update(GameContext &ctx, InputManager &input) {
     bool running =
         ctx.cutsceneRunner.update(ctx.world, ctx.ui, input.isConfirmPressed(), ctx.sound);
     if (!running) {
-        ctx.pushRequest(ModeRequest::changeState(GameState::overworld));
+        if (ctx.flow.cutsceneEndRequest.has_value()) {
+            ctx.pushRequest(std::move(*ctx.flow.cutsceneEndRequest));
+            ctx.flow.cutsceneEndRequest.reset();
+        } else {
+            ctx.pushRequest(ModeRequest::changeState(GameState::overworld));
+        }
     }
 }
 

@@ -5,6 +5,7 @@
 #include "../state/World.h"
 #include "../story/StoryAction.h"
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <variant>
@@ -57,6 +58,11 @@ struct StartWildBattleRequest {
 
 struct StartTrainerBattleRequest {
     NPC *npc{nullptr};
+    bool includePreBattleDialogue{false};
+};
+
+struct StartTrainerBattleIntroRequest {
+    NPC *npc{nullptr};
 };
 
 struct EndBattleRequest {};
@@ -90,9 +96,9 @@ struct StoryActionRequest {
 struct ModeRequest {
     using Payload =
         std::variant<ChangeStateRequest, EnterBattleModeRequest, StartWildBattleRequest,
-                     StartTrainerBattleRequest, EndBattleRequest, TransitionToMapRequest,
-                     StartDialogueRequest, StartDialogueChoiceRequest, StartCutsceneRequest,
-                     StoryActionRequest>;
+                     StartTrainerBattleRequest, StartTrainerBattleIntroRequest, EndBattleRequest,
+                     TransitionToMapRequest, StartDialogueRequest, StartDialogueChoiceRequest,
+                     StartCutsceneRequest, StoryActionRequest>;
 
     Payload payload;
 
@@ -104,8 +110,12 @@ struct ModeRequest {
         return ModeRequest{StartWildBattleRequest{species, level}};
     }
 
-    static ModeRequest trainerBattle(NPC *trainer) {
-        return ModeRequest{StartTrainerBattleRequest{trainer}};
+    static ModeRequest trainerBattle(NPC *trainer, bool includePreBattleDialogue = false) {
+        return ModeRequest{StartTrainerBattleRequest{trainer, includePreBattleDialogue}};
+    }
+
+    static ModeRequest trainerBattleIntro(NPC *trainer) {
+        return ModeRequest{StartTrainerBattleIntroRequest{trainer}};
     }
 
     static ModeRequest endBattle() { return ModeRequest{EndBattleRequest{}}; }
@@ -161,6 +171,7 @@ struct SessionFlowState {
     int currentSaveSlot{-1};
     bool pendingPushBack{false};
     GameState dialogueReturnState{GameState::overworld};
+    std::optional<ModeRequest> cutsceneEndRequest;
 };
 
 struct GameContext {

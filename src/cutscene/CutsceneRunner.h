@@ -13,6 +13,7 @@ class CutsceneRunner {
 
     // Load a cutscene from a .cutscene file
     bool load(const std::string &path);
+    bool load(Cutscene cutscene);
 
     // Start playback (resets state)
     void start();

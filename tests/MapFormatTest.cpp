@@ -20,7 +20,7 @@ player_spawn|1|2
 1|2|4|30
 broken|entry
 [npcs]
-guide|Guide|normal|1|1|left|0|hello there@@quest_done?thanks for helping|villager_f|
+guide|Guide|normal|1|1|left|0|hello there@@quest_done?thanks for helping@@Hey! You have Daemons too?;Let's battle!|villager_f|
 trainer_1|Trainer|trainer|2|2|up|4|Ready?;Let's battle!|bart_iver|1:5,7:8
 )");
 
@@ -46,10 +46,14 @@ trainer_1|Trainer|trainer|2|2|up|4|Ready?;Let's battle!|bart_iver|1:5,7:8
     assert(guide.spriteType == "villager_f");
     assert(guide.type == NPCType::normal);
     assert(guide.facing == Direction::left);
-    assert(guide.dialogueStages.size() == 2);
+    assert(guide.dialogueStages.size() == 3);
     assert(guide.dialogueStages[0].requiredFlag.empty());
     assert(guide.dialogueStages[0].lines.size() == 1);
     assert(guide.dialogueStages[1].requiredFlag == "quest_done");
+    assert(guide.dialogueStages[2].requiredFlag.empty());
+    assert(guide.dialogueStages[2].lines.size() == 2);
+    assert(guide.dialogueStages[2].lines[0] == "Hey! You have Daemons too?");
+    assert(guide.dialogueStages[2].lines[1] == "Let's battle!");
 
     const auto &trainer = definition.npcs[1];
     assert(trainer.spriteType == "bart_iver");

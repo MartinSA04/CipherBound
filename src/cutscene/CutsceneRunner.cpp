@@ -27,6 +27,11 @@ bool CutsceneRunner::load(const std::string &path) {
     return true;
 }
 
+bool CutsceneRunner::load(Cutscene cutsceneData) {
+    cutscene = std::move(cutsceneData);
+    return !cutscene.id.empty();
+}
+
 void CutsceneRunner::start() { playback.reset(); }
 
 bool CutsceneRunner::isFinished() const { return playback.isFinished(); }

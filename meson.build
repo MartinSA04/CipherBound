@@ -90,6 +90,7 @@ battle_core_src = [
   'src/battle/BattleEventQueue.cpp',
   'src/battle/BattleAI.cpp',
   'src/battle/BattleRules.cpp',
+  'src/battle/TrainerApproachCutscene.cpp',
   'src/battle/BattleTurnResolver.cpp',
   'src/battle/TypeChart.cpp',
 ]
@@ -372,6 +373,27 @@ battle_rules_test = executable(
 )
 
 test('battle_rules', battle_rules_test)
+
+trainer_approach_cutscene_test = executable(
+  'trainer_approach_cutscene_test',
+  [
+    'tests/TrainerApproachCutsceneTest.cpp',
+    'src/battle/TrainerApproachCutscene.cpp',
+    'src/state/Daemon.cpp',
+    'src/state/Entity.cpp',
+    'src/state/Map.cpp',
+    'src/state/Movement.cpp',
+    'src/state/NPC.cpp',
+    'src/state/player/DaemonDex.cpp',
+    'src/state/player/EventFlags.cpp',
+    'src/state/player/Inventory.cpp',
+    'src/state/player/Party.cpp',
+    'src/state/player/Player.cpp',
+    'src/state/player/WalkAnimation.cpp',
+  ],
+)
+
+test('trainer_approach_cutscene', trainer_approach_cutscene_test)
 
 map_model_test = executable(
   'map_model_test',

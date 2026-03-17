@@ -1,5 +1,5 @@
 #include "WalkAnimation.h"
-#include "../../ui/Renderer.h"
+#include "../../ui/UiConstants.h"
 #include "../Movement.h"
 
 int WalkAnimation::getMoveDelay() const { return moveDelay; }

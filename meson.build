@@ -200,7 +200,6 @@ state_model_test = executable(
     'src/state/player/Player.cpp',
     'src/state/player/WalkAnimation.cpp',
   ],
-  dependencies : [animationwindow_dep],
 )
 
 test('state_model', state_model_test)
@@ -223,7 +222,6 @@ world_npc_ownership_test = executable(
     'src/state/player/Player.cpp',
     'src/state/player/WalkAnimation.cpp',
   ],
-  dependencies : [animationwindow_dep],
 )
 
 test('world_npc_ownership', world_npc_ownership_test)

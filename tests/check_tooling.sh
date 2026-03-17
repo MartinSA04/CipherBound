@@ -21,7 +21,7 @@ if [ ! -f "$compile_db" ]; then
 fi
 
 grep -q -- '"file": "../src/main.cpp"' "$compile_db"
-grep -q -- '"file": "../src/core/Session.cpp"' "$compile_db"
+grep -q -- '"file": "../src/app/Session.cpp"' "$compile_db"
 grep -q -- '"file": "../src/ui/gameui/Battle.cpp"' "$compile_db"
 grep -q -- '-std=c++20' "$compile_db"
 

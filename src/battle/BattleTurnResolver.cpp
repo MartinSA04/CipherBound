@@ -1,7 +1,7 @@
 #include "BattleTurnResolver.h"
 #include "BattleAI.h"
 #include "BattleRules.h"
-#include "../data/Pokedex.h"
+#include "../game_data/Pokedex.h"
 #include "../state/Daemon.h"
 #include <array>
 

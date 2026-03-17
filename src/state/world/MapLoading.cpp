@@ -1,4 +1,4 @@
-#include "../../data/Pokedex.h"
+#include "../../game_data/Pokedex.h"
 #include "../World.h"
 #include "MapFormat.h"
 #include <fstream>

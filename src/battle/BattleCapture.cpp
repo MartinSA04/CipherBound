@@ -1,5 +1,5 @@
 #include "BattleCapture.h"
-#include "../data/Item.h"
+#include "../game_data/Item.h"
 #include "../state/Daemon.h"
 #include <algorithm>
 #include <cmath>

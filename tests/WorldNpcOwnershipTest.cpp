@@ -1,4 +1,4 @@
-#include "../src/data/Species.h"
+#include "../src/game_data/Species.h"
 #include "../src/state/Map.h"
 #include "../src/state/World.h"
 #include <cassert>

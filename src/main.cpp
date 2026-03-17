@@ -1,4 +1,4 @@
-#include "core/Session.h"
+#include "app/Session.h"
 
 namespace {
 

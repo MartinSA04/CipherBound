@@ -1,6 +1,6 @@
 #pragma once
-#include "../data/Move.h"
-#include "../data/Species.h"
+#include "../game_data/Move.h"
+#include "../game_data/Species.h"
 #include <array>
 #include <functional>
 #include <string>

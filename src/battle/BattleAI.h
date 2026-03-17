@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../data/Move.h"
-#include "../data/Species.h"
+#include "../game_data/Move.h"
+#include "../game_data/Species.h"
 #include "../state/Daemon.h"
 #include <random>
 #include <span>

@@ -1,6 +1,6 @@
 #include "MapFormat.h"
-#include "../../core/StringUtils.h"
-#include "../../core/TextParse.h"
+#include "../../common/StringUtils.h"
+#include "../../common/TextParse.h"
 
 using StringUtils::parseDirection;
 using StringUtils::splitDoubleAt;

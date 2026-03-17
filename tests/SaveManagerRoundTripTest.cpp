@@ -1,4 +1,4 @@
-#include "../src/data/Pokedex.h"
+#include "../src/game_data/Pokedex.h"
 #include "../src/save/SaveManager.h"
 #include "../src/state/Map.h"
 #include "../src/state/NPC.h"

@@ -20,42 +20,57 @@ if host_machine.system() != 'emscripten'
   compiler_flags += ['-static']
 endif
 
-src = [
-  'src/main.cpp',
-  'src/core/Session.cpp',
-  'src/core/SessionCoordinator.cpp',
-  'src/core/FilePaths.cpp',
-  'src/core/GameMode.cpp',
-  'src/core/StoryManager.cpp',
-  'src/core/CutsceneLoader.cpp',
-  'src/core/CutscenePlayback.cpp',
-  'src/core/CutsceneRunner.cpp',
-  'src/core/CutsceneFormat.cpp',
-  'src/core/CutsceneWorldOps.cpp',
-  'src/core/modes/OverworldMode.cpp',
-  'src/core/modes/overworld/Movement.cpp',
-  'src/core/modes/overworld/Interaction.cpp',
-  'src/core/modes/overworld/FlowChecks.cpp',
-  'src/core/modes/MenuMode.cpp',
-  'src/core/modes/menu/Render.cpp',
-  'src/core/modes/BattleMode.cpp',
-  'src/core/modes/battlemode/Update.cpp',
-  'src/core/modes/battlemode/Render.cpp',
-  'src/core/modes/battlemode/CaptureAnimation.cpp',
-  'src/core/modes/BattleIntroMode.cpp',
-  'src/core/modes/TitleScreenMode.cpp',
-  'src/core/modes/TransitionMode.cpp',
-  'src/core/modes/PartyMode.cpp',
-  'src/core/modes/BagMode.cpp',
-  'src/core/modes/SaveMode.cpp',
-  'src/core/modes/DialogueMode.cpp',
-  'src/core/modes/DialogueChoiceMode.cpp',
-  'src/core/modes/PCBoxMode.cpp',
-  'src/core/modes/bag/BrowsingState.cpp',
-  'src/core/modes/bag/TargetState.cpp',
-  'src/core/modes/bag/MessageState.cpp',
-  'src/core/modes/CutSceneMode.cpp',
-  'src/core/modes/DaemondexMode.cpp',
+common_src = [
+  'src/common/FilePaths.cpp',
+]
+
+story_src = [
+  'src/story/StoryManager.cpp',
+]
+
+cutscene_src = [
+  'src/cutscene/CutsceneLoader.cpp',
+  'src/cutscene/CutscenePlayback.cpp',
+  'src/cutscene/CutsceneRunner.cpp',
+  'src/cutscene/CutsceneFormat.cpp',
+  'src/cutscene/CutsceneWorldOps.cpp',
+]
+
+app_src = [
+  'src/app/Session.cpp',
+  'src/app/SessionCoordinator.cpp',
+  'src/app/GameMode.cpp',
+  'src/app/modes/OverworldMode.cpp',
+  'src/app/modes/overworld/Movement.cpp',
+  'src/app/modes/overworld/Interaction.cpp',
+  'src/app/modes/overworld/FlowChecks.cpp',
+  'src/app/modes/MenuMode.cpp',
+  'src/app/modes/menu/Render.cpp',
+  'src/app/modes/BattleMode.cpp',
+  'src/app/modes/battlemode/Update.cpp',
+  'src/app/modes/battlemode/Render.cpp',
+  'src/app/modes/battlemode/CaptureAnimation.cpp',
+  'src/app/modes/BattleIntroMode.cpp',
+  'src/app/modes/TitleScreenMode.cpp',
+  'src/app/modes/TransitionMode.cpp',
+  'src/app/modes/PartyMode.cpp',
+  'src/app/modes/BagMode.cpp',
+  'src/app/modes/SaveMode.cpp',
+  'src/app/modes/DialogueMode.cpp',
+  'src/app/modes/DialogueChoiceMode.cpp',
+  'src/app/modes/PCBoxMode.cpp',
+  'src/app/modes/bag/BrowsingState.cpp',
+  'src/app/modes/bag/TargetState.cpp',
+  'src/app/modes/bag/MessageState.cpp',
+  'src/app/modes/CutSceneMode.cpp',
+  'src/app/modes/DaemondexMode.cpp',
+]
+
+game_data_src = [
+  'src/game_data/Pokedex.cpp',
+]
+
+state_src = [
   'src/state/Entity.cpp',
   'src/state/Daemon.cpp',
   'src/state/player/Player.cpp',
@@ -72,7 +87,9 @@ src = [
   'src/state/Movement.cpp',
   'src/state/player/Party.cpp',
   'src/state/player/WalkAnimation.cpp',
-  'src/data/Pokedex.cpp',
+]
+
+battle_src = [
   'src/battle/Battle.cpp',
   'src/battle/BattleCapture.cpp',
   'src/battle/BattleEventQueue.cpp',
@@ -80,10 +97,19 @@ src = [
   'src/battle/BattleRules.cpp',
   'src/battle/BattleTurnResolver.cpp',
   'src/battle/TypeChart.cpp',
+]
+
+save_src = [
   'src/save/SaveFormat.cpp',
   'src/save/SaveManager.cpp',
+]
+
+audio_src = [
   'src/audio/MusicManager.cpp',
   'src/audio/SoundManager.cpp',
+]
+
+ui_src = [
   'src/ui/Renderer.cpp',
   'src/ui/InputManager.cpp',
   'src/ui/OverworldRenderer.cpp',
@@ -93,6 +119,18 @@ src = [
   'src/ui/gameui/Battle.cpp',
   'src/ui/SpriteFont.cpp',
 ]
+
+src = ['src/main.cpp']
+src += common_src
+src += story_src
+src += cutscene_src
+src += app_src
+src += game_data_src
+src += state_src
+src += battle_src
+src += save_src
+src += audio_src
+src += ui_src
 
 if host_machine.system() == 'windows'
   ld_flags = ['-static', '-lstdc++exp']
@@ -134,7 +172,7 @@ test_bash = find_program('bash')
 
 string_utils_test = executable(
   'string_utils_test',
-  'tests/StringUtilsTest.cpp'
+  'tests/common/StringUtilsTest.cpp'
 )
 
 test('string_utils', string_utils_test)
@@ -148,14 +186,14 @@ test('mode_request', mode_request_test)
 
 story_action_test = executable(
   'story_action_test',
-  'tests/StoryActionTest.cpp'
+  'tests/story/StoryActionTest.cpp'
 )
 
 test('story_action', story_action_test)
 
 text_parse_test = executable(
   'text_parse_test',
-  'tests/TextParseTest.cpp'
+  'tests/common/TextParseTest.cpp'
 )
 
 test('text_parse', text_parse_test)
@@ -164,7 +202,7 @@ save_format_test = executable(
   'save_format_test',
   [
     'tests/SaveFormatTest.cpp',
-    'src/data/Pokedex.cpp',
+    'src/game_data/Pokedex.cpp',
     'src/state/Daemon.cpp',
     'src/save/SaveFormat.cpp',
   ],
@@ -175,8 +213,8 @@ test('save_format', save_format_test)
 cutscene_format_test = executable(
   'cutscene_format_test',
   [
-    'tests/CutsceneFormatTest.cpp',
-    'src/core/CutsceneFormat.cpp',
+    'tests/cutscene/CutsceneFormatTest.cpp',
+    'src/cutscene/CutsceneFormat.cpp',
   ],
 )
 
@@ -185,10 +223,10 @@ test('cutscene_format', cutscene_format_test)
 cutscene_loader_test = executable(
   'cutscene_loader_test',
   [
-    'tests/CutsceneLoaderTest.cpp',
-    'src/core/CutsceneLoader.cpp',
-    'src/core/CutsceneFormat.cpp',
-    'src/core/FilePaths.cpp',
+    'tests/cutscene/CutsceneLoaderTest.cpp',
+    'src/cutscene/CutsceneLoader.cpp',
+    'src/cutscene/CutsceneFormat.cpp',
+    'src/common/FilePaths.cpp',
   ],
 )
 
@@ -197,9 +235,9 @@ test('cutscene_loader', cutscene_loader_test)
 file_paths_test = executable(
   'file_paths_test',
   [
-    'tests/FilePathsTest.cpp',
-    'src/core/CutsceneFormat.cpp',
-    'src/core/FilePaths.cpp',
+    'tests/common/FilePathsTest.cpp',
+    'src/cutscene/CutsceneFormat.cpp',
+    'src/common/FilePaths.cpp',
   ],
 )
 
@@ -208,8 +246,8 @@ test('file_paths', file_paths_test)
 cutscene_playback_test = executable(
   'cutscene_playback_test',
   [
-    'tests/CutscenePlaybackTest.cpp',
-    'src/core/CutscenePlayback.cpp',
+    'tests/cutscene/CutscenePlaybackTest.cpp',
+    'src/cutscene/CutscenePlayback.cpp',
   ],
 )
 
@@ -218,8 +256,8 @@ test('cutscene_playback', cutscene_playback_test)
 cutscene_world_ops_test = executable(
   'cutscene_world_ops_test',
   [
-    'tests/CutsceneWorldOpsTest.cpp',
-    'src/core/CutsceneWorldOps.cpp',
+    'tests/cutscene/CutsceneWorldOpsTest.cpp',
+    'src/cutscene/CutsceneWorldOps.cpp',
     'src/state/Daemon.cpp',
     'src/state/Entity.cpp',
     'src/state/Map.cpp',
@@ -284,7 +322,7 @@ battle_turn_resolver_test = executable(
     'src/battle/BattleAI.cpp',
     'src/battle/BattleRules.cpp',
     'src/battle/TypeChart.cpp',
-    'src/data/Pokedex.cpp',
+    'src/game_data/Pokedex.cpp',
     'src/state/Daemon.cpp',
   ],
 )
@@ -349,7 +387,7 @@ save_manager_roundtrip_test = executable(
   'save_manager_roundtrip_test',
   [
     'tests/SaveManagerRoundTripTest.cpp',
-    'src/data/Pokedex.cpp',
+    'src/game_data/Pokedex.cpp',
     'src/save/SaveFormat.cpp',
     'src/save/SaveManager.cpp',
     'src/state/Daemon.cpp',

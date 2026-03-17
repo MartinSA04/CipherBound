@@ -1,5 +1,5 @@
 #pragma once
-#include "../data/Species.h"
+#include "../game_data/Species.h"
 
 // Damage and type effectiveness calculations
 namespace TypeChart {

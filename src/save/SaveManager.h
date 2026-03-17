@@ -1,5 +1,5 @@
 #pragma once
-#include "../data/Pokedex.h"
+#include "../game_data/Pokedex.h"
 #include "../state/World.h"
 #include "../state/player/Player.h"
 #include <string>

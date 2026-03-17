@@ -1,7 +1,7 @@
 #pragma once
 #include "BattleEventQueue.h"
 #include "BattleTypes.h"
-#include "../data/Pokedex.h"
+#include "../game_data/Pokedex.h"
 #include "../state/Daemon.h"
 #include "../state/NPC.h"
 #include "../state/player/Player.h"

@@ -1,6 +1,6 @@
 #include "../src/battle/BattleCapture.h"
-#include "../src/data/Item.h"
-#include "../src/data/Species.h"
+#include "../src/game_data/Item.h"
+#include "../src/game_data/Species.h"
 #include "../src/state/Daemon.h"
 #include <array>
 #include <cassert>

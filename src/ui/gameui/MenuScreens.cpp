@@ -1,5 +1,5 @@
-#include "../../core/StringUtils.h"
-#include "../../data/Pokedex.h"
+#include "../../common/StringUtils.h"
+#include "../../game_data/Pokedex.h"
 #include "../GameUI.h"
 #include <algorithm>
 

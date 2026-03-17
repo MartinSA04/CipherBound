@@ -1,6 +1,6 @@
 #include "../src/battle/BattleAI.h"
-#include "../src/data/Move.h"
-#include "../src/data/Species.h"
+#include "../src/game_data/Move.h"
+#include "../src/game_data/Species.h"
 #include "../src/state/Daemon.h"
 #include <array>
 #include <cassert>

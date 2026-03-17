@@ -115,14 +115,26 @@ The server must serve `.wasm` files with MIME type `application/wasm`.
 ```text
 src/
 ├── main.cpp                 Entry point (native + Emscripten main loop)
-├── core/
+├── app/
 │   ├── Session.cpp/h        Game session bootstrap and main loop
 │   ├── SessionCoordinator.cpp/h Routes mode transitions and cross-mode requests
 │   ├── GameMode.cpp/h       Abstract GameMode base class + GameContext + typed ModeRequest
-│   ├── StoryManager.cpp/h   Tracks story flags and progress
-│   ├── CutsceneRunner.cpp/h Executes scripted cutscene sequences
 │   └── modes/               One class per game state (see Architecture below)
-├── data/
+├── common/
+│   ├── FilePaths.cpp/h      Runtime asset path resolution helpers
+│   ├── StringUtils.h        Small string parsing / formatting helpers
+│   ├── TextParse.h          Low-level text parsing utilities
+│   └── VariantUtils.h       Reusable `std::visit` overload helpers
+├── story/
+│   ├── StoryAction.h        Typed story action payloads
+│   └── StoryManager.cpp/h   Story progression checks and choices
+├── cutscene/
+│   ├── CutsceneFormat.cpp/h Pure cutscene parser
+│   ├── CutsceneLoader.cpp/h File loading + path resolution
+│   ├── CutscenePlayback.cpp/h Playback state machine
+│   ├── CutsceneRunner.cpp/h Cutscene coordinator
+│   └── CutsceneWorldOps.cpp/h World/entity operations used by cutscenes
+├── game_data/
 │   ├── Species.h            Daemon species definitions + science-themed types
 │   ├── Move.h               Move data structures
 │   ├── Item.h               Item data structures
@@ -136,10 +148,14 @@ src/
 │   ├── Daemon.cpp/h         Individual Daemon instances (stats, moves, HP)
 │   └── Entity.cpp/h         Base entity with position and animation
 ├── battle/
-│   ├── Battle.cpp/h         Turn-based battle logic and state machine
-│   └── TypeChart.cpp/h      Type effectiveness matrix
+│   ├── Battle.cpp/h         Turn-based battle coordinator and state machine
+│   ├── BattleAI.cpp/h       Opponent move scoring and selection
+│   ├── BattleRules.cpp/h    Damage and EXP rules
+│   ├── BattleCapture.cpp/h  Capture resolution
+│   └── BattleTurnResolver.cpp/h Move preparation and attack resolution
 ├── save/
-│   └── SaveManager.cpp/h    Multi-slot save/load to file
+│   ├── SaveFormat.cpp/h     Parsed save-file model and serializers
+│   └── SaveManager.cpp/h    Multi-slot save/load orchestration
 ├── audio/
 │   ├── MusicManager.cpp/h   Background music per map and battle
 │   └── SoundManager.cpp/h   Sound effect loading and playback
@@ -151,13 +167,17 @@ src/
     ├── SpriteFont.cpp/h      Bitmap font renderer from sprite sheet
     └── gameui/               Battle, dialogue, and menu screen rendering helpers
 
-assets/                      Game data and media
+assets/                      Game content and media
 ├── audio/                   Music tracks (MP3)
 ├── data/                    Species, moves, items, maps, cutscenes (text files)
 ├── sprites/                 Daemon, player, and UI sprites (PNG)
 └── tilesets/                Map tileset images
 
 tests/                       Automated regression and tooling tests
+├── common/                  Utility and path-resolution tests
+├── cutscene/                Parser, loader, playback, and world-op tests
+├── story/                   Story action tests
+└── *.cpp                    Feature-specific regression tests
 
 subprojects/
 ├── animationwindow/         SDL2 rendering library (modified for Emscripten)
@@ -167,9 +187,9 @@ subprojects/
 
 ## Architecture
 
-### GameMode Pattern
+### App Flow
 
-The game uses a **state-driven architecture** where each screen or phase of the game is a separate `GameMode` subclass. `Session` bootstraps the subsystems and main loop, while `SessionCoordinator` owns the active mode and dispatches `update()` / `render()` calls each frame.
+The game uses a **state-driven architecture** where each screen or phase of the game is a separate `GameMode` subclass. `src/app/Session` bootstraps the subsystems and main loop, while `src/app/SessionCoordinator` owns the active mode and dispatches `update()` / `render()` calls each frame.
 
 Modes communicate through **typed `ModeRequest` payloads** — a mode pushes a request such as "start wild battle", "transition to map", or "enter battle mode", and the coordinator processes it between frames to switch modes, create battles, load maps, and resolve story actions.
 

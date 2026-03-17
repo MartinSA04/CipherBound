@@ -1,4 +1,4 @@
-#include "../src/core/GameMode.h"
+#include "../src/app/GameMode.h"
 #include <cassert>
 
 int main() {

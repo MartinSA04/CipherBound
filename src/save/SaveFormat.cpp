@@ -1,7 +1,7 @@
 #include "SaveFormat.h"
-#include "../core/StringUtils.h"
-#include "../core/TextParse.h"
-#include "../data/Pokedex.h"
+#include "../common/StringUtils.h"
+#include "../common/TextParse.h"
+#include "../game_data/Pokedex.h"
 #include <sstream>
 
 using StringUtils::trimRightInPlace;

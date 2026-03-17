@@ -1,4 +1,4 @@
-#include "../src/data/Species.h"
+#include "../src/game_data/Species.h"
 #include "../src/state/NPC.h"
 #include "../src/state/player/Party.h"
 #include "../src/state/player/Player.h"

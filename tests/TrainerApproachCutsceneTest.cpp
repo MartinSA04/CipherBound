@@ -13,24 +13,24 @@ int main() {
     assert(cutscene.id == "trainer_approach_route1_trainer1");
     assert(cutscene.steps.size() == 5);
 
-    const CutsceneStep &facePlayer = cutscene.steps[0];
-    assert(facePlayer.type == CutsceneStep::Type::face);
-    assert(facePlayer.target == "player");
-    assert(facePlayer.direction == Direction::up);
-
-    const CutsceneStep &faceTrainer = cutscene.steps[1];
+    const CutsceneStep &faceTrainer = cutscene.steps[0];
     assert(faceTrainer.type == CutsceneStep::Type::face);
     assert(faceTrainer.target == "route1_trainer1");
     assert(faceTrainer.direction == Direction::down);
 
-    const CutsceneStep &moveTrainer = cutscene.steps[2];
+    const CutsceneStep &moveTrainer = cutscene.steps[1];
     assert(moveTrainer.type == CutsceneStep::Type::move);
     assert(moveTrainer.target == "route1_trainer1");
     assert(moveTrainer.x == 5);
     assert(moveTrainer.y == 4);
 
-    const CutsceneStep &sync = cutscene.steps[3];
+    const CutsceneStep &sync = cutscene.steps[2];
     assert(sync.type == CutsceneStep::Type::sync);
+
+    const CutsceneStep &facePlayer = cutscene.steps[3];
+    assert(facePlayer.type == CutsceneStep::Type::face);
+    assert(facePlayer.target == "player");
+    assert(facePlayer.direction == Direction::up);
 
     const CutsceneStep &say = cutscene.steps[4];
     assert(say.type == CutsceneStep::Type::say);

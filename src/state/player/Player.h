@@ -17,6 +17,8 @@ class Player : public Entity {
     void update() override;
 
     void addDaemon(Daemon daemon);
+    void restorePartyDaemon(Daemon daemon);
+    bool restoreBoxDaemon(int boxIndex, Daemon daemon);
 
     Daemon &getDaemon(int index);
     const Daemon &getDaemon(int index) const;

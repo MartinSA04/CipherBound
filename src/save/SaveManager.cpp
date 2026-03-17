@@ -1,126 +1,10 @@
 #include "SaveManager.h"
-#include "../core/StringUtils.h"
-#include "../core/TextParse.h"
+#include "SaveFormat.h"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-using StringUtils::trimRightInPlace;
-
-namespace {
-
-enum class SaveSection { none, header, flags, badges, inventory, party, pc_boxes, npcs, daemondex };
-
-SaveSection parseSectionHeader(const std::string &line) {
-    if (line == "[header]")
-        return SaveSection::header;
-    if (line == "[flags]")
-        return SaveSection::flags;
-    if (line == "[badges]")
-        return SaveSection::badges;
-    if (line == "[inventory]")
-        return SaveSection::inventory;
-    if (line == "[party]")
-        return SaveSection::party;
-    if (line == "[pc_boxes]")
-        return SaveSection::pc_boxes;
-    if (line == "[npcs]")
-        return SaveSection::npcs;
-    if (line == "[daemondex]")
-        return SaveSection::daemondex;
-    return SaveSection::none;
-}
-
-} // namespace
 
 SaveManager::SaveManager() : baseSavePath("saves/") {}
-
-// --- BaseStats serialization ---
-
-std::string SaveManager::serializeBaseStats(const BaseStats &stats) {
-    return std::to_string(stats.hp) + "," + std::to_string(stats.attack) + "," +
-           std::to_string(stats.defense) + "," + std::to_string(stats.specialAttack) + "," +
-           std::to_string(stats.specialDefense) + "," + std::to_string(stats.speed);
-}
-
-BaseStats SaveManager::deserializeBaseStats(std::string_view s) {
-    const auto values = TextParse::parseFixedIntList<6>(s, ',');
-    if (!values.has_value())
-        throw std::runtime_error("Invalid BaseStats encoding");
-
-    return BaseStats{(*values)[0], (*values)[1], (*values)[2],
-                     (*values)[3], (*values)[4], (*values)[5]};
-}
-
-// --- Daemon serialization ---
-// Format:
-// speciesId;level;exp;currentHP;nickname;status;iv_hp,iv_atk,...;ev_hp,ev_atk,...;moveId:curPP:maxPP,...
-
-std::string SaveManager::serializeDaemon(const Daemon &daemon) {
-    std::ostringstream oss;
-    oss << daemon.getSpeciesId() << ";" << daemon.getLevel() << ";" << daemon.getExp() << ";"
-        << daemon.getCurrentHP() << ";" << daemon.getNickname() << ";"
-        << static_cast<int>(daemon.getStatus()) << ";" << serializeBaseStats(daemon.getIVs()) << ";"
-        << serializeBaseStats(daemon.getEVs()) << ";";
-
-    const auto &moves = daemon.getMoves();
-    for (int i = 0; i < 4; ++i) {
-        if (i > 0)
-            oss << ",";
-        oss << moves[static_cast<size_t>(i)].moveId << ":"
-            << moves[static_cast<size_t>(i)].currentPP << ":"
-            << moves[static_cast<size_t>(i)].maxPP;
-    }
-    return oss.str();
-}
-
-Daemon SaveManager::deserializeDaemon(const std::string &line, const Pokedex &pokedex) {
-    const auto parts = TextParse::splitView(line, ';');
-    if (parts.size() != 9)
-        throw std::runtime_error("Invalid daemon field count");
-
-    const auto speciesId = TextParse::parseInt(parts[0]);
-    const auto level = TextParse::parseInt(parts[1]);
-    const auto exp = TextParse::parseInt(parts[2]);
-    const auto currentHP = TextParse::parseInt(parts[3]);
-    const auto statusRaw = TextParse::parseInt(parts[5]);
-    if (!speciesId.has_value() || !level.has_value() || !exp.has_value() ||
-        !currentHP.has_value() || !statusRaw.has_value()) {
-        throw std::runtime_error("Invalid numeric daemon field");
-    }
-
-    std::string nickname(parts[4]);
-    auto status = static_cast<StatusEffect>(*statusRaw);
-    BaseStats ivs = deserializeBaseStats(parts[6]);
-    BaseStats evs = deserializeBaseStats(parts[7]);
-
-    // Parse moves: "moveId:curPP:maxPP,moveId:curPP:maxPP,..."
-    std::array<MoveSlot, 4> moves{};
-    for (auto &m : moves) {
-        m.moveId = -1;
-        m.currentPP = 0;
-        m.maxPP = 0;
-    }
-
-    const auto moveParts = TextParse::splitView(parts[8], ',');
-    int slot = 0;
-    for (const auto moveToken : moveParts) {
-        if (slot >= 4)
-            break;
-        const auto values = TextParse::parseFixedIntList<3>(moveToken, ':');
-        if (!values.has_value())
-            throw std::runtime_error("Invalid move slot encoding");
-        moves[static_cast<std::size_t>(slot)].moveId = (*values)[0];
-        moves[static_cast<std::size_t>(slot)].currentPP = (*values)[1];
-        moves[static_cast<std::size_t>(slot)].maxPP = (*values)[2];
-        ++slot;
-    }
-
-    const Species &species = pokedex.getSpecies(*speciesId);
-    return Daemon(species, *level, *exp, *currentHP, nickname, status, ivs, evs, moves);
-}
 
 // --- Save game ---
 
@@ -156,7 +40,7 @@ bool SaveManager::saveGame(const std::string &filepath, const Player &player, co
     // [party]
     out << "[party]\n";
     for (const auto &daemon : player.getParty())
-        out << serializeDaemon(daemon) << "\n";
+        out << SaveFormat::serializeDaemon(daemon) << "\n";
 
     // [pc_boxes]
     out << "[pc_boxes]\n";
@@ -164,7 +48,7 @@ bool SaveManager::saveGame(const std::string &filepath, const Player &player, co
     for (int b = 0; b < Player::NUM_BOXES; ++b) {
         const auto &box = player.getBox(b);
         for (const auto &daemon : box)
-            out << "box|" << b << "|" << serializeDaemon(daemon) << "\n";
+            out << "box|" << b << "|" << SaveFormat::serializeDaemon(daemon) << "\n";
     }
 
     // [npcs] — save defeated state
@@ -195,132 +79,67 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
     if (!in.is_open())
         return false;
 
-    // Clear existing state
-    player.clearParty();
-    player.clearInventory();
-    player.clearBadges();
-    player.clearFlags();
-    player.clearPCBoxes();
-    player.clearDaemondex();
-    player.setMoney(0);
+    const SaveFormat::SaveParseResult parsed = SaveFormat::parse(in);
+    for (const auto &warning : parsed.warnings)
+        std::cerr << "SaveManager: " << warning << "\n";
 
-    std::string mapId;
-    Position pos{0, 0};
-    Direction facing = Direction::down;
+    const std::string restoredName =
+        parsed.data.playerName.empty() ? player.getName() : parsed.data.playerName;
+    Player restored(restoredName, parsed.data.position);
+    restored.setFacing(parsed.data.facing);
+    restored.setMoney(parsed.data.money);
 
-    SaveSection section = SaveSection::none;
+    for (const auto &flag : parsed.data.flags)
+        restored.setFlag(flag);
+    for (const auto &badge : parsed.data.badges)
+        restored.addBadge(badge);
+    for (const auto &entry : parsed.data.inventory)
+        restored.addItem(entry.itemId, entry.quantity);
+    for (const auto &speciesId : parsed.data.seen)
+        restored.markSeen(speciesId);
+    for (const auto &speciesId : parsed.data.caught)
+        restored.markCaught(speciesId);
 
-    std::string line;
-    while (std::getline(in, line)) {
-        trimRightInPlace(line);
-
-        if (line.empty() || line[0] == '#')
-            continue;
-
-        if (SaveSection nextSection = parseSectionHeader(line); nextSection != SaveSection::none) {
-            section = nextSection;
-            continue;
+    for (const auto &saved : parsed.data.party) {
+        try {
+            restored.restorePartyDaemon(SaveFormat::hydrateDaemon(saved, pokedex));
+        } catch (const std::exception &e) {
+            std::cerr << "SaveManager: failed to restore party daemon: " << e.what() << "\n";
         }
+    }
 
-        switch (section) {
-        case SaveSection::header: {
-            const auto parts = TextParse::splitView(line, '|');
-            if (parts.size() < 2)
-                break;
-            const std::string_view key = parts[0];
-            if (key == "map")
-                mapId = std::string(parts[1]);
-            else if (key == "money") {
-                if (const auto money = TextParse::parseInt(parts[1]); money.has_value())
-                    player.setMoney(*money);
-            } else if (key == "facing") {
-                if (const auto dir = TextParse::parseInt(parts[1]); dir.has_value())
-                    facing = static_cast<Direction>(*dir);
-            } else if (key == "pos") {
-                if (const auto coords = TextParse::parseFixedIntFields<2>(parts, 1);
-                    coords.has_value()) {
-                    pos.x = (*coords)[0];
-                    pos.y = (*coords)[1];
-                }
-            }
-            break;
-        }
-        case SaveSection::flags:
-            player.setFlag(line);
-            break;
-        case SaveSection::badges:
-            player.addBadge(line);
-            break;
-        case SaveSection::inventory: {
-            const auto values = TextParse::parseFixedIntList<2>(line, '|');
-            if (values.has_value()) {
-                player.addItem((*values)[0], (*values)[1]);
-            }
-            break;
-        }
-        case SaveSection::party: {
+    for (std::size_t boxIndex = 0; boxIndex < parsed.data.pcBoxes.size(); ++boxIndex) {
+        for (const auto &saved : parsed.data.pcBoxes[boxIndex]) {
             try {
-                Daemon c = deserializeDaemon(line, pokedex);
-                player.addDaemon(c);
+                restored.restoreBoxDaemon(static_cast<int>(boxIndex),
+                                          SaveFormat::hydrateDaemon(saved, pokedex));
             } catch (const std::exception &e) {
-                std::cerr << "SaveManager: failed to load Daemon: " << e.what() << "\n";
+                std::cerr << "SaveManager: failed to restore boxed daemon: " << e.what() << "\n";
             }
-            break;
         }
-        case SaveSection::pc_boxes: {
-            if (line.starts_with("current_box|")) {
-                if (const auto box = TextParse::parseInt(std::string_view(line).substr(12));
-                    box.has_value()) {
-                    player.setCurrentBox(*box);
-                }
-            } else if (line.starts_with("box|")) {
-                const auto parts = TextParse::splitView(line, '|');
-                if (parts.size() < 3)
-                    break;
-                std::string daemonData(parts[2]);
-                try {
-                    Daemon c = deserializeDaemon(daemonData, pokedex);
-                    player.addDaemon(c); // Overflows to PC boxes
-                } catch (const std::exception &e) {
-                    std::cerr << "SaveManager: failed to load PC Daemon: " << e.what() << "\n";
-                }
-            }
-            break;
-        }
-        case SaveSection::npcs: {
-            const auto parts = TextParse::splitView(line, '|');
-            if (parts.size() >= 3) {
-                NPC *npc = world.findNPCById(std::string(parts[0]), std::string(parts[1]));
-                if (npc)
-                    npc->setDefeated(true);
-            }
-            break;
-        }
-        case SaveSection::daemondex: {
-            const auto keyVal = TextParse::splitOnce(line, '|');
-            if (keyVal.has_value()) {
-                const auto id = TextParse::parseInt(keyVal->second);
-                if (!id.has_value())
-                    break;
-                std::string_view key = keyVal->first;
-                if (key == "seen")
-                    player.markSeen(*id);
-                else if (key == "caught")
-                    player.markCaught(*id);
-            }
-            break;
-        }
-        default:
-            break;
-        }
+    }
+    restored.setCurrentBox(parsed.data.currentBox);
+
+    for (const auto &mapId : world.getMapIds()) {
+        for (const auto &npc : world.getNPCs(mapId))
+            npc->setDefeated(false);
+    }
+    for (const auto &state : parsed.data.npcStates) {
+        if (!state.defeated)
+            continue;
+        if (NPC *npc = world.findNPCById(state.mapId, state.npcId); npc != nullptr)
+            npc->setDefeated(true);
     }
 
-    // Set map and position
-    if (!mapId.empty()) {
-        world.setCurrentMap(mapId);
-        player.setPosition(pos);
-        player.setFacing(facing);
-    }
+    if (!world.getCurrentMapId().empty())
+        world.getMap(world.getCurrentMapId()).setOccupied(player.getPosition(), false);
+
+    if (!parsed.data.mapId.empty())
+        world.setCurrentMap(parsed.data.mapId);
+
+    world.setPlayer(std::move(restored));
+    if (!world.getCurrentMapId().empty())
+        world.getMap(world.getCurrentMapId()).setOccupied(world.getPlayer().getPosition(), true);
 
     return true;
 }
@@ -351,53 +170,11 @@ SaveManager::SlotInfo SaveManager::getSlotInfo(int slot) const {
 
     info.exists = true;
 
-    std::string line;
-    bool inHeader = false;
-    bool inParty = false;
-    bool inBadges = false;
-    while (std::getline(in, line)) {
-        trimRightInPlace(line);
-
-        if (line == "[header]") {
-            inHeader = true;
-            inParty = false;
-            inBadges = false;
-            continue;
-        }
-        if (line == "[party]") {
-            inParty = true;
-            inHeader = false;
-            inBadges = false;
-            continue;
-        }
-        if (line == "[badges]") {
-            inBadges = true;
-            inHeader = false;
-            inParty = false;
-            continue;
-        }
-        if (!line.empty() && line[0] == '[') {
-            inHeader = false;
-            inParty = false;
-            inBadges = false;
-            continue;
-        }
-
-        if (inHeader) {
-            if (const auto keyVal = TextParse::splitOnce(line, '|'); keyVal.has_value()) {
-                std::string_view key = keyVal->first;
-                std::string_view val = keyVal->second;
-                if (key == "name")
-                    info.playerName = std::string(val);
-                if (key == "map")
-                    info.mapId = std::string(val);
-            }
-        }
-        if (inParty && !line.empty())
-            info.partySize++;
-        if (inBadges && !line.empty())
-            info.badgeCount++;
-    }
+    const SaveFormat::SaveSlotSummary summary = SaveFormat::summarize(SaveFormat::parse(in).data);
+    info.playerName = summary.playerName;
+    info.partySize = summary.partySize;
+    info.badgeCount = summary.badgeCount;
+    info.mapId = summary.mapId;
 
     return info;
 }

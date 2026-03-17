@@ -3,7 +3,6 @@
 #include "../state/World.h"
 #include "../state/player/Player.h"
 #include <string>
-#include <string_view>
 #include <vector>
 
 class SaveManager {
@@ -34,10 +33,4 @@ class SaveManager {
   private:
     static constexpr int MAX_SAVE_SLOTS = 4;
     std::string baseSavePath;
-
-    // Daemon serialization helpers
-    static std::string serializeDaemon(const Daemon &daemon);
-    static Daemon deserializeDaemon(const std::string &line, const Pokedex &pokedex);
-    static std::string serializeBaseStats(const BaseStats &stats);
-    static BaseStats deserializeBaseStats(std::string_view s);
 };

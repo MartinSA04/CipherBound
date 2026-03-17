@@ -23,6 +23,7 @@ class PartyAndPCBoxes : public Party {
 
   public:
     void addDaemonToBox(Daemon daemon);
+    bool addDaemonToBox(int boxIndex, Daemon daemon);
 
     // PC Box storage
     static constexpr int BOX_SIZE = 30;

@@ -30,6 +30,18 @@ void PartyAndPCBoxes::addDaemonToBox(Daemon daemon) {
     }
 }
 
+bool PartyAndPCBoxes::addDaemonToBox(int boxIndex, Daemon daemon) {
+    if (boxIndex < 0 || boxIndex >= NUM_BOXES)
+        return false;
+
+    auto &box = pcBoxes[static_cast<std::size_t>(boxIndex)];
+    if (box.size() >= BOX_SIZE)
+        return false;
+
+    box.push_back(std::move(daemon));
+    return true;
+}
+
 void PartyAndPCBoxes::depositDaemon(int partyIndex) {
     if (!canDeposit() || partyIndex < 0 || partyIndex >= partySize())
         return;

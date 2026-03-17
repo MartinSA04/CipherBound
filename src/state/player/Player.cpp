@@ -13,6 +13,12 @@ void Player::addDaemon(Daemon daemon) {
     }
 }
 
+void Player::restorePartyDaemon(Daemon daemon) { partyStorage.addDaemon(std::move(daemon)); }
+
+bool Player::restoreBoxDaemon(int boxIndex, Daemon daemon) {
+    return partyStorage.addDaemonToBox(boxIndex, std::move(daemon));
+}
+
 Daemon &Player::getDaemon(int index) { return partyStorage.getDaemon(index); }
 
 const Daemon &Player::getDaemon(int index) const { return partyStorage.getDaemon(index); }

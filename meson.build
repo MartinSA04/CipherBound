@@ -27,6 +27,7 @@ src = [
   'src/core/GameMode.cpp',
   'src/core/StoryManager.cpp',
   'src/core/CutsceneRunner.cpp',
+  'src/core/CutsceneFormat.cpp',
   'src/core/modes/OverworldMode.cpp',
   'src/core/modes/overworld/Movement.cpp',
   'src/core/modes/overworld/Interaction.cpp',
@@ -58,6 +59,7 @@ src = [
   'src/state/Map.cpp',
   'src/state/World.cpp',
   'src/state/world/MapLoading.cpp',
+  'src/state/world/MapFormat.cpp',
   'src/state/world/NPCs.cpp',
   'src/state/world/Encounters.cpp',
   'src/state/player/DaemonDex.cpp',
@@ -74,6 +76,7 @@ src = [
   'src/battle/BattleRules.cpp',
   'src/battle/BattleTurnResolver.cpp',
   'src/battle/TypeChart.cpp',
+  'src/save/SaveFormat.cpp',
   'src/save/SaveManager.cpp',
   'src/audio/MusicManager.cpp',
   'src/audio/SoundManager.cpp',
@@ -152,6 +155,38 @@ text_parse_test = executable(
 )
 
 test('text_parse', text_parse_test)
+
+save_format_test = executable(
+  'save_format_test',
+  [
+    'tests/SaveFormatTest.cpp',
+    'src/data/Pokedex.cpp',
+    'src/state/Daemon.cpp',
+    'src/save/SaveFormat.cpp',
+  ],
+)
+
+test('save_format', save_format_test)
+
+cutscene_format_test = executable(
+  'cutscene_format_test',
+  [
+    'tests/CutsceneFormatTest.cpp',
+    'src/core/CutsceneFormat.cpp',
+  ],
+)
+
+test('cutscene_format', cutscene_format_test)
+
+map_format_test = executable(
+  'map_format_test',
+  [
+    'tests/MapFormatTest.cpp',
+    'src/state/world/MapFormat.cpp',
+  ],
+)
+
+test('map_format', map_format_test)
 
 battle_event_queue_test = executable(
   'battle_event_queue_test',
@@ -249,6 +284,31 @@ state_model_test = executable(
 )
 
 test('state_model', state_model_test)
+
+save_manager_roundtrip_test = executable(
+  'save_manager_roundtrip_test',
+  [
+    'tests/SaveManagerRoundTripTest.cpp',
+    'src/data/Pokedex.cpp',
+    'src/save/SaveFormat.cpp',
+    'src/save/SaveManager.cpp',
+    'src/state/Daemon.cpp',
+    'src/state/Entity.cpp',
+    'src/state/Map.cpp',
+    'src/state/Movement.cpp',
+    'src/state/NPC.cpp',
+    'src/state/World.cpp',
+    'src/state/world/NPCs.cpp',
+    'src/state/player/DaemonDex.cpp',
+    'src/state/player/EventFlags.cpp',
+    'src/state/player/Inventory.cpp',
+    'src/state/player/Party.cpp',
+    'src/state/player/Player.cpp',
+    'src/state/player/WalkAnimation.cpp',
+  ],
+)
+
+test('save_manager_roundtrip', save_manager_roundtrip_test)
 
 world_npc_ownership_test = executable(
   'world_npc_ownership_test',

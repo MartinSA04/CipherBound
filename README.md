@@ -27,34 +27,61 @@ A Pokémon-inspired RPG built in C++20 with SDL2, where Daemons are themed aroun
 
 ## Building
 
+The native configure/build/test commands below are the same commands run by CI.
+
 ### Prerequisites
 
-- **C++20 compiler** (GCC 12+, Clang 14+, or MSVC 2022+)
+- **C++20 compiler** (CI-tested with GCC on Linux and MinGW64 GCC on Windows)
 - **Meson** (≥ 1.0) and **Ninja**
-- **SDL2**, **SDL2_image**, **SDL2_mixer** development libraries (installed system-wide on Linux, or fetched automatically via Meson wraps)
+- **SDL2**, **SDL2_image**, **SDL2_mixer** development libraries
+- **On Windows:** use an **MSYS2 MINGW64** shell
 
 ### Native (Linux)
 
 ```bash
 # Install dependencies (Ubuntu/Debian)
-sudo apt install meson ninja-build libsdl2-dev libsdl2-image-dev
+sudo apt-get update
+sudo apt-get install -y \
+  meson \
+  ninja-build \
+  libsdl2-dev \
+  libsdl2-image-dev \
+  libsdl2-mixer-dev \
+  pkg-config \
+  cmake
 
-# Build
+# Configure, build, and test
 meson setup build
 meson compile -C build
+meson test -C build --print-errorlogs
 
-# Run
+# Run manually
 ./build/program
 ```
 
 ### Native (Windows)
 
-SDL2 dependencies are fetched automatically via Meson wrap files. Just run:
+Open an **MSYS2 MINGW64** shell and run:
 
 ```bash
+# Install dependencies
+pacman -S --needed --noconfirm \
+  mingw-w64-x86_64-gcc \
+  mingw-w64-x86_64-meson \
+  mingw-w64-x86_64-ninja \
+  mingw-w64-x86_64-cmake \
+  mingw-w64-x86_64-pkgconf \
+  mingw-w64-x86_64-SDL2 \
+  mingw-w64-x86_64-SDL2_image \
+  mingw-w64-x86_64-SDL2_mixer
+
+# Configure, build, and test
 meson setup build
 meson compile -C build
-build\program.exe
+meson test -C build --print-errorlogs
+
+# Run manually
+./build/program.exe
 ```
 
 ### Web (Emscripten / WebAssembly)
@@ -72,14 +99,14 @@ source /path/to/emsdk/emsdk_env.sh
 ./build_web.sh serve
 ```
 
-This cross-compiles to WebAssembly using `emscripten-cross.ini`, bundles game assets into a `.data` file, and produces `program.html` from the custom `shell.html` template.
+This cross-compiles to WebAssembly using `emscripten-cross.ini`, bundles game assets into a `.data` file, and produces a deployable site in `buildw/deploy/` from the custom `shell.html` template.
 
-To **deploy**, upload the following files from `buildw/` to a web server:
+To **deploy**, upload the files from `buildw/deploy/` to a web server:
 
-- `program.html`
-- `program.js`
-- `program.wasm`
-- `program.data`
+- `index.html`
+- `index.<hash>.js`
+- `index.<hash>.wasm`
+- `index.<hash>.data`
 
 The server must serve `.wasm` files with MIME type `application/wasm`.
 
@@ -89,8 +116,9 @@ The server must serve `.wasm` files with MIME type `application/wasm`.
 src/
 ├── main.cpp                 Entry point (native + Emscripten main loop)
 ├── core/
-│   ├── Session.cpp/h        Game session — owns all subsystems, runs main loop
-│   ├── GameMode.cpp/h       Abstract GameMode base class + GameContext + ModeRequest
+│   ├── Session.cpp/h        Game session bootstrap and main loop
+│   ├── SessionCoordinator.cpp/h Routes mode transitions and cross-mode requests
+│   ├── GameMode.cpp/h       Abstract GameMode base class + GameContext + typed ModeRequest
 │   ├── StoryManager.cpp/h   Tracks story flags and progress
 │   ├── CutsceneRunner.cpp/h Executes scripted cutscene sequences
 │   └── modes/               One class per game state (see Architecture below)
@@ -100,12 +128,12 @@ src/
 │   ├── Item.h               Item data structures
 │   ├── Cutscene.h           Cutscene data structures
 │   └── Pokedex.cpp/h        Loads species, moves, and items from data files
-├── world/
+├── state/
 │   ├── World.cpp/h          Manages maps, player, NPCs, encounters
 │   ├── Map.cpp/h            Tile-based map with layers and collision
-│   ├── Player.cpp/h         Player state, party, inventory, position
+│   ├── player/Player.cpp/h  Player state, party, inventory, position
 │   ├── NPC.cpp/h            NPC entities with dialogue and trainer data
-│   ├── Daemon.cpp/h       Individual Daemon instances (stats, moves, HP)
+│   ├── Daemon.cpp/h         Individual Daemon instances (stats, moves, HP)
 │   └── Entity.cpp/h         Base entity with position and animation
 ├── battle/
 │   ├── Battle.cpp/h         Turn-based battle logic and state machine
@@ -113,20 +141,23 @@ src/
 ├── save/
 │   └── SaveManager.cpp/h    Multi-slot save/load to file
 ├── audio/
-│   └── MusicManager.cpp/h   Background music per map and battle
+│   ├── MusicManager.cpp/h   Background music per map and battle
+│   └── SoundManager.cpp/h   Sound effect loading and playback
 └── ui/
     ├── Renderer.cpp/h        SDL2 rendering abstraction (sprites, shapes, text)
     ├── GameUI.cpp/h          High-level UI drawing (battle panels, menus, etc.)
     ├── OverworldRenderer.cpp/h  Overworld-specific rendering (tilemap, entities)
     ├── InputManager.cpp/h    Keyboard input with edge detection
     ├── SpriteFont.cpp/h      Bitmap font renderer from sprite sheet
-    └── Menu.h                Reusable menu widget
+    └── gameui/               Battle, dialogue, and menu screen rendering helpers
 
 assets/                      Game data and media
 ├── audio/                   Music tracks (MP3)
 ├── data/                    Species, moves, items, maps, cutscenes (text files)
 ├── sprites/                 Daemon, player, and UI sprites (PNG)
 └── tilesets/                Map tileset images
+
+tests/                       Automated regression and tooling tests
 
 subprojects/
 ├── animationwindow/         SDL2 rendering library (modified for Emscripten)
@@ -138,9 +169,9 @@ subprojects/
 
 ### GameMode Pattern
 
-The game uses a **state-driven architecture** where each screen or phase of the game is a separate `GameMode` subclass. The `Session` class owns all subsystems and the active mode, dispatching `update()` and `render()` calls each frame.
+The game uses a **state-driven architecture** where each screen or phase of the game is a separate `GameMode` subclass. `Session` bootstraps the subsystems and main loop, while `SessionCoordinator` owns the active mode and dispatches `update()` / `render()` calls each frame.
 
-Modes communicate with `Session` through **`ModeRequest`** objects — a mode pushes a request (e.g. "start wild battle", "transition to map"), and Session processes it between frames to switch modes, create battles, load maps, etc.
+Modes communicate through **typed `ModeRequest` payloads** — a mode pushes a request such as "start wild battle", "transition to map", or "enter battle mode", and the coordinator processes it between frames to switch modes, create battles, load maps, and resolve story actions.
 
 Each mode receives a `GameContext` reference containing all shared subsystems:
 
@@ -172,6 +203,7 @@ Species, moves, items, maps, and cutscenes are all loaded from text files in `as
 
 - **Daemon sprites** — Some Daemon sprite artwork was generated with the help of AI image generation tools.
 - **Emscripten/web build setup** — AI coding assistance (GitHub Copilot) was used to help configure the Meson build system for Emscripten cross-compilation, create the custom HTML shell template, and resolve compatibility issues (main loop adaptation, font system fallbacks, exception handling flags).
+- **Testing and restructuring help** — AI coding assistance, including OpenAI Codex, was also used to help set up automated tests and CI checks, and to suggest parts of the codebase restructuring and cleanup work (for example session coordination, battle support code extraction, parser cleanup, and typed cross-mode requests).
 
 ## License
 

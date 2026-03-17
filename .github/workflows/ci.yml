@@ -37,6 +37,45 @@ jobs:
       - name: Run test suite
         run: meson test -C build --print-errorlogs
 
+  windows-native:
+    name: Windows Build And Test
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+
+      - name: Install Windows build dependencies
+        shell: msys2 {0}
+        run: |
+          pacman -S --needed --noconfirm \
+            mingw-w64-x86_64-gcc \
+            mingw-w64-x86_64-meson \
+            mingw-w64-x86_64-ninja \
+            mingw-w64-x86_64-cmake \
+            mingw-w64-x86_64-pkgconf \
+            mingw-w64-x86_64-SDL2 \
+            mingw-w64-x86_64-SDL2_image \
+            mingw-w64-x86_64-SDL2_mixer
+
+      - name: Configure Windows build
+        shell: msys2 {0}
+        run: meson setup build
+
+      - name: Compile Windows build
+        shell: msys2 {0}
+        run: meson compile -C build
+
+      - name: Run Windows test suite
+        shell: msys2 {0}
+        run: meson test -C build --print-errorlogs
+
   web:
     name: Web Build
     runs-on: ubuntu-latest
@@ -65,7 +104,6 @@ jobs:
       - name: Build web target
         run: |
           source emsdk/emsdk_env.sh
-          chmod +x ./build_web.sh
           ./build_web.sh
 
       - name: Verify web build output

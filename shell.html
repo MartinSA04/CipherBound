@@ -15,10 +15,45 @@
   <meta name="format-detection" content="telephone=no">
   <!-- PWA hints for Add-to-Home-Screen -->
   <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="CipherBound">
+  <meta name="apple-mobile-web-app-title" content="CipherBound">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Play CipherBound in your browser, a retro-inspired creature-battling RPG where physics- and mathematics-themed Daemons explore, battle, and evolve.">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <meta name="theme-color" content="#1a1a2e">
+  <link rel="canonical" href="./">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="CipherBound">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="CipherBound - Browser-Based Creature-Battling RPG">
+  <meta property="og:description" content="Play CipherBound in your browser, a retro-inspired creature-battling RPG where physics- and mathematics-themed Daemons explore, battle, and evolve.">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="CipherBound - Browser-Based Creature-Battling RPG">
+  <meta name="twitter:description" content="Play CipherBound in your browser, a retro-inspired creature-battling RPG where physics- and mathematics-themed Daemons explore, battle, and evolve.">
   <!-- Suppress favicon 404 -->
   <link rel="icon" href="data:,">
-  <title>CipherBound</title>
+  <title>CipherBound - Browser-Based Creature-Battling RPG</title>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": "CipherBound",
+      "description": "Play CipherBound in your browser, a retro-inspired creature-battling RPG where physics- and mathematics-themed Daemons explore, battle, and evolve.",
+      "applicationCategory": "GameApplication",
+      "genre": [
+        "Role-playing video game",
+        "Adventure game",
+        "Creature-collecting game"
+      ],
+      "gamePlatform": "Web Browser",
+      "playMode": "SinglePlayer",
+      "operatingSystem": "Web Browser",
+      "browserRequirements": "Requires JavaScript, WebAssembly, WebGL, and IndexedDB support.",
+      "inLanguage": "en",
+      "isAccessibleForFree": true,
+      "url": "./"
+    }
+  </script>
   <style>
     /* ── Reset ── */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -112,13 +147,29 @@
       top: 0; left: 0; right: 0; bottom: 0;
       display: flex;
       flex-direction: column;
+      gap: 12px;
       align-items: center;
       justify-content: center;
       background: #1a1a2e;
+      padding: 24px;
+      text-align: center;
       z-index: 10;
     }
     #loading.hidden { display: none; }
-    #status { margin-bottom: 12px; font-size: 16px; }
+    #loading-copy {
+      max-width: 34rem;
+    }
+    #loading-copy h1 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    #loading-copy p {
+      color: #c7c7d9;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    #status { font-size: 16px; }
 
     progress {
       width: 240px;
@@ -154,6 +205,31 @@
       min-width: 200px;
       min-height: 48px;     /* Apple HIG minimum tap target */
       touch-action: manipulation;
+    }
+
+    #noscript-message {
+      position: fixed;
+      inset: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 24px;
+      border: 1px solid #5b7fff;
+      border-radius: 12px;
+      background: rgba(10, 10, 20, 0.94);
+      text-align: center;
+      z-index: 60;
+    }
+    #noscript-message h1 {
+      font-size: clamp(1.75rem, 5vw, 2.5rem);
+      line-height: 1.1;
+    }
+    #noscript-message p {
+      max-width: 36rem;
+      color: #c7c7d9;
+      line-height: 1.5;
     }
 
     /* ── Base button styles ── */
@@ -308,44 +384,50 @@
   </style>
 </head>
 <body>
-  <div id="game-layout">
+  <main id="game-layout">
     <div id="canvas-wrapper">
       <div id="canvas-container">
-        <div id="loading">
+        <div id="loading" aria-live="polite">
+          <div id="loading-copy">
+            <h1>CipherBound</h1>
+            <p>Play a retro-inspired browser RPG where physics- and mathematics-themed Daemons explore, battle, and evolve.</p>
+          </div>
           <div id="status">Loading...</div>
           <progress id="progress" value="0" max="100"></progress>
         </div>
-        <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+        <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1" aria-label="CipherBound gameplay area">
+          CipherBound is a browser-based creature-battling RPG. If the game does not load, enable JavaScript and use a browser with WebAssembly, WebGL, and IndexedDB support.
+        </canvas>
       </div>
     </div>
     <div id="touch-portrait-row">
       <div id="touch-left" class="touch-side">
         <div class="dpad">
           <div class="dpad-blank"></div>
-          <button class="dpad-btn" data-key="ArrowUp" data-code="ArrowUp">&#9650;</button>
+          <button class="dpad-btn" data-key="ArrowUp" data-code="ArrowUp" aria-label="Move up">&#9650;</button>
           <div class="dpad-blank"></div>
-          <button class="dpad-btn" data-key="ArrowLeft" data-code="ArrowLeft">&#9664;</button>
+          <button class="dpad-btn" data-key="ArrowLeft" data-code="ArrowLeft" aria-label="Move left">&#9664;</button>
           <div class="dpad-blank"></div>
-          <button class="dpad-btn" data-key="ArrowRight" data-code="ArrowRight">&#9654;</button>
+          <button class="dpad-btn" data-key="ArrowRight" data-code="ArrowRight" aria-label="Move right">&#9654;</button>
           <div class="dpad-blank"></div>
-          <button class="dpad-btn" data-key="ArrowDown" data-code="ArrowDown">&#9660;</button>
+          <button class="dpad-btn" data-key="ArrowDown" data-code="ArrowDown" aria-label="Move down">&#9660;</button>
           <div class="dpad-blank"></div>
         </div>
       </div>
       <div id="touch-right" class="touch-side">
         <div class="action-buttons">
           <div class="action-row">
-            <button class="action-btn btn-b" data-key="x" data-code="KeyX">B</button>
-            <button class="action-btn btn-a" data-key="z" data-code="KeyZ">A</button>
+            <button class="action-btn btn-b" data-key="x" data-code="KeyX" aria-label="Cancel or go back">B</button>
+            <button class="action-btn btn-a" data-key="z" data-code="KeyZ" aria-label="Confirm or interact">A</button>
           </div>
           <div class="small-buttons">
-            <button class="small-btn" data-key="Shift" data-code="ShiftLeft">Run</button>
-            <button class="small-btn" data-key="c" data-code="KeyC">Menu</button>
+            <button class="small-btn" data-key="Shift" data-code="ShiftLeft" aria-label="Run">Run</button>
+            <button class="small-btn" data-key="c" data-code="KeyC" aria-label="Open menu">Menu</button>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <button id="fs-toggle" type="button" aria-label="Toggle fullscreen">
     <svg id="fs-icon-expand" viewBox="0 0 24 24"><path d="M3 3h6v2H5v4H3V3zm12 0h6v6h-2V5h-4V3zM3 15h2v4h4v2H3v-6zm16 4h-4v2h6v-6h-2v4z"/></svg>
@@ -355,6 +437,14 @@
   <div id="audio-unlock">
     <button id="audio-unlock-btn" type="button">Tap to enable audio</button>
   </div>
+
+  <noscript>
+    <section id="noscript-message">
+      <h1>CipherBound</h1>
+      <p>CipherBound is a browser-based creature-battling RPG where physics- and mathematics-themed Daemons explore, battle, and evolve.</p>
+      <p>Enable JavaScript to play. The game also requires a modern browser with WebAssembly, WebGL, and IndexedDB support for rendering and save data.</p>
+    </section>
+  </noscript>
 
   <script>
     /* ═══════════════════════════════════════════════════════════

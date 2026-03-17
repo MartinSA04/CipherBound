@@ -1,17 +1,28 @@
 #include "../../core/StringUtils.h"
+#include "../../core/TextParse.h"
 #include "../../data/Pokedex.h"
 #include "../World.h"
 #include <fstream>
-#include <sstream>
 #include <stdexcept>
 
 using StringUtils::parseDirection;
 using StringUtils::splitDoubleAt;
-using StringUtils::splitPipe;
 using StringUtils::splitSemicolon;
 using StringUtils::trimRightInPlace;
 
 namespace {
+
+struct RawNPC {
+    std::string id;
+    std::string name;
+    std::string typeStr;
+    std::string facingStr;
+    int x{0};
+    int y{0};
+    int sightRange{0};
+    std::string dialogueStr;
+    std::string partyStr;
+};
 
 TileType charToTileType(char c) {
     switch (c) {
@@ -71,6 +82,59 @@ NPCType parseNPCType(const std::string &s) {
     return NPCType::normal;
 }
 
+std::optional<WarpPoint> parseWarpLine(std::string_view line) {
+    const auto parts = TextParse::splitView(line, '|');
+    if (parts.size() != 5)
+        return std::nullopt;
+
+    const auto from = TextParse::parseFixedIntFields<2>(parts, 0);
+    const auto target = TextParse::parseFixedIntFields<2>(parts, 3);
+    if (!from.has_value() || !target.has_value())
+        return std::nullopt;
+
+    WarpPoint warp;
+    warp.from = {(*from)[0], (*from)[1]};
+    warp.targetMapId = std::string(parts[2]);
+    warp.targetPosition = {(*target)[0], (*target)[1]};
+    return warp;
+}
+
+std::optional<WildEncounterSlot> parseEncounterLine(std::string_view line) {
+    const auto values = TextParse::parseFixedIntList<4>(line, '|');
+    if (!values.has_value())
+        return std::nullopt;
+
+    WildEncounterSlot slot;
+    slot.speciesId = (*values)[0];
+    slot.minLevel = (*values)[1];
+    slot.maxLevel = (*values)[2];
+    slot.weight = (*values)[3];
+    return slot;
+}
+
+std::optional<RawNPC> parseNPCLine(std::string_view line) {
+    const auto parts = TextParse::splitView(line, '|');
+    if (parts.size() < 8)
+        return std::nullopt;
+
+    const auto coords = TextParse::parseFixedIntFields<2>(parts, 3);
+    const auto sightRange = TextParse::parseInt(parts[6]);
+    if (!coords.has_value() || !sightRange.has_value())
+        return std::nullopt;
+
+    RawNPC raw;
+    raw.id = std::string(parts[0]);
+    raw.name = std::string(parts[1]);
+    raw.typeStr = std::string(parts[2]);
+    raw.x = (*coords)[0];
+    raw.y = (*coords)[1];
+    raw.facingStr = std::string(parts[5]);
+    raw.sightRange = *sightRange;
+    raw.dialogueStr = std::string(parts[7]);
+    raw.partyStr = (parts.size() > 8) ? std::string(parts[8]) : "";
+    return raw;
+}
+
 } // namespace
 
 std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pokedex) {
@@ -88,11 +152,6 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
     std::vector<WarpPoint> warps;
     std::vector<WildEncounterSlot> encounters;
 
-    struct RawNPC {
-        std::string id, name, typeStr, facingStr;
-        int x, y, sightRange;
-        std::string dialogueStr, partyStr;
-    };
     std::vector<RawNPC> rawNPCs;
 
     enum class Section {
@@ -137,22 +196,27 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
 
         switch (section) {
         case Section::header: {
-            auto parts = splitPipe(line);
+            const auto parts = TextParse::splitView(line, '|');
             if (parts.size() >= 2) {
-                const std::string &key = parts[0];
+                const std::string_view key = parts[0];
                 if (key == "id")
-                    mapId = parts[1];
-                else if (key == "width")
-                    mapWidth = std::stoi(parts[1]);
-                else if (key == "height")
-                    mapHeight = std::stoi(parts[1]);
-                else if (key == "background")
-                    bgImage = parts[1];
+                    mapId = std::string(parts[1]);
+                else if (key == "width") {
+                    if (const auto width = TextParse::parseInt(parts[1]); width.has_value())
+                        mapWidth = *width;
+                } else if (key == "height") {
+                    if (const auto height = TextParse::parseInt(parts[1]); height.has_value())
+                        mapHeight = *height;
+                } else if (key == "background")
+                    bgImage = std::string(parts[1]);
                 else if (key == "background_overlay")
-                    bgImageOverlay = parts[1];
-                else if (key == "player_spawn" && parts.size() >= 3) {
-                    spawnX = std::stoi(parts[1]);
-                    spawnY = std::stoi(parts[2]);
+                    bgImageOverlay = std::string(parts[1]);
+                else if (key == "player_spawn") {
+                    if (const auto spawn = TextParse::parseFixedIntFields<2>(parts, 1);
+                        spawn.has_value()) {
+                        spawnX = (*spawn)[0];
+                        spawnY = (*spawn)[1];
+                    }
                 }
             }
             break;
@@ -160,46 +224,18 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
         case Section::tiles:
             tileRows.push_back(line);
             break;
-        case Section::warps: {
-            auto parts = splitPipe(line);
-            if (parts.size() >= 5) {
-                WarpPoint warp;
-                warp.from = {std::stoi(parts[0]), std::stoi(parts[1])};
-                warp.targetMapId = parts[2];
-                warp.targetPosition = {std::stoi(parts[3]), std::stoi(parts[4])};
-                warps.push_back(warp);
-            }
+        case Section::warps:
+            if (const auto warp = parseWarpLine(line); warp.has_value())
+                warps.push_back(*warp);
             break;
-        }
-        case Section::encounters: {
-            auto parts = splitPipe(line);
-            if (parts.size() >= 4) {
-                WildEncounterSlot slot;
-                slot.speciesId = std::stoi(parts[0]);
-                slot.minLevel = std::stoi(parts[1]);
-                slot.maxLevel = std::stoi(parts[2]);
-                slot.weight = std::stoi(parts[3]);
-                encounters.push_back(slot);
-            }
+        case Section::encounters:
+            if (const auto encounter = parseEncounterLine(line); encounter.has_value())
+                encounters.push_back(*encounter);
             break;
-        }
-        case Section::npcs: {
-            auto parts = splitPipe(line);
-            if (parts.size() >= 8) {
-                RawNPC raw;
-                raw.id = parts[0];
-                raw.name = parts[1];
-                raw.typeStr = parts[2];
-                raw.x = std::stoi(parts[3]);
-                raw.y = std::stoi(parts[4]);
-                raw.facingStr = parts[5];
-                raw.sightRange = std::stoi(parts[6]);
-                raw.dialogueStr = parts[7];
-                raw.partyStr = (parts.size() > 8) ? parts[8] : "";
-                rawNPCs.push_back(raw);
-            }
+        case Section::npcs:
+            if (const auto npc = parseNPCLine(line); npc.has_value())
+                rawNPCs.push_back(*npc);
             break;
-        }
         default:
             break;
         }
@@ -261,16 +297,12 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
         }
 
         if (!raw.partyStr.empty() && raw.partyStr != "-") {
-            std::istringstream pss(raw.partyStr);
-            std::string entry;
-            while (std::getline(pss, entry, ',')) {
-                auto colon = entry.find(':');
-                if (colon != std::string::npos) {
-                    int speciesId = std::stoi(entry.substr(0, colon));
-                    int level = std::stoi(entry.substr(colon + 1));
-                    const Species &species = pokedex.getSpecies(speciesId);
-                    npc->addDaemon(Daemon(species, level));
-                }
+            for (const auto entry : TextParse::splitView(raw.partyStr, ',')) {
+                const auto values = TextParse::parseFixedIntList<2>(entry, ':');
+                if (!values.has_value())
+                    continue;
+                const Species &species = pokedex.getSpecies((*values)[0]);
+                npc->addDaemon(Daemon(species, (*values)[1]));
             }
         }
 

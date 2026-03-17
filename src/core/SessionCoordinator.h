@@ -16,14 +16,16 @@ class SessionCoordinator {
     void switchMode(GameState newState);
 
   private:
-    void handleChangeStateRequest(const ModeRequest &req);
-    void handleStartWildBattleRequest(const ModeRequest &req);
-    void handleStartTrainerBattleRequest(const ModeRequest &req);
-    void handleEndBattleRequest();
-    void handleTransitionToMapRequest(const ModeRequest &req);
-    void handleStartDialogueRequest(const ModeRequest &req);
-    void handleStartDialogueChoiceRequest(const ModeRequest &req);
-    void handleStartCutsceneRequest(const ModeRequest &req);
+    void handleRequest(const ChangeStateRequest &req);
+    void handleRequest(const EnterBattleModeRequest &req);
+    void handleRequest(const StartWildBattleRequest &req);
+    void handleRequest(const StartTrainerBattleRequest &req);
+    void handleRequest(const EndBattleRequest &req);
+    void handleRequest(const TransitionToMapRequest &req);
+    void handleRequest(const StartDialogueRequest &req);
+    void handleRequest(const StartDialogueChoiceRequest &req);
+    void handleRequest(const StartCutsceneRequest &req);
+    void handleRequest(const StoryActionRequest &req);
     void handleStoryAction(const StoryAction &action);
 
     void switchToMode(GameState newState, std::unique_ptr<GameMode> mode);

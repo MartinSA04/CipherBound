@@ -1,11 +1,39 @@
 #include "SaveManager.h"
 #include "../core/StringUtils.h"
+#include "../core/TextParse.h"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using StringUtils::trimRightInPlace;
+
+namespace {
+
+enum class SaveSection { none, header, flags, badges, inventory, party, pc_boxes, npcs, daemondex };
+
+SaveSection parseSectionHeader(const std::string &line) {
+    if (line == "[header]")
+        return SaveSection::header;
+    if (line == "[flags]")
+        return SaveSection::flags;
+    if (line == "[badges]")
+        return SaveSection::badges;
+    if (line == "[inventory]")
+        return SaveSection::inventory;
+    if (line == "[party]")
+        return SaveSection::party;
+    if (line == "[pc_boxes]")
+        return SaveSection::pc_boxes;
+    if (line == "[npcs]")
+        return SaveSection::npcs;
+    if (line == "[daemondex]")
+        return SaveSection::daemondex;
+    return SaveSection::none;
+}
+
+} // namespace
 
 SaveManager::SaveManager() : baseSavePath("saves/") {}
 
@@ -17,36 +45,13 @@ std::string SaveManager::serializeBaseStats(const BaseStats &stats) {
            std::to_string(stats.specialDefense) + "," + std::to_string(stats.speed);
 }
 
-BaseStats SaveManager::deserializeBaseStats(const std::string &s) {
-    BaseStats stats{0, 0, 0, 0, 0, 0};
-    std::istringstream iss(s);
-    std::string token;
-    int idx = 0;
-    while (std::getline(iss, token, ',') && idx < 6) {
-        int val = std::stoi(token);
-        switch (idx) {
-        case 0:
-            stats.hp = val;
-            break;
-        case 1:
-            stats.attack = val;
-            break;
-        case 2:
-            stats.defense = val;
-            break;
-        case 3:
-            stats.specialAttack = val;
-            break;
-        case 4:
-            stats.specialDefense = val;
-            break;
-        case 5:
-            stats.speed = val;
-            break;
-        }
-        ++idx;
-    }
-    return stats;
+BaseStats SaveManager::deserializeBaseStats(std::string_view s) {
+    const auto values = TextParse::parseFixedIntList<6>(s, ',');
+    if (!values.has_value())
+        throw std::runtime_error("Invalid BaseStats encoding");
+
+    return BaseStats{(*values)[0], (*values)[1], (*values)[2],
+                     (*values)[3], (*values)[4], (*values)[5]};
 }
 
 // --- Daemon serialization ---
@@ -72,18 +77,22 @@ std::string SaveManager::serializeDaemon(const Daemon &daemon) {
 }
 
 Daemon SaveManager::deserializeDaemon(const std::string &line, const Pokedex &pokedex) {
-    std::istringstream iss(line);
-    std::string token;
-    std::vector<std::string> parts;
-    while (std::getline(iss, token, ';'))
-        parts.push_back(token);
+    const auto parts = TextParse::splitView(line, ';');
+    if (parts.size() != 9)
+        throw std::runtime_error("Invalid daemon field count");
 
-    int speciesId = std::stoi(parts[0]);
-    int level = std::stoi(parts[1]);
-    int exp = std::stoi(parts[2]);
-    int currentHP = std::stoi(parts[3]);
-    std::string nickname = parts[4];
-    auto status = static_cast<StatusEffect>(std::stoi(parts[5]));
+    const auto speciesId = TextParse::parseInt(parts[0]);
+    const auto level = TextParse::parseInt(parts[1]);
+    const auto exp = TextParse::parseInt(parts[2]);
+    const auto currentHP = TextParse::parseInt(parts[3]);
+    const auto statusRaw = TextParse::parseInt(parts[5]);
+    if (!speciesId.has_value() || !level.has_value() || !exp.has_value() ||
+        !currentHP.has_value() || !statusRaw.has_value()) {
+        throw std::runtime_error("Invalid numeric daemon field");
+    }
+
+    std::string nickname(parts[4]);
+    auto status = static_cast<StatusEffect>(*statusRaw);
     BaseStats ivs = deserializeBaseStats(parts[6]);
     BaseStats evs = deserializeBaseStats(parts[7]);
 
@@ -95,23 +104,22 @@ Daemon SaveManager::deserializeDaemon(const std::string &line, const Pokedex &po
         m.maxPP = 0;
     }
 
-    std::istringstream moveSS(parts[8]);
-    std::string moveToken;
+    const auto moveParts = TextParse::splitView(parts[8], ',');
     int slot = 0;
-    while (std::getline(moveSS, moveToken, ',') && slot < 4) {
-        std::istringstream ms(moveToken);
-        std::string mv;
-        std::getline(ms, mv, ':');
-        moves[static_cast<std::size_t>(slot)].moveId = std::stoi(mv);
-        std::getline(ms, mv, ':');
-        moves[static_cast<std::size_t>(slot)].currentPP = std::stoi(mv);
-        std::getline(ms, mv, ':');
-        moves[static_cast<std::size_t>(slot)].maxPP = std::stoi(mv);
+    for (const auto moveToken : moveParts) {
+        if (slot >= 4)
+            break;
+        const auto values = TextParse::parseFixedIntList<3>(moveToken, ':');
+        if (!values.has_value())
+            throw std::runtime_error("Invalid move slot encoding");
+        moves[static_cast<std::size_t>(slot)].moveId = (*values)[0];
+        moves[static_cast<std::size_t>(slot)].currentPP = (*values)[1];
+        moves[static_cast<std::size_t>(slot)].maxPP = (*values)[2];
         ++slot;
     }
 
-    const Species &species = pokedex.getSpecies(speciesId);
-    return Daemon(species, level, exp, currentHP, nickname, status, ivs, evs, moves);
+    const Species &species = pokedex.getSpecies(*speciesId);
+    return Daemon(species, *level, *exp, *currentHP, nickname, status, ivs, evs, moves);
 }
 
 // --- Save game ---
@@ -200,8 +208,7 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
     Position pos{0, 0};
     Direction facing = Direction::down;
 
-    enum class Section { none, header, flags, badges, inventory, party, pc_boxes, npcs, daemondex };
-    Section section = Section::none;
+    SaveSection section = SaveSection::none;
 
     std::string line;
     while (std::getline(in, line)) {
@@ -210,75 +217,48 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
         if (line.empty() || line[0] == '#')
             continue;
 
-        if (line == "[header]") {
-            section = Section::header;
-            continue;
-        }
-        if (line == "[flags]") {
-            section = Section::flags;
-            continue;
-        }
-        if (line == "[badges]") {
-            section = Section::badges;
-            continue;
-        }
-        if (line == "[inventory]") {
-            section = Section::inventory;
-            continue;
-        }
-        if (line == "[party]") {
-            section = Section::party;
-            continue;
-        }
-        if (line == "[pc_boxes]") {
-            section = Section::pc_boxes;
-            continue;
-        }
-        if (line == "[npcs]") {
-            section = Section::npcs;
-            continue;
-        }
-        if (line == "[daemondex]") {
-            section = Section::daemondex;
+        if (SaveSection nextSection = parseSectionHeader(line); nextSection != SaveSection::none) {
+            section = nextSection;
             continue;
         }
 
         switch (section) {
-        case Section::header: {
-            auto sep = line.find('|');
-            if (sep == std::string::npos)
+        case SaveSection::header: {
+            const auto parts = TextParse::splitView(line, '|');
+            if (parts.size() < 2)
                 break;
-            std::string key = line.substr(0, sep);
-            std::string val = line.substr(sep + 1);
+            const std::string_view key = parts[0];
             if (key == "map")
-                mapId = val;
-            else if (key == "money")
-                player.setMoney(std::stoi(val));
-            else if (key == "facing")
-                facing = static_cast<Direction>(std::stoi(val));
-            else if (key == "pos") {
-                auto sep2 = val.find('|');
-                pos.x = std::stoi(val.substr(0, sep2));
-                pos.y = std::stoi(val.substr(sep2 + 1));
+                mapId = std::string(parts[1]);
+            else if (key == "money") {
+                if (const auto money = TextParse::parseInt(parts[1]); money.has_value())
+                    player.setMoney(*money);
+            } else if (key == "facing") {
+                if (const auto dir = TextParse::parseInt(parts[1]); dir.has_value())
+                    facing = static_cast<Direction>(*dir);
+            } else if (key == "pos") {
+                if (const auto coords = TextParse::parseFixedIntFields<2>(parts, 1);
+                    coords.has_value()) {
+                    pos.x = (*coords)[0];
+                    pos.y = (*coords)[1];
+                }
             }
             break;
         }
-        case Section::flags:
+        case SaveSection::flags:
             player.setFlag(line);
             break;
-        case Section::badges:
+        case SaveSection::badges:
             player.addBadge(line);
             break;
-        case Section::inventory: {
-            auto sep = line.find('|');
-            if (sep != std::string::npos) {
-                int itemId = std::stoi(line.substr(0, sep));
-                int qty = std::stoi(line.substr(sep + 1));
-                player.addItem(itemId, qty);
+        case SaveSection::inventory: {
+            const auto values = TextParse::parseFixedIntList<2>(line, '|');
+            if (values.has_value()) {
+                player.addItem((*values)[0], (*values)[1]);
             }
             break;
         }
-        case Section::party: {
+        case SaveSection::party: {
             try {
                 Daemon c = deserializeDaemon(line, pokedex);
                 player.addDaemon(c);
@@ -287,15 +267,17 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
             }
             break;
         }
-        case Section::pc_boxes: {
+        case SaveSection::pc_boxes: {
             if (line.starts_with("current_box|")) {
-                player.setCurrentBox(std::stoi(line.substr(12)));
+                if (const auto box = TextParse::parseInt(std::string_view(line).substr(12));
+                    box.has_value()) {
+                    player.setCurrentBox(*box);
+                }
             } else if (line.starts_with("box|")) {
-                auto first = line.find('|');
-                auto second = line.find('|', first + 1);
-                // int boxIdx = std::stoi(line.substr(first + 1, second - first
-                // - 1));
-                std::string daemonData = line.substr(second + 1);
+                const auto parts = TextParse::splitView(line, '|');
+                if (parts.size() < 3)
+                    break;
+                std::string daemonData(parts[2]);
                 try {
                     Daemon c = deserializeDaemon(daemonData, pokedex);
                     player.addDaemon(c); // Overflows to PC boxes
@@ -305,27 +287,26 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
             }
             break;
         }
-        case Section::npcs: {
-            auto sep1 = line.find('|');
-            auto sep2 = line.find('|', sep1 + 1);
-            if (sep1 != std::string::npos && sep2 != std::string::npos) {
-                std::string npcMapId = line.substr(0, sep1);
-                std::string npcId = line.substr(sep1 + 1, sep2 - sep1 - 1);
-                NPC *npc = world.findNPCById(npcMapId, npcId);
+        case SaveSection::npcs: {
+            const auto parts = TextParse::splitView(line, '|');
+            if (parts.size() >= 3) {
+                NPC *npc = world.findNPCById(std::string(parts[0]), std::string(parts[1]));
                 if (npc)
                     npc->setDefeated(true);
             }
             break;
         }
-        case Section::daemondex: {
-            auto sep = line.find('|');
-            if (sep != std::string::npos) {
-                std::string key = line.substr(0, sep);
-                int id = std::stoi(line.substr(sep + 1));
+        case SaveSection::daemondex: {
+            const auto keyVal = TextParse::splitOnce(line, '|');
+            if (keyVal.has_value()) {
+                const auto id = TextParse::parseInt(keyVal->second);
+                if (!id.has_value())
+                    break;
+                std::string_view key = keyVal->first;
                 if (key == "seen")
-                    player.markSeen(id);
+                    player.markSeen(*id);
                 else if (key == "caught")
-                    player.markCaught(id);
+                    player.markCaught(*id);
             }
             break;
         }
@@ -403,14 +384,13 @@ SaveManager::SlotInfo SaveManager::getSlotInfo(int slot) const {
         }
 
         if (inHeader) {
-            auto sep = line.find('|');
-            if (sep != std::string::npos) {
-                std::string key = line.substr(0, sep);
-                std::string val = line.substr(sep + 1);
+            if (const auto keyVal = TextParse::splitOnce(line, '|'); keyVal.has_value()) {
+                std::string_view key = keyVal->first;
+                std::string_view val = keyVal->second;
                 if (key == "name")
-                    info.playerName = val;
+                    info.playerName = std::string(val);
                 if (key == "map")
-                    info.mapId = val;
+                    info.mapId = std::string(val);
             }
         }
         if (inParty && !line.empty())

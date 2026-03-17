@@ -1,18 +1,12 @@
 #pragma once
 #include "../GameMode.h"
-#include <string>
 
-class NPC;
 class Renderer;
 
 class BattleMode : public GameMode {
   public:
     void update(GameContext &ctx, InputManager &input) override;
     void render(GameContext &ctx) override;
-
-    void setTrainerNPCId(const std::string &id);
-    void setTrainer(NPC *trainer);
-    const std::string &getTrainerNPCId() const;
 
   private:
     void updateBattleIntroAnim(GameContext &ctx);
@@ -27,9 +21,6 @@ class BattleMode : public GameMode {
     void drawCaptureScene(GameContext &ctx);
     void drawBall(Renderer &renderer, int frame, int x, int y) const;
     void drawBallCentered(Renderer &renderer, int frame, int cx, int cy) const;
-
-    std::string currentTrainerNPCId;
-    NPC *battleTrainer{nullptr};
 
     int menuSelected{0};
     int moveSelected{0};

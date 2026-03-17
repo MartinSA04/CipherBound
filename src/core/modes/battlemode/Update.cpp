@@ -32,7 +32,7 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
     case BattleState::fled:
     case BattleState::captured:
         if (bs == BattleState::victory || bs == BattleState::captured) {
-            MusicTrack victoryTrack = (battleTrainer && battleTrainer->isTrainerType())
+            MusicTrack victoryTrack = battle.getType() == BattleType::trainer
                                           ? MusicTrack::trainerVictory
                                           : MusicTrack::wildVictory;
             ctx.music.play(victoryTrack, ctx.ui.getRenderer().getWindow());
@@ -72,7 +72,7 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
     case BattleState::animatingEXP: {
         BattleState bps = battle.getPendingState();
         if (bps == BattleState::victory || bps == BattleState::captured) {
-            MusicTrack victoryTrack = (battleTrainer && battleTrainer->isTrainerType())
+            MusicTrack victoryTrack = battle.getType() == BattleType::trainer
                                           ? MusicTrack::trainerVictory
                                           : MusicTrack::wildVictory;
             ctx.music.play(victoryTrack, ctx.ui.getRenderer().getWindow());

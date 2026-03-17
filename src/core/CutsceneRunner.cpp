@@ -1,13 +1,94 @@
 #include "CutsceneRunner.h"
 #include "StringUtils.h"
+#include "TextParse.h"
 #include <fstream>
 #include <iostream>
 #include <set>
 
 using StringUtils::parseDirection;
-using StringUtils::splitPipe;
 using StringUtils::splitSemicolon;
 using StringUtils::trimRightInPlace;
+
+namespace {
+
+enum class CutsceneSection { none, header, steps };
+
+std::optional<CutsceneStep> parseCutsceneStep(std::string_view line) {
+    const auto parts = TextParse::splitView(line, '|');
+    if (parts.empty())
+        return std::nullopt;
+
+    const std::string_view cmd = parts[0];
+    CutsceneStep step{};
+
+    if (cmd == "move" && parts.size() >= 4) {
+        const auto coords = TextParse::parseFixedIntFields<2>(parts, 2);
+        if (!coords.has_value())
+            return std::nullopt;
+        step.type = CutsceneStep::Type::move;
+        step.target = std::string(parts[1]);
+        step.x = (*coords)[0];
+        step.y = (*coords)[1];
+        return step;
+    }
+
+    if (cmd == "walk" && parts.size() >= 3) {
+        step.type = CutsceneStep::Type::walk;
+        step.target = std::string(parts[1]);
+        step.direction = parseDirection(std::string(parts[2]));
+        return step;
+    }
+
+    if (cmd == "face" && parts.size() >= 3) {
+        step.type = CutsceneStep::Type::face;
+        step.target = std::string(parts[1]);
+        step.direction = parseDirection(std::string(parts[2]));
+        return step;
+    }
+
+    if (cmd == "say" && parts.size() >= 3) {
+        step.type = CutsceneStep::Type::say;
+        step.speaker = std::string(parts[1]);
+        step.lines = splitSemicolon(std::string(parts[2]));
+        return step;
+    }
+
+    if (cmd == "wait" && parts.size() >= 2) {
+        const auto frames = TextParse::parseInt(parts[1]);
+        if (!frames.has_value())
+            return std::nullopt;
+        step.type = CutsceneStep::Type::wait;
+        step.frames = *frames;
+        return step;
+    }
+
+    if (cmd == "sync") {
+        step.type = CutsceneStep::Type::sync;
+        return step;
+    }
+
+    if (cmd == "flag" && parts.size() >= 2) {
+        step.type = CutsceneStep::Type::flag;
+        step.flagName = std::string(parts[1]);
+        return step;
+    }
+
+    if (cmd == "hide" && parts.size() >= 2) {
+        step.type = CutsceneStep::Type::hide;
+        step.target = std::string(parts[1]);
+        return step;
+    }
+
+    if (cmd == "show" && parts.size() >= 2) {
+        step.type = CutsceneStep::Type::show;
+        step.target = std::string(parts[1]);
+        return step;
+    }
+
+    return std::nullopt;
+}
+
+} // namespace
 
 bool CutsceneRunner::load(const std::string &path) {
     std::ifstream file(path);
@@ -19,12 +100,7 @@ bool CutsceneRunner::load(const std::string &path) {
     cutscene.steps.clear();
     cutscene.id.clear();
 
-    enum class Section {
-        none,
-        header,
-        steps,
-    };
-    Section section = Section::none;
+    CutsceneSection section = CutsceneSection::none;
 
     std::string line;
     while (std::getline(file, line)) {
@@ -34,63 +110,25 @@ bool CutsceneRunner::load(const std::string &path) {
             continue;
 
         if (line == "[header]") {
-            section = Section::header;
+            section = CutsceneSection::header;
             continue;
         }
         if (line == "[steps]") {
-            section = Section::steps;
+            section = CutsceneSection::steps;
             continue;
         }
 
-        if (section == Section::header) {
-            auto parts = splitPipe(line);
-            if (parts.size() >= 2 && parts[0] == "id")
-                cutscene.id = parts[1];
-        } else if (section == Section::steps) {
-            auto parts = splitPipe(line);
-            if (parts.empty())
-                continue;
-
-            const std::string &cmd = parts[0];
-            CutsceneStep step{};
-
-            if (cmd == "move" && parts.size() >= 4) {
-                step.type = CutsceneStep::Type::move;
-                step.target = parts[1];
-                step.x = std::stoi(parts[2]);
-                step.y = std::stoi(parts[3]);
-            } else if (cmd == "walk" && parts.size() >= 3) {
-                step.type = CutsceneStep::Type::walk;
-                step.target = parts[1];
-                step.direction = parseDirection(parts[2]);
-            } else if (cmd == "face" && parts.size() >= 3) {
-                step.type = CutsceneStep::Type::face;
-                step.target = parts[1];
-                step.direction = parseDirection(parts[2]);
-            } else if (cmd == "say" && parts.size() >= 3) {
-                step.type = CutsceneStep::Type::say;
-                step.speaker = parts[1];
-                step.lines = splitSemicolon(parts[2]);
-            } else if (cmd == "wait" && parts.size() >= 2) {
-                step.type = CutsceneStep::Type::wait;
-                step.frames = std::stoi(parts[1]);
-            } else if (cmd == "sync") {
-                step.type = CutsceneStep::Type::sync;
-            } else if (cmd == "flag" && parts.size() >= 2) {
-                step.type = CutsceneStep::Type::flag;
-                step.flagName = parts[1];
-            } else if (cmd == "hide" && parts.size() >= 2) {
-                step.type = CutsceneStep::Type::hide;
-                step.target = parts[1];
-            } else if (cmd == "show" && parts.size() >= 2) {
-                step.type = CutsceneStep::Type::show;
-                step.target = parts[1];
-            } else {
-                std::cerr << "CutsceneRunner: unknown step '" << cmd << "'\n";
+        if (section == CutsceneSection::header) {
+            const auto keyVal = TextParse::splitOnce(line, '|');
+            if (keyVal.has_value() && keyVal->first == "id")
+                cutscene.id = std::string(keyVal->second);
+        } else if (section == CutsceneSection::steps) {
+            const auto step = parseCutsceneStep(line);
+            if (!step.has_value()) {
+                std::cerr << "CutsceneRunner: invalid step '" << line << "'\n";
                 continue;
             }
-
-            cutscene.steps.push_back(std::move(step));
+            cutscene.steps.push_back(*step);
         }
     }
 

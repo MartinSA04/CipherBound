@@ -129,6 +129,20 @@ string_utils_test = executable(
 
 test('string_utils', string_utils_test)
 
+mode_request_test = executable(
+  'mode_request_test',
+  'tests/ModeRequestTest.cpp'
+)
+
+test('mode_request', mode_request_test)
+
+text_parse_test = executable(
+  'text_parse_test',
+  'tests/TextParseTest.cpp'
+)
+
+test('text_parse', text_parse_test)
+
 battle_animation_utils_test = executable(
   'battle_animation_utils_test',
   'tests/BattleAnimationUtilsTest.cpp'

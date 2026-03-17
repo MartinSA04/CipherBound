@@ -1,5 +1,4 @@
 #include "TargetState.h"
-#include "../../../audio/SoundManager.h"
 #include "../../../data/Pokedex.h"
 #include "../../../state/Daemon.h"
 #include "../../../state/World.h"

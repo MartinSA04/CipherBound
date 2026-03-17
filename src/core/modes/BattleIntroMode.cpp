@@ -18,7 +18,8 @@ void BattleIntroMode::update(GameContext &ctx, InputManager & /*input*/) {
         if (trainer && trainer->isTrainerType()) {
             ctx.setBattle(std::make_unique<Battle>(ctx.world.getPlayer(), trainer,
                                                    BattleType::trainer, ctx.world.getRng(),
-                                                   ctx.pokedex));
+                                                   ctx.pokedex),
+                          trainer->getId());
 
             // Mark all trainer daemons as seen
             for (const auto &d : trainer->getParty())
@@ -41,11 +42,7 @@ void BattleIntroMode::update(GameContext &ctx, InputManager & /*input*/) {
         ctx.ui.battleIntroPhase = 0;
         ctx.ui.battleIntroFrame = 0;
 
-        // Request transition to battle mode — Session will set up BattleMode
-        // with trainer info
-        ModeRequest req = ModeRequest::changeState(GameState::battle);
-        req.npc = trainer; // pass trainer info along
-        ctx.pushRequest(std::move(req));
+        ctx.pushRequest(ModeRequest::enterBattleMode());
     }
 }
 

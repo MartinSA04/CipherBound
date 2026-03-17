@@ -2,6 +2,7 @@
 #include "../data/Move.h"
 #include "../data/Species.h"
 #include <array>
+#include <functional>
 #include <string>
 
 struct MoveSlot {
@@ -65,5 +66,5 @@ class Daemon {
 
     int calculateStat(int base, int iv, int ev, bool isHP) const;
 
-    const Species *speciesRef;
+    std::reference_wrapper<const Species> speciesRef;
 };

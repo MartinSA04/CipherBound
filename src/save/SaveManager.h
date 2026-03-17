@@ -3,6 +3,7 @@
 #include "../state/World.h"
 #include "../state/player/Player.h"
 #include <string>
+#include <string_view>
 #include <vector>
 
 class SaveManager {
@@ -38,5 +39,5 @@ class SaveManager {
     static std::string serializeDaemon(const Daemon &daemon);
     static Daemon deserializeDaemon(const std::string &line, const Pokedex &pokedex);
     static std::string serializeBaseStats(const BaseStats &stats);
-    static BaseStats deserializeBaseStats(const std::string &s);
+    static BaseStats deserializeBaseStats(std::string_view s);
 };

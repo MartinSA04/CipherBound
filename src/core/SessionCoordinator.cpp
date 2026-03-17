@@ -18,6 +18,14 @@
 #include "modes/TitleScreenMode.h"
 #include "modes/TransitionMode.h"
 
+namespace {
+template <class... Ts> struct Overloaded : Ts... {
+    using Ts::operator()...;
+};
+
+template <class... Ts> Overloaded(Ts...) -> Overloaded<Ts...>;
+} // namespace
+
 SessionCoordinator::SessionCoordinator(GameContext &ctx) : ctx(ctx) {}
 
 void SessionCoordinator::update(InputManager &input) {
@@ -36,43 +44,33 @@ void SessionCoordinator::processRequests() {
     std::vector<ModeRequest> requests = ctx.mailbox.drain();
 
     for (auto &req : requests) {
-        switch (req.type) {
-        case ModeRequest::Type::changeState:
-            handleChangeStateRequest(req);
-            break;
-
-        case ModeRequest::Type::startWildBattle:
-            handleStartWildBattleRequest(req);
-            break;
-
-        case ModeRequest::Type::startTrainerBattle:
-            handleStartTrainerBattleRequest(req);
-            break;
-
-        case ModeRequest::Type::endBattle:
-            handleEndBattleRequest();
-            break;
-
-        case ModeRequest::Type::transitionToMap:
-            handleTransitionToMapRequest(req);
-            break;
-
-        case ModeRequest::Type::startDialogue:
-            handleStartDialogueRequest(req);
-            break;
-
-        case ModeRequest::Type::startDialogueChoice:
-            handleStartDialogueChoiceRequest(req);
-            break;
-
-        case ModeRequest::Type::startCutscene:
-            handleStartCutsceneRequest(req);
-            break;
-
-        case ModeRequest::Type::handleStoryAction:
-            handleStoryAction(req.storyActionData);
-            break;
-        }
+        std::visit(Overloaded{[this](const ChangeStateRequest &request) { handleRequest(request); },
+                              [this](const EnterBattleModeRequest &request) {
+                                  handleRequest(request);
+                              },
+                              [this](const StartWildBattleRequest &request) {
+                                  handleRequest(request);
+                              },
+                              [this](const StartTrainerBattleRequest &request) {
+                                  handleRequest(request);
+                              },
+                              [this](const EndBattleRequest &request) { handleRequest(request); },
+                              [this](const TransitionToMapRequest &request) {
+                                  handleRequest(request);
+                              },
+                              [this](const StartDialogueRequest &request) {
+                                  handleRequest(request);
+                              },
+                              [this](const StartDialogueChoiceRequest &request) {
+                                  handleRequest(request);
+                              },
+                              [this](const StartCutsceneRequest &request) {
+                                  handleRequest(request);
+                              },
+                              [this](const StoryActionRequest &request) {
+                                  handleRequest(request);
+                              }},
+                   req.payload);
     }
 }
 
@@ -80,40 +78,33 @@ void SessionCoordinator::switchMode(GameState newState) {
     switchToMode(newState, createMode(newState));
 }
 
-void SessionCoordinator::handleChangeStateRequest(const ModeRequest &req) {
-    if (req.targetState == GameState::battle) {
-        auto mode = std::make_unique<BattleMode>();
-        if (req.npc) {
-            mode->setTrainerNPCId(req.npc->getId());
-            mode->setTrainer(req.npc);
-        }
-        switchToMode(GameState::battle, std::move(mode));
-        return;
-    }
-
+void SessionCoordinator::handleRequest(const ChangeStateRequest &req) {
     switchMode(req.targetState);
 }
 
-void SessionCoordinator::handleStartWildBattleRequest(const ModeRequest &req) {
+void SessionCoordinator::handleRequest(const EnterBattleModeRequest & /*req*/) {
+    switchToMode(GameState::battle, std::make_unique<BattleMode>());
+}
+
+void SessionCoordinator::handleRequest(const StartWildBattleRequest &req) {
     ctx.ui.battleIntroFrame = 0;
     switchToMode(GameState::battleIntro,
                  std::make_unique<BattleIntroMode>(req.speciesId, req.level));
     ctx.music.play(MusicTrack::wildBattle, ctx.ui.getRenderer().getWindow());
 }
 
-void SessionCoordinator::handleStartTrainerBattleRequest(const ModeRequest &req) {
+void SessionCoordinator::handleRequest(const StartTrainerBattleRequest &req) {
     ctx.ui.battleIntroFrame = 0;
     switchToMode(GameState::battleIntro, std::make_unique<BattleIntroMode>(req.npc));
     ctx.music.play(MusicTrack::trainerBattle, ctx.ui.getRenderer().getWindow());
 }
 
-void SessionCoordinator::handleEndBattleRequest() {
+void SessionCoordinator::handleRequest(const EndBattleRequest & /*req*/) {
     if (ctx.hasBattle()) {
-        auto *battleMode = dynamic_cast<BattleMode *>(currentMode.get());
-        if (battleMode && !battleMode->getTrainerNPCId().empty()) {
+        if (!ctx.battleTrainerNPCId().empty()) {
             BattleResult result = ctx.battle().getResult();
             if (result.playerWon)
-                ctx.world.setNPCDefeated(battleMode->getTrainerNPCId());
+                ctx.world.setNPCDefeated(ctx.battleTrainerNPCId());
         }
     }
 
@@ -124,29 +115,33 @@ void SessionCoordinator::handleEndBattleRequest() {
     ctx.music.play(mapTrack, ctx.ui.getRenderer().getWindow());
 }
 
-void SessionCoordinator::handleTransitionToMapRequest(const ModeRequest &req) {
+void SessionCoordinator::handleRequest(const TransitionToMapRequest &req) {
     const std::string &mapId = ctx.world.getCurrentMapId();
     ctx.world.getMap(mapId).setOccupied(ctx.world.getPlayer().getPosition(), false);
     switchToMode(GameState::transition, std::make_unique<TransitionMode>(req.mapId, req.spawn));
 }
 
-void SessionCoordinator::handleStartDialogueRequest(const ModeRequest &req) {
+void SessionCoordinator::handleRequest(const StartDialogueRequest &req) {
     ctx.flow.dialogueReturnState = req.returnState;
     switchToMode(GameState::dialogue,
                  std::make_unique<DialogueMode>(req.speaker, req.lines, req.npc, req.returnState));
 }
 
-void SessionCoordinator::handleStartDialogueChoiceRequest(const ModeRequest &req) {
+void SessionCoordinator::handleRequest(const StartDialogueChoiceRequest &req) {
     switchToMode(GameState::dialogueChoice,
                  std::make_unique<DialogueChoiceMode>(req.choiceOptions, req.choiceContext,
                                                       ctx.flow.dialogueReturnState));
 }
 
-void SessionCoordinator::handleStartCutsceneRequest(const ModeRequest &req) {
+void SessionCoordinator::handleRequest(const StartCutsceneRequest &req) {
     if (ctx.cutsceneRunner.load(req.cutscenePath)) {
         ctx.cutsceneRunner.start();
         switchMode(GameState::cutscene);
     }
+}
+
+void SessionCoordinator::handleRequest(const StoryActionRequest &req) {
+    handleStoryAction(req.action);
 }
 
 void SessionCoordinator::handleStoryAction(const StoryAction &action) {

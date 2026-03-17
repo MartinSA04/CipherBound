@@ -3,7 +3,7 @@
 
 Daemon::Daemon(const Species &species, int level)
     : speciesId(species.id), level(level), exp(0), currentHP(0), status(StatusEffect::none),
-      ivs{0, 0, 0, 0, 0, 0}, evs{0, 0, 0, 0, 0, 0}, speciesRef(&species) {
+      ivs{0, 0, 0, 0, 0, 0}, evs{0, 0, 0, 0, 0, 0}, speciesRef(species) {
     nickname = species.name;
 
     // Init moves to empty
@@ -33,7 +33,7 @@ Daemon::Daemon(const Species &species, int level, int exp, int currentHP,
                const std::string &nickname, StatusEffect status, const BaseStats &ivs,
                const BaseStats &evs, const std::array<MoveSlot, 4> &moves)
     : speciesId(species.id), level(level), exp(exp), currentHP(currentHP), status(status), ivs(ivs),
-      evs(evs), moves(moves), speciesRef(&species) {
+      evs(evs), moves(moves), speciesRef(species) {
     this->nickname = nickname;
 }
 
@@ -45,7 +45,7 @@ int Daemon::calculateStat(int base, int iv, int ev, bool isHP) const {
 }
 
 int Daemon::getMaxHP() const {
-    return calculateStat(speciesRef->baseStats.hp, ivs.hp, evs.hp, true);
+    return calculateStat(speciesRef.get().baseStats.hp, ivs.hp, evs.hp, true);
 }
 
 int Daemon::getCurrentHP() const { return currentHP; }
@@ -65,7 +65,7 @@ const std::string &Daemon::getNickname() const { return nickname; }
 void Daemon::setNickname(const std::string &name) { nickname = name; }
 int Daemon::getLevel() const { return level; }
 int Daemon::getExp() const { return exp; }
-const Species &Daemon::getSpecies() const { return *speciesRef; }
+const Species &Daemon::getSpecies() const { return speciesRef.get(); }
 int Daemon::getSpeciesId() const { return speciesId; }
 const BaseStats &Daemon::getIVs() const { return ivs; }
 const BaseStats &Daemon::getEVs() const { return evs; }
@@ -93,7 +93,7 @@ bool Daemon::checkLevelUp() {
         exp -= needed;
         level++;
         int oldMax = getMaxHP();
-        int newMax = calculateStat(speciesRef->baseStats.hp, ivs.hp, evs.hp, true);
+        int newMax = calculateStat(speciesRef.get().baseStats.hp, ivs.hp, evs.hp, true);
         currentHP += (newMax - oldMax);
         return true;
     }
@@ -101,7 +101,7 @@ bool Daemon::checkLevelUp() {
 }
 
 int Daemon::getStat(int statIndex) const {
-    const BaseStats &bs = speciesRef->baseStats;
+    const BaseStats &bs = speciesRef.get().baseStats;
     switch (statIndex) {
     case 0:
         return getMaxHP();

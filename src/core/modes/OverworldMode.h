@@ -4,6 +4,7 @@
 
 class OverworldMode : public GameMode {
   public:
+    void onEnter(GameContext &ctx) override;
     void update(GameContext &ctx, InputManager &input) override;
     void render(GameContext &ctx) override;
 

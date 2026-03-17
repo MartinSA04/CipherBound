@@ -24,10 +24,14 @@ src = [
   'src/main.cpp',
   'src/core/Session.cpp',
   'src/core/SessionCoordinator.cpp',
+  'src/core/FilePaths.cpp',
   'src/core/GameMode.cpp',
   'src/core/StoryManager.cpp',
+  'src/core/CutsceneLoader.cpp',
+  'src/core/CutscenePlayback.cpp',
   'src/core/CutsceneRunner.cpp',
   'src/core/CutsceneFormat.cpp',
+  'src/core/CutsceneWorldOps.cpp',
   'src/core/modes/OverworldMode.cpp',
   'src/core/modes/overworld/Movement.cpp',
   'src/core/modes/overworld/Interaction.cpp',
@@ -177,6 +181,62 @@ cutscene_format_test = executable(
 )
 
 test('cutscene_format', cutscene_format_test)
+
+cutscene_loader_test = executable(
+  'cutscene_loader_test',
+  [
+    'tests/CutsceneLoaderTest.cpp',
+    'src/core/CutsceneLoader.cpp',
+    'src/core/CutsceneFormat.cpp',
+    'src/core/FilePaths.cpp',
+  ],
+)
+
+test('cutscene_loader', cutscene_loader_test)
+
+file_paths_test = executable(
+  'file_paths_test',
+  [
+    'tests/FilePathsTest.cpp',
+    'src/core/CutsceneFormat.cpp',
+    'src/core/FilePaths.cpp',
+  ],
+)
+
+test('file_paths', file_paths_test)
+
+cutscene_playback_test = executable(
+  'cutscene_playback_test',
+  [
+    'tests/CutscenePlaybackTest.cpp',
+    'src/core/CutscenePlayback.cpp',
+  ],
+)
+
+test('cutscene_playback', cutscene_playback_test)
+
+cutscene_world_ops_test = executable(
+  'cutscene_world_ops_test',
+  [
+    'tests/CutsceneWorldOpsTest.cpp',
+    'src/core/CutsceneWorldOps.cpp',
+    'src/state/Daemon.cpp',
+    'src/state/Entity.cpp',
+    'src/state/Map.cpp',
+    'src/state/Movement.cpp',
+    'src/state/NPC.cpp',
+    'src/state/World.cpp',
+    'src/state/world/NPCs.cpp',
+    'src/state/player/DaemonDex.cpp',
+    'src/state/player/EventFlags.cpp',
+    'src/state/player/Inventory.cpp',
+    'src/state/player/Party.cpp',
+    'src/state/player/Player.cpp',
+    'src/state/player/WalkAnimation.cpp',
+  ],
+)
+
+test('cutscene_world_ops', cutscene_world_ops_test)
 
 map_format_test = executable(
   'map_format_test',

@@ -1,11 +1,11 @@
 #pragma once
-#include "../audio/SoundManager.h"
+#include "CutscenePlayback.h"
 #include "../data/Cutscene.h"
-#include "../state/World.h"
-#include "../ui/GameUI.h"
-#include <cstddef>
 #include <string>
-#include <vector>
+
+class World;
+class GameUI;
+class SoundManager;
 
 class CutsceneRunner {
   public:
@@ -32,37 +32,8 @@ class CutsceneRunner {
 
   private:
     Cutscene cutscene;
-    std::size_t currentStep{0};
-    bool finished{true};
-
-    // --- Movement tracking ---
-    struct PendingMove {
-        std::string targetId; // "player" or NPC id
-        Position destination;
-    };
-    std::vector<PendingMove> pendingMoves;
-
-    // --- Wait tracking ---
-    int waitFrames{0};
-
-    // --- Dialogue tracking ---
-    bool inDialogue{false};
+    CutscenePlaybackState playback;
 
     // Process steps from currentStep onward until hitting a blocking step
     void processSteps(World &world, GameUI &ui);
-
-    // Tick all pending movements one step closer to their targets
-    void tickMovements(World &world);
-
-    // Check if all pending movements have arrived
-    bool allMovesComplete(const World &world) const;
-
-    // Get current position of a target entity
-    Position getEntityPosition(const World &world, const std::string &targetId) const;
-
-    // Check if an entity is currently mid-walk-animation
-    bool isEntityWalking(const World &world, const std::string &targetId) const;
-
-    // Start a single tile step for an entity toward its destination
-    void stepEntityToward(World &world, const std::string &targetId, Position dest);
 };

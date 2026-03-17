@@ -1,13 +1,9 @@
 #include "CutSceneMode.h"
-#include "../../state/World.h"
 #include "../../ui/GameUI.h"
 #include "../../ui/InputManager.h"
 #include "../CutsceneRunner.h"
 
 void CutSceneMode::update(GameContext &ctx, InputManager &input) {
-    // Player animation must tick for smooth movement
-    ctx.world.getPlayer().updateAnimation();
-
     bool running =
         ctx.cutsceneRunner.update(ctx.world, ctx.ui, input.isConfirmPressed(), ctx.sound);
     if (!running) {

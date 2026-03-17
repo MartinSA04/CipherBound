@@ -18,6 +18,7 @@
 #include "modes/SaveMode.h"
 #include "modes/TitleScreenMode.h"
 #include "modes/TransitionMode.h"
+#include <iostream>
 
 SessionCoordinator::SessionCoordinator(GameContext &ctx) : ctx(ctx) {}
 
@@ -32,34 +33,41 @@ void SessionCoordinator::render() {
 }
 
 void SessionCoordinator::processRequests() {
-    // Drain all pending requests (a request may push more, but we process them
-    // in order and stop after one pass to avoid infinite loops)
-    std::vector<ModeRequest> requests = ctx.mailbox.drain();
+    constexpr int maxRequestPasses = 16;
 
-    for (auto &req : requests) {
-        std::visit(VariantUtils::Overloaded{
-                       [this](const ChangeStateRequest &request) { handleRequest(request); },
-                       [this](const EnterBattleModeRequest &request) { handleRequest(request); },
-                       [this](const StartWildBattleRequest &request) { handleRequest(request); },
-                       [this](const StartTrainerBattleRequest &request) {
-                           handleRequest(request);
-                       },
-                       [this](const EndBattleRequest &request) { handleRequest(request); },
-                       [this](const TransitionToMapRequest &request) {
-                           handleRequest(request);
-                       },
-                       [this](const StartDialogueRequest &request) {
-                           handleRequest(request);
-                       },
-                       [this](const StartDialogueChoiceRequest &request) {
-                           handleRequest(request);
-                       },
-                       [this](const StartCutsceneRequest &request) {
-                           handleRequest(request);
-                       },
-                       [this](const StoryActionRequest &request) { handleRequest(request); }},
-                   req.payload);
+    for (int pass = 0; pass < maxRequestPasses; ++pass) {
+        std::vector<ModeRequest> requests = ctx.mailbox.drain();
+        if (requests.empty())
+            return;
+
+        for (auto &req : requests) {
+            std::visit(VariantUtils::Overloaded{
+                           [this](const ChangeStateRequest &request) { handleRequest(request); },
+                           [this](const EnterBattleModeRequest &request) { handleRequest(request); },
+                           [this](const StartWildBattleRequest &request) { handleRequest(request); },
+                           [this](const StartTrainerBattleRequest &request) {
+                               handleRequest(request);
+                           },
+                           [this](const EndBattleRequest &request) { handleRequest(request); },
+                           [this](const TransitionToMapRequest &request) {
+                               handleRequest(request);
+                           },
+                           [this](const StartDialogueRequest &request) {
+                               handleRequest(request);
+                           },
+                           [this](const StartDialogueChoiceRequest &request) {
+                               handleRequest(request);
+                           },
+                           [this](const StartCutsceneRequest &request) {
+                               handleRequest(request);
+                           },
+                           [this](const StoryActionRequest &request) { handleRequest(request); }},
+                       req.payload);
+        }
     }
+
+    if (!ctx.mailbox.pending.empty())
+        std::cerr << "SessionCoordinator: request processing exceeded pass limit\n";
 }
 
 void SessionCoordinator::switchMode(GameState newState) {
@@ -125,6 +133,9 @@ void SessionCoordinator::handleRequest(const StartCutsceneRequest &req) {
     if (ctx.cutsceneRunner.load(req.cutscenePath)) {
         ctx.cutsceneRunner.start();
         switchMode(GameState::cutscene);
+    } else {
+        std::cerr << "SessionCoordinator: failed to load cutscene '" << req.cutscenePath
+                  << "'\n";
     }
 }
 
@@ -145,22 +156,22 @@ void SessionCoordinator::handleStoryAction(const StoryNoAction & /*action*/) {}
 
 void SessionCoordinator::handleStoryAction(const StoryBlockWarpAction &action) {
     ctx.flow.pendingPushBack = true;
-    ctx.pushRequest(
-        ModeRequest::dialogue(action.speaker, action.lines, nullptr, GameState::overworld));
+    handleRequest(
+        StartDialogueRequest{action.speaker, action.lines, nullptr, GameState::overworld});
 }
 
 void SessionCoordinator::handleStoryAction(const StoryShowChoiceAction &action) {
-    ctx.pushRequest(
-        ModeRequest::dialogueChoice(action.options, action.choiceContext, ctx.flow.dialogueReturnState));
+    handleRequest(StartDialogueChoiceRequest{action.options, action.choiceContext,
+                                             ctx.flow.dialogueReturnState});
 }
 
 void SessionCoordinator::handleStoryAction(const StoryStartBattleAction &action) {
-    ctx.pushRequest(ModeRequest::trainerBattle(action.trainer));
+    handleRequest(StartTrainerBattleRequest{action.trainer});
 }
 
 void SessionCoordinator::handleStoryAction(const StoryShowDialogueAction &action) {
-    ctx.pushRequest(ModeRequest::dialogue(action.speaker, action.lines, nullptr,
-                                          GameState::overworld));
+    handleRequest(StartDialogueRequest{action.speaker, action.lines, nullptr,
+                                       GameState::overworld});
 }
 
 void SessionCoordinator::handleStoryAction(const StoryReturnToStateAction & /*action*/) {
@@ -172,7 +183,7 @@ void SessionCoordinator::handleStoryAction(const StoryReturnToStateAction & /*ac
 }
 
 void SessionCoordinator::handleStoryAction(const StoryStartCutsceneAction &action) {
-    ctx.pushRequest(ModeRequest::cutscene(action.cutscenePath));
+    handleRequest(StartCutsceneRequest{action.cutscenePath});
 }
 
 void SessionCoordinator::switchToMode(GameState newState, std::unique_ptr<GameMode> mode) {

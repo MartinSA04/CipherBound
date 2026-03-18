@@ -1,9 +1,12 @@
+#include "../../common/FilePaths.h"
 #include "../../game_data/Pokedex.h"
 #include "../World.h"
 #include "MapFormat.h"
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
 namespace {
 
@@ -47,6 +50,21 @@ bool isTileWalkable(TileType type) {
     default:
         return true;
     }
+}
+
+std::vector<std::filesystem::path> discoverMapFiles(const std::filesystem::path &mapRoot) {
+    std::vector<std::filesystem::path> mapFiles;
+    if (!std::filesystem::exists(mapRoot))
+        throw std::runtime_error("Map directory not found: " + mapRoot.string());
+
+    for (const auto &entry : std::filesystem::recursive_directory_iterator(mapRoot)) {
+        if (!entry.is_regular_file() || entry.path().extension() != ".map")
+            continue;
+        mapFiles.push_back(entry.path());
+    }
+
+    std::sort(mapFiles.begin(), mapFiles.end());
+    return mapFiles;
 }
 
 } // namespace
@@ -114,22 +132,40 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
         addNPC(definition.id, std::move(npc));
     }
 
-    if (definition.playerSpawn.has_value())
-        player = Player("Player", *definition.playerSpawn);
+    if (definition.playerSpawn.has_value()) {
+        if (defaultRespawnMapId.empty()) {
+            player = Player("Player", *definition.playerSpawn);
+            setDefaultRespawnPoint(definition.id, *definition.playerSpawn, player.getFacing());
+        } else {
+            std::cerr << "MapLoading(" << path.string()
+                      << "): ignoring additional player_spawn for map '" << definition.id
+                      << "'\n";
+        }
+    }
 
     return definition.id;
 }
 
 void World::generate(const Pokedex &pokedex) {
-    loadMap("assets/data/maps/pallet_town.map", pokedex);
-    loadMap("assets/data/maps/viridian_town.map", pokedex);
-    loadMap("assets/data/maps/house1_1f.map", pokedex);
-    std::string startMap = loadMap("assets/data/maps/house1_2f.map", pokedex);
-    loadMap("assets/data/maps/house2_1f.map", pokedex);
-    loadMap("assets/data/maps/bart_iver_lab.map", pokedex);
+    maps.clear();
+    npcs.clear();
+    currentMapId.clear();
+    defaultRespawnMapId.clear();
+    defaultRespawnPosition = {0, 0};
+    defaultRespawnFacing = Direction::down;
+    player = Player("Player", {5, 5});
 
-    loadMap("assets/data/maps/route_1.map", pokedex);
+    const std::filesystem::path mapRoot = FilePaths::resolveExistingPath("assets/data/maps");
+    const std::vector<std::filesystem::path> mapFiles = discoverMapFiles(mapRoot);
+    if (mapFiles.empty())
+        throw std::runtime_error("No map files found under: " + mapRoot.string());
 
-    setDefaultRespawnPoint(startMap, player.getPosition(), player.getFacing());
-    setCurrentMap(startMap);
+    for (const auto &mapPath : mapFiles)
+        loadMap(mapPath, pokedex);
+
+    if (defaultRespawnMapId.empty())
+        throw std::runtime_error("No map with player_spawn found under: " + mapRoot.string());
+
+    setCurrentMap(defaultRespawnMapId);
+    maps.at(currentMapId).setOccupied(player.getPosition(), true);
 }

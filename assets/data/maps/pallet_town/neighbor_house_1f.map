@@ -1,8 +1,8 @@
-# Rival's House - 1st Floor
+# Neighbor's House - 1st Floor
 # Map description file
 
 [header]
-id|house2_1f
+id|neighbor_house_1f
 width|13
 height|10
 background|assets/tilesets/pallet_town/maps/house2_1f.png

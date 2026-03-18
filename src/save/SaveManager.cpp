@@ -4,6 +4,20 @@
 #include <fstream>
 #include <iostream>
 
+namespace {
+
+std::string normalizeLegacyMapId(const std::string &mapId) {
+    if (mapId == "house1_1f")
+        return "player_house_1f";
+    if (mapId == "house1_2f")
+        return "player_house_2f";
+    if (mapId == "house2_1f")
+        return "neighbor_house_1f";
+    return mapId;
+}
+
+} // namespace
+
 SaveManager::SaveManager() : baseSavePath("saves/") {}
 
 // --- Save game ---
@@ -95,7 +109,8 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
     restored.setFacing(parsed.data.facing);
     restored.setMoney(parsed.data.money);
     if (!parsed.data.respawnMapId.empty() && parsed.data.respawnPosition.has_value()) {
-        restored.setRespawnPoint(parsed.data.respawnMapId, *parsed.data.respawnPosition,
+        restored.setRespawnPoint(normalizeLegacyMapId(parsed.data.respawnMapId),
+                                 *parsed.data.respawnPosition,
                                  parsed.data.respawnFacing.value_or(Direction::down));
     }
 
@@ -137,15 +152,17 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
     for (const auto &state : parsed.data.npcStates) {
         if (!state.defeated)
             continue;
-        if (NPC *npc = world.findNPCById(state.mapId, state.npcId); npc != nullptr)
+        if (NPC *npc = world.findNPCById(normalizeLegacyMapId(state.mapId), state.npcId);
+            npc != nullptr) {
             npc->setDefeated(true);
+        }
     }
 
     if (!world.getCurrentMapId().empty())
         world.getMap(world.getCurrentMapId()).setOccupied(player.getPosition(), false);
 
     if (!parsed.data.mapId.empty())
-        world.setCurrentMap(parsed.data.mapId);
+        world.setCurrentMap(normalizeLegacyMapId(parsed.data.mapId));
 
     world.setPlayer(std::move(restored));
     if (!world.getCurrentMapId().empty())

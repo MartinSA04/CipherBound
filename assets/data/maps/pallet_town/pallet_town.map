@@ -47,8 +47,8 @@ background_overlay|assets/tilesets/pallet_town/maps/overworld_overlay.png
 
 [warps]
 # Format: fromX|fromY|targetMapId|targetX|targetY
-6|7|house1_1f|4|8
-15|7|house2_1f|4|8
+6|7|player_house_1f|4|8
+15|7|neighbor_house_1f|4|8
 16|13|bart_iver_lab|6|12
 12|0|route_1|12|38
 13|0|route_1|13|38

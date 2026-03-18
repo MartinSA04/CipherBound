@@ -7,7 +7,11 @@ World::World(int seed)
 
 // --- Map management ---
 
-void World::addMap(const std::string &id, Map map) { maps.emplace(id, std::move(map)); }
+void World::addMap(const std::string &id, Map map) {
+    const auto [_, inserted] = maps.emplace(id, std::move(map));
+    if (!inserted)
+        throw std::runtime_error("Duplicate map id: " + id);
+}
 
 Map &World::getMap(const std::string &id) {
     auto it = maps.find(id);

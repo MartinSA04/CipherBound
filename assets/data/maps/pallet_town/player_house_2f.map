@@ -2,7 +2,7 @@
 # Map description file
 
 [header]
-id|house1_2f
+id|player_house_2f
 width|12
 height|9
 background|assets/tilesets/pallet_town/maps/house1_2f.png
@@ -21,7 +21,7 @@ player_spawn|2|3
 
 [warps]
 # Format: fromX|fromY|targetMapId|targetX|targetY
-9|2|house1_1f|10|2
+9|2|player_house_1f|10|2
 
 [encounters]
 

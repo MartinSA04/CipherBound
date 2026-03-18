@@ -475,6 +475,33 @@ world_respawn_test = executable(
 
 test('world_respawn', world_respawn_test)
 
+world_generate_test = executable(
+  'world_generate_test',
+  [
+    'tests/WorldGenerateTest.cpp',
+    'src/common/FilePaths.cpp',
+    'src/game_data/Pokedex.cpp',
+    'src/state/Daemon.cpp',
+    'src/state/Entity.cpp',
+    'src/state/Map.cpp',
+    'src/state/Movement.cpp',
+    'src/state/NPC.cpp',
+    'src/state/World.cpp',
+    'src/state/world/Encounters.cpp',
+    'src/state/world/MapFormat.cpp',
+    'src/state/world/MapLoading.cpp',
+    'src/state/world/NPCs.cpp',
+    'src/state/player/DaemonDex.cpp',
+    'src/state/player/EventFlags.cpp',
+    'src/state/player/Inventory.cpp',
+    'src/state/player/Party.cpp',
+    'src/state/player/Player.cpp',
+    'src/state/player/WalkAnimation.cpp',
+  ],
+)
+
+test('world_generate', world_generate_test)
+
 save_manager_roundtrip_test = executable(
   'save_manager_roundtrip_test',
   [

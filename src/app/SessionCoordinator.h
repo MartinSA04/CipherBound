@@ -25,6 +25,7 @@ class SessionCoordinator {
     void handleRequest(const TransitionToMapRequest &req);
     void handleRequest(const StartDialogueRequest &req);
     void handleRequest(const StartDialogueChoiceRequest &req);
+    void handleRequest(const OpenShopRequest &req);
     void handleRequest(const StartCutsceneRequest &req);
     void handleRequest(const StoryActionRequest &req);
     void handleStoryAction(const StoryNoAction &action);

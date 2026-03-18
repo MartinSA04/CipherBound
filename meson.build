@@ -50,6 +50,7 @@ app_src = [
   'src/app/modes/TransitionMode.cpp',
   'src/app/modes/PartyMode.cpp',
   'src/app/modes/BagMode.cpp',
+  'src/app/modes/ShopMode.cpp',
   'src/app/modes/SaveMode.cpp',
   'src/app/modes/DialogueMode.cpp',
   'src/app/modes/DialogueChoiceMode.cpp',

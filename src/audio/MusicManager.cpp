@@ -9,9 +9,13 @@ void MusicManager::loadAll() {
     tracks[MusicTrack::titleScreen] =
         std::make_unique<TDT4102::Audio>(base + "1-02_Title_Screen_.mp3");
     tracks[MusicTrack::town] = std::make_unique<TDT4102::Audio>(base + "1-04. New Bark Town_.mp3");
+    tracks[MusicTrack::city] = std::make_unique<TDT4102::Audio>(base + "022 Violet City.mp3");
     tracks[MusicTrack::lab] = std::make_unique<TDT4102::Audio>(base + "1-07. Elm Pokemon Lab_.mp3");
-    tracks[MusicTrack::route] = std::make_unique<TDT4102::Audio>(
-        base + "1-04. New Bark Town_.mp3"); // reuse town for route (or swap)
+    tracks[MusicTrack::route] = std::make_unique<TDT4102::Audio>(base + "020 Route 30.mp3");
+    tracks[MusicTrack::center] = std::make_unique<TDT4102::Audio>(base + "015 Pokémon Center.mp3");
+    tracks[MusicTrack::mart] = std::make_unique<TDT4102::Audio>(base + "25. Poké Mart.mp3");
+    tracks[MusicTrack::trainerEyesMeet] =
+        std::make_unique<TDT4102::Audio>(base + "17. Trainers' Eyes Meet (Boy 1).mp3");
     tracks[MusicTrack::wildBattle] =
         std::make_unique<TDT4102::Audio>(base + "1-10. Battle! (Wild Pokemon-Johto Version)_.mp3");
     tracks[MusicTrack::wildVictory] =
@@ -39,6 +43,18 @@ void MusicManager::play(MusicTrack track, TDT4102::AnimationWindow &window) {
         window.play_audio(*it->second, 9999); // loop many times
 }
 
+void MusicManager::playOneShot(MusicTrack track, TDT4102::AnimationWindow &window) {
+    Mix_HaltMusic();
+    currentTrack = track;
+
+    if (track == MusicTrack::none)
+        return;
+
+    auto it = tracks.find(track);
+    if (it != tracks.end() && it->second)
+        window.play_audio(*it->second, 0);
+}
+
 void MusicManager::stop() {
     Mix_HaltMusic();
     currentTrack = MusicTrack::none;
@@ -49,6 +65,12 @@ MusicTrack MusicManager::trackForMap(const std::string &mapId) {
         return MusicTrack::lab;
     if (mapId == "route_1")
         return MusicTrack::route;
+    if (mapId == "viridian_town")
+        return MusicTrack::city;
+    if (mapId == "viridian_center")
+        return MusicTrack::center;
+    if (mapId == "viridian_mart")
+        return MusicTrack::mart;
     // Towns and houses
     return MusicTrack::town;
 }

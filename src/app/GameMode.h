@@ -33,6 +33,7 @@ enum class GameState {
     menu,
     party,
     bag,
+    shop,
     saving,
     dialogue,
     dialogueChoice,
@@ -85,6 +86,12 @@ struct StartDialogueChoiceRequest {
     GameState returnState{GameState::overworld};
 };
 
+struct OpenShopRequest {
+    std::string title;
+    std::string shopkeeperName;
+    std::vector<int> itemIds;
+};
+
 struct StartCutsceneRequest {
     std::string cutscenePath;
 };
@@ -98,7 +105,7 @@ struct ModeRequest {
         std::variant<ChangeStateRequest, EnterBattleModeRequest, StartWildBattleRequest,
                      StartTrainerBattleRequest, StartTrainerBattleIntroRequest, EndBattleRequest,
                      TransitionToMapRequest, StartDialogueRequest, StartDialogueChoiceRequest,
-                     StartCutsceneRequest, StoryActionRequest>;
+                     OpenShopRequest, StartCutsceneRequest, StoryActionRequest>;
 
     Payload payload;
 
@@ -135,6 +142,12 @@ struct ModeRequest {
                                       GameState retState = GameState::overworld) {
         return ModeRequest{StartDialogueChoiceRequest{
             std::move(options), std::move(context), retState}};
+    }
+
+    static ModeRequest openShop(std::string title, std::string shopkeeperName,
+                                std::vector<int> itemIds) {
+        return ModeRequest{
+            OpenShopRequest{std::move(title), std::move(shopkeeperName), std::move(itemIds)}};
     }
 
     static ModeRequest cutscene(std::string path) {

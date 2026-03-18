@@ -19,13 +19,21 @@ int main() {
     ModeMailbox mailbox;
     mailbox.push(ModeRequest::changeState(GameState::party));
     mailbox.push(ModeRequest::trainerBattle(trainer));
+    mailbox.push(ModeRequest::openShop("Viridian Mart", "Clerk", {1, 5}));
 
     std::vector<ModeRequest> drained = mailbox.drain();
-    assert(drained.size() == 2);
+    assert(drained.size() == 3);
     assert(std::holds_alternative<ChangeStateRequest>(drained[0].payload));
     assert(std::get<ChangeStateRequest>(drained[0].payload).targetState == GameState::party);
     assert(std::holds_alternative<StartTrainerBattleRequest>(drained[1].payload));
     assert(std::get<StartTrainerBattleRequest>(drained[1].payload).npc == trainer);
+    assert(std::holds_alternative<OpenShopRequest>(drained[2].payload));
+    const auto &shopPayload = std::get<OpenShopRequest>(drained[2].payload);
+    assert(shopPayload.title == "Viridian Mart");
+    assert(shopPayload.shopkeeperName == "Clerk");
+    assert(shopPayload.itemIds.size() == 2);
+    assert(shopPayload.itemIds[0] == 1);
+    assert(shopPayload.itemIds[1] == 5);
 
     assert(mailbox.drain().empty());
     return 0;

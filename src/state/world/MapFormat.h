@@ -19,6 +19,7 @@ struct NPCDefinition {
     std::string spriteType;
     std::string name;
     NPCType type{NPCType::normal};
+    bool hidden{false};
     Position position{0, 0};
     Direction facing{Direction::down};
     int sightRange{0};

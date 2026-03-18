@@ -44,13 +44,19 @@ class GameUI {
 
     void drawPartyList(const Player &player, int selected);
     void drawBagScreen(const Player &player, const Pokedex &pokedex, int selected);
+    void drawShopScreen(const Player &player, const Pokedex &pokedex,
+                        const std::vector<int> &itemIds, int selected,
+                        const std::string &title, const std::string &footerText);
     void drawSummaryScreen(const Daemon &daemon, const Pokedex &pokedex, int page = 0);
 
     void navigateVertical(int &selected, int count);
+    void navigateHorizontal(int &selected, int count);
+    void navigateLinear(int &selected, int count);
     void navigate2x2(int &selected);
 
     void drawDialogueBox(const std::string &speaker, const std::string &text);
     void drawChoiceBox(const std::vector<std::string> &options, int selected);
+    void drawShopQuantityBox(int quantity);
 
     void startDialogue(const std::string &speaker, const std::vector<std::string> &lines);
     bool advanceDialogueLine();

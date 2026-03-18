@@ -10,6 +10,11 @@ using StringUtils::trimRightInPlace;
 namespace MapFormat {
 namespace {
 
+struct NPCSpriteSpec {
+    std::string spriteType;
+    bool hidden{false};
+};
+
 enum class Section { none, header, tiles, warps, encounters, npcs };
 
 NPCType parseNPCType(std::string_view value) {
@@ -98,6 +103,23 @@ std::vector<NPCPartyMember> parseNPCParty(std::string_view encoded) {
     return party;
 }
 
+NPCSpriteSpec parseNPCSpriteSpec(std::string_view encoded) {
+    NPCSpriteSpec spec;
+    if (encoded.empty())
+        return spec;
+
+    const auto parts = TextParse::splitView(encoded, '@');
+    if (!parts.empty() && !parts[0].empty() && parts[0] != "-")
+        spec.spriteType = std::string(parts[0]);
+
+    for (std::size_t i = 1; i < parts.size(); ++i) {
+        if (parts[i] == "hidden")
+            spec.hidden = true;
+    }
+
+    return spec;
+}
+
 std::optional<NPCDefinition> parseNPC(std::string_view line) {
     const auto parts = TextParse::splitView(line, '|');
     if (parts.size() != 10)
@@ -116,8 +138,9 @@ std::optional<NPCDefinition> parseNPC(std::string_view line) {
     npc.facing = parseDirection(std::string(parts[5]));
     npc.sightRange = *sightRange;
     npc.dialogueStages = parseDialogueStages(parts[7]);
-    if (!parts[8].empty() && parts[8] != "-")
-        npc.spriteType = std::string(parts[8]);
+    const NPCSpriteSpec spriteSpec = parseNPCSpriteSpec(parts[8]);
+    npc.spriteType = spriteSpec.spriteType;
+    npc.hidden = spriteSpec.hidden;
     npc.party = parseNPCParty(parts[9]);
     return npc;
 }

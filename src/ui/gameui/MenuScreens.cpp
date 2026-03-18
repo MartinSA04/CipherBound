@@ -256,3 +256,86 @@ void GameUI::drawBagScreen(const Player &player, const Pokedex &pokedex, int sel
         spriteFont.drawText(renderer, item.description, 28 + 4 * scale, descY + 5 * scale, scale);
     }
 }
+
+void GameUI::drawShopScreen(const Player &player, const Pokedex &pokedex,
+                            const std::vector<int> &itemIds, int selected,
+                            const std::string &title, const std::string &footerText) {
+    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{182, 172, 145});
+
+    const int scale = PIXEL_SCALE;
+    const int outerPadding = 5 * scale;
+    const int headerHeight = 24 * scale;
+    const int sectionGap = 3 * scale;
+    const int listWidth = 132 * scale;
+    const int listHeight = 110 * scale;
+    const int detailGap = 3 * scale;
+    const int panelY = headerHeight + 10 * scale;
+
+    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, headerHeight, TDT4102::Color{98, 82, 56});
+    spriteFont.drawText(renderer, title, outerPadding, 4 * scale, scale);
+
+    const std::string moneyText = "$" + std::to_string(player.getMoney());
+    const int moneyTextWidth = spriteFont.getTextWidth(moneyText, scale);
+    spriteFont.drawText(renderer, moneyText, WINDOW_WIDTH - moneyTextWidth - outerPadding,
+                        4 * scale, scale);
+
+    const int listX = outerPadding;
+    const int listY = panelY;
+    renderer.drawFilledRect(listX, listY, listWidth, listHeight, TDT4102::Color{238, 231, 214});
+    renderer.drawRect(listX, listY, listWidth, listHeight, TDT4102::Color::transparent,
+                      TDT4102::Color{70, 60, 40});
+
+    if (itemIds.empty()) {
+        spriteFont.drawText(renderer, "Sold out", listX + 8 * scale, listY + 8 * scale, scale);
+    } else {
+        int sy = listY + 6 * scale;
+        for (std::size_t i = 0; i < itemIds.size(); ++i) {
+            const bool isSelected = static_cast<int>(i) == selected;
+            const ItemData &item = pokedex.getItem(itemIds[i]);
+            if (isSelected) {
+                renderer.drawFilledRect(listX + scale, sy - scale / 2, listWidth - 2 * scale,
+                                        16 * scale,
+                                        TDT4102::Color{255, 239, 181});
+                drawSelectionArrow(listX + scale / 2, sy + 4 * scale, scale);
+            }
+
+            spriteFont.drawText(renderer, item.name, listX + 6 * scale, sy, scale);
+            const std::string priceText = "$" + std::to_string(item.value);
+            const int priceX =
+                listX + listWidth - spriteFont.getTextWidth(priceText, scale) - 8 * scale;
+            spriteFont.drawText(renderer, priceText, priceX, sy, scale);
+            sy += 16 * scale;
+        }
+    }
+
+    const int detailX = listX + listWidth + detailGap;
+    const int detailY = listY;
+    const int detailW = WINDOW_WIDTH - detailX - outerPadding;
+    const int detailH = listHeight;
+    renderer.drawFilledRect(detailX, detailY, detailW, detailH, TDT4102::Color{248, 244, 232});
+    renderer.drawRect(detailX, detailY, detailW, detailH, TDT4102::Color::transparent,
+                      TDT4102::Color{70, 60, 40});
+
+    if (!itemIds.empty()) {
+        const ItemData &item = pokedex.getItem(itemIds[static_cast<std::size_t>(selected)]);
+        const int detailTextX = detailX + 8 * scale;
+        spriteFont.drawText(renderer, item.name, detailTextX, detailY + 6 * scale, scale);
+
+        const std::string ownedText = "Owned: " + std::to_string(player.getItemCount(item.id));
+        spriteFont.drawText(renderer, ownedText, detailTextX, detailY + 22 * scale, scale);
+
+        const std::string costText = "Price: $" + std::to_string(item.value);
+        spriteFont.drawText(renderer, costText, detailTextX, detailY + 38 * scale, scale);
+
+        const int descriptionX = detailTextX;
+        const int descriptionY = detailY + 54 * scale;
+        const int descriptionWidth = detailW - 16 * scale;
+        spriteFont.drawTextPartial(renderer, item.description, item.description.size(), descriptionX,
+                                   descriptionY, scale, 1, descriptionWidth);
+    }
+
+    const int hintY = WINDOW_HEIGHT - 20 * scale;
+    drawNarrowTextBar(outerPadding, hintY, 220, scale);
+    spriteFont.drawText(renderer, footerText, outerPadding + sectionGap * 4, hintY + 5 * scale,
+                        scale);
+}

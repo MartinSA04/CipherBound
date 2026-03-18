@@ -9,8 +9,12 @@ enum class MusicTrack {
     none,
     titleScreen,
     town,
+    city,
     lab,
     route,
+    center,
+    mart,
+    trainerEyesMeet,
     wildBattle,
     wildVictory,
     trainerBattle,
@@ -26,6 +30,9 @@ class MusicManager {
 
     // Play a track (does nothing if already playing that track)
     void play(MusicTrack track, TDT4102::AnimationWindow &window);
+
+    // Play a track once immediately, interrupting current music.
+    void playOneShot(MusicTrack track, TDT4102::AnimationWindow &window);
 
     // Stop current music
     void stop();

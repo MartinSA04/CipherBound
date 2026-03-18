@@ -118,28 +118,32 @@ void GameUI::drawDialogueBox(const std::string &speaker, const std::string &text
 }
 
 void GameUI::drawChoiceBox(const std::vector<std::string> &options, int selected) {
-    int scale = PIXEL_SCALE;
+    const int scale = PIXEL_SCALE;
+    const int innerPaddingX = 5 * scale;
+    const int innerPaddingY = 4 * scale;
+    const int outerPadding = 5 * scale;
+    const int gapAboveTextbox = 3 * scale;
     int maxTextW = 0;
     for (const auto &opt : options) {
         int tw = spriteFont.getTextWidth(opt, scale);
         if (tw > maxTextW)
             maxTextW = tw;
     }
-    int boxWidth = maxTextW + 10 * scale;
-    int itemHeight = 16 * scale + 8;
-    int boxHeight = 16;
-    int optionCount = static_cast<int>(options.size());
-    for (int i = 0; i < optionCount; ++i) {
+    const int boxWidth = maxTextW + innerPaddingX * 2;
+    const int itemHeight = 16 * scale + 4 * scale;
+    int boxHeight = innerPaddingY * 2;
+    const int optionCount = static_cast<int>(options.size());
+    for (int i = 0; i < optionCount; ++i)
         boxHeight += itemHeight;
-    }
-    int boxX = WINDOW_WIDTH - boxWidth - 20;
-    int boxY = WINDOW_HEIGHT - UI_PANEL_HEIGHT - boxHeight - 10;
+
+    const int boxX = WINDOW_WIDTH - boxWidth - outerPadding;
+    const int boxY = WINDOW_HEIGHT - UI_PANEL_HEIGHT - boxHeight - gapAboveTextbox;
 
     renderer.drawFilledRect(boxX, boxY, boxWidth, boxHeight, TDT4102::Color{240, 245, 255});
     renderer.drawRect(boxX, boxY, boxWidth, boxHeight, TDT4102::Color::transparent,
                       TDT4102::Color{60, 70, 100});
 
-    int oy = boxY + 8;
+    int oy = boxY + innerPaddingY;
     for (int i = 0; i < optionCount; ++i) {
         if (i == selected)
             drawSelectionArrow(boxX + 2 * scale, oy + 4 * scale, scale);
@@ -147,6 +151,25 @@ void GameUI::drawChoiceBox(const std::vector<std::string> &options, int selected
                             scale);
         oy += itemHeight;
     }
+}
+
+void GameUI::drawShopQuantityBox(int quantity) {
+    const int scale = PIXEL_SCALE;
+    const int innerPaddingX = 5 * scale;
+    const int innerPaddingY = 4 * scale;
+    const int outerPadding = 5 * scale;
+    const int gapAboveTextbox = 3 * scale;
+    const std::string quantityText = "x" + std::to_string(quantity);
+
+    const int boxWidth = spriteFont.getTextWidth(quantityText, scale) + innerPaddingX * 2;
+    const int boxHeight = 16 * scale + innerPaddingY * 2;
+    const int boxX = WINDOW_WIDTH - boxWidth - outerPadding;
+    const int boxY = WINDOW_HEIGHT - UI_PANEL_HEIGHT - boxHeight - gapAboveTextbox;
+
+    renderer.drawFilledRect(boxX, boxY, boxWidth, boxHeight, TDT4102::Color{240, 245, 255});
+    renderer.drawRect(boxX, boxY, boxWidth, boxHeight, TDT4102::Color::transparent,
+                      TDT4102::Color{60, 70, 100});
+    spriteFont.drawText(renderer, quantityText, boxX + innerPaddingX, boxY + innerPaddingY, scale);
 }
 
 void GameUI::drawTextBox(int x, int y, int width, int height, const std::string &text) {

@@ -27,6 +27,8 @@ int main() {
         "player_house_1f",
         "player_house_2f",
         "route_1",
+        "viridian_center",
+        "viridian_mart",
         "viridian_town",
     };
     assert(mapIds == expectedMapIds);

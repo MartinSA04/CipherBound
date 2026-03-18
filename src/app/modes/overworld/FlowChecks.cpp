@@ -3,6 +3,23 @@
 #include "../../../state/player/Player.h"
 #include "../../../story/StoryManager.h"
 #include "../OverworldMode.h"
+#include <optional>
+#include <vector>
+
+namespace {
+
+struct ShopDefinition {
+    std::string title;
+    std::vector<int> itemIds;
+};
+
+std::optional<ShopDefinition> shopDefinitionFor(const NPC &npc) {
+    if (npc.getId() == "viridian_mart_shopkeeper")
+        return ShopDefinition{"Viridian Mart", {1, 5}};
+    return std::nullopt;
+}
+
+} // namespace
 
 bool OverworldMode::wildBattleStarts(GameContext &ctx) {
     Player &player = ctx.world.getPlayer();
@@ -57,6 +74,14 @@ bool OverworldMode::trainerBattleStarts(GameContext &ctx) {
 bool OverworldMode::dialogueStarts(GameContext &ctx, NPC *npc) {
     Player &player = ctx.world.getPlayer();
     std::vector<std::string> lines = npc->getDialogueLines(player.getFlags());
+
+    if (npc->getType() == NPCType::shopkeeper) {
+        if (const auto shop = shopDefinitionFor(*npc); shop.has_value()) {
+            ctx.pushRequest(ModeRequest::openShop(shop->title, npc->getName(), shop->itemIds));
+            return true;
+        }
+        return false;
+    }
 
     if (npc->getType() == NPCType::healer) {
         ctx.world.healPlayerParty();

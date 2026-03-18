@@ -92,6 +92,88 @@ void GameUI::navigateVertical(int &selected, int count) {
     }
 }
 
+void GameUI::navigateHorizontal(int &selected, int count) {
+    if (count <= 0)
+        return;
+
+    if (selected < 0 || selected >= count)
+        selected = (selected % count + count) % count;
+
+    Direction dir;
+    bool dirHeld = input.getMovementDirection(dir);
+
+    if (dirHeld && (dir == Direction::left || dir == Direction::right)) {
+        if (!menuDirHeld || dir != menuLastDir) {
+            if (dir == Direction::left)
+                selected = (selected - 1 + count) % count;
+            else
+                selected = (selected + 1) % count;
+            menuRepeatTimer = 0;
+            menuFirstRepeat = true;
+            menuDirHeld = true;
+            menuLastDir = dir;
+        } else {
+            menuRepeatTimer++;
+            int delay = menuFirstRepeat ? menuInitialDelay : menuRepeatDelay;
+            if (menuRepeatTimer >= delay) {
+                if (dir == Direction::left)
+                    selected = (selected - 1 + count) % count;
+                else
+                    selected = (selected + 1) % count;
+                menuRepeatTimer = 0;
+                menuFirstRepeat = false;
+            }
+        }
+    } else {
+        menuDirHeld = false;
+        menuRepeatTimer = 0;
+        menuFirstRepeat = true;
+    }
+}
+
+void GameUI::navigateLinear(int &selected, int count) {
+    if (count <= 0)
+        return;
+
+    if (selected < 0 || selected >= count)
+        selected = (selected % count + count) % count;
+
+    Direction dir;
+    bool dirHeld = input.getMovementDirection(dir);
+
+    if (dirHeld) {
+        const bool decrement = dir == Direction::down || dir == Direction::left;
+        const bool increment = dir == Direction::up || dir == Direction::right;
+
+        if (!decrement && !increment) {
+            menuDirHeld = false;
+            menuRepeatTimer = 0;
+            menuFirstRepeat = true;
+            return;
+        }
+
+        if (!menuDirHeld || dir != menuLastDir) {
+            selected = decrement ? (selected - 1 + count) % count : (selected + 1) % count;
+            menuRepeatTimer = 0;
+            menuFirstRepeat = true;
+            menuDirHeld = true;
+            menuLastDir = dir;
+        } else {
+            menuRepeatTimer++;
+            int delay = menuFirstRepeat ? menuInitialDelay : menuRepeatDelay;
+            if (menuRepeatTimer >= delay) {
+                selected = decrement ? (selected - 1 + count) % count : (selected + 1) % count;
+                menuRepeatTimer = 0;
+                menuFirstRepeat = false;
+            }
+        }
+    } else {
+        menuDirHeld = false;
+        menuRepeatTimer = 0;
+        menuFirstRepeat = true;
+    }
+}
+
 void GameUI::navigate2x2(int &sel) {
     if (input.isRightHeld() && (sel % 2) == 0)
         sel += 1;

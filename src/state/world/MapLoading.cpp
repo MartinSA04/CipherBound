@@ -126,7 +126,7 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
             npc->addDaemon(Daemon(species, entry.level));
         }
 
-        if (npc->getType() == NPCType::pc)
+        if (npcDefinition.hidden || npc->getType() == NPCType::pc)
             npc->setHidden(true);
 
         addNPC(definition.id, std::move(npc));

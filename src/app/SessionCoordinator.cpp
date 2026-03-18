@@ -17,6 +17,7 @@
 #include "modes/PCBoxMode.h"
 #include "modes/PartyMode.h"
 #include "modes/SaveMode.h"
+#include "modes/ShopMode.h"
 #include "modes/TitleScreenMode.h"
 #include "modes/TransitionMode.h"
 #include <iostream>
@@ -74,6 +75,7 @@ void SessionCoordinator::processRequests() {
                            [this](const StartDialogueChoiceRequest &request) {
                                handleRequest(request);
                            },
+                           [this](const OpenShopRequest &request) { handleRequest(request); },
                            [this](const StartCutsceneRequest &request) {
                                handleRequest(request);
                            },
@@ -113,6 +115,9 @@ void SessionCoordinator::handleRequest(const StartTrainerBattleRequest &req) {
         handleRequest(StartTrainerBattleIntroRequest{req.npc});
         return;
     }
+
+    if (req.includePreBattleDialogue)
+        ctx.music.playOneShot(MusicTrack::trainerEyesMeet, ctx.ui.getRenderer().getWindow());
 
     ctx.flow.cutsceneEndRequest = ModeRequest::trainerBattleIntro(req.npc);
 
@@ -173,6 +178,11 @@ void SessionCoordinator::handleRequest(const StartDialogueChoiceRequest &req) {
     switchToMode(GameState::dialogueChoice,
                  std::make_unique<DialogueChoiceMode>(req.choiceOptions, req.choiceContext,
                                                       ctx.flow.dialogueReturnState));
+}
+
+void SessionCoordinator::handleRequest(const OpenShopRequest &req) {
+    switchToMode(GameState::shop,
+                 std::make_unique<ShopMode>(req.title, req.shopkeeperName, req.itemIds));
 }
 
 void SessionCoordinator::handleRequest(const StartCutsceneRequest &req) {
@@ -259,6 +269,8 @@ std::unique_ptr<GameMode> SessionCoordinator::createMode(GameState state) {
         return std::make_unique<PartyMode>();
     case GameState::bag:
         return std::make_unique<BagMode>();
+    case GameState::shop:
+        return std::make_unique<ShopMode>();
     case GameState::saving:
         return std::make_unique<SaveMode>();
     case GameState::pcBox:
@@ -286,6 +298,8 @@ ScreenType SessionCoordinator::screenForState(GameState gs) {
         return ScreenType::party;
     case GameState::bag:
         return ScreenType::bag;
+    case GameState::shop:
+        return ScreenType::shop;
     case GameState::saving:
         return ScreenType::dialogue;
     case GameState::dialogue:

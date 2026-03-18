@@ -206,11 +206,16 @@ void Battle::executeTurn() {
         addMessage("It dealt " + std::to_string(resolution.damage) + " damage!");
 
         if (resolution.defenderFainted) {
-            const int exp = BattleRules::calculateExpYield(getOpponentDaemon());
-            playerDaemon.addExp(exp);
+            expGained = BattleRules::calculateExpYield(getOpponentDaemon());
+            moneyGained = BattleRules::calculateMoneyReward(getOpponentDaemon(), type);
+            playerDaemon.addExp(expGained);
+            if (moneyGained > 0)
+                player.addMoney(moneyGained);
             addMessage("The opposing " + getOpponentDaemon().getNickname() + " fainted!");
-            addMessage("Gained " + std::to_string(exp) + " EXP!");
+            addMessage("Gained " + std::to_string(expGained) + " EXP!");
             addEXPAnimMarker();
+            if (moneyGained > 0)
+                addMessage("Received " + std::to_string(moneyGained) + " dollars!");
             addMessage("You won!");
             pendingState = BattleState::victory;
             state = BattleState::showingMessages;
@@ -262,8 +267,17 @@ void Battle::executeOpponentTurn() {
 
     if (resolution.defenderFainted) {
         addMessage(playerDaemon.getNickname() + " fainted!");
-        pendingState = BattleState::defeat;
+        const int replacementIndex = player.findFirstUsableDaemonIndex(1);
+        if (replacementIndex >= 0) {
+            pendingAutoSwitchIndex = replacementIndex;
+            pendingState = BattleState::choosingAction;
+        } else {
+            pendingAutoSwitchIndex = -1;
+            addMessage("You blacked out!");
+            pendingState = BattleState::defeat;
+        }
     } else {
+        pendingAutoSwitchIndex = -1;
         pendingState = BattleState::choosingAction;
     }
     state = BattleState::showingMessages;
@@ -277,8 +291,8 @@ BattleResult Battle::getResult() const {
     result.playerWon = (state == BattleState::victory || state == BattleState::captured);
     result.playerFled = (state == BattleState::fled);
     result.captured = (state == BattleState::captured);
-    result.expGained = 0;
-    result.moneyGained = 0;
+    result.expGained = expGained;
+    result.moneyGained = moneyGained;
     return result;
 }
 
@@ -386,6 +400,12 @@ void Battle::addAttackAnimMarker(bool isPlayer) { eventQueue.pushAttackAnimation
 
 void Battle::transitionToQueuedState() {
     state = eventQueue.consume(pendingState, introPhase, attackAnimIsPlayer);
+    if (state == pendingState && eventQueue.empty() && pendingAutoSwitchIndex >= 0) {
+        player.swapDaemon(0, pendingAutoSwitchIndex);
+        pendingAutoSwitchIndex = -1;
+        addMessage("Go, " + player.getDaemon(0).getNickname() + "!");
+        state = BattleState::showingMessages;
+    }
 }
 
 void Battle::finishAttackAnimation() { transitionToQueuedState(); }

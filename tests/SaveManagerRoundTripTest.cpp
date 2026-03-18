@@ -36,6 +36,7 @@ int main() {
 
     Player original("Ada", {3, 4});
     original.setFacing(Direction::left);
+    original.setRespawnPoint("other", {5, 6}, Direction::up);
     original.addItem(5, 7);
     original.addBadge("badge_alpha");
     original.setFlag("intro_done");
@@ -69,6 +70,10 @@ int main() {
     assert(world.getPlayer().getName() == "Ada");
     assert((world.getPlayer().getPosition() == Position{3, 4}));
     assert(world.getPlayer().getFacing() == Direction::left);
+    assert(world.getPlayer().hasRespawnPoint());
+    assert(world.getPlayer().getRespawnMapId() == "other");
+    assert((world.getPlayer().getRespawnPosition() == Position{5, 6}));
+    assert(world.getPlayer().getRespawnFacing() == Direction::up);
     assert(world.getPlayer().getItemCount(5) == 7);
     assert(world.getPlayer().hasBadge("badge_alpha"));
     assert(world.getPlayer().hasFlag("intro_done"));

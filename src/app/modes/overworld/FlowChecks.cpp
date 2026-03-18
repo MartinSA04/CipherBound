@@ -56,8 +56,16 @@ bool OverworldMode::trainerBattleStarts(GameContext &ctx) {
 
 bool OverworldMode::dialogueStarts(GameContext &ctx, NPC *npc) {
     Player &player = ctx.world.getPlayer();
+    std::vector<std::string> lines = npc->getDialogueLines(player.getFlags());
 
-    const auto &lines = npc->getDialogueLines(player.getFlags());
+    if (npc->getType() == NPCType::healer) {
+        ctx.world.healPlayerParty();
+        ctx.world.markHealingCenterUsed(player.getPosition(), player.getFacing());
+        ctx.playSound(SoundEffect::recovery);
+        if (lines.empty())
+            lines = {"Your party is back in shape!"};
+    }
+
     if (lines.empty())
         return false;
 

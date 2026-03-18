@@ -81,6 +81,9 @@ class Battle {
     int itemChoice;
     int switchTarget;
     BattleAction currentAction;
+    int pendingAutoSwitchIndex{-1};
+    int expGained{0};
+    int moneyGained{0};
 
     std::mt19937 &rng;
     const Pokedex &pokedex;

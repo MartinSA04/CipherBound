@@ -48,6 +48,18 @@ class Player : public Entity {
     void addMoney(int amount);
     bool spendMoney(int amount);
     void setMoney(int amount);
+    void fullHealParty();
+    bool hasUsableDaemons() const;
+    bool allDaemonsFainted() const;
+    int findFirstUsableDaemonIndex(int startIndex = 0) const;
+
+    void setRespawnPoint(const std::string &mapId, Position position,
+                         Direction facing = Direction::down);
+    bool hasRespawnPoint() const;
+    const std::string &getRespawnMapId() const;
+    Position getRespawnPosition() const;
+    Direction getRespawnFacing() const;
+    void clearRespawnPoint();
 
     void setFlag(const std::string &flag);
     bool hasFlag(const std::string &flag) const;
@@ -75,4 +87,8 @@ class Player : public Entity {
     EventFlags eventFlags;
     PartyAndPCBoxes partyStorage;
     DaemonDex daemonDex;
+    std::string respawnMapId;
+    Position respawnPosition{0, 0};
+    Direction respawnFacing{Direction::down};
+    bool respawnPointSet{false};
 };

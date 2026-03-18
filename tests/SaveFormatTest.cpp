@@ -9,6 +9,9 @@ map|lab
 pos|3|4
 facing|2
 money|125
+respawn_map|house1_2f
+respawn_pos|2|3
+respawn_facing|1
 [flags]
 intro_done
 [badges]
@@ -35,6 +38,10 @@ caught|7
     assert((parsed.data.position == Position{3, 4}));
     assert(parsed.data.facing == Direction::left);
     assert(parsed.data.money == 125);
+    assert(parsed.data.respawnMapId == "house1_2f");
+    assert(parsed.data.respawnPosition.has_value());
+    assert((*parsed.data.respawnPosition == Position{2, 3}));
+    assert(parsed.data.respawnFacing == Direction::down);
     assert(parsed.data.flags.size() == 1);
     assert(parsed.data.badges.size() == 1);
     assert(parsed.data.inventory.size() == 1);

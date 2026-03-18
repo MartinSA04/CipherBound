@@ -69,6 +69,30 @@ int main() {
     assert(player.hasCaught(7));
     assert(player.getDaemon(0).getSpeciesId() == 1);
 
+    player.setRespawnPoint("healing_center", {4, 4}, Direction::right);
+    assert(player.hasRespawnPoint());
+    assert(player.getRespawnMapId() == "healing_center");
+    assert((player.getRespawnPosition() == Position{4, 4}));
+    assert(player.getRespawnFacing() == Direction::right);
+
+    player.getDaemon(0).takeDamage(player.getDaemon(0).getCurrentHP());
+    assert(player.findFirstUsableDaemonIndex() == 1);
+    assert(player.hasUsableDaemons());
+    assert(!player.allDaemonsFainted());
+
+    for (int i = 1; i < player.partySize(); ++i)
+        player.getDaemon(i).takeDamage(player.getDaemon(i).getCurrentHP());
+    assert(player.findFirstUsableDaemonIndex() == -1);
+    assert(player.allDaemonsFainted());
+
+    player.fullHealParty();
+    assert(player.hasUsableDaemons());
+    assert(!player.allDaemonsFainted());
+    assert(player.getDaemon(0).getCurrentHP() == player.getDaemon(0).getMaxHP());
+
+    player.clearRespawnPoint();
+    assert(!player.hasRespawnPoint());
+
     player.clearBadges();
     player.clearFlags();
     assert(player.getBadges().empty());

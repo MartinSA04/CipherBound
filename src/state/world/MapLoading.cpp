@@ -122,6 +122,7 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
 
 void World::generate(const Pokedex &pokedex) {
     loadMap("assets/data/maps/pallet_town.map", pokedex);
+    loadMap("assets/data/maps/viridian_town.map", pokedex);
     loadMap("assets/data/maps/house1_1f.map", pokedex);
     std::string startMap = loadMap("assets/data/maps/house1_2f.map", pokedex);
     loadMap("assets/data/maps/house2_1f.map", pokedex);
@@ -129,5 +130,6 @@ void World::generate(const Pokedex &pokedex) {
 
     loadMap("assets/data/maps/route_1.map", pokedex);
 
+    setDefaultRespawnPoint(startMap, player.getPosition(), player.getFacing());
     setCurrentMap(startMap);
 }

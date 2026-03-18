@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 class Renderer {
   public:
@@ -42,6 +43,11 @@ class Renderer {
     static bool isOnScreen(int worldX, int worldY, int cameraX, int cameraY);
 
   private:
+    void markTextureFailed(const std::string &id, const std::string &operation,
+                           const std::string &message);
+
     TDT4102::AnimationWindow window;
     std::unordered_map<std::string, TDT4102::Image> textures;
+    std::unordered_map<std::string, std::filesystem::path> texturePaths;
+    std::unordered_set<std::string> failedTextures;
 };

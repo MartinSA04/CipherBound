@@ -44,6 +44,46 @@ void World::setCurrentMap(const std::string &id) {
 Player &World::getPlayer() { return player; }
 const Player &World::getPlayer() const { return player; }
 void World::setPlayer(Player p) { player = std::move(p); }
+void World::healPlayerParty() { player.fullHealParty(); }
+
+void World::setDefaultRespawnPoint(const std::string &mapId, Position position, Direction facing) {
+    defaultRespawnMapId = mapId;
+    defaultRespawnPosition = position;
+    defaultRespawnFacing = facing;
+}
+
+void World::markHealingCenterUsed(Position position, Direction facing) {
+    player.setRespawnPoint(currentMapId, position, facing);
+}
+
+void World::respawnPlayerAfterBlackout() {
+    healPlayerParty();
+
+    std::string targetMapId;
+    Position targetPosition{0, 0};
+    Direction targetFacing = Direction::down;
+
+    if (player.hasRespawnPoint() && maps.contains(player.getRespawnMapId())) {
+        targetMapId = player.getRespawnMapId();
+        targetPosition = player.getRespawnPosition();
+        targetFacing = player.getRespawnFacing();
+    } else if (!defaultRespawnMapId.empty() && maps.contains(defaultRespawnMapId)) {
+        targetMapId = defaultRespawnMapId;
+        targetPosition = defaultRespawnPosition;
+        targetFacing = defaultRespawnFacing;
+    }
+
+    if (targetMapId.empty())
+        return;
+
+    if (!currentMapId.empty() && maps.contains(currentMapId))
+        maps[currentMapId].setOccupied(player.getPosition(), false);
+
+    setCurrentMap(targetMapId);
+    player.setPosition(targetPosition);
+    player.setFacing(targetFacing);
+    maps[currentMapId].setOccupied(player.getPosition(), true);
+}
 
 std::mt19937 &World::getRng() { return rng; }
 

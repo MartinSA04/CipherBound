@@ -73,6 +73,49 @@ bool Player::spendMoney(int amount) { return inventory.spendMoney(amount); }
 
 void Player::setMoney(int amount) { inventory.setMoney(amount); }
 
+void Player::fullHealParty() {
+    for (int i = 0; i < partySize(); ++i)
+        getDaemon(i).fullHeal();
+}
+
+bool Player::hasUsableDaemons() const { return findFirstUsableDaemonIndex() >= 0; }
+
+bool Player::allDaemonsFainted() const { return !hasUsableDaemons(); }
+
+int Player::findFirstUsableDaemonIndex(int startIndex) const {
+    if (startIndex < 0)
+        startIndex = 0;
+
+    for (int i = startIndex; i < partySize(); ++i) {
+        if (!getDaemon(i).isFainted())
+            return i;
+    }
+
+    return -1;
+}
+
+void Player::setRespawnPoint(const std::string &mapId, Position position, Direction facing) {
+    respawnMapId = mapId;
+    respawnPosition = position;
+    respawnFacing = facing;
+    respawnPointSet = true;
+}
+
+bool Player::hasRespawnPoint() const { return respawnPointSet; }
+
+const std::string &Player::getRespawnMapId() const { return respawnMapId; }
+
+Position Player::getRespawnPosition() const { return respawnPosition; }
+
+Direction Player::getRespawnFacing() const { return respawnFacing; }
+
+void Player::clearRespawnPoint() {
+    respawnMapId.clear();
+    respawnPosition = {0, 0};
+    respawnFacing = Direction::down;
+    respawnPointSet = false;
+}
+
 void Player::setFlag(const std::string &flag) { eventFlags.setFlag(flag); }
 
 bool Player::hasFlag(const std::string &flag) const { return eventFlags.hasFlag(flag); }

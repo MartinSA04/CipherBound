@@ -134,12 +134,20 @@ void SessionCoordinator::handleRequest(const StartTrainerBattleIntroRequest &req
 }
 
 void SessionCoordinator::handleRequest(const EndBattleRequest & /*req*/) {
+    bool playerBlackedOut = false;
     if (ctx.hasBattle()) {
+        playerBlackedOut = ctx.battle().getState() == BattleState::defeat;
         if (!ctx.battleTrainerNPCId().empty()) {
             BattleResult result = ctx.battle().getResult();
             if (result.playerWon)
                 ctx.world.setNPCDefeated(ctx.battleTrainerNPCId());
         }
+    }
+
+    if (playerBlackedOut) {
+        switchToMode(GameState::transition,
+                     std::make_unique<TransitionMode>(TransitionMode::Kind::blackoutRespawn));
+        return;
     }
 
     ctx.clearBattle();

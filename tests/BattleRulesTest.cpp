@@ -68,6 +68,8 @@ int main() {
     assert(rolledHigh >= rolledLow);
 
     assert(BattleRules::calculateExpYield(defender) == defenderSpecies.baseExpYield * 20 / 7);
+    assert(BattleRules::calculateMoneyReward(defender, BattleType::wild) == 0);
+    assert(BattleRules::calculateMoneyReward(defender, BattleType::trainer) == 400);
 
     return 0;
 }

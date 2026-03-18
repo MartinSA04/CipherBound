@@ -6,6 +6,7 @@
 #include "../state/Movement.h"
 #include <array>
 #include <iosfwd>
+#include <optional>
 #include <set>
 #include <string>
 #include <vector>
@@ -43,6 +44,9 @@ struct SaveFileData {
     Position position{0, 0};
     Direction facing{Direction::down};
     int money{0};
+    std::string respawnMapId;
+    std::optional<Position> respawnPosition;
+    std::optional<Direction> respawnFacing;
     std::vector<std::string> flags;
     std::vector<std::string> badges;
     std::vector<SavedInventoryEntry> inventory;

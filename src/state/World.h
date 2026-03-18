@@ -36,6 +36,11 @@ class World {
     Player &getPlayer();
     const Player &getPlayer() const;
     void setPlayer(Player player);
+    void healPlayerParty();
+    void setDefaultRespawnPoint(const std::string &mapId, Position position,
+                                Direction facing = Direction::down);
+    void markHealingCenterUsed(Position position, Direction facing);
+    void respawnPlayerAfterBlackout();
 
     // NPCs are owned by the world and exposed through non-owning pointers.
     void addNPC(const std::string &mapId, std::unique_ptr<NPC> npc);
@@ -64,4 +69,7 @@ class World {
     std::map<std::string, Map> maps;
     std::map<std::string, NPCList> npcs;
     Player player;
+    std::string defaultRespawnMapId;
+    Position defaultRespawnPosition{0, 0};
+    Direction defaultRespawnFacing{Direction::down};
 };

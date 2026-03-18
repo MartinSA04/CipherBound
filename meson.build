@@ -374,6 +374,34 @@ battle_rules_test = executable(
 
 test('battle_rules', battle_rules_test)
 
+battle_flow_test = executable(
+  'battle_flow_test',
+  [
+    'tests/BattleFlowTest.cpp',
+    'src/battle/Battle.cpp',
+    'src/battle/BattleCapture.cpp',
+    'src/battle/BattleEventQueue.cpp',
+    'src/battle/BattleAI.cpp',
+    'src/battle/BattleRules.cpp',
+    'src/battle/BattleTurnResolver.cpp',
+    'src/battle/TypeChart.cpp',
+    'src/game_data/Pokedex.cpp',
+    'src/state/Daemon.cpp',
+    'src/state/Entity.cpp',
+    'src/state/Map.cpp',
+    'src/state/Movement.cpp',
+    'src/state/NPC.cpp',
+    'src/state/player/DaemonDex.cpp',
+    'src/state/player/EventFlags.cpp',
+    'src/state/player/Inventory.cpp',
+    'src/state/player/Party.cpp',
+    'src/state/player/Player.cpp',
+    'src/state/player/WalkAnimation.cpp',
+  ],
+)
+
+test('battle_flow', battle_flow_test)
+
 trainer_approach_cutscene_test = executable(
   'trainer_approach_cutscene_test',
   [
@@ -424,6 +452,28 @@ state_model_test = executable(
 )
 
 test('state_model', state_model_test)
+
+world_respawn_test = executable(
+  'world_respawn_test',
+  [
+    'tests/WorldRespawnTest.cpp',
+    'src/state/Daemon.cpp',
+    'src/state/Entity.cpp',
+    'src/state/Map.cpp',
+    'src/state/Movement.cpp',
+    'src/state/NPC.cpp',
+    'src/state/World.cpp',
+    'src/state/world/NPCs.cpp',
+    'src/state/player/DaemonDex.cpp',
+    'src/state/player/EventFlags.cpp',
+    'src/state/player/Inventory.cpp',
+    'src/state/player/Party.cpp',
+    'src/state/player/Player.cpp',
+    'src/state/player/WalkAnimation.cpp',
+  ],
+)
+
+test('world_respawn', world_respawn_test)
 
 save_manager_roundtrip_test = executable(
   'save_manager_roundtrip_test',

@@ -149,6 +149,13 @@ SaveParseResult parse(std::istream &input) {
                     result.data.money = *money;
                 else
                     result.warnings.push_back("Invalid money value: " + line);
+            } else if (key == "respawn_map")
+                result.data.respawnMapId = std::string(parts[1]);
+            else if (key == "respawn_facing") {
+                if (const auto dir = TextParse::parseInt(parts[1]); dir.has_value())
+                    result.data.respawnFacing = static_cast<Direction>(*dir);
+                else
+                    result.warnings.push_back("Invalid respawn facing value: " + line);
             } else if (key == "facing") {
                 if (const auto dir = TextParse::parseInt(parts[1]); dir.has_value())
                     result.data.facing = static_cast<Direction>(*dir);
@@ -160,6 +167,13 @@ SaveParseResult parse(std::istream &input) {
                     result.data.position = {(*coords)[0], (*coords)[1]};
                 } else {
                     result.warnings.push_back("Invalid position value: " + line);
+                }
+            } else if (key == "respawn_pos") {
+                if (const auto coords = TextParse::parseFixedIntFields<2>(parts, 1);
+                    coords.has_value()) {
+                    result.data.respawnPosition = Position{(*coords)[0], (*coords)[1]};
+                } else {
+                    result.warnings.push_back("Invalid respawn position value: " + line);
                 }
             }
             break;

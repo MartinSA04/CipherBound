@@ -21,6 +21,12 @@ bool SaveManager::saveGame(const std::string &filepath, const Player &player, co
     out << "pos|" << player.getPosition().x << "|" << player.getPosition().y << "\n";
     out << "facing|" << static_cast<int>(player.getFacing()) << "\n";
     out << "money|" << player.getMoney() << "\n";
+    if (player.hasRespawnPoint()) {
+        out << "respawn_map|" << player.getRespawnMapId() << "\n";
+        out << "respawn_pos|" << player.getRespawnPosition().x << "|"
+            << player.getRespawnPosition().y << "\n";
+        out << "respawn_facing|" << static_cast<int>(player.getRespawnFacing()) << "\n";
+    }
 
     // [flags]
     out << "[flags]\n";
@@ -88,6 +94,10 @@ bool SaveManager::loadGame(const std::string &filepath, Player &player, World &w
     Player restored(restoredName, parsed.data.position);
     restored.setFacing(parsed.data.facing);
     restored.setMoney(parsed.data.money);
+    if (!parsed.data.respawnMapId.empty() && parsed.data.respawnPosition.has_value()) {
+        restored.setRespawnPoint(parsed.data.respawnMapId, *parsed.data.respawnPosition,
+                                 parsed.data.respawnFacing.value_or(Direction::down));
+    }
 
     for (const auto &flag : parsed.data.flags)
         restored.setFlag(flag);

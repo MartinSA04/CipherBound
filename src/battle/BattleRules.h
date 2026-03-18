@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BattleTypes.h"
 #include "../game_data/Move.h"
 #include "../game_data/Species.h"
 #include "../state/Daemon.h"
@@ -12,5 +13,6 @@ int calculateDamage(const Daemon &attacker, const Daemon &defender, const MoveDa
                     int randomPercent);
 
 int calculateExpYield(const Daemon &defeated);
+int calculateMoneyReward(const Daemon &defeated, BattleType type);
 
 } // namespace BattleRules

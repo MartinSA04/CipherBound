@@ -46,4 +46,19 @@ int calculateExpYield(const Daemon &defeated) {
     return defeated.getSpecies().baseExpYield * defeated.getLevel() / 7;
 }
 
+int calculateMoneyReward(const Daemon &defeated, BattleType type) {
+    const int baseReward = std::max(20, defeated.getLevel() * 10);
+
+    switch (type) {
+    case BattleType::wild:
+        return 0;
+    case BattleType::trainer:
+        return baseReward * 2;
+    case BattleType::gymLeader:
+        return baseReward * 4;
+    }
+
+    return baseReward;
+}
+
 } // namespace BattleRules

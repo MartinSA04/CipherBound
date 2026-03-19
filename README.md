@@ -130,6 +130,8 @@ Generate the contributor/API docs with:
 
 Then open `docs/html/index.html`. The generated site contains a curated architecture overview, grouped subsystem reference, and format documentation for maps, cutscenes, and saves.
 
+CI validates the docs on pushes and pull requests. Pushes to `main` also publish the generated Doxygen site through GitHub Pages once the repository Pages source is set to **GitHub Actions**.
+
 ## Use of AI
 
 - **Daemon sprites** — Some Daemon sprite artwork was generated with the help of AI image generation tools.

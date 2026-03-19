@@ -1,46 +1,49 @@
+/**
+ * @file
+ * @brief In-memory cutscene data structures shared by parsing and playback code.
+ * @ingroup cutscene_system
+ * @ingroup data_formats
+ */
+
 #pragma once
 #include "../state/Movement.h"
 #include <string>
 #include <vector>
 
-// A single step in a cutscene script
+/// A single command emitted by the cutscene parser.
 struct CutsceneStep {
+    /// Kind of command represented by the step.
     enum class Type {
-        move, // Move entity tile-by-tile to (x,y). Non-blocking (use sync).
-        walk, // Move entity one tile in direction. Non-blocking (use sync).
-        face, // Set entity facing direction. Immediate.
-        say,  // Show dialogue. Blocking (waits for player dismiss).
-        wait, // Wait N frames. Blocking.
-        sync, // Wait for all pending movements to finish. Blocking.
-        flag, // Set a player event flag. Immediate.
-        hide, // Hide an NPC from the map. Immediate.
-        show, // Show a hidden NPC on the map. Immediate.
+        move, ///< Move an entity toward an absolute tile position.
+        walk, ///< Move an entity one tile in a direction.
+        face, ///< Change an entity's facing direction immediately.
+        say,  ///< Show dialogue and block until dismissed.
+        wait, ///< Wait a fixed number of frames.
+        sync, ///< Wait for all queued moves to complete.
+        flag, ///< Set a player event flag.
+        hide, ///< Hide an NPC.
+        show, ///< Show a previously hidden NPC.
     };
 
-    Type type;
+    Type type; ///< Command type.
 
-    // Target entity: "player" or NPC id
-    std::string target;
+    std::string target; ///< Target entity id, or `player`.
 
-    // For move: destination
-    int x{0}, y{0};
+    int x{0}; ///< Destination X for `move`.
+    int y{0}; ///< Destination Y for `move`.
 
-    // For walk / face: direction
-    Direction direction{Direction::down};
+    Direction direction{Direction::down}; ///< Direction for `walk` and `face`.
 
-    // For say: speaker + lines
-    std::string speaker;
-    std::vector<std::string> lines;
+    std::string speaker;              ///< Speaker name for `say`.
+    std::vector<std::string> lines;   ///< Dialogue lines for `say`.
 
-    // For wait: frame count
-    int frames{0};
+    int frames{0}; ///< Frame count for `wait`.
 
-    // For flag: flag name
-    std::string flagName;
+    std::string flagName; ///< Event flag name for `flag`.
 };
 
-// A complete cutscene loaded from file
+/// A complete parsed cutscene loaded from disk or created programmatically.
 struct Cutscene {
-    std::string id;
-    std::vector<CutsceneStep> steps;
+    std::string id;                 ///< Stable cutscene id from the file header.
+    std::vector<CutsceneStep> steps; ///< Ordered steps executed by the runner.
 };

@@ -1,3 +1,9 @@
+/**
+ * @file
+ * @brief High-level cutscene executor used by the app flow.
+ * @ingroup cutscene_system
+ */
+
 #pragma once
 #include "CutscenePlayback.h"
 #include "../game_data/Cutscene.h"
@@ -7,28 +13,33 @@ class World;
 class GameUI;
 class SoundManager;
 
+/**
+ * @brief Loads, starts, and advances cutscenes against the live world and UI.
+ * @ingroup cutscene_system
+ */
 class CutsceneRunner {
   public:
+    /// Creates an idle cutscene runner with no loaded cutscene.
     CutsceneRunner() = default;
 
-    // Load a cutscene from a .cutscene file
+    /// Loads a cutscene from a `.cutscene` file.
     bool load(const std::string &path);
+    /// Loads a cutscene value directly.
     bool load(Cutscene cutscene);
 
-    // Start playback (resets state)
+    /// Starts playback from the beginning and resets transient state.
     void start();
 
-    // Update one frame. Returns true while the cutscene is still running.
-    // confirmPressed: whether the player pressed confirm this frame (for
-    // dialogue).
+    /// Advances playback by one frame and returns whether it is still running.
     bool update(World &world, GameUI &ui, bool confirmPressed, SoundManager &sound);
 
-    // True if the cutscene has finished
+    /// Returns whether playback has completed.
     bool isFinished() const;
 
-    // True if a dialogue box is currently showing
+    /// Returns whether cutscene dialogue is currently visible.
     bool isShowingDialogue() const;
 
+    /// Returns the loaded cutscene id.
     const std::string &getId() const;
 
   private:

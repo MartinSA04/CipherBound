@@ -1,20 +1,44 @@
-PROJECT_NAME           = "MyProject"
+PROJECT_NAME           = "CipherBound"
+PROJECT_BRIEF          = "Pokemon-inspired RPG built in C++20 with SDL2"
 OUTPUT_DIRECTORY       = docs
-INPUT                  = include src README.md
-FILE_PATTERNS          = *.h *.hpp *.hh *.c *.cc *.cpp *.cxx *.md
+STRIP_FROM_PATH        = .
+
+INPUT                  = src README.md docs/doxygen
+FILE_PATTERNS          = *.h *.hpp *.hh *.md *.dox
 RECURSIVE              = YES
 
 EXTRACT_ALL            = NO
 EXTRACT_PRIVATE        = NO
 EXTRACT_STATIC         = NO
+EXTRACT_LOCAL_CLASSES  = NO
+HIDE_UNDOC_MEMBERS     = YES
+HIDE_UNDOC_CLASSES     = YES
+HIDE_FRIEND_COMPOUNDS  = YES
+HIDE_IN_BODY_DOCS      = YES
+
+JAVADOC_AUTOBRIEF      = YES
+SORT_MEMBER_DOCS       = NO
+GROUP_NESTED_COMPOUNDS = YES
+
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+WARN_NO_PARAMDOC       = NO
 
 GENERATE_HTML          = YES
+GENERATE_TREEVIEW      = YES
+FULL_SIDEBAR           = YES
+DISABLE_INDEX          = NO
 GENERATE_LATEX         = NO
 
 USE_MDFILE_AS_MAINPAGE = README.md
 MARKDOWN_SUPPORT       = YES
+TOC_INCLUDE_HEADINGS   = 2
+
+SHOW_INCLUDE_FILES     = NO
+SOURCE_BROWSER         = NO
+REFERENCES_RELATION    = YES
+REFERENCED_BY_RELATION = YES
 
 HAVE_DOT               = YES
 CALL_GRAPH             = NO
 CALLER_GRAPH           = NO
-CLASS_DIAGRAMS         = YES

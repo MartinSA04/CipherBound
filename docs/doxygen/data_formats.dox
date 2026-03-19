@@ -1,0 +1,29 @@
+/**
+ * @page data_file_formats Data File Formats
+ *
+ * CipherBound uses plain-text formats for maps, cutscenes, and save data. The
+ * parsing APIs keep going when possible and accumulate non-fatal warnings in
+ * their result objects.
+ *
+ * @section map_files Map Files
+ *
+ * Map files use named sections such as `[header]`, `[tiles]`, `[warps]`,
+ * `[encounters]`, and `[npcs]`. The parser exposed in `MapFormat` converts
+ * those sections into `MapDefinition`, `WarpPoint`, `WildEncounterSlot`, and
+ * `NPCDefinition` values.
+ *
+ * @section cutscene_files Cutscene Files
+ *
+ * Cutscene files use `[header]` and `[steps]`. Steps are command-driven rows
+ * such as `move`, `walk`, `say`, `wait`, `sync`, `flag`, `hide`, and `show`.
+ * `CutsceneFormat::parse()` produces a `Cutscene` plus warnings for malformed
+ * lines.
+ *
+ * @section save_files Save Files
+ *
+ * Save files are section-based and store player metadata, flags, badges,
+ * inventory, party members, PC box contents, defeated NPC state, and daemon
+ * dex progress. `SaveFormat::parse()` returns a partially populated
+ * `SaveParseResult` even when some entries are invalid, allowing callers to
+ * inspect warnings and decide how to proceed.
+ */

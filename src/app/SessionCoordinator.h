@@ -1,3 +1,9 @@
+/**
+ * @file
+ * @brief Central coordinator that owns the active mode and processes mode requests.
+ * @ingroup app_core
+ */
+
 #pragma once
 
 #include "GameMode.h"
@@ -6,13 +12,22 @@
 class InputManager;
 enum class ScreenType;
 
+/**
+ * @brief Owns the current `GameMode` and performs cross-mode transitions.
+ * @ingroup app_core
+ */
 class SessionCoordinator {
   public:
+    /// Binds the coordinator to the shared game context.
     explicit SessionCoordinator(GameContext &ctx);
 
+    /// Advances the active mode by one frame.
     void update(InputManager &input);
+    /// Renders the active mode.
     void render();
+    /// Drains and handles all requests currently present in the mailbox.
     void processRequests();
+    /// Switches directly to a new state using the default mode factory.
     void switchMode(GameState newState);
 
   private:

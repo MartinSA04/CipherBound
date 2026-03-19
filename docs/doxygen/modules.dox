@@ -1,0 +1,23 @@
+/** @defgroup app_core App Flow
+ *  High-level session orchestration, game modes, and cross-mode requests.
+ */
+
+/** @defgroup battle_system Battle System
+ *  Battle rules, AI, turn resolution, and presentation state shared with battle modes.
+ */
+
+/** @defgroup cutscene_system Cutscene System
+ *  Parsing, loading, playback state, and runtime execution of scripted cutscenes.
+ */
+
+/** @defgroup save_system Save System
+ *  Save-file schema, parsing, serialization, and slot management.
+ */
+
+/** @defgroup world_state World State
+ *  Tile maps, entity movement, and runtime world ownership.
+ */
+
+/** @defgroup data_formats Data Formats
+ *  Parsed in-memory representations for repo-specific text formats.
+ */

@@ -17,16 +17,23 @@ fi
 rm -rf docs/html docs/latex
 
 log_file="$(mktemp)"
-trap 'rm -f "$log_file"' EXIT
+filtered_log_file="$(mktemp)"
+trap 'rm -f "$log_file" "$filtered_log_file"' EXIT
 
 if ! doxygen Doxyfile >"$log_file" 2>&1; then
     cat "$log_file"
     exit 1
 fi
 
-cat "$log_file"
+# Filter out known layout-schema warnings caused by Doxygen version differences
+# between local development and GitHub Actions runners.
+grep -Ev \
+    "warning: ignoring unsupported tag 'PAGE_OUTLINE_PANEL'|warning: Unexpected start tag 'properties' found in scope='(namespace|file)/member(decl|def)/'!|warning: User defined layout misses entry '(namespace|file)/member(def|decl)/properties'" \
+    "$log_file" >"$filtered_log_file" || true
 
-if grep -Eq 'warning:|error:' "$log_file"; then
+cat "$filtered_log_file"
+
+if grep -Eq 'warning:|error:' "$filtered_log_file"; then
     echo "Doxygen emitted warnings or errors."
     exit 1
 fi

@@ -33,7 +33,8 @@ background_overlay|assets/tilesets/pallet_town/maps/bart_iver_lab_overlay.png
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue stages separated by @@, each can have flag? prefix
-prof_bart_iver|Prof. Bart Iver|questGiver|6|3|down|0|has_starter?How is your Daemon doing?;Take good care of it!@@Hello there! Welcome to the world of Daemons!;I am Professor Bart Iver.;People call me the Daemon professor.;Here, choose a Daemon from the table!|bart_iver|
+prof_bart_iver|Prof. Bart Iver|questGiver|6|3|down|0|has_starter?Did you get it yet?; Go to the faculty and retrieve it.; I will tell you more then.@@Come on, choose a Daemon!|bart_iver|
+
 pokeball_1|Pokeball|normal|8|4|down|0|has_starter?The Pokeball is empty.@@Bulbulum, the classical Daemon.;It manipulates classical forces with ease.|-|
-pokeball_2|Pokeball|normal|9|4|down|0|has_starter?The Pokeball is empty.@@Newtonion, the classical Daemon.;A master of Newtonian mechanics.|-|
-pokeball_3|Pokeball|normal|10|4|down|0|has_starter?The Pokeball is empty.@@Gravitonion, the quantum Daemon.;It bends gravity to its will.|-|
+pokeball_2|Pokeball|normal|9|4|down|0|has_starter?The Pokeball is empty.@@Newtonion, placeholder.|-|
+pokeball_3|Pokeball|normal|10|4|down|0|has_starter?The Pokeball is empty.@@Gravitonion, placeholder.|-|

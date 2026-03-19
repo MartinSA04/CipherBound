@@ -25,26 +25,39 @@ wait|40
 move|prof_bart_iver|6|6
 sync
 
-say|Prof. Bart Iver|Ah, there you are!;I've been waiting for you.
-say|Prof. Bart Iver|Welcome to my lab!;I am Professor Bart Iver.;People call me the Daemon professor.
+say|???|Ah, there you are!;I've been waiting for you.
+say|???|Welcome to my lab!;I am Professor Bart Iver.
 
-# Bart Iver walks toward the pokeball table (staying below the wall row)
-say|Prof. Bart Iver|Come, follow me.;I have something special for you.
+say|Prof. Bart Iver|You're probably wondering what's going on.;I can assure you all will be explained.
+say|Prof. Bart Iver|First of all, sorry for all the secrecy.;But you can never be too careful these days.
+say|Prof. Bart Iver|To get to the point... I need your help.;
 
-# Bart Iver goes right along y=6, then up to y=5 next to the table
-move|prof_bart_iver|7|5
+say|You|With what exactly?;And why can't we be seen talking with each other?
+
+say|Prof. Bart Iver|Well, about that...;The university leadership has fired me,;and doesn't want me interacting with the students anymore.
+say|Prof. Bart Iver|Now, back to the issue. I need your help.;Since they fired me, I am not allowed on campus anymore.
+say|Prof. Bart Iver|That's where you come in...;When they fired me they took something very important.;I will explain what later...
+say|Prof. Bart Iver|For now I just need you to trust me.;If you do, I can help you with your ambition.;To find out what Daemons actually are.
+
+say|You|H-H-How do you know about that?
+
+say|Prof. Bart Iver|That's not important.;I need you to go to the first faculty and get what they took from me.
+say|Prof. Bart Iver|But be careful, they won't give it up without a fight.
+
+say|Prof. Bart Iver|Anyways, to help you on your journey through university,;I have gathered some rather rare Daemons.;Come! Follow me!
+
+move|prof_bart_iver|7|4
 move|player|6|6
 sync
+face|prof_bart_iver|down
 
-face|prof_bart_iver|up
 face|player|up
 
 wait|30
 
-# Bart Iver presents the Daemons
 say|Prof. Bart Iver|On this table are three Daemons.;Each one is unique and powerful.
-say|Prof. Bart Iver|Bulbulum manipulates classical forces.;Newtonion is a master of mechanics.;And Gravitonion bends gravity itself.
-say|Prof. Bart Iver|Go ahead — pick one!
+say|Prof. Bart Iver|Bulbulum manipulates classical forces.;Newtonion placeholder.;Gravitonion placeholder.
+say|Prof. Bart Iver|Go ahead - pick one!
 
 wait|30
 

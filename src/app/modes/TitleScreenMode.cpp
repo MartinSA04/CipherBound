@@ -46,9 +46,11 @@ void TitleScreenMode::update(GameContext &ctx, InputManager &input) {
                 ctx.world.getPlayer().addItem(potionId, 5);
                 ctx.world.getPlayer().addItem(daemonBallId, 10);
                 ctx.pushRequest(ModeRequest::dialogue(
-                    "", {"What a good night sleep!",
-                         "Its finally my birthday and time to start my adventure!",
-                         "I should go see Bart Iver in his lab"}));
+                    "", {"What a good night sleep!", "Its finally time to start my degree!",
+                         "I will pursue my fathers great dream.",
+                         "To understand what Daemons actually are!",
+                         "If only he would be alive to see it...",
+                         "I should see if my schedule has been delivered in the mail."}));
             }
 
             MusicTrack mapTrack = MusicManager::trackForMap(ctx.world.getCurrentMapId());

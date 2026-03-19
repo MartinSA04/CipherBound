@@ -1,40 +1,43 @@
+/**
+ * @file
+ * @brief Main battle gameplay mode.
+ * @ingroup battle_system
+ */
+
 #pragma once
 #include "../../app/GameMode.h"
 #include "../ui/BattleRenderer.h"
 
+/// Mode that presents the active battle and handles player combat choices.
 class BattleMode : public GameMode {
   public:
+    /// Updates battle menus, animations, and message progression.
     void update(GameContext &ctx, InputManager &input) override;
+    /// Renders the battle presentation layer.
     void render(GameContext &ctx) override;
 
   private:
     void updateBattleIntroAnim(GameContext &ctx);
     void updateCaptureAnim(GameContext &ctx);
 
-    int menuSelected{0};
-    int moveSelected{0};
-    int partySelected{0};
-    int bagSelected{0};
+    int menuSelected{0};             ///< Current top-level battle menu selection.
+    int moveSelected{0};             ///< Current move selection.
+    int partySelected{0};            ///< Current party selection.
+    int bagSelected{0};              ///< Current bag selection.
 
-    // Battle party sub-state (for viewing summary or action menu from party
-    // list)
-    bool viewingSummary{false};
-    bool showingPartyAction{false};
-    int partyActionSelected{0};
-    int summaryPage{0};
+    bool viewingSummary{false};      ///< Whether the party summary overlay is open.
+    bool showingPartyAction{false};  ///< Whether the party action submenu is open.
+    int partyActionSelected{0};      ///< Current party action submenu selection.
+    int summaryPage{0};              ///< Current summary page.
 
-    // Capture animation state
-    int captureAnimFrame{0};
-    bool captureAnimDone{false};
+    int captureAnimFrame{0};         ///< Capture animation frame counter.
+    bool captureAnimDone{false};     ///< Whether the current capture animation finished.
 
-    // Attack animation state
-    int attackAnimFrame{0};
+    int attackAnimFrame{0};          ///< Attack animation frame counter.
 
-    // Idle bob animation counter (increments every frame in battle)
-    int battleAnimFrame{0};
+    int battleAnimFrame{0};          ///< Idle battle bob/frame counter.
 
-    // EXP animation sound state
-    bool expSoundPlayed{false};
+    bool expSoundPlayed{false};      ///< Prevents repeated EXP sound retriggering.
 
     BattleRenderer battleRenderer;
 };

@@ -1,0 +1,49 @@
+/**
+ * @page save_compatibility_guide How Save Compatibility Works
+ * @tableofcontents
+ *
+ * @section save_compatibility_model Compatibility Model
+ *
+ * Save parsing is intentionally warning-tolerant. @ref SaveFormat::parse()
+ * accumulates non-fatal warnings in @ref SaveFormat::SaveParseResult instead of
+ * failing on the first malformed line. That makes it easier to inspect
+ * partially valid files and evolve the format conservatively.
+ *
+ * @section save_compatibility_rules Practical Rules
+ *
+ * To preserve compatibility:
+ * - Prefer adding new optional keys or new sections over changing the meaning
+ *   of existing ones.
+ * - Keep parsing tolerant where possible and default missing fields sensibly.
+ * - Add tests that cover both the new format and any legacy form you still
+ *   support.
+ *
+ * @section save_compatibility_legacy Legacy Handling
+ *
+ * The current loader already contains a small example of compatibility repair:
+ * `SaveManager.cpp` normalizes older map ids such as `house1_1f` into the newer
+ * runtime ids before restoring player position and NPC state.
+ *
+ * @section save_compatibility_process Changing The Format
+ *
+ * When changing the save format:
+ * 1. Update @ref SaveFormat data structures and parser logic.
+ * 2. Update save serialization in @ref SaveManager.
+ * 3. Add or update tests in `tests/SaveFormatTest.cpp` and
+ *    `tests/SaveManagerRoundTripTest.cpp`.
+ * 4. Update the save sections documented in @ref data_file_formats.
+ *
+ * @section save_compatibility_examples Example Header
+ *
+ * @code{.ini}
+ * [header]
+ * name|Ada
+ * map|lab
+ * pos|3|4
+ * facing|2
+ * money|125
+ * respawn_map|player_house_2f
+ * respawn_pos|2|3
+ * respawn_facing|1
+ * @endcode
+ */

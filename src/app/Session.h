@@ -1,3 +1,9 @@
+/**
+ * @file
+ * @brief Top-level game session bootstrap and frame loop.
+ * @ingroup app_core
+ */
+
 #pragma once
 #include "../audio/MusicManager.h"
 #include "../audio/SoundManager.h"
@@ -11,40 +17,47 @@
 #include "SessionCoordinator.h"
 #include <chrono>
 
+/**
+ * @brief Owns all long-lived subsystems for one running game session.
+ * @ingroup app_core
+ */
 class Session {
   public:
+    /// Creates a session with a deterministic world seed.
     explicit Session(int seed);
+    /// Destroys the session and owned subsystems.
     ~Session();
 
-    // Initialise game data and subsystems (call before run/tick)
+    /// Loads game data, assets, and initial mode state.
     void init();
 
-    // Main game loop (native only — blocks until window closes)
+    /// Runs the native main loop until the window closes.
     void run();
 
-    // Execute a single frame (used by Emscripten main loop callback)
+    /// Executes one frame of update, request processing, and rendering.
     void tick();
 
-    // Access subsystems
+    /// Returns the owned world model.
     World &getWorld();
+    /// Returns the loaded game-data catalog.
     Pokedex &getPokedex();
+    /// Returns the owned UI facade.
     GameUI &getUI();
+    /// Returns the save manager.
     SaveManager &getSaveManager();
 
   private:
-    // Subsystems
-    World world;
-    Pokedex pokedex;
-    GameUI ui;
-    SaveManager saveManager;
-    StoryManager story;
-    MusicManager music;
-    SoundManager sound;
-    CutsceneRunner cutsceneRunner;
+    World world;                   ///< Owned world model.
+    Pokedex pokedex;              ///< Loaded game-data tables.
+    GameUI ui;                    ///< Owned UI facade.
+    SaveManager saveManager;      ///< Save/load orchestration.
+    StoryManager story;           ///< Story progression logic.
+    MusicManager music;           ///< Background music playback.
+    SoundManager sound;           ///< Sound effect playback.
+    CutsceneRunner cutsceneRunner; ///< Scripted cutscene runner.
 
-    // Shared context (references into subsystems above)
-    GameContext ctx;
-    SessionCoordinator coordinator;
+    GameContext ctx;              ///< Shared mode context referencing owned subsystems.
+    SessionCoordinator coordinator; ///< Active mode coordinator.
 
     static constexpr int targetFPS = 60;
     static constexpr std::chrono::duration<double> targetFrameTime{1.0 / targetFPS};

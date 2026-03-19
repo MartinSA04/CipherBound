@@ -2,8 +2,9 @@ PROJECT_NAME           = "CipherBound"
 PROJECT_BRIEF          = "Pokemon-inspired RPG built in C++20 with SDL2"
 OUTPUT_DIRECTORY       = docs
 STRIP_FROM_PATH        = .
+LAYOUT_FILE            = docs/doxygen/layout.xml
 
-INPUT                  = src README.md docs/doxygen
+INPUT                  = src docs/doxygen
 FILE_PATTERNS          = *.h *.hpp *.hh *.md *.dox
 RECURSIVE              = YES
 
@@ -19,6 +20,7 @@ HIDE_IN_BODY_DOCS      = YES
 JAVADOC_AUTOBRIEF      = YES
 SORT_MEMBER_DOCS       = NO
 GROUP_NESTED_COMPOUNDS = YES
+ALPHABETICAL_INDEX     = NO
 
 WARN_IF_UNDOCUMENTED   = YES
 WARN_IF_DOC_ERROR      = YES
@@ -26,15 +28,18 @@ WARN_NO_PARAMDOC       = NO
 
 GENERATE_HTML          = YES
 GENERATE_TREEVIEW      = YES
-FULL_SIDEBAR           = YES
+PAGE_OUTLINE_PANEL     = YES
+FULL_SIDEBAR           = NO
 DISABLE_INDEX          = NO
 GENERATE_LATEX         = NO
 
-USE_MDFILE_AS_MAINPAGE = README.md
+USE_MDFILE_AS_MAINPAGE = docs/doxygen/mainpage.md
 MARKDOWN_SUPPORT       = YES
 TOC_INCLUDE_HEADINGS   = 2
 
 SHOW_INCLUDE_FILES     = NO
+SHOW_FILES             = NO
+SHOW_NAMESPACES        = NO
 SOURCE_BROWSER         = NO
 REFERENCES_RELATION    = YES
 REFERENCED_BY_RELATION = YES

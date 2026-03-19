@@ -1,3 +1,9 @@
+/**
+ * @file
+ * @brief Story progression hooks invoked by dialogue, choices, warps, and map entry.
+ * @ingroup app_core
+ */
+
 #pragma once
 #include "StoryAction.h"
 #include <string>
@@ -8,22 +14,24 @@ class Player;
 class World;
 struct WarpPoint;
 
+/**
+ * @brief Central story-rule dispatcher used by the app flow.
+ * @ingroup app_core
+ */
 class StoryManager {
   public:
     StoryManager() = default;
 
-    // Called when a dialogue finishes — decides what happens next
-    // npc: the NPC whose dialogue just ended (may be nullptr)
+    /// Decides what should happen after dialogue closes.
     StoryAction onDialogueEnd(NPC *npc, World &world);
 
-    // Called when the player picks a choice — decides what happens next
+    /// Decides what should happen after the player makes a dialogue choice.
     StoryAction onChoiceSelected(const std::string &context, int choice, World &world,
                                  Pokedex &pokedex);
 
-    // Called when the player steps on a warp — returns blockWarp action if
-    // blocked
+    /// Returns a warp-blocking story action when entering the warp is disallowed.
     StoryAction checkWarp(const WarpPoint &warp, Player &player);
 
-    // Called when the player enters a new map — may trigger a cutscene
+    /// Returns any story action triggered by entering a new map.
     StoryAction checkMapEnter(const std::string &mapId, Player &player);
 };

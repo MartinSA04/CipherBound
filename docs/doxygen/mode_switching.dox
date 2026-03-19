@@ -1,0 +1,46 @@
+/**
+ * @page mode_switching_flow How Mode Switching Works
+ * @tableofcontents
+ *
+ * @section mode_switching_summary Summary
+ *
+ * CipherBound does not let modes replace each other directly. Instead, a mode
+ * pushes a typed @ref ModeRequest into the shared @ref ModeMailbox, and the
+ * @ref SessionCoordinator processes those requests between frames.
+ *
+ * @section mode_switching_path Frame Flow
+ *
+ * A typical frame goes through these steps:
+ * 1. @ref Session::tick() starts the frame and polls rendering/input services.
+ * 2. @ref SessionCoordinator::update() calls `update()` on the active
+ *    @ref GameMode.
+ * 3. The mode appends any @ref ModeRequest values to @ref GameContext::mailbox.
+ * 4. @ref SessionCoordinator::processRequests() drains the mailbox and handles
+ *    the queued requests.
+ * 5. The coordinator creates the next mode, updates the UI screen type, and
+ *    calls `onEnter()` on the new mode.
+ *
+ * @section mode_switching_examples Common Examples
+ *
+ * Examples of request-driven transitions:
+ * - Overworld interaction pushes @ref ModeRequest::dialogue().
+ * - Encounter logic pushes @ref ModeRequest::wildBattle().
+ * - Story hooks push @ref ModeRequest::storyAction().
+ * - Transition logic pushes @ref ModeRequest::transition().
+ *
+ * @section mode_switching_extend Adding A New Mode
+ *
+ * To add a new mode cleanly:
+ * - Define or reuse a @ref GameState value.
+ * - Add a mode class derived from @ref GameMode.
+ * - Add the constructor path in the coordinator's `createMode()` factory.
+ * - Add any new request type to @ref ModeRequest if the mode needs a custom
+ *   handoff.
+ * - Update UI screen mapping in `SessionCoordinator::screenForState()`.
+ *
+ * Start with these APIs when changing transition behavior:
+ * - @ref SessionCoordinator
+ * - @ref ModeRequest
+ * - @ref GameContext
+ * - @ref GameMode
+ */

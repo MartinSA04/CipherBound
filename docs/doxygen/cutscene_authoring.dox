@@ -1,0 +1,56 @@
+/**
+ * @page cutscene_authoring_guide How To Script A Cutscene
+ * @tableofcontents
+ *
+ * @section cutscene_authoring_shape File Shape
+ *
+ * Cutscenes are section-based text files parsed by @ref CutsceneFormat and run
+ * by @ref CutsceneRunner.
+ *
+ * Required sections:
+ * - `[header]`
+ * - `[steps]`
+ *
+ * Example:
+ * @code{.ini}
+ * [header]
+ * id|example_cutscene
+ *
+ * [steps]
+ * move|player|5|5
+ * move|some_npc|3|5
+ * sync
+ * face|some_npc|right
+ * say|Some NPC|Hello there!;Welcome to this example cutscene.
+ * wait|60
+ * flag|example_done
+ * @endcode
+ *
+ * @section cutscene_authoring_commands Commands
+ *
+ * Supported commands:
+ * - `move|target|x|y`
+ * - `walk|target|direction`
+ * - `face|target|direction`
+ * - `say|speaker|line1;line2`
+ * - `wait|frames`
+ * - `sync`
+ * - `flag|name`
+ * - `hide|npc_id`
+ * - `show|npc_id`
+ *
+ * Targets are either `player` or an NPC id from the active map.
+ *
+ * @section cutscene_authoring_tips Authoring Tips
+ *
+ * Practical rules that make scripts easier to maintain:
+ * - Queue parallel movement with multiple `move` or `walk` commands, then end
+ *   the sequence with `sync`.
+ * - Use event flags to make one-shot scenes non-repeatable.
+ * - Keep dialogue ownership clear by using consistent speaker names.
+ * - Prefer small cutscenes that do one story job well over large monolithic
+ *   scene files.
+ *
+ * `assets/data/cutscenes/example.cutscene` is the best starting reference when
+ * authoring a new script.
+ */

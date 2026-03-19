@@ -114,122 +114,28 @@ To **deploy**, upload the files from `buildw/deploy/` to a web server:
 
 The server must serve `.wasm` files with MIME type `application/wasm`.
 
-## Project Structure
-
-```text
-src/
-├── main.cpp                 Entry point (native + Emscripten main loop)
-├── app/
-│   ├── Session.cpp/h        Game session bootstrap and main loop
-│   ├── SessionCoordinator.cpp/h Routes mode transitions and cross-mode requests
-│   ├── GameMode.cpp/h       Abstract GameMode base class + GameContext + typed ModeRequest
-│   └── modes/               One class per game state (see Architecture below)
-├── common/
-│   ├── FilePaths.cpp/h      Runtime asset path resolution helpers
-│   ├── StringUtils.h        Small string parsing / formatting helpers
-│   ├── TextParse.h          Low-level text parsing utilities
-│   └── VariantUtils.h       Reusable `std::visit` overload helpers
-├── story/
-│   ├── StoryAction.h        Typed story action payloads
-│   └── StoryManager.cpp/h   Story progression checks and choices
-├── cutscene/
-│   ├── CutsceneFormat.cpp/h Pure cutscene parser
-│   ├── CutsceneLoader.cpp/h File loading + path resolution
-│   ├── CutscenePlayback.cpp/h Playback state machine
-│   ├── CutsceneRunner.cpp/h Cutscene coordinator
-│   └── CutsceneWorldOps.cpp/h World/entity operations used by cutscenes
-├── game_data/
-│   ├── Species.h            Daemon species definitions + science-themed types
-│   ├── Move.h               Move data structures
-│   ├── Item.h               Item data structures
-│   ├── Cutscene.h           Cutscene data structures
-│   └── Pokedex.cpp/h        Loads species, moves, and items from data files
-├── state/
-│   ├── World.cpp/h          Manages maps, player, NPCs, encounters
-│   ├── Map.cpp/h            Tile-based map with layers and collision
-│   ├── player/Player.cpp/h  Player state, party, inventory, position
-│   ├── NPC.cpp/h            NPC entities with dialogue and trainer data
-│   ├── Daemon.cpp/h         Individual Daemon instances (stats, moves, HP)
-│   └── Entity.cpp/h         Base entity with position and animation
-├── battle/
-│   ├── Battle.cpp/h         Turn-based battle coordinator and state machine
-│   ├── BattleAI.cpp/h       Opponent move scoring and selection
-│   ├── BattleRules.cpp/h    Damage and EXP rules
-│   ├── BattleCapture.cpp/h  Capture resolution
-│   ├── BattleTurnResolver.cpp/h Move preparation and attack resolution
-│   ├── mode/                BattleMode, BattleIntroMode, and battle-specific mode flow
-│   └── ui/                  BattleRenderer and battle presentation state
-├── save/
-│   ├── SaveFormat.cpp/h     Parsed save-file model and serializers
-│   └── SaveManager.cpp/h    Multi-slot save/load orchestration
-├── audio/
-│   ├── MusicManager.cpp/h   Background music per map and battle
-│   └── SoundManager.cpp/h   Sound effect loading and playback
-└── ui/
-    ├── Renderer.cpp/h        SDL2 rendering abstraction (sprites, shapes, text)
-    ├── GameUI.cpp/h          High-level UI drawing (battle panels, menus, etc.)
-    ├── OverworldRenderer.cpp/h  Overworld-specific rendering (tilemap, entities)
-    ├── InputManager.cpp/h    Keyboard input with edge detection
-    ├── SpriteFont.cpp/h      Bitmap font renderer from sprite sheet
-    └── gameui/               Battle, dialogue, and menu screen rendering helpers
-
-assets/                      Game content and media
-├── audio/                   Music tracks (MP3)
-├── data/                    Species, moves, items, maps, cutscenes (text files)
-├── sprites/                 Daemon, player, and UI sprites (PNG)
-└── tilesets/                Map tileset images
-
-tests/                       Automated regression and tooling tests
-├── common/                  Utility and path-resolution tests
-├── cutscene/                Parser, loader, playback, and world-op tests
-├── story/                   Story action tests
-└── *.cpp                    Feature-specific regression tests
-
-subprojects/
-├── animationwindow/         SDL2 rendering library (modified for Emscripten)
-├── std_lib_facilities/      Course utility header
-└── *.wrap                   Meson wrap files for SDL2 dependencies
-```
-
 ## Architecture
 
-### App Flow
+CipherBound uses a **state-driven architecture** where each screen or phase of the game is a separate `GameMode` subclass. `SessionCoordinator` owns the active mode, while modes communicate through typed `ModeRequest` payloads stored in `GameContext`.
 
-The game uses a **state-driven architecture** where each screen or phase of the game is a separate `GameMode` subclass. `src/app/Session` bootstraps the subsystems and main loop, while `src/app/SessionCoordinator` owns the active mode and dispatches `update()` / `render()` calls each frame.
+Most game content is **data-driven**. Species, moves, items, maps, cutscenes, and save data are loaded from text files under `assets/data/`, which keeps content iteration separate from engine changes.
 
-Modes communicate through **typed `ModeRequest` payloads** — a mode pushes a request such as "start wild battle", "transition to map", or "enter battle mode", and the coordinator processes it between frames to switch modes, create battles, load maps, and resolve story actions.
+## Documentation
 
-Each mode receives a `GameContext` reference containing all shared subsystems:
+Generate the contributor/API docs with:
 
-| Mode                 | Purpose                                                |
-|----------------------|--------------------------------------------------------|
-| `TitleScreenMode`    | Title screen with save slot selection                  |
-| `OverworldMode`      | Walking around, NPC interaction, encounters            |
-| `TransitionMode`     | Fade-out/fade-in between maps                          |
-| `BattleIntroMode`    | Battle entry animation                                 |
-| `BattleMode`         | Turn-based combat                                      |
-| `MenuMode`           | In-game pause menu                                     |
-| `PartyMode`          | View and manage party Daemons                          |
-| `BagMode`            | Inventory (uses sub-states: Browsing, Target, Message) |
-| `PCBoxMode`          | PC storage box for Daemons                             |
-| `SaveMode`           | Save game screen                                       |
-| `DialogueMode`       | NPC dialogue display                                   |
-| `DialogueChoiceMode` | Dialogue with player choices                           |
-| `CutSceneMode`       | Scripted cutscene playback                             |
+```bash
+./generate_docs.sh
+```
 
-### Rendering
-
-The game renders at a fixed **768×576** resolution (16×12 tiles at 48px each). Sprites use 16×16 source art upscaled 4× via nearest-neighbor for crisp pixel art. Rendering is done through an `AnimationWindow` wrapper around SDL2's renderer API.
-
-### Data-Driven Content
-
-Species, moves, items, maps, and cutscenes are all loaded from text files in `assets/data/`, making it easy to add or tweak content without recompiling.
+Then open `docs/html/index.html`. The generated site contains a curated architecture overview, grouped subsystem reference, and format documentation for maps, cutscenes, and saves.
 
 ## Use of AI
 
 - **Daemon sprites** — Some Daemon sprite artwork was generated with the help of AI image generation tools.
 - **Emscripten/web build setup** — AI coding assistance (GitHub Copilot) was used to help configure the Meson build system for Emscripten cross-compilation, create the custom HTML shell template, and resolve compatibility issues (main loop adaptation, font system fallbacks, exception handling flags).
 - **Testing and restructuring help** — AI coding assistance, including OpenAI Codex, was also used to help set up automated tests and CI checks, and to suggest parts of the codebase restructuring and cleanup work (for example session coordination, battle support code extraction, parser cleanup, and typed cross-mode requests).
+- **Documentation** — Some contributor-facing documentation text, Doxygen comments, and documentation pages were drafted with AI assistance and are rendered into the docs site by Doxygen. These generated docs are intended as maintained project documentation, not as an automatically trusted source of truth.
 - **Best practices** — ChatGPT and OpenAI Codex has been used to figure out best code practices, and as help to find useful methods in the standard library. In Addition to helping with more advanced syntax.
 
 ## License

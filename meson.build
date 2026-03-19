@@ -181,6 +181,8 @@ exe = executable(
 )
 
 test_bash = find_program('bash')
+doxygen_prog = find_program('doxygen', required : false)
+dot_prog = find_program('dot', required : false)
 
 string_utils_test = executable(
   'string_utils_test',
@@ -559,3 +561,14 @@ test(
     meson.project_build_root(),
   ],
 )
+
+if doxygen_prog.found() and dot_prog.found()
+  test(
+    'docs_smoke',
+    test_bash,
+    args : [
+      meson.project_source_root() / 'tests' / 'check_docs.sh',
+      meson.project_source_root(),
+    ],
+  )
+endif

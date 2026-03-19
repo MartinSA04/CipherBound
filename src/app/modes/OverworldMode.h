@@ -1,11 +1,24 @@
+/**
+ * @file
+ * @brief Main overworld mode handling movement, interaction, encounters, and warp flow.
+ * @ingroup app_core
+ */
+
 #pragma once
 #include "../GameMode.h"
 #include "../../story/StoryAction.h"
 
+/**
+ * @brief Default exploration mode for walking the player around the world.
+ * @ingroup app_core
+ */
 class OverworldMode : public GameMode {
   public:
+    /// Runs any story hook associated with entering the current map.
     void onEnter(GameContext &ctx) override;
+    /// Updates player movement, interactions, and encounter checks.
     void update(GameContext &ctx, InputManager &input) override;
+    /// Renders the current overworld scene.
     void render(GameContext &ctx) override;
 
   private:
@@ -18,15 +31,11 @@ class OverworldMode : public GameMode {
     void handlePlayerWarpAttempt(GameContext &ctx);
     void handlePlayerInteraction(GameContext &ctx);
 
-    // Pending warp block (deferred until walk animation finishes)
-    bool pendingWarpBlock{false};
-    StoryBlockWarpAction pendingWarpBlockAction;
+    bool pendingWarpBlock{false};           ///< Whether a blocked warp should trigger after movement settles.
+    StoryBlockWarpAction pendingWarpBlockAction; ///< Deferred warp-block action.
 
-    // Wild encounters are only checked once per step.
-    // Set to true when the player finishes a step; cleared after a check.
-    bool justStepped{false};
+    bool justStepped{false};                ///< Whether the player completed a step this frame.
 
-    // Wall-hit sound: only play once per blocked attempt
-    bool wallHitPlayed{false};
-    Direction wallHitDir{Direction::down};
+    bool wallHitPlayed{false};              ///< Prevents repeated wall-hit sounds while holding a direction.
+    Direction wallHitDir{Direction::down};  ///< Direction tied to the last wall-hit sound.
 };

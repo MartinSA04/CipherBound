@@ -1,0 +1,49 @@
+/**
+ * @page battle_turn_flow_guide How Battle Turn Resolution Works
+ * @tableofcontents
+ *
+ * @section battle_turn_flow_summary Summary
+ *
+ * Battle flow is split across four main pieces:
+ * - @ref Battle for the message-driven battle state machine
+ * - @ref BattleTurnResolver for move validation and attack execution
+ * - @ref BattleRules for deterministic formulas
+ * - @ref BattleAI for opponent move selection
+ *
+ * @section battle_turn_flow_player Player Turn
+ *
+ * A standard player attack follows this path:
+ * 1. @ref Battle::chooseMove() stores the selected slot and calls `executeTurn()`.
+ * 2. @ref BattleTurnResolver::preparePlayerMove() validates the slot and spends PP.
+ * 3. @ref BattleTurnResolver::resolveAttack() rolls accuracy and damage.
+ * 4. @ref Battle queues battle messages and animation markers.
+ * 5. The presentation layer consumes those markers and returns control when each
+ *    animation completes.
+ *
+ * @section battle_turn_flow_opponent Opponent Turn
+ *
+ * The opponent path is similar, except the selected slot is chosen through
+ * @ref BattleAI::chooseMoveSlot() before being validated and executed by
+ * @ref BattleTurnResolver.
+ *
+ * @section battle_turn_flow_messages Message And Animation Markers
+ *
+ * The battle state machine does not animate directly. Instead it pushes message
+ * and animation markers into `BattleEventQueue`. The active battle mode and
+ * presentation state interpret those markers to drive HP, EXP, intro, attack,
+ * and capture animations.
+ *
+ * @section battle_turn_flow_change Changing Turn Logic
+ *
+ * If you need to change turn behavior:
+ * - Use @ref BattleRules for formula changes.
+ * - Use @ref BattleAI for opponent decision changes.
+ * - Use @ref BattleTurnResolver for validation and attack sequencing changes.
+ * - Use @ref Battle for message/state-flow changes.
+ *
+ * The most relevant automated checks are in:
+ * - `tests/BattleRulesTest.cpp`
+ * - `tests/BattleAITest.cpp`
+ * - `tests/BattleTurnResolverTest.cpp`
+ * - `tests/BattleFlowTest.cpp`
+ */

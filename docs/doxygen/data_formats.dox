@@ -12,12 +12,51 @@
  * those sections into `MapDefinition`, `WarpPoint`, `WildEncounterSlot`, and
  * `NPCDefinition` values.
  *
+ * Minimal example:
+ * @code{.ini}
+ * [header]
+ * id|pallet_town
+ * width|24
+ * height|20
+ * background|assets/tilesets/pallet_town/maps/overworld.png
+ *
+ * [tiles]
+ * ####
+ * #..#
+ *
+ * [warps]
+ * 1|0|route_1|12|38
+ *
+ * [encounters]
+ * 1|2|5|40
+ *
+ * [npcs]
+ * pallet_girl|Girl|normal|10|9|down|0|Welcome to Pallet Town!|girl|
+ * @endcode
+ *
+ * See also @ref map_authoring_guide.
+ *
  * @section cutscene_files Cutscene Files
  *
  * Cutscene files use `[header]` and `[steps]`. Steps are command-driven rows
  * such as `move`, `walk`, `say`, `wait`, `sync`, `flag`, `hide`, and `show`.
  * `CutsceneFormat::parse()` produces a `Cutscene` plus warnings for malformed
  * lines.
+ *
+ * Minimal example:
+ * @code{.ini}
+ * [header]
+ * id|example_cutscene
+ *
+ * [steps]
+ * move|player|5|5
+ * move|some_npc|3|5
+ * sync
+ * say|Some NPC|Hello there!;Welcome to this example cutscene.
+ * flag|example_done
+ * @endcode
+ *
+ * See also @ref cutscene_authoring_guide.
  *
  * @section save_files Save Files
  *
@@ -26,4 +65,21 @@
  * dex progress. `SaveFormat::parse()` returns a partially populated
  * `SaveParseResult` even when some entries are invalid, allowing callers to
  * inspect warnings and decide how to proceed.
+ *
+ * Minimal example:
+ * @code{.ini}
+ * [header]
+ * name|Ada
+ * map|lab
+ * pos|3|4
+ * facing|2
+ *
+ * [inventory]
+ * 5|7
+ *
+ * [party]
+ * 1;5;10;22;Bulbulum;0;1,2,3,4,5,6;6,5,4,3,2,1;1:15:15,-1:0:0,-1:0:0,-1:0:0
+ * @endcode
+ *
+ * See also @ref save_compatibility_guide.
  */

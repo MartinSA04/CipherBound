@@ -1,0 +1,64 @@
+/**
+ * @page architecture_overview Architecture Overview
+ * @tableofcontents
+ *
+ * @section arch_runtime Runtime Shape
+ *
+ * CipherBound is a state-driven application. The long-lived session objects are
+ * created during startup, and the active screen is represented by a concrete
+ * @ref GameMode instance.
+ *
+ * The main runtime entry points are:
+ * - @ref SessionCoordinator for mode ownership and request processing.
+ * - @ref GameContext for shared subsystem references and cross-mode state.
+ * - @ref World for map ownership, NPC ownership, player state, and encounters.
+ *
+ * @section arch_modes Mode Switching
+ *
+ * Modes do not switch the application state directly. Instead, they push typed
+ * @ref ModeRequest values into the shared @ref ModeMailbox. The
+ * @ref SessionCoordinator drains that mailbox between frames, interprets each
+ * request, and creates or reuses the next mode.
+ *
+ * This keeps per-mode update logic small while centralizing transitions such as
+ * battle startup, map changes, dialogue flow, and cutscene handoff.
+ *
+ * @section arch_subsystems Key Subsystems
+ *
+ * The most useful subsystem entry points for contributors are:
+ * - @ref app_core "App Flow" for state transitions and shared runtime context.
+ * - @ref world_state "World State" for map data, movement, and entity ownership.
+ * - @ref battle_system "Battle System" for rules, AI, and attack resolution.
+ * - @ref cutscene_system "Cutscene System" for script parsing and playback.
+ * - @ref save_system "Save System" for persistent state and slot handling.
+ *
+ * @section arch_data Data-Driven Content
+ *
+ * Maps, cutscenes, and saves are all backed by plain-text formats. The parsing
+ * layer converts those files into in-memory schema objects before the runtime
+ * systems consume them.
+ *
+ * Start with these APIs when changing content formats:
+ * - @ref MapFormat
+ * - @ref CutsceneFormat
+ * - @ref SaveFormat
+ *
+ * The related format guide is documented in @ref data_file_formats.
+ *
+ * @section arch_reading Suggested Reading Order
+ *
+ * For a fast orientation pass through the codebase, read in this order:
+ * - @ref SessionCoordinator
+ * - @ref GameMode
+ * - @ref World
+ * - @ref MapFormat
+ * - @ref CutsceneRunner
+ * - @ref SaveManager
+ *
+ * After that, the most useful workflow guides are:
+ * - @ref mode_switching_flow
+ * - @ref map_authoring_guide
+ * - @ref cutscene_authoring_guide
+ * - @ref save_compatibility_guide
+ * - @ref battle_turn_flow_guide
+ */

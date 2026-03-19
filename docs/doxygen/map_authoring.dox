@@ -1,0 +1,67 @@
+/**
+ * @page map_authoring_guide How To Add A Map
+ * @tableofcontents
+ *
+ * @section map_authoring_files Files To Touch
+ *
+ * Adding a map usually means editing:
+ * - a `.map` file under `assets/data/maps/`
+ * - one or two background images under `assets/tilesets/`
+ * - optional NPC dialogue and party entries inside the map file itself
+ *
+ * The runtime parser is documented in @ref MapFormat.
+ *
+ * @section map_authoring_sections Required Sections
+ *
+ * A map file normally contains:
+ * - `[header]` with `id`, `width`, `height`, and background paths
+ * - `[tiles]` with one character per tile
+ * - optional `[warps]`
+ * - optional `[encounters]`
+ * - optional `[npcs]`
+ *
+ * Example:
+ * @code{.ini}
+ * [header]
+ * id|example_map
+ * width|8
+ * height|6
+ * background|assets/tilesets/example/maps/example.png
+ *
+ * [tiles]
+ * ########
+ * #......#
+ * #..TT..#
+ * #...d..#
+ * #......#
+ * ########
+ *
+ * [warps]
+ * 4|3|player_house_1f|4|8
+ * @endcode
+ *
+ * @section map_authoring_npcs NPC Entries
+ *
+ * NPC rows use the format:
+ * @code{.txt}
+ * id|name|type|x|y|facing|sightRange|dialogue|sprite|party
+ * @endcode
+ *
+ * Notes:
+ * - Dialogue lines are separated by `;`
+ * - Dialogue stages are separated by `@@`
+ * - Trainer party entries use `speciesId:level`
+ * - The sprite field can include `@hidden` to start hidden
+ *
+ * @section map_authoring_checks Validation
+ *
+ * Before considering a map done:
+ * - Build and run the game and walk the whole map.
+ * - Verify every door/warp target exists.
+ * - Verify tall grass and encounter areas behave as expected.
+ * - Verify NPC dialogue, facing, and trainer sight ranges.
+ * - Run the map-format and world-generation tests.
+ *
+ * The existing `assets/data/maps/pallet_town/pallet_town.map` file is a good
+ * reference for a complete overworld map.
+ */

@@ -1,22 +1,32 @@
+/**
+ * @file
+ * @brief Party management mode.
+ * @ingroup app_core
+ */
+
 #pragma once
 #include "../GameMode.h"
 
+/// Mode for inspecting, rearranging, and reviewing party daemons.
 class PartyMode : public GameMode {
   public:
+    /// Updates party navigation, swapping, and summary flow.
     void update(GameContext &ctx, InputManager &input) override;
+    /// Renders the party UI or summary screen.
     void render(GameContext &ctx) override;
 
   private:
+    /// Current party-mode substate.
     enum class SubState {
-        browsing,       // Navigating party list
-        actionMenu,     // Showing action sub-menu (Summary, Switch, Cancel)
-        selectingSwap,  // Picking second Daemon to swap with
-        showingSummary, // Viewing a Daemon's summary screen
+        browsing,       ///< Navigating the party list.
+        actionMenu,     ///< Showing the action submenu.
+        selectingSwap,  ///< Selecting a target to swap with.
+        showingSummary, ///< Showing the daemon summary screen.
     };
 
-    int selected{0};
-    SubState subState{SubState::browsing};
-    int actionSelected{0};
-    int swapSource{0};  // Index of Daemon to swap from
-    int summaryPage{0}; // 0 = info/moves, 1 = stats
+    int selected{0};                    ///< Current party selection.
+    SubState subState{SubState::browsing}; ///< Active party substate.
+    int actionSelected{0};              ///< Current action submenu selection.
+    int swapSource{0};                  ///< Source party index for swaps.
+    int summaryPage{0};                 ///< Active summary page.
 };

@@ -106,6 +106,7 @@ The build defaults `SITE_URL` to `https://cipherbound.com/`. Override it only if
 To **deploy**, upload the files from `buildw/deploy/` to a web server:
 
 - `index.html`
+- `build_version.json`
 - `index.<hash>.js`
 - `index.<hash>.wasm`
 - `index.<hash>.data`
@@ -113,6 +114,8 @@ To **deploy**, upload the files from `buildw/deploy/` to a web server:
 - `sitemap.xml`
 
 The server must serve `.wasm` files with MIME type `application/wasm`.
+
+The Cloudflare deployment workflow also stamps the build with a generated version string, exposes that metadata in the deployed site, writes it to `build_version.json`, and publishes a matching Git tag and GitHub release after a successful deploy.
 
 ## Architecture
 

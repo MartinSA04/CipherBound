@@ -20,6 +20,11 @@ done
 
 DEFAULT_SITE_URL="https://cipherbound.com/"
 SITE_URL="${SITE_URL:-$DEFAULT_SITE_URL}"
+BUILD_VERSION="${BUILD_VERSION:-$(git rev-parse --short HEAD 2>/dev/null || echo unknown)}"
+BUILD_COMMIT_SHA="${BUILD_COMMIT_SHA:-$(git rev-parse HEAD 2>/dev/null || echo unknown)}"
+BUILD_COMMIT_SHORT="${BUILD_COMMIT_SHORT:-$(printf '%.7s' "$BUILD_COMMIT_SHA")}"
+BUILD_TIMESTAMP="${BUILD_TIMESTAMP:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
+BUILD_REF_NAME="${BUILD_REF_NAME:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)}"
 
 case "$SITE_URL" in
     http://*|https://*) ;;
@@ -35,6 +40,11 @@ case "$SITE_URL" in
 esac
 
 SITE_ROOT_URL_SED="$(printf '%s' "$SITE_ROOT_URL" | sed 's/[&|]/\\&/g')"
+BUILD_VERSION_SED="$(printf '%s' "$BUILD_VERSION" | sed 's/[&|]/\\&/g')"
+BUILD_COMMIT_SHA_SED="$(printf '%s' "$BUILD_COMMIT_SHA" | sed 's/[&|]/\\&/g')"
+BUILD_COMMIT_SHORT_SED="$(printf '%s' "$BUILD_COMMIT_SHORT" | sed 's/[&|]/\\&/g')"
+BUILD_TIMESTAMP_SED="$(printf '%s' "$BUILD_TIMESTAMP" | sed 's/[&|]/\\&/g')"
+BUILD_REF_NAME_SED="$(printf '%s' "$BUILD_REF_NAME" | sed 's/[&|]/\\&/g')"
 
 if [ "$SITE_ROOT_URL" = "$DEFAULT_SITE_URL" ]; then
     echo "Using default production SITE_URL: $SITE_ROOT_URL"
@@ -103,7 +113,23 @@ sed -i \
     -e "s|src=\"${BASENAME}\.js\"|src=\"${HASHED_JS}\"|g" \
     -e "s|src='${BASENAME}\.js'|src='${HASHED_JS}'|g" \
     -e "s|__SITE_URL__|${SITE_ROOT_URL_SED}|g" \
+    -e "s|__BUILD_VERSION__|${BUILD_VERSION_SED}|g" \
+    -e "s|__BUILD_COMMIT_SHA__|${BUILD_COMMIT_SHA_SED}|g" \
+    -e "s|__BUILD_COMMIT_SHORT__|${BUILD_COMMIT_SHORT_SED}|g" \
+    -e "s|__BUILD_TIMESTAMP__|${BUILD_TIMESTAMP_SED}|g" \
+    -e "s|__BUILD_REF_NAME__|${BUILD_REF_NAME_SED}|g" \
     "$DEPLOY_DIR/index.html"
+
+cat > "$DEPLOY_DIR/build_version.json" <<EOF
+{
+  "version": "${BUILD_VERSION}",
+  "commit_sha": "${BUILD_COMMIT_SHA}",
+  "commit_short": "${BUILD_COMMIT_SHORT}",
+  "build_timestamp": "${BUILD_TIMESTAMP}",
+  "ref_name": "${BUILD_REF_NAME}",
+  "site_url": "${SITE_ROOT_URL}"
+}
+EOF
 
 cat > "$DEPLOY_DIR/robots.txt" <<EOF
 User-agent: *
@@ -128,6 +154,7 @@ echo "Build complete."
 echo
 echo "Deploy directory contents:"
 echo "  $DEPLOY_DIR/index.html"
+echo "  $DEPLOY_DIR/build_version.json"
 echo "  $DEPLOY_DIR/$HASHED_JS"
 echo "  $DEPLOY_DIR/$HASHED_WASM"
 echo "  $DEPLOY_DIR/$HASHED_DATA"

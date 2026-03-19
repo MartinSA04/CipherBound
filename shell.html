@@ -208,6 +208,28 @@
       touch-action: manipulation;
     }
 
+    #build-meta {
+      position: fixed;
+      left: max(8px, env(safe-area-inset-left));
+      bottom: max(8px, env(safe-area-inset-bottom));
+      z-index: 55;
+      max-width: min(28rem, calc(100vw - 16px));
+      padding: 6px 10px;
+      border: 1px solid rgba(91, 127, 255, 0.45);
+      border-radius: 10px;
+      background: rgba(10, 10, 20, 0.76);
+      color: #cfd6ff;
+      font-size: 11px;
+      line-height: 1.35;
+      letter-spacing: 0.02em;
+      backdrop-filter: blur(10px);
+      pointer-events: none;
+    }
+    #build-meta strong {
+      color: #ffffff;
+      font-weight: 700;
+    }
+
     #noscript-message {
       position: fixed;
       inset: 16px;
@@ -381,6 +403,7 @@
       .dpad-btn { width: 44px; height: 44px; font-size: 18px; }
       .action-btn { width: 48px; height: 48px; font-size: 14px; }
       .small-btn { height: 28px; padding: 0 10px; font-size: 10px; }
+      #build-meta { font-size: 10px; }
     }
   </style>
 </head>
@@ -439,6 +462,12 @@
     <button id="audio-unlock-btn" type="button">Tap to enable audio</button>
   </div>
 
+  <aside id="build-meta" aria-label="Build metadata">
+    <strong>CipherBound</strong> <span id="build-meta-version">__BUILD_VERSION__</span>
+    <span id="build-meta-commit">(__BUILD_COMMIT_SHORT__)</span>
+    <span id="build-meta-time">__BUILD_TIMESTAMP__</span>
+  </aside>
+
   <noscript>
     <section id="noscript-message">
       <h1>CipherBound</h1>
@@ -459,8 +488,25 @@
     var wrapperElement   = document.getElementById('canvas-wrapper');
     var audioUnlockOverlay = document.getElementById('audio-unlock');
     var audioUnlockButton  = document.getElementById('audio-unlock-btn');
+    var buildMetaVersion = document.getElementById('build-meta-version');
+    var buildMetaCommit = document.getElementById('build-meta-commit');
+    var buildMetaTime = document.getElementById('build-meta-time');
 
     window.ASSET_BASE = window.ASSET_BASE || '';
+    window.CIPHERBOUND_BUILD = {
+      version: '__BUILD_VERSION__',
+      commitSha: '__BUILD_COMMIT_SHA__',
+      commitShort: '__BUILD_COMMIT_SHORT__',
+      timestamp: '__BUILD_TIMESTAMP__',
+      refName: '__BUILD_REF_NAME__'
+    };
+
+    (function() {
+      var build = window.CIPHERBOUND_BUILD;
+      if (buildMetaVersion) buildMetaVersion.textContent = build.version;
+      if (buildMetaCommit) buildMetaCommit.textContent = '(' + build.commitShort + ')';
+      if (buildMetaTime) buildMetaTime.textContent = build.timestamp;
+    })();
 
     /* ═══════════════════════════════════════════════════════════
      *  WEBGL CONTEXT LOSS

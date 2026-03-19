@@ -3,6 +3,9 @@ name: Deploy CipherBound
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -17,16 +20,32 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      - name: Compute deployment version
+        id: version
+        run: |
+          short_sha="${GITHUB_SHA::7}"
+          build_version="web.${GITHUB_RUN_NUMBER}.${short_sha}"
+          deploy_tag="deploy-${GITHUB_RUN_NUMBER}-${short_sha}"
+          build_timestamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          {
+            echo "build_version=$build_version"
+            echo "deploy_tag=$deploy_tag"
+            echo "build_timestamp=$build_timestamp"
+            echo "short_sha=$short_sha"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Install system build tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y meson ninja-build python3 curl git
+          sudo apt-get install -y meson ninja-build python3 curl git jq
 
       - name: Install Emscripten SDK
         run: |
@@ -42,7 +61,13 @@ jobs:
         run: |
           source emsdk/emsdk_env.sh
           chmod +x ./build_web.sh
-          SITE_URL=https://cipherbound.com/ ./build_web.sh
+          SITE_URL=https://cipherbound.com/ \
+          BUILD_VERSION='${{ steps.version.outputs.build_version }}' \
+          BUILD_COMMIT_SHA='${{ github.sha }}' \
+          BUILD_COMMIT_SHORT='${{ steps.version.outputs.short_sha }}' \
+          BUILD_TIMESTAMP='${{ steps.version.outputs.build_timestamp }}' \
+          BUILD_REF_NAME='${{ github.ref_name }}' \
+          ./build_web.sh
 
       - name: Rewrite asset base for production
         run: |
@@ -63,9 +88,12 @@ jobs:
 
       - name: Verify SEO deploy artifacts
         run: |
+          test -f buildw/deploy/build_version.json
           test -f buildw/deploy/robots.txt
           test -f buildw/deploy/sitemap.xml
           grep -q 'https://cipherbound.com/' buildw/deploy/index.html
+          jq -e '.version == "${{ steps.version.outputs.build_version }}"' buildw/deploy/build_version.json
+          grep -q '${{ steps.version.outputs.build_version }}' buildw/deploy/index.html
 
       - name: Upload hashed .data file(s) to R2
         run: |
@@ -88,3 +116,28 @@ jobs:
 
       - name: Deploy to Cloudflare Pages
         run: wrangler pages deploy buildw/deploy --project-name "$PAGES_PROJECT_NAME"
+
+      - name: Create deployment tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "${{ steps.version.outputs.deploy_tag }}" "${{ github.sha }}"
+          git push origin "${{ steps.version.outputs.deploy_tag }}"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.deploy_tag }}" \
+            --title "Deploy ${{ steps.version.outputs.build_version }}" \
+            --notes "$(cat <<EOF
+          Cloudflare deployment metadata
+
+          Version: ${{ steps.version.outputs.build_version }}
+          Tag: ${{ steps.version.outputs.deploy_tag }}
+          Commit: ${{ github.sha }}
+          Ref: ${{ github.ref_name }}
+          Built: ${{ steps.version.outputs.build_timestamp }}
+          Site: https://cipherbound.com/
+          EOF
+          )"

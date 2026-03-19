@@ -1,0 +1,20 @@
+PROJECT_NAME           = "MyProject"
+OUTPUT_DIRECTORY       = docs
+INPUT                  = include src README.md
+FILE_PATTERNS          = *.h *.hpp *.hh *.c *.cc *.cpp *.cxx *.md
+RECURSIVE              = YES
+
+EXTRACT_ALL            = NO
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = NO
+
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+
+USE_MDFILE_AS_MAINPAGE = README.md
+MARKDOWN_SUPPORT       = YES
+
+HAVE_DOT               = YES
+CALL_GRAPH             = NO
+CALLER_GRAPH           = NO
+CLASS_DIAGRAMS         = YES

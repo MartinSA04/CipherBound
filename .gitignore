@@ -29,3 +29,7 @@ Thumbs.db
 
 # clangd
 .cache/*
+
+# Doxygen
+docs/html/
+docs/latex/

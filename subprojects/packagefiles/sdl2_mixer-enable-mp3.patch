@@ -1,0 +1,13 @@
+--- a/meson.build
++++ b/meson.build
+@@ -19,6 +19,10 @@
+ mpg123_dep = dependency('mpg123', required: get_option('mpg123'))
+ if mpg123_dep.found()
+   feature_args += '-DMUSIC_MP3_MPG123'
++else
++  # Keep MP3 support available even when the system mpg123 development
++  # package is missing by using SDL_mixer's bundled dr_mp3 backend.
++  feature_args += '-DMUSIC_MP3_DRMP3'
+ endif
+ 
+ opus_dep = dependency('opusfile', required: get_option('opus'))

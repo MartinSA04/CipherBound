@@ -59,6 +59,8 @@ mmmmmm################pppp######################
 
 36|19|viridian_mart|4|7
 26|26|viridian_center|7|8
+25|18|viridian_npc_house|4|7
+25|11|viridian_academy|4|7
 
 [encounters]
 # Format: speciesId|minLevel|maxLevel|weight

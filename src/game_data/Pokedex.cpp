@@ -35,7 +35,8 @@ void Pokedex::loadSpecies(const std::string &path) {
             tokens.push_back(token);
 
         if (tokens.size() < 14) {
-            std::cerr << "Malformed species line (expected 14 fields): " << line << std::endl;
+            std::cerr << "Malformed species line (expected at least 14 fields): " << line
+                      << std::endl;
             continue;
         }
 
@@ -51,6 +52,15 @@ void Pokedex::loadSpecies(const std::string &path) {
         }
         sp.primaryType = pt->second;
         sp.secondaryType = st->second;
+
+        if (tokens.size() >= 15 && !tokens[14].empty() && tokens[14] != "none") {
+            const auto growth = growthRateMap.find(tokens[14]);
+            if (growth == growthRateMap.end()) {
+                std::cerr << "Unknown growth rate for species " << sp.name << std::endl;
+                continue;
+            }
+            sp.growthRate = growth->second;
+        }
 
         sp.baseStats.hp = std::stoi(tokens[4]);
         sp.baseStats.attack = std::stoi(tokens[5]);

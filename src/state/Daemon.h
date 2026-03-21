@@ -41,6 +41,8 @@ class Daemon {
     int getLevel() const;
     /// Returns the total EXP.
     int getExp() const;
+    /// Returns the EXP earned since reaching the current level.
+    int getExpProgress() const;
     /// Returns the EXP needed for the next level.
     int getExpNeeded() const;
     /// Adds EXP without immediately resolving level-up UI.

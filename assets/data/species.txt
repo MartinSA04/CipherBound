@@ -1,16 +1,17 @@
 # Species data file
-# Format: id|name|primaryType|secondaryType|hp|atk|def|spa|spd|spe|catchRate|baseExp|learnset|evolutions
+# Format: id|name|primaryType|secondaryType|hp|atk|def|spa|spd|spe|catchRate|baseExp|learnset|evolutions|growthRate
 # Learnset: moveId:level,moveId:level,...
 # Evolutions: targetId:level,targetId:level,...
 # Types: classical, electromagnetic, quantum, nuclear, radioactive, thermal,
 #        gravitational, algebraic, calculus, probabilistic, algorithmic,
 #        logic, digital, recursive, chaotic
+# Growth rates: erratic, fast, mediumFast, mediumSlow, slow, fluctuating
 # Lines starting with # are comments
 
 # Physics starters
-1|Bulbulum|classical|classical|45|55|45|40|40|50|200|64|1:1,11:5|2:16
-2|Newtonion|classical|classical|45|55|45|40|40|50|200|64|1:1,11:5|3:32
-3|Gravitonion|quantum|gravitational|60|70|60|55|55|65|200|142|1:1,7:1,11:5|none
+1|Bulbulum|classical|classical|45|55|45|40|40|50|200|64|1:1,11:5|2:16|mediumSlow
+2|Newtonion|classical|classical|45|55|45|40|40|50|200|64|1:1,11:5|3:32|mediumSlow
+3|Gravitonion|quantum|gravitational|60|70|60|55|55|65|200|142|1:1,7:1,11:5|none|mediumSlow
 
 
 

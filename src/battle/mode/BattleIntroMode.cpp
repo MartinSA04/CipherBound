@@ -39,7 +39,7 @@ void BattleIntroMode::update(GameContext &ctx, InputManager & /*input*/) {
         Battle &battle = ctx.battle();
         presentation.beginBattle(battle.getPlayerDaemon().getCurrentHP(),
                                  battle.getOpponentDaemon().getCurrentHP(),
-                                 battle.getPlayerDaemon().getExp());
+                                 battle.getPlayerDaemon().getExpProgress());
         battle.start();
 
         ctx.pushRequest(ModeRequest::enterBattleMode());

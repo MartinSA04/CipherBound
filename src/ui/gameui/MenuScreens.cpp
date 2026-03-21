@@ -121,9 +121,11 @@ void GameUI::drawSummaryScreen(const Daemon &daemon, const Pokedex &pokedex, int
         int expBarX = 54 + 16 * scale;
         int expBarW = 48 * scale;
         int expNeeded = daemon.getExpNeeded();
-        drawSpriteEXPBar(expBarX, expY + 4 * scale, expBarW, daemon.getExp(), expNeeded, scale);
+        drawSpriteEXPBar(expBarX, expY + 4 * scale, expBarW, daemon.getExpProgress(), expNeeded,
+                         scale);
         spriteFont.drawText(renderer,
-                            std::to_string(daemon.getExp()) + "-" + std::to_string(expNeeded),
+                            std::to_string(daemon.getExpProgress()) + "-" +
+                                std::to_string(expNeeded),
                             expBarX + expBarW + 4 * scale, expY, scale);
 
         int movesHeaderY = expY + 16 * scale;

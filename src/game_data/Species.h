@@ -3,6 +3,15 @@
 #include <unordered_map>
 #include <vector>
 
+enum class GrowthRate {
+    erratic,
+    fast,
+    mediumFast,
+    mediumSlow,
+    slow,
+    fluctuating,
+};
+
 enum class ElementType {
     classical,       // Newtonian mechanics
     electromagnetic, // EM force, Maxwell's equations
@@ -39,6 +48,15 @@ inline const std::unordered_map<std::string, ElementType> typeMap = {
     {"chaotic", ElementType::chaotic},
 };
 
+inline const std::unordered_map<std::string, GrowthRate> growthRateMap = {
+    {"erratic", GrowthRate::erratic},
+    {"fast", GrowthRate::fast},
+    {"mediumFast", GrowthRate::mediumFast},
+    {"mediumSlow", GrowthRate::mediumSlow},
+    {"slow", GrowthRate::slow},
+    {"fluctuating", GrowthRate::fluctuating},
+};
+
 inline std::string elementTypeName(ElementType t) {
     for (const auto &[name, val] : typeMap) {
         if (val == t)
@@ -71,6 +89,7 @@ struct Species {
     std::string name;
     ElementType primaryType;
     ElementType secondaryType;
+    GrowthRate growthRate{GrowthRate::mediumFast};
     BaseStats baseStats;
     int catchRate;
     int baseExpYield;

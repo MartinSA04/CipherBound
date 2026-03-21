@@ -436,6 +436,16 @@ map_model_test = executable(
 
 test('map_model', map_model_test)
 
+daemon_exp_test = executable(
+  'daemon_exp_test',
+  [
+    'tests/DaemonExpTest.cpp',
+    'src/state/Daemon.cpp',
+  ],
+)
+
+test('daemon_exp', daemon_exp_test)
+
 state_model_test = executable(
   'state_model_test',
   [

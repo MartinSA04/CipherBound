@@ -25,7 +25,7 @@ void BattleMode::updateSwitchAnim(GameContext &ctx) {
             presentation.playerFieldVisible = true;
         } else {
             presentation.playerDisplayHP = battle.getPlayerDaemon().getCurrentHP();
-            presentation.playerDisplayEXP = battle.getPlayerDaemon().getExp();
+            presentation.playerDisplayEXP = battle.getPlayerDaemon().getExpProgress();
             presentation.playerFieldVisible = false;
             presentation.resetExpAnimation();
         }
@@ -106,7 +106,7 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
 
         Daemon &daemon = battle.getPlayerDaemon();
         const EXPTickResult result =
-            presentation.tickEXPAnimation(daemon.getExp(), daemon.getExpNeeded());
+            presentation.tickEXPAnimation(daemon.getExpProgress(), daemon.getExpNeeded());
 
         if (!expSoundPlayed) {
             ctx.playSound(SoundEffect::expTick);

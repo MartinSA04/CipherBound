@@ -13,6 +13,7 @@
 #include "../state/player/Player.h"
 #include <memory>
 #include <random>
+#include <vector>
 
 /**
  * @brief Runtime battle coordinator for both wild and trainer battles.
@@ -109,6 +110,7 @@ class Battle {
     void addCaptureAnimMarker();             // Insert marker to trigger capture animation
     void addAttackAnimMarker(bool isPlayer); // Insert marker to trigger attack animation
     void addSwitchAnimMarker(bool isRecall); // Insert marker to trigger player switch animation
+    int participantCount() const;
     void transitionToQueuedState();
     void executeTurn();
 
@@ -136,5 +138,6 @@ class Battle {
     std::mt19937 &rng;
     const Pokedex &pokedex;
     BattleEventQueue eventQueue;
+    std::vector<bool> playerParticipants;
     std::string emptyMessage;      ///< Empty string returned when no message is available.
 };

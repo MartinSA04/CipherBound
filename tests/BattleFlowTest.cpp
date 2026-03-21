@@ -84,6 +84,7 @@ int main() {
     winner.restorePartyDaemon(makeDaemon(pokedex, 3, 20, 7));
     const Daemon rewardTarget = makeDaemon(pokedex, 1, 1, 1, 1, "Target");
     const int expectedMoney = BattleRules::calculateMoneyReward(rewardTarget, BattleType::wild);
+    const int expectedWildExp = BattleRules::calculateExpYield(rewardTarget, BattleType::wild);
 
     Battle winBattle(winner, std::make_unique<Daemon>(rewardTarget), BattleType::wild, rng, pokedex);
     winBattle.start();
@@ -99,13 +100,27 @@ int main() {
     assert(winBattle.getResult().moneyGained == expectedMoney);
     assert(winner.getMoney() == expectedMoney);
     assert(expectedMoney == 0);
-    assert(winBattle.getResult().expGained > 0);
+    assert(winBattle.getResult().expGained == expectedWildExp);
+
+    Player trainerWinner("TrainerWinner", {0, 0});
+    trainerWinner.restorePartyDaemon(makeDaemon(pokedex, 3, 20, 7));
+    NPC trainer("trainer_1", "Trainer", {0, 0}, NPCType::trainer);
+    trainer.addDaemon(rewardTarget);
+
+    Battle trainerBattle(trainerWinner, &trainer, BattleType::trainer, rng, pokedex);
+    trainerBattle.start();
+    drainBattle(trainerBattle);
+    trainerBattle.chooseAction(BattleAction::fight);
+    trainerBattle.chooseMove(0);
+    drainBattle(trainerBattle);
+    assert(trainerBattle.getResult().expGained ==
+           BattleRules::calculateExpYield(rewardTarget, BattleType::trainer));
 
     Player switcher("Switcher", {0, 0});
     switcher.restorePartyDaemon(makeDaemon(pokedex, 1, 8, 1, -1, "Lead"));
     switcher.restorePartyDaemon(makeDaemon(pokedex, 2, 8, 1, -1, "Backup"));
 
-    Battle switchBattle(switcher, std::make_unique<Daemon>(makeDaemon(pokedex, 3, 8, 1)),
+    Battle switchBattle(switcher, std::make_unique<Daemon>(makeDaemon(pokedex, 3, 8, 1, 1)),
                         BattleType::wild, rng, pokedex);
     switchBattle.start();
     drainBattle(switchBattle);
@@ -135,6 +150,30 @@ int main() {
 
     switchBattle.finishSwitchAnimation();
     assert(switchBattle.getState() == BattleState::opponentTurn);
+    switchBattle.executeOpponentTurn();
+    while (switchBattle.getState() != BattleState::choosingAction) {
+        switch (switchBattle.getState()) {
+        case BattleState::showingMessages:
+            switchBattle.advanceMessage();
+            break;
+        case BattleState::animatingHP:
+            switchBattle.finishHPAnimation();
+            break;
+        case BattleState::animatingAttack:
+            switchBattle.finishAttackAnimation();
+            break;
+        default:
+            break;
+        }
+    }
+    switchBattle.chooseAction(BattleAction::fight);
+    switchBattle.chooseMove(0);
+    drainBattle(switchBattle);
+    const int splitExp = BattleRules::calculateExpYield(makeDaemon(pokedex, 3, 8, 1), BattleType::wild,
+                                                        2);
+    assert(switchBattle.getResult().expGained == splitExp * 2);
+    assert(switcher.getDaemon(0).getExpProgress() == splitExp);
+    assert(switcher.getDaemon(1).getExpProgress() == splitExp);
 
     Player loser("Loser", {0, 0});
     loser.restorePartyDaemon(makeDaemon(pokedex, 1, 5, 1, 1, "Lead"));

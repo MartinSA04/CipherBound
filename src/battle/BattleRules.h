@@ -24,8 +24,8 @@ float effectivenessMultiplier(ElementType attackType, const Species &defenderSpe
 int calculateDamage(const Daemon &attacker, const Daemon &defender, const MoveData &move,
                     int randomPercent);
 
-/// Calculates experience yield for a defeated daemon.
-int calculateExpYield(const Daemon &defeated);
+/// Calculates per-participant experience yield for a defeated daemon.
+int calculateExpYield(const Daemon &defeated, BattleType type, int participantCount = 1);
 /// Calculates post-battle money reward for the given battle type.
 int calculateMoneyReward(const Daemon &defeated, BattleType type);
 

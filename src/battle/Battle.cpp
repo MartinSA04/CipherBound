@@ -2,6 +2,7 @@
 #include "BattleCapture.h"
 #include "BattleRules.h"
 #include "BattleTurnResolver.h"
+#include <algorithm>
 #include <string_view>
 
 namespace {
@@ -35,6 +36,9 @@ void Battle::start() {
     // Battle already starts in BattleState::intro (from constructor).
     // Phase 0: opponent (Daemon or NPC) slides in.
     introPhase = 0;
+    playerParticipants.assign(static_cast<std::size_t>(player.partySize()), false);
+    if (!playerParticipants.empty())
+        playerParticipants[0] = true;
 
     if (opponent == nullptr) {
         // Wild: after phase 0 anim, show message then player sends out
@@ -208,13 +212,20 @@ void Battle::executeTurn() {
         addMessage("It dealt " + std::to_string(resolution.damage) + " damage!");
 
         if (resolution.defenderFainted) {
-            expGained = BattleRules::calculateExpYield(getOpponentDaemon());
+            const int expShare = BattleRules::calculateExpYield(getOpponentDaemon(), type,
+                                                                participantCount());
+            expGained = 0;
+            for (int i = 0; i < player.partySize(); ++i) {
+                if (!playerParticipants[static_cast<std::size_t>(i)])
+                    continue;
+                player.getDaemon(i).addExp(expShare);
+                expGained += expShare;
+            }
             moneyGained = BattleRules::calculateMoneyReward(getOpponentDaemon(), type);
-            playerDaemon.addExp(expGained);
             if (moneyGained > 0)
                 player.addMoney(moneyGained);
             addMessage("The opposing " + getOpponentDaemon().getNickname() + " fainted!");
-            addMessage("Gained " + std::to_string(expGained) + " EXP!");
+            addMessage(playerDaemon.getNickname() + " gained " + std::to_string(expShare) + " EXP!");
             addEXPAnimMarker();
             if (moneyGained > 0)
                 addMessage("Received " + std::to_string(moneyGained) + " dollars!");
@@ -410,17 +421,37 @@ void Battle::addAttackAnimMarker(bool isPlayer) { eventQueue.pushAttackAnimation
 
 void Battle::addSwitchAnimMarker(bool isRecall) { eventQueue.pushSwitchAnimation(isRecall); }
 
+int Battle::participantCount() const {
+    return static_cast<int>(std::count(playerParticipants.begin(), playerParticipants.end(), true));
+}
+
 void Battle::transitionToQueuedState() {
     state = eventQueue.consume(pendingState, introPhase, attackAnimIsPlayer, switchAnimIsRecall);
     if (state == BattleState::animatingSwitch && !switchAnimIsRecall &&
         pendingPlayerSwitchIndex >= 0) {
+        if (pendingPlayerSwitchIndex < static_cast<int>(playerParticipants.size())) {
+            const std::size_t pendingIndex = static_cast<std::size_t>(pendingPlayerSwitchIndex);
+            const bool activeParticipant = playerParticipants[0];
+            playerParticipants[0] = playerParticipants[pendingIndex];
+            playerParticipants[pendingIndex] = activeParticipant;
+        }
         player.swapDaemon(0, pendingPlayerSwitchIndex);
+        if (!playerParticipants.empty())
+            playerParticipants[0] = true;
         pendingPlayerSwitchIndex = -1;
         return;
     }
 
     if (state == pendingState && eventQueue.empty() && pendingPlayerSwitchIndex >= 0) {
+        if (pendingPlayerSwitchIndex < static_cast<int>(playerParticipants.size())) {
+            const std::size_t pendingIndex = static_cast<std::size_t>(pendingPlayerSwitchIndex);
+            const bool activeParticipant = playerParticipants[0];
+            playerParticipants[0] = playerParticipants[pendingIndex];
+            playerParticipants[pendingIndex] = activeParticipant;
+        }
         player.swapDaemon(0, pendingPlayerSwitchIndex);
+        if (!playerParticipants.empty())
+            playerParticipants[0] = true;
         pendingPlayerSwitchIndex = -1;
     }
 }

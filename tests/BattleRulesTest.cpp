@@ -67,7 +67,12 @@ int main() {
         BattleRules::calculateDamage(attacker, defender, neutralSpecialMove, 100);
     assert(rolledHigh >= rolledLow);
 
-    assert(BattleRules::calculateExpYield(defender) == defenderSpecies.baseExpYield * 20 / 7);
+    assert(BattleRules::calculateExpYield(defender, BattleType::wild) ==
+           defenderSpecies.baseExpYield * 20 / 7);
+    assert(BattleRules::calculateExpYield(defender, BattleType::trainer) ==
+           defenderSpecies.baseExpYield * 20 * 3 / 14);
+    assert(BattleRules::calculateExpYield(defender, BattleType::trainer, 2) ==
+           defenderSpecies.baseExpYield * 20 * 3 / 28);
     assert(BattleRules::calculateMoneyReward(defender, BattleType::wild) == 0);
     assert(BattleRules::calculateMoneyReward(defender, BattleType::trainer) == 400);
 

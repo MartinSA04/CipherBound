@@ -42,8 +42,17 @@ int calculateDamage(const Daemon &attacker, const Daemon &defender, const MoveDa
     return std::max(1, baseDamage);
 }
 
-int calculateExpYield(const Daemon &defeated) {
-    return defeated.getSpecies().baseExpYield * defeated.getLevel() / 7;
+int calculateExpYield(const Daemon &defeated, BattleType type, int participantCount) {
+    const int participants = std::max(1, participantCount);
+    int numerator = defeated.getSpecies().baseExpYield * defeated.getLevel();
+    int denominator = 7 * participants;
+
+    if (type == BattleType::trainer || type == BattleType::gymLeader) {
+        numerator *= 3;
+        denominator *= 2;
+    }
+
+    return numerator / denominator;
 }
 
 int calculateMoneyReward(const Daemon &defeated, BattleType type) {

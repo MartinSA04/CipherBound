@@ -63,6 +63,9 @@ void drainBattle(Battle &battle) {
         case BattleState::animatingAttack:
             battle.finishAttackAnimation();
             break;
+        case BattleState::animatingSwitch:
+            battle.finishSwitchAnimation();
+            break;
         default:
             return;
         }
@@ -98,6 +101,41 @@ int main() {
     assert(expectedMoney == 0);
     assert(winBattle.getResult().expGained > 0);
 
+    Player switcher("Switcher", {0, 0});
+    switcher.restorePartyDaemon(makeDaemon(pokedex, 1, 8, 1, -1, "Lead"));
+    switcher.restorePartyDaemon(makeDaemon(pokedex, 2, 8, 1, -1, "Backup"));
+
+    Battle switchBattle(switcher, std::make_unique<Daemon>(makeDaemon(pokedex, 3, 8, 1)),
+                        BattleType::wild, rng, pokedex);
+    switchBattle.start();
+    drainBattle(switchBattle);
+    assert(switchBattle.getState() == BattleState::choosingAction);
+
+    switchBattle.chooseAction(BattleAction::switchDaemon);
+    assert(switchBattle.getState() == BattleState::choosingSwitch);
+    switchBattle.chooseSwitchTarget(1);
+    assert(switchBattle.getState() == BattleState::showingMessages);
+    assert(switchBattle.getMessage() == "Come back, Lead!");
+    assert(switchBattle.getPlayerDaemon().getNickname() == "Lead");
+
+    switchBattle.advanceMessage();
+    assert(switchBattle.getState() == BattleState::animatingSwitch);
+    assert(switchBattle.isSwitchRecalling());
+    assert(switchBattle.getPlayerDaemon().getNickname() == "Lead");
+
+    switchBattle.finishSwitchAnimation();
+    assert(switchBattle.getState() == BattleState::showingMessages);
+    assert(switchBattle.getMessage() == "Go, Backup!");
+    assert(switchBattle.getPlayerDaemon().getNickname() == "Lead");
+
+    switchBattle.advanceMessage();
+    assert(switchBattle.getState() == BattleState::animatingSwitch);
+    assert(!switchBattle.isSwitchRecalling());
+    assert(switchBattle.getPlayerDaemon().getNickname() == "Backup");
+
+    switchBattle.finishSwitchAnimation();
+    assert(switchBattle.getState() == BattleState::opponentTurn);
+
     Player loser("Loser", {0, 0});
     loser.restorePartyDaemon(makeDaemon(pokedex, 1, 5, 1, 1, "Lead"));
     loser.restorePartyDaemon(makeDaemon(pokedex, 2, 5, 1, 1, "Backup"));
@@ -109,7 +147,30 @@ int main() {
     assert(blackoutBattle.getState() == BattleState::choosingAction);
 
     blackoutBattle.executeOpponentTurn();
-    drainBattle(blackoutBattle);
+    bool sawForcedSwitchAnimation = false;
+    for (int guard = 0; guard < 128 && blackoutBattle.getState() != BattleState::choosingAction;
+         ++guard) {
+        switch (blackoutBattle.getState()) {
+        case BattleState::showingMessages:
+            blackoutBattle.advanceMessage();
+            break;
+        case BattleState::animatingHP:
+            blackoutBattle.finishHPAnimation();
+            break;
+        case BattleState::animatingAttack:
+            blackoutBattle.finishAttackAnimation();
+            break;
+        case BattleState::animatingSwitch:
+            sawForcedSwitchAnimation = true;
+            assert(!blackoutBattle.isSwitchRecalling());
+            assert(loser.getDaemon(0).getNickname() == "Backup");
+            blackoutBattle.finishSwitchAnimation();
+            break;
+        default:
+            break;
+        }
+    }
+    assert(sawForcedSwitchAnimation);
     assert(blackoutBattle.getState() == BattleState::choosingAction);
     assert(loser.getDaemon(0).getNickname() == "Backup");
     assert(!loser.allDaemonsFainted());

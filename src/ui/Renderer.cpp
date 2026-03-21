@@ -4,7 +4,9 @@
 
 Renderer::Renderer() : window{50, 50, WINDOW_WIDTH, WINDOW_HEIGHT, "CipherBound"} {
     window.setBackgroundColor(TDT4102::Color::black);
-    window.hide_cursor();
+    #ifndef __EMSCRIPTEN__
+        window.hide_cursor();
+    #endif
 }
 
 TDT4102::AnimationWindow &Renderer::getWindow() { return window; }

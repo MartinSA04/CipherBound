@@ -21,6 +21,12 @@ void BattleEventQueue::pushAttackAnimation(bool isPlayer) {
                        {}});
 }
 
+void BattleEventQueue::pushSwitchAnimation(bool isRecall) {
+    entries.push_back({isRecall ? EventType::switchAnimationRecall
+                                : EventType::switchAnimationSendOut,
+                       {}});
+}
+
 void BattleEventQueue::pushLevelUpResume(std::string message) {
     entries.push_front({EventType::expAnimation, {}});
     entries.push_front({EventType::message, std::move(message)});
@@ -40,7 +46,7 @@ void BattleEventQueue::popCurrentMessage() {
 }
 
 BattleState BattleEventQueue::consume(BattleState pendingState, int &introPhase,
-                                      bool &attackAnimIsPlayer) {
+                                      bool &attackAnimIsPlayer, bool &switchAnimIsRecall) {
     if (entries.empty())
         return pendingState;
 
@@ -69,6 +75,14 @@ BattleState BattleEventQueue::consume(BattleState pendingState, int &introPhase,
         entries.pop_front();
         attackAnimIsPlayer = false;
         return BattleState::animatingAttack;
+    case EventType::switchAnimationRecall:
+        entries.pop_front();
+        switchAnimIsRecall = true;
+        return BattleState::animatingSwitch;
+    case EventType::switchAnimationSendOut:
+        entries.pop_front();
+        switchAnimIsRecall = false;
+        return BattleState::animatingSwitch;
     }
 
     return pendingState;

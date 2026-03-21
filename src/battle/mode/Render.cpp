@@ -39,6 +39,11 @@ void BattleMode::render(GameContext &ctx) {
         return;
     }
 
+    if (bs == BattleState::animatingSwitch) {
+        battleRenderer.drawPlayerSwitchScene(ctx.ui, battle, presentation, battleAnimFrame);
+        return;
+    }
+
     battleRenderer.drawBattleScene(ctx.ui, battle, presentation, battleAnimFrame, attackAnimFrame,
                                    captureAnimDone);
 

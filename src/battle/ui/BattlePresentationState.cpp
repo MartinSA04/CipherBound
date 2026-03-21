@@ -8,7 +8,9 @@ void BattlePresentationState::reset() {
     playerDisplayEXP = 0;
     introFrame = 0;
     introPhase = 0;
+    playerFieldVisible = true;
     resetExpAnimation();
+    resetSwitchAnimation();
 }
 
 void BattlePresentationState::beginBattle(int playerHP, int opponentHP, int playerEXP) {
@@ -17,13 +19,17 @@ void BattlePresentationState::beginBattle(int playerHP, int opponentHP, int play
     playerDisplayEXP = playerEXP;
     introFrame = 0;
     introPhase = 0;
+    playerFieldVisible = true;
     resetExpAnimation();
+    resetSwitchAnimation();
 }
 
 void BattlePresentationState::resetExpAnimation() {
     expAnimFrame = 0;
     expAnimStartEXP = -1;
 }
+
+void BattlePresentationState::resetSwitchAnimation() { switchFrame = 0; }
 
 bool BattlePresentationState::tickHPAnimation(int targetPlayerHP, int targetOpponentHP,
                                               int maxPlayerHP, int maxOpponentHP) {
@@ -71,4 +77,13 @@ EXPTickResult BattlePresentationState::tickEXPAnimation(int targetEXP, int expNe
     }
 
     return EXPTickResult::inProgress;
+}
+
+bool BattlePresentationState::tickSwitchAnimation() {
+    switchFrame++;
+    if (switchFrame >= switchSceneDuration) {
+        resetSwitchAnimation();
+        return true;
+    }
+    return false;
 }

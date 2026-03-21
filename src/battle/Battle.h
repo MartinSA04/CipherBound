@@ -85,6 +85,8 @@ class Battle {
     void finishCaptureAnimation();
     /// Resumes the battle flow after the attack animation completes.
     void finishAttackAnimation();
+    /// Resumes the battle flow after the player switch animation completes.
+    void finishSwitchAnimation();
     /// Inserts a level-up message while keeping the EXP animation flow intact.
     void addLevelUpMessage(const std::string &msg);
     /// Executes the opponent's attack phase.
@@ -96,6 +98,8 @@ class Battle {
     bool getCaptureSuccess() const;
     /// Returns whether the current attack animation is from the player's daemon.
     bool isPlayerAttacking() const;
+    /// Returns whether the active player switch animation is recalling the current daemon.
+    bool isSwitchRecalling() const;
 
   private:
     void addMessage(const std::string &msg);
@@ -104,6 +108,7 @@ class Battle {
     void addIntroAnimMarker();               // Insert marker to continue intro animation
     void addCaptureAnimMarker();             // Insert marker to trigger capture animation
     void addAttackAnimMarker(bool isPlayer); // Insert marker to trigger attack animation
+    void addSwitchAnimMarker(bool isRecall); // Insert marker to trigger player switch animation
     void transitionToQueuedState();
     void executeTurn();
 
@@ -118,12 +123,13 @@ class Battle {
     int captureShakes{0};          ///< Number of ball shakes queued for capture animation.
     bool captureSuccess{false};    ///< Whether the queued capture attempt succeeds.
     bool attackAnimIsPlayer{true}; ///< Whether the active attack animation is from the player.
+    bool switchAnimIsRecall{false}; ///< Whether the active switch animation is a recall phase.
 
     int playerMoveSlot;
     int itemChoice;
     int switchTarget;
     BattleAction currentAction;
-    int pendingAutoSwitchIndex{-1};
+    int pendingPlayerSwitchIndex{-1};
     int expGained{0};
     int moneyGained{0};
 

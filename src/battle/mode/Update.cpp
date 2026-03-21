@@ -16,6 +16,27 @@ void BattleMode::updateBattleIntroAnim(GameContext &ctx) {
     }
 }
 
+void BattleMode::updateSwitchAnim(GameContext &ctx) {
+    Battle &battle = ctx.battle();
+    BattlePresentationState &presentation = ctx.battlePresentation();
+
+    if (presentation.switchFrame == 0) {
+        if (battle.isSwitchRecalling()) {
+            presentation.playerFieldVisible = true;
+        } else {
+            presentation.playerDisplayHP = battle.getPlayerDaemon().getCurrentHP();
+            presentation.playerDisplayEXP = battle.getPlayerDaemon().getExp();
+            presentation.playerFieldVisible = false;
+            presentation.resetExpAnimation();
+        }
+    }
+
+    if (presentation.tickSwitchAnimation()) {
+        presentation.playerFieldVisible = !battle.isSwitchRecalling();
+        battle.finishSwitchAnimation();
+    }
+}
+
 void BattleMode::update(GameContext &ctx, InputManager &input) {
     if (!ctx.hasBattle())
         return;
@@ -127,6 +148,10 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
         }
         return;
     }
+
+    case BattleState::animatingSwitch:
+        updateSwitchAnim(ctx);
+        return;
 
     case BattleState::choosingAction:
         ctx.ui.navigate2x2(menuSelected);

@@ -11,6 +11,7 @@ enum class BattleState {
     animatingEXP,
     animatingCapture,
     animatingAttack,
+    animatingSwitch,
     opponentTurn,
     victory,
     defeat,

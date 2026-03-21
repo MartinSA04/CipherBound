@@ -19,6 +19,7 @@ class BattleMode : public GameMode {
   private:
     void updateBattleIntroAnim(GameContext &ctx);
     void updateCaptureAnim(GameContext &ctx);
+    void updateSwitchAnim(GameContext &ctx);
 
     int menuSelected{0};             ///< Current top-level battle menu selection.
     int moveSelected{0};             ///< Current move selection.

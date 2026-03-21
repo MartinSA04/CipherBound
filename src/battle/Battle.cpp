@@ -144,11 +144,13 @@ void Battle::chooseSwitchTarget(int partyIndex) {
         return;
     }
 
-    // Swap the Daemon to the front
-    std::string oldName = player.getDaemon(0).getNickname();
-    player.swapDaemon(0, partyIndex);
+    const std::string oldName = player.getDaemon(0).getNickname();
+    const std::string newName = target.getNickname();
+    pendingPlayerSwitchIndex = partyIndex;
     addMessage("Come back, " + oldName + "!");
-    addMessage("Go, " + player.getDaemon(0).getNickname() + "!");
+    addSwitchAnimMarker(true);
+    addMessage("Go, " + newName + "!");
+    addSwitchAnimMarker(false);
 
     // Opponent gets a turn after switching
     pendingState = BattleState::opponentTurn;
@@ -269,15 +271,17 @@ void Battle::executeOpponentTurn() {
         addMessage(playerDaemon.getNickname() + " fainted!");
         const int replacementIndex = player.findFirstUsableDaemonIndex(1);
         if (replacementIndex >= 0) {
-            pendingAutoSwitchIndex = replacementIndex;
+            pendingPlayerSwitchIndex = replacementIndex;
+            addSwitchAnimMarker(false);
+            addMessage("Go, " + player.getDaemon(replacementIndex).getNickname() + "!");
             pendingState = BattleState::choosingAction;
         } else {
-            pendingAutoSwitchIndex = -1;
+            pendingPlayerSwitchIndex = -1;
             addMessage("You blacked out!");
             pendingState = BattleState::defeat;
         }
     } else {
-        pendingAutoSwitchIndex = -1;
+        pendingPlayerSwitchIndex = -1;
         pendingState = BattleState::choosingAction;
     }
     state = BattleState::showingMessages;
@@ -376,9 +380,15 @@ void Battle::finishEXPAnimation() { transitionToQueuedState(); }
 
 void Battle::finishCaptureAnimation() { transitionToQueuedState(); }
 
+void Battle::finishSwitchAnimation() { transitionToQueuedState(); }
+
 int Battle::getCaptureShakes() const { return captureShakes; }
 
 bool Battle::getCaptureSuccess() const { return captureSuccess; }
+
+bool Battle::isPlayerAttacking() const { return attackAnimIsPlayer; }
+
+bool Battle::isSwitchRecalling() const { return switchAnimIsRecall; }
 
 void Battle::addLevelUpMessage(const std::string &msg) {
     // Show the message, then resume EXP animation for remaining EXP.
@@ -398,16 +408,21 @@ void Battle::addCaptureAnimMarker() { eventQueue.pushCaptureAnimation(); }
 
 void Battle::addAttackAnimMarker(bool isPlayer) { eventQueue.pushAttackAnimation(isPlayer); }
 
+void Battle::addSwitchAnimMarker(bool isRecall) { eventQueue.pushSwitchAnimation(isRecall); }
+
 void Battle::transitionToQueuedState() {
-    state = eventQueue.consume(pendingState, introPhase, attackAnimIsPlayer);
-    if (state == pendingState && eventQueue.empty() && pendingAutoSwitchIndex >= 0) {
-        player.swapDaemon(0, pendingAutoSwitchIndex);
-        pendingAutoSwitchIndex = -1;
-        addMessage("Go, " + player.getDaemon(0).getNickname() + "!");
-        state = BattleState::showingMessages;
+    state = eventQueue.consume(pendingState, introPhase, attackAnimIsPlayer, switchAnimIsRecall);
+    if (state == BattleState::animatingSwitch && !switchAnimIsRecall &&
+        pendingPlayerSwitchIndex >= 0) {
+        player.swapDaemon(0, pendingPlayerSwitchIndex);
+        pendingPlayerSwitchIndex = -1;
+        return;
+    }
+
+    if (state == pendingState && eventQueue.empty() && pendingPlayerSwitchIndex >= 0) {
+        player.swapDaemon(0, pendingPlayerSwitchIndex);
+        pendingPlayerSwitchIndex = -1;
     }
 }
 
 void Battle::finishAttackAnimation() { transitionToQueuedState(); }
-
-bool Battle::isPlayerAttacking() const { return attackAnimIsPlayer; }

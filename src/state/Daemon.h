@@ -62,6 +62,10 @@ class Daemon {
     std::optional<LevelUpResult> resolveLevelUp();
     /// Returns move ids learned at the given level.
     std::vector<int> getMovesLearnedAtLevel(int learnedLevel) const;
+    /// Returns the species id this daemon can evolve into at its current level, if any.
+    std::optional<int> getEvolutionTargetSpeciesId() const;
+    /// Replaces this daemon's species data with its evolved form.
+    void evolveTo(const Species &species);
 
     /// Returns the current HP.
     int getCurrentHP() const;

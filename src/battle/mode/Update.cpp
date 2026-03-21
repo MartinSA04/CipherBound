@@ -51,14 +51,17 @@ void BattleMode::updateSwitchAnim(GameContext &ctx) {
 bool BattleMode::queueDaemonProgression(GameContext &ctx, int partyIndex, bool resolveAllLevels) {
     Daemon &daemon = ctx.world.getPlayer().getDaemon(partyIndex);
     bool queuedAny = false;
+    if (partyIndex >= static_cast<int>(progressionLeveledUp.size()))
+        progressionLeveledUp.resize(static_cast<std::size_t>(partyIndex + 1), false);
 
     while (const std::optional<LevelUpResult> levelUp = daemon.resolveLevelUp()) {
         queuedAny = true;
+        progressionLeveledUp[static_cast<std::size_t>(partyIndex)] = true;
         progressionEvents.push_back(
-            {ProgressionEventType::message, partyIndex, -1,
+            {ProgressionEventType::message, partyIndex, -1, -1, -1,
              daemon.getNickname() + " leveled up to Lv" + std::to_string(levelUp->newLevel) + "!"});
         progressionEvents.push_back(
-            {ProgressionEventType::message, partyIndex, -1,
+            {ProgressionEventType::message, partyIndex, -1, -1, -1,
              formatStatGainMessage(levelUp->statGains)});
 
         for (int moveId : daemon.getMovesLearnedAtLevel(levelUp->newLevel)) {
@@ -70,14 +73,14 @@ bool BattleMode::queueDaemonProgression(GameContext &ctx, int partyIndex, bool r
             if (emptySlot >= 0) {
                 daemon.learnMove(move.id, emptySlot, move.maxPP);
                 progressionEvents.push_back(
-                    {ProgressionEventType::message, partyIndex, -1,
+                    {ProgressionEventType::message, partyIndex, -1, -1, -1,
                      daemon.getNickname() + " learned " + move.name + "!"});
             } else {
                 progressionEvents.push_back(
-                    {ProgressionEventType::message, partyIndex, -1,
+                    {ProgressionEventType::message, partyIndex, -1, -1, -1,
                      daemon.getNickname() + " wants to learn " + move.name + "!"});
                 progressionEvents.push_back(
-                    {ProgressionEventType::replaceMove, partyIndex, move.id, {}});
+                    {ProgressionEventType::replaceMove, partyIndex, move.id, -1, -1, {}});
             }
         }
 
@@ -97,6 +100,20 @@ bool BattleMode::queueParticipantProgression(GameContext &ctx) {
             continue;
         if (queueDaemonProgression(ctx, i, true))
             queuedAny = true;
+
+        if (i >= static_cast<int>(progressionLeveledUp.size()) ||
+            !progressionLeveledUp[static_cast<std::size_t>(i)]) {
+            continue;
+        }
+
+        const Daemon &daemon = ctx.world.getPlayer().getDaemon(i);
+        const std::optional<int> evolutionTarget = daemon.getEvolutionTargetSpeciesId();
+        if (!evolutionTarget.has_value())
+            continue;
+
+        progressionEvents.push_back({ProgressionEventType::evolution, i, -1, daemon.getSpeciesId(),
+                                     *evolutionTarget, daemon.getNickname()});
+        queuedAny = true;
     }
 
     return queuedAny;
@@ -122,6 +139,50 @@ bool BattleMode::updateProgressionSequence(GameContext &ctx, InputManager &input
         return true;
     }
 
+    if (event.type == ProgressionEventType::evolution) {
+        static constexpr int evolutionTransformFrame = 420;
+        static constexpr int evolutionTotalFrames = 600;
+        const std::string finalText =
+            event.text + " evolved into " + ctx.pokedex.getSpecies(event.targetSpeciesId).name + "!";
+
+        if (evolutionAnimFrame == 0)
+            ctx.music.play(MusicTrack::evolution, ctx.ui.getRenderer().getWindow());
+        if (evolutionAnimFrame < evolutionTotalFrames) {
+            evolutionAnimFrame++;
+            if (!evolutionApplied && evolutionAnimFrame >= evolutionTransformFrame) {
+                Daemon &daemon = ctx.world.getPlayer().getDaemon(event.partyIndex);
+                const Species &targetSpecies = ctx.pokedex.getSpecies(event.targetSpeciesId);
+                daemon.evolveTo(targetSpecies);
+                ctx.world.getPlayer().markSeen(targetSpecies.id);
+                ctx.world.getPlayer().markCaught(targetSpecies.id);
+
+                if (event.partyIndex == 0)
+                    ctx.battlePresentation().playerDisplayHP = daemon.getCurrentHP();
+
+                evolutionApplied = true;
+                ctx.playSound(SoundEffect::levelUp);
+            }
+
+            if (evolutionAnimFrame == evolutionTotalFrames)
+                ctx.music.playOneShot(MusicTrack::evolutionComplete,
+                                      ctx.ui.getRenderer().getWindow());
+            return true;
+        }
+
+        ctx.ui.setDialogueText(finalText);
+        if (ctx.ui.updateTypewriter(input.isConfirmPressed())) {
+            ctx.playSound(SoundEffect::select);
+            progressionEvents.pop_front();
+            evolutionAnimFrame = 0;
+            evolutionApplied = false;
+            if (event.partyIndex >= 0 &&
+                event.partyIndex < static_cast<int>(progressionLeveledUp.size())) {
+                progressionLeveledUp[static_cast<std::size_t>(event.partyIndex)] = false;
+            }
+        }
+        return true;
+    }
+
     Daemon &daemon = ctx.world.getPlayer().getDaemon(event.partyIndex);
     const MoveData &newMove = ctx.pokedex.getMove(event.moveId);
     ctx.ui.navigateVertical(progressionSelectedMove, 5);
@@ -138,7 +199,7 @@ bool BattleMode::updateProgressionSequence(GameContext &ctx, InputManager &input
 
     if (progressionSelectedMove >= 4) {
         progressionEvents.push_front(
-            {ProgressionEventType::message, event.partyIndex, -1,
+            {ProgressionEventType::message, event.partyIndex, -1, -1, -1,
              daemon.getNickname() + " did not learn " + newMove.name + "."});
         progressionSelectedMove = 0;
         return true;
@@ -154,7 +215,7 @@ bool BattleMode::updateProgressionSequence(GameContext &ctx, InputManager &input
 
     daemon.learnMove(newMove.id, progressionSelectedMove, newMove.maxPP);
     progressionEvents.push_front(
-        {ProgressionEventType::message, event.partyIndex, -1, learnedMessage});
+        {ProgressionEventType::message, event.partyIndex, -1, -1, -1, learnedMessage});
     progressionSelectedMove = 0;
     return true;
 }
@@ -163,14 +224,23 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
     if (!ctx.hasBattle())
         return;
 
+    Battle &battle = ctx.battle();
+    BattlePresentationState &presentation = ctx.battlePresentation();
+    BattleState bs = battle.getState();
+    if (bs == BattleState::intro) {
+        progressionEvents.clear();
+        progressionLeveledUp.assign(static_cast<std::size_t>(ctx.world.getPlayer().partySize()),
+                                    false);
+        progressionFinishesExpAnimation = false;
+        progressionSelectedMove = 0;
+        evolutionAnimFrame = 0;
+        evolutionApplied = false;
+    }
+
     if (updateProgressionSequence(ctx, input))
         return;
 
-    Battle &battle = ctx.battle();
-    BattlePresentationState &presentation = ctx.battlePresentation();
     battleAnimFrame++;
-
-    BattleState bs = battle.getState();
     switch (bs) {
     case BattleState::intro:
         updateBattleIntroAnim(ctx);

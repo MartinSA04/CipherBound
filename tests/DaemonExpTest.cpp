@@ -58,6 +58,10 @@ int main() {
 
     Species learner = makeSpecies(10, GrowthRate::mediumFast);
     learner.learnset = {{7, 6}, {8, 7}};
+    learner.evolutions = {{11, 6}};
+    Species evolved = makeSpecies(11, GrowthRate::mediumFast);
+    evolved.name = "Nextmon";
+    evolved.baseStats = {60, 70, 65, 80, 75, 60};
 
     Daemon progression(learner, 5);
     progression.addExp(91);
@@ -70,6 +74,18 @@ int main() {
     const std::vector<int> levelSixMoves = progression.getMovesLearnedAtLevel(6);
     assert(levelSixMoves.size() == 1);
     assert(levelSixMoves[0] == 7);
+    assert(progression.getEvolutionTargetSpeciesId().has_value());
+    assert(*progression.getEvolutionTargetSpeciesId() == 11);
+    progression.evolveTo(evolved);
+    assert(progression.getSpeciesId() == 11);
+    assert(progression.getSpecies().name == "Nextmon");
+    assert(progression.getNickname() == "Nextmon");
+    assert(progression.getMaxHP() > 0);
+
+    Daemon nicknamed(learner, 6, 216, 20, "Buddy", StatusEffect::none, {0, 0, 0, 0, 0, 0},
+                     {0, 0, 0, 0, 0, 0}, emptyMoves());
+    nicknamed.evolveTo(evolved);
+    assert(nicknamed.getNickname() == "Buddy");
 
     Daemon moveSlots(learner, 5, 125, 20, "Moves", StatusEffect::none, {0, 0, 0, 0, 0, 0},
                      {0, 0, 0, 0, 0, 0}, emptyMoves());

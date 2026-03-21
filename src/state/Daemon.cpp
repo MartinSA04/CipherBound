@@ -250,6 +250,29 @@ std::vector<int> Daemon::getMovesLearnedAtLevel(int learnedLevel) const {
     return learnedMoves;
 }
 
+std::optional<int> Daemon::getEvolutionTargetSpeciesId() const {
+    for (const EvolutionInfo &evolution : speciesRef.get().evolutions) {
+        if (level >= evolution.levelRequired)
+            return evolution.targetSpeciesId;
+    }
+    return std::nullopt;
+}
+
+void Daemon::evolveTo(const Species &species) {
+    const Species &oldSpecies = speciesRef.get();
+    const bool hadDefaultNickname = nickname == oldSpecies.name;
+    const int oldMaxHP = getMaxHP();
+
+    speciesId = species.id;
+    speciesRef = species;
+
+    const int newMaxHP = getMaxHP();
+    currentHP = std::clamp(currentHP + (newMaxHP - oldMaxHP), 0, newMaxHP);
+
+    if (hadDefaultNickname)
+        nickname = species.name;
+}
+
 int Daemon::getStat(int statIndex) const {
     const BaseStats &bs = speciesRef.get().baseStats;
     switch (statIndex) {

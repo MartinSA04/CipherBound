@@ -19,6 +19,8 @@ enum class MusicTrack {
     wildVictory,
     trainerBattle,
     trainerVictory,
+    evolution,
+    evolutionComplete,
 };
 
 class MusicManager {

@@ -24,6 +24,10 @@ void MusicManager::loadAll() {
         base + "1-18. Battle! (Trainer Battle-Johto Version)_.mp3");
     tracks[MusicTrack::trainerVictory] =
         std::make_unique<TDT4102::Audio>(base + "1-19. Victory! (Trainer Battle)_.mp3");
+    tracks[MusicTrack::evolution] =
+        std::make_unique<TDT4102::Audio>(base + "039 Evolution.mp3");
+    tracks[MusicTrack::evolutionComplete] =
+        std::make_unique<TDT4102::Audio>(base + "40. Congratulations! Your Pokémon Evolved!.mp3");
 }
 
 void MusicManager::play(MusicTrack track, TDT4102::AnimationWindow &window) {

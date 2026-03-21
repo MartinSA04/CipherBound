@@ -9,6 +9,7 @@
 #include "../ui/BattleRenderer.h"
 #include <deque>
 #include <string>
+#include <vector>
 
 /// Mode that presents the active battle and handles player combat choices.
 class BattleMode : public GameMode {
@@ -22,12 +23,15 @@ class BattleMode : public GameMode {
     enum class ProgressionEventType {
         message,
         replaceMove,
+        evolution,
     };
 
     struct ProgressionEvent {
         ProgressionEventType type{ProgressionEventType::message};
         int partyIndex{-1};
         int moveId{-1};
+        int sourceSpeciesId{-1};
+        int targetSpeciesId{-1};
         std::string text;
     };
 
@@ -59,6 +63,9 @@ class BattleMode : public GameMode {
     bool expSoundPlayed{false};      ///< Prevents repeated EXP sound retriggering.
     bool progressionFinishesExpAnimation{false}; ///< Whether to resume battle after the queue.
     int progressionSelectedMove{0};  ///< Current move selection for move replacement.
+    int evolutionAnimFrame{0};       ///< Current evolution animation frame.
+    bool evolutionApplied{false};    ///< Whether the active evolution has mutated the daemon.
+    std::vector<bool> progressionLeveledUp; ///< Tracks which participants leveled this battle.
     std::deque<ProgressionEvent> progressionEvents; ///< Pending local level-up / learn-move flow.
 
     BattleRenderer battleRenderer;

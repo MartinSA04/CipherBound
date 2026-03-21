@@ -29,4 +29,5 @@ class PartyMode : public GameMode {
     int actionSelected{0};              ///< Current action submenu selection.
     int swapSource{0};                  ///< Source party index for swaps.
     int summaryPage{0};                 ///< Active summary page.
+    int summaryMoveSelected{0};         ///< Selected move on the summary move page.
 };

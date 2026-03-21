@@ -7,6 +7,17 @@
 #include "../../ui/InputManager.h"
 #include "BattleMode.h"
 
+namespace {
+
+std::string formatStatGainMessage(const BaseStats &gains) {
+    return "Stat gains: HP +" + std::to_string(gains.hp) + ", Atk +" +
+           std::to_string(gains.attack) + ", Def +" + std::to_string(gains.defense) +
+           ", SpA +" + std::to_string(gains.specialAttack) + ", SpD +" +
+           std::to_string(gains.specialDefense) + ", Spe +" + std::to_string(gains.speed) + ".";
+}
+
+} // namespace
+
 void BattleMode::updateBattleIntroAnim(GameContext &ctx) {
     BattlePresentationState &presentation = ctx.battlePresentation();
     presentation.introFrame++;
@@ -37,8 +48,122 @@ void BattleMode::updateSwitchAnim(GameContext &ctx) {
     }
 }
 
+bool BattleMode::queueDaemonProgression(GameContext &ctx, int partyIndex, bool resolveAllLevels) {
+    Daemon &daemon = ctx.world.getPlayer().getDaemon(partyIndex);
+    bool queuedAny = false;
+
+    while (const std::optional<LevelUpResult> levelUp = daemon.resolveLevelUp()) {
+        queuedAny = true;
+        progressionEvents.push_back(
+            {ProgressionEventType::message, partyIndex, -1,
+             daemon.getNickname() + " leveled up to Lv" + std::to_string(levelUp->newLevel) + "!"});
+        progressionEvents.push_back(
+            {ProgressionEventType::message, partyIndex, -1,
+             formatStatGainMessage(levelUp->statGains)});
+
+        for (int moveId : daemon.getMovesLearnedAtLevel(levelUp->newLevel)) {
+            if (daemon.knowsMove(moveId))
+                continue;
+
+            const MoveData &move = ctx.pokedex.getMove(moveId);
+            const int emptySlot = daemon.firstEmptyMoveSlot();
+            if (emptySlot >= 0) {
+                daemon.learnMove(move.id, emptySlot, move.maxPP);
+                progressionEvents.push_back(
+                    {ProgressionEventType::message, partyIndex, -1,
+                     daemon.getNickname() + " learned " + move.name + "!"});
+            } else {
+                progressionEvents.push_back(
+                    {ProgressionEventType::message, partyIndex, -1,
+                     daemon.getNickname() + " wants to learn " + move.name + "!"});
+                progressionEvents.push_back(
+                    {ProgressionEventType::replaceMove, partyIndex, move.id, {}});
+            }
+        }
+
+        if (!resolveAllLevels)
+            break;
+    }
+
+    return queuedAny;
+}
+
+bool BattleMode::queueParticipantProgression(GameContext &ctx) {
+    Battle &battle = ctx.battle();
+    bool queuedAny = false;
+
+    for (int i = 0; i < ctx.world.getPlayer().partySize(); ++i) {
+        if (!battle.didPlayerParticipate(i))
+            continue;
+        if (queueDaemonProgression(ctx, i, true))
+            queuedAny = true;
+    }
+
+    return queuedAny;
+}
+
+bool BattleMode::updateProgressionSequence(GameContext &ctx, InputManager &input) {
+    if (progressionEvents.empty()) {
+        if (progressionFinishesExpAnimation) {
+            progressionFinishesExpAnimation = false;
+            ctx.battle().finishEXPAnimation();
+            return true;
+        }
+        return false;
+    }
+
+    const ProgressionEvent event = progressionEvents.front();
+    if (event.type == ProgressionEventType::message) {
+        ctx.ui.setDialogueText(event.text);
+        if (ctx.ui.updateTypewriter(input.isConfirmPressed())) {
+            ctx.playSound(SoundEffect::select);
+            progressionEvents.pop_front();
+        }
+        return true;
+    }
+
+    Daemon &daemon = ctx.world.getPlayer().getDaemon(event.partyIndex);
+    const MoveData &newMove = ctx.pokedex.getMove(event.moveId);
+    ctx.ui.navigateVertical(progressionSelectedMove, 5);
+
+    if (input.isCancelPressed()) {
+        progressionSelectedMove = 4;
+    }
+
+    if (!input.isConfirmPressed() && !input.isCancelPressed())
+        return true;
+
+    ctx.playSound(SoundEffect::select);
+    progressionEvents.pop_front();
+
+    if (progressionSelectedMove >= 4) {
+        progressionEvents.push_front(
+            {ProgressionEventType::message, event.partyIndex, -1,
+             daemon.getNickname() + " did not learn " + newMove.name + "."});
+        progressionSelectedMove = 0;
+        return true;
+    }
+
+    const MoveSlot &oldSlot = daemon.getMoves()[static_cast<std::size_t>(progressionSelectedMove)];
+    std::string learnedMessage = daemon.getNickname() + " learned " + newMove.name + "!";
+    if (oldSlot.moveId >= 0) {
+        learnedMessage = daemon.getNickname() + " forgot " +
+                         ctx.pokedex.getMove(oldSlot.moveId).name + " and learned " +
+                         newMove.name + "!";
+    }
+
+    daemon.learnMove(newMove.id, progressionSelectedMove, newMove.maxPP);
+    progressionEvents.push_front(
+        {ProgressionEventType::message, event.partyIndex, -1, learnedMessage});
+    progressionSelectedMove = 0;
+    return true;
+}
+
 void BattleMode::update(GameContext &ctx, InputManager &input) {
     if (!ctx.hasBattle())
+        return;
+
+    if (updateProgressionSequence(ctx, input))
         return;
 
     Battle &battle = ctx.battle();
@@ -113,18 +238,25 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
             expSoundPlayed = true;
         }
 
-        if (result == EXPTickResult::filledBar && daemon.checkLevelUp()) {
+        if (result == EXPTickResult::filledBar) {
+            if (!queueDaemonProgression(ctx, 0, false)) {
+                expSoundPlayed = false;
+                battle.finishEXPAnimation();
+                return;
+            }
             ctx.playSound(SoundEffect::levelUp);
             presentation.playerDisplayEXP = 0;
             presentation.resetExpAnimation();
             expSoundPlayed = false;
-            battle.addLevelUpMessage(daemon.getNickname() + " leveled up to Lv" +
-                                     std::to_string(daemon.getLevel()) + "!");
             presentation.playerDisplayHP = daemon.getCurrentHP();
         } else if (result == EXPTickResult::reachedTarget) {
             ctx.playSound(SoundEffect::expFull);
             expSoundPlayed = false;
-            battle.finishEXPAnimation();
+            if (queueParticipantProgression(ctx)) {
+                progressionFinishesExpAnimation = true;
+            } else {
+                battle.finishEXPAnimation();
+            }
         }
         return;
     }
@@ -167,6 +299,7 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
             showingPartyAction = false;
             viewingSummary = false;
             partyActionSelected = 0;
+            summaryMoveSelected = 0;
         }
         return;
 
@@ -184,13 +317,11 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
     case BattleState::choosingSwitch:
         if (viewingSummary) {
             Direction dir;
-            bool dirHeld = input.getMovementDirection(dir);
-            if (dirHeld) {
-                if (dir == Direction::left && summaryPage > 0)
-                    summaryPage = 0;
-                else if (dir == Direction::right && summaryPage < 1)
-                    summaryPage = 1;
-            }
+            const bool dirHeld = input.getMovementDirection(dir);
+            if (dirHeld && (dir == Direction::left || dir == Direction::right))
+                ctx.ui.navigateHorizontal(summaryPage, 3);
+            else if (summaryPage == 2)
+                ctx.ui.navigateVertical(summaryMoveSelected, 4);
             if (input.isCancelPressed()) {
                 viewingSummary = false;
                 showingPartyAction = true;
@@ -206,6 +337,7 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
                 switch (partyActionSelected) {
                 case 0:
                     summaryPage = 0;
+                    summaryMoveSelected = 0;
                     viewingSummary = true;
                     showingPartyAction = false;
                     break;

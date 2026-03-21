@@ -9,13 +9,22 @@
 #include "../game_data/Species.h"
 #include <array>
 #include <functional>
+#include <optional>
 #include <string>
+#include <vector>
 
 /// Runtime move slot including remaining PP.
 struct MoveSlot {
     int moveId;    ///< Move id, or `-1` for an empty slot.
     int currentPP; ///< Current PP.
     int maxPP;     ///< Maximum PP.
+};
+
+/// Detailed information about one resolved level-up.
+struct LevelUpResult {
+    int oldLevel;       ///< Level before leveling up.
+    int newLevel;       ///< Level after leveling up.
+    BaseStats statGains; ///< Per-stat increases from the level-up.
 };
 
 /**
@@ -49,6 +58,10 @@ class Daemon {
     void addExp(int amount);
     /// Applies pending level-up rules and returns whether a level was gained.
     bool checkLevelUp();
+    /// Resolves one pending level-up and returns the resulting stat gains.
+    std::optional<LevelUpResult> resolveLevelUp();
+    /// Returns move ids learned at the given level.
+    std::vector<int> getMovesLearnedAtLevel(int learnedLevel) const;
 
     /// Returns the current HP.
     int getCurrentHP() const;
@@ -76,10 +89,14 @@ class Daemon {
 
     /// Returns the move slots.
     const std::array<MoveSlot, 4> &getMoves() const;
+    /// Returns whether the daemon already knows the given move.
+    bool knowsMove(int moveId) const;
+    /// Returns the first empty move slot, or `-1` if all slots are occupied.
+    int firstEmptyMoveSlot() const;
     /// Deducts PP from a move slot and returns whether the move could be used.
     bool useMove(int slot);
     /// Learns or replaces a move in the selected slot.
-    bool learnMove(int moveId, int slot);
+    bool learnMove(int moveId, int slot, int maxPP = 15);
 
     /// Returns the species id.
     int getSpeciesId() const;
@@ -102,7 +119,9 @@ class Daemon {
 
     std::array<MoveSlot, 4> moves; ///< Learned move slots.
 
+    int calculateStatAtLevel(int base, int iv, int ev, int statLevel, bool isHP) const;
     int calculateStat(int base, int iv, int ev, bool isHP) const;
+    BaseStats calculateStatsForLevel(int statLevel) const;
 
     std::reference_wrapper<const Species> speciesRef; ///< Referenced species definition.
 };

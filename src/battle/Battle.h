@@ -101,6 +101,8 @@ class Battle {
     bool isPlayerAttacking() const;
     /// Returns whether the active player switch animation is recalling the current daemon.
     bool isSwitchRecalling() const;
+    /// Returns whether the given party index participated and therefore gained battle EXP.
+    bool didPlayerParticipate(int partyIndex) const;
 
   private:
     void addMessage(const std::string &msg);

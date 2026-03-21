@@ -401,6 +401,12 @@ bool Battle::isPlayerAttacking() const { return attackAnimIsPlayer; }
 
 bool Battle::isSwitchRecalling() const { return switchAnimIsRecall; }
 
+bool Battle::didPlayerParticipate(int partyIndex) const {
+    if (partyIndex < 0 || partyIndex >= static_cast<int>(playerParticipants.size()))
+        return false;
+    return playerParticipants[static_cast<std::size_t>(partyIndex)];
+}
+
 void Battle::addLevelUpMessage(const std::string &msg) {
     // Show the message, then resume EXP animation for remaining EXP.
     eventQueue.pushLevelUpResume(msg);

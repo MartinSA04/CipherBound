@@ -22,6 +22,10 @@ std::array<MoveSlot, 4> emptyMoves() {
     return {{{-1, 0, 0}, {-1, 0, 0}, {-1, 0, 0}, {-1, 0, 0}}};
 }
 
+std::array<MoveSlot, 4> fullMoves() {
+    return {{{1, 35, 35}, {2, 35, 35}, {3, 35, 35}, {4, 35, 35}}};
+}
+
 } // namespace
 
 int main() {
@@ -51,6 +55,33 @@ int main() {
     assert(leveler.getLevel() == 6);
     assert(leveler.getExp() == 216);
     assert(leveler.getExpProgress() == 0);
+
+    Species learner = makeSpecies(10, GrowthRate::mediumFast);
+    learner.learnset = {{7, 6}, {8, 7}};
+
+    Daemon progression(learner, 5);
+    progression.addExp(91);
+    const auto firstLevel = progression.resolveLevelUp();
+    assert(firstLevel.has_value());
+    assert(firstLevel->oldLevel == 5);
+    assert(firstLevel->newLevel == 6);
+    assert(firstLevel->statGains.hp > 0);
+    assert(firstLevel->statGains.attack > 0);
+    const std::vector<int> levelSixMoves = progression.getMovesLearnedAtLevel(6);
+    assert(levelSixMoves.size() == 1);
+    assert(levelSixMoves[0] == 7);
+
+    Daemon moveSlots(learner, 5, 125, 20, "Moves", StatusEffect::none, {0, 0, 0, 0, 0, 0},
+                     {0, 0, 0, 0, 0, 0}, emptyMoves());
+    assert(moveSlots.firstEmptyMoveSlot() == 0);
+    assert(!moveSlots.knowsMove(7));
+    assert(moveSlots.learnMove(7, 0, 20));
+    assert(moveSlots.knowsMove(7));
+
+    Daemon fullMoveSet(learner, 5, 125, 20, "Full", StatusEffect::none, {0, 0, 0, 0, 0, 0},
+                       {0, 0, 0, 0, 0, 0}, fullMoves());
+    assert(fullMoveSet.firstEmptyMoveSlot() == -1);
+    assert(fullMoveSet.knowsMove(1));
 
     return 0;
 }

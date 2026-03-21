@@ -75,7 +75,11 @@ class GameUI {
                         const std::vector<int> &itemIds, int selected,
                         const std::string &title, const std::string &footerText);
     /// Draws the daemon summary screen.
-    void drawSummaryScreen(const Daemon &daemon, const Pokedex &pokedex, int page = 0);
+    void drawSummaryScreen(const Daemon &daemon, const Pokedex &pokedex, int page = 0,
+                           int selectedMove = 0);
+    /// Draws the move details / move replacement screen for one daemon.
+    void drawMoveLearningScreen(const Daemon &daemon, const Pokedex &pokedex, int selectedMove,
+                                int newMoveId);
 
     /// Handles repeated vertical menu navigation.
     void navigateVertical(int &selected, int count);

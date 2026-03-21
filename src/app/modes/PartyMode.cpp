@@ -30,6 +30,7 @@ void PartyMode::update(GameContext &ctx, InputManager &input) {
             switch (actionSelected) {
             case 0: // Summary
                 summaryPage = 0;
+                summaryMoveSelected = 0;
                 subState = SubState::showingSummary;
                 break;
             case 1: // Switch
@@ -66,17 +67,14 @@ void PartyMode::update(GameContext &ctx, InputManager &input) {
         break;
 
     case SubState::showingSummary: {
-        // Left/Right to switch pages
         Direction dir;
-        bool dirHeld = input.getMovementDirection(dir);
-        if (dirHeld) {
-            if (dir == Direction::left && summaryPage > 0)
-                summaryPage = 0;
-            else if (dir == Direction::right && summaryPage < 1)
-                summaryPage = 1;
-        }
-        // Up/Down to switch between party members (with repeat delay)
-        ctx.ui.navigateVertical(selected, partySize);
+        const bool dirHeld = input.getMovementDirection(dir);
+        if (dirHeld && (dir == Direction::left || dir == Direction::right))
+            ctx.ui.navigateHorizontal(summaryPage, 3);
+        else if (summaryPage == 2)
+            ctx.ui.navigateVertical(summaryMoveSelected, 4);
+        else
+            ctx.ui.navigateVertical(selected, partySize);
         if (input.isCancelPressed()) {
             subState = SubState::browsing;
         }
@@ -88,7 +86,7 @@ void PartyMode::update(GameContext &ctx, InputManager &input) {
 void PartyMode::render(GameContext &ctx) {
     if (subState == SubState::showingSummary) {
         const Daemon &daemon = ctx.world.getPlayer().getDaemon(selected);
-        ctx.ui.drawSummaryScreen(daemon, ctx.pokedex, summaryPage);
+        ctx.ui.drawSummaryScreen(daemon, ctx.pokedex, summaryPage, summaryMoveSelected);
         return;
     }
 

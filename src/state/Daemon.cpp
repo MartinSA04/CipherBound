@@ -123,11 +123,27 @@ Daemon::Daemon(const Species &species, int level, int exp, int currentHP,
     this->nickname = nickname;
 }
 
-int Daemon::calculateStat(int base, int iv, int ev, bool isHP) const {
+int Daemon::calculateStatAtLevel(int base, int iv, int ev, int statLevel, bool isHP) const {
     if (isHP) {
-        return ((2 * base + iv + ev / 4) * level / 100) + level + 10;
+        return ((2 * base + iv + ev / 4) * statLevel / 100) + statLevel + 10;
     }
-    return ((2 * base + iv + ev / 4) * level / 100) + 5;
+    return ((2 * base + iv + ev / 4) * statLevel / 100) + 5;
+}
+
+int Daemon::calculateStat(int base, int iv, int ev, bool isHP) const {
+    return calculateStatAtLevel(base, iv, ev, level, isHP);
+}
+
+BaseStats Daemon::calculateStatsForLevel(int statLevel) const {
+    const BaseStats &baseStats = speciesRef.get().baseStats;
+    return {calculateStatAtLevel(baseStats.hp, ivs.hp, evs.hp, statLevel, true),
+            calculateStatAtLevel(baseStats.attack, ivs.attack, evs.attack, statLevel, false),
+            calculateStatAtLevel(baseStats.defense, ivs.defense, evs.defense, statLevel, false),
+            calculateStatAtLevel(baseStats.specialAttack, ivs.specialAttack, evs.specialAttack,
+                                 statLevel, false),
+            calculateStatAtLevel(baseStats.specialDefense, ivs.specialDefense, evs.specialDefense,
+                                 statLevel, false),
+            calculateStatAtLevel(baseStats.speed, ivs.speed, evs.speed, statLevel, false)};
 }
 
 int Daemon::getMaxHP() const {
@@ -165,6 +181,19 @@ void Daemon::setStatus(StatusEffect s) { status = s; }
 void Daemon::clearStatus() { status = StatusEffect::none; }
 const std::array<MoveSlot, 4> &Daemon::getMoves() const { return moves; }
 
+bool Daemon::knowsMove(int moveId) const {
+    return std::any_of(moves.begin(), moves.end(),
+                       [moveId](const MoveSlot &slot) { return slot.moveId == moveId; });
+}
+
+int Daemon::firstEmptyMoveSlot() const {
+    for (int i = 0; i < 4; ++i) {
+        if (moves[static_cast<std::size_t>(i)].moveId < 0)
+            return i;
+    }
+    return -1;
+}
+
 bool Daemon::useMove(int slot) {
     if (slot < 0 || slot >= 4 || moves[static_cast<std::size_t>(slot)].moveId < 0)
         return false;
@@ -184,17 +213,41 @@ int Daemon::getExpNeeded() const {
 }
 
 bool Daemon::checkLevelUp() {
-    if (level >= maxDaemonLevel)
-        return false;
+    return resolveLevelUp().has_value();
+}
 
-    if (exp >= totalExpForNextLevel(speciesRef.get(), level)) {
-        int oldMax = getMaxHP();
-        level++;
-        int newMax = calculateStat(speciesRef.get().baseStats.hp, ivs.hp, evs.hp, true);
-        currentHP += (newMax - oldMax);
-        return true;
+std::optional<LevelUpResult> Daemon::resolveLevelUp() {
+    if (level >= maxDaemonLevel)
+        return std::nullopt;
+
+    if (exp < totalExpForNextLevel(speciesRef.get(), level))
+        return std::nullopt;
+
+    const int oldLevel = level;
+    const BaseStats oldStats = calculateStatsForLevel(oldLevel);
+
+    level++;
+
+    const BaseStats newStats = calculateStatsForLevel(level);
+    currentHP += (newStats.hp - oldStats.hp);
+
+    return LevelUpResult{oldLevel,
+                         level,
+                         {newStats.hp - oldStats.hp,
+                          newStats.attack - oldStats.attack,
+                          newStats.defense - oldStats.defense,
+                          newStats.specialAttack - oldStats.specialAttack,
+                          newStats.specialDefense - oldStats.specialDefense,
+                          newStats.speed - oldStats.speed}};
+}
+
+std::vector<int> Daemon::getMovesLearnedAtLevel(int learnedLevel) const {
+    std::vector<int> learnedMoves;
+    for (const LearnableMove &learnable : speciesRef.get().learnset) {
+        if (learnable.levelLearned == learnedLevel)
+            learnedMoves.push_back(learnable.moveId);
     }
-    return false;
+    return learnedMoves;
 }
 
 int Daemon::getStat(int statIndex) const {
@@ -217,9 +270,9 @@ int Daemon::getStat(int statIndex) const {
     }
 }
 
-bool Daemon::learnMove(int moveId, int slot) {
+bool Daemon::learnMove(int moveId, int slot, int maxPP) {
     if (slot < 0 || slot >= 4)
         return false;
-    moves[static_cast<std::size_t>(slot)] = {moveId, 15, 15}; // PP should come from MoveData lookup
+    moves[static_cast<std::size_t>(slot)] = {moveId, maxPP, maxPP};
     return true;
 }

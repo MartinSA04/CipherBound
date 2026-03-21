@@ -44,6 +44,20 @@ void BattleMode::render(GameContext &ctx) {
         return;
     }
 
+    if (!progressionEvents.empty()) {
+        const ProgressionEvent &event = progressionEvents.front();
+        if (event.type == ProgressionEventType::replaceMove) {
+            const Daemon &daemon = ctx.world.getPlayer().getDaemon(event.partyIndex);
+            ctx.ui.drawMoveLearningScreen(daemon, ctx.pokedex, progressionSelectedMove,
+                                          event.moveId);
+        } else {
+            battleRenderer.drawBattleScene(ctx.ui, battle, presentation, battleAnimFrame,
+                                           attackAnimFrame, captureAnimDone);
+            ctx.ui.drawDialogueBox("", event.text);
+        }
+        return;
+    }
+
     battleRenderer.drawBattleScene(ctx.ui, battle, presentation, battleAnimFrame, attackAnimFrame,
                                    captureAnimDone);
 
@@ -55,7 +69,7 @@ void BattleMode::render(GameContext &ctx) {
     } else if (bs == BattleState::choosingSwitch) {
         if (viewingSummary) {
             const Daemon &daemon = ctx.world.getPlayer().getDaemon(partySelected);
-            ctx.ui.drawSummaryScreen(daemon, ctx.pokedex, summaryPage);
+            ctx.ui.drawSummaryScreen(daemon, ctx.pokedex, summaryPage, summaryMoveSelected);
         } else {
             ctx.ui.drawPartyList(ctx.world.getPlayer(), partySelected);
             if (showingPartyAction) {

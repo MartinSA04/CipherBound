@@ -174,6 +174,10 @@ int main() {
     assert(switchBattle.getResult().expGained == splitExp * 2);
     assert(switcher.getDaemon(0).getExpProgress() == splitExp);
     assert(switcher.getDaemon(1).getExpProgress() == splitExp);
+    assert(switcher.getDaemon(0).getEVs().attack == 2);
+    assert(switcher.getDaemon(0).getEVs().speed == 1);
+    assert(switcher.getDaemon(1).getEVs().attack == 2);
+    assert(switcher.getDaemon(1).getEVs().speed == 1);
 
     Player loser("Loser", {0, 0});
     loser.restorePartyDaemon(makeDaemon(pokedex, 1, 5, 1, 1, "Lead"));

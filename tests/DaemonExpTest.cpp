@@ -159,5 +159,27 @@ int main() {
            generatedA.getIVs().specialAttack != 0 || generatedA.getIVs().specialDefense != 0 ||
            generatedA.getIVs().speed != 0);
 
+    Daemon evGain(statSpecies, 50, level50Exp, 120, "EVGain", StatusEffect::none,
+                  {31, 31, 31, 31, 31, 31}, {0, 0, 0, 0, 0, 0}, emptyMoves(), Nature::hardy);
+    const BaseStats applied = evGain.gainEffortValues({4, 8, 0, 0, 0, 0});
+    assert(applied.hp == 4);
+    assert(applied.attack == 8);
+    assert(evGain.getEVs().hp == 4);
+    assert(evGain.getEVs().attack == 8);
+    assert(evGain.getMaxHP() == 121);
+    assert(evGain.getCurrentHP() == 121);
+    assert(evGain.getStat(1) == 70);
+
+    Daemon cappedEVs(statSpecies, 50, level50Exp, 120, "Capped", StatusEffect::none,
+                     {31, 31, 31, 31, 31, 31}, {252, 252, 0, 0, 0, 0}, emptyMoves(),
+                     Nature::hardy);
+    const BaseStats cappedApplied = cappedEVs.gainEffortValues({8, 8, 8, 8, 8, 8});
+    assert(cappedApplied.hp == 3);
+    assert(cappedApplied.attack == 3);
+    assert(cappedApplied.defense == 0);
+    assert(cappedEVs.getEVs().hp == 255);
+    assert(cappedEVs.getEVs().attack == 255);
+    assert(cappedEVs.getEVs().defense == 0);
+
     return 0;
 }

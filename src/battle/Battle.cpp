@@ -214,10 +214,12 @@ void Battle::executeTurn() {
         if (resolution.defenderFainted) {
             const int expShare = BattleRules::calculateExpYield(getOpponentDaemon(), type,
                                                                 participantCount());
+            const BaseStats effortYield = getOpponentDaemon().getSpecies().effortYield;
             expGained = 0;
             for (int i = 0; i < player.partySize(); ++i) {
                 if (!playerParticipants[static_cast<std::size_t>(i)])
                     continue;
+                player.getDaemon(i).gainEffortValues(effortYield);
                 player.getDaemon(i).addExp(expShare);
                 expGained += expShare;
             }

@@ -1,9 +1,28 @@
 #include "Pokedex.h"
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <unordered_map>
+
+namespace {
+
+std::optional<BaseStats> parseBaseStatsField(const std::string &encoded) {
+    std::istringstream stats(encoded);
+    std::string token;
+    std::vector<int> values;
+
+    while (std::getline(stats, token, ','))
+        values.push_back(std::stoi(token));
+
+    if (values.size() != 6)
+        return std::nullopt;
+
+    return BaseStats{values[0], values[1], values[2], values[3], values[4], values[5]};
+}
+
+} // namespace
 
 Pokedex::Pokedex() {
     // Index 0 is unused (dummy)
@@ -70,6 +89,15 @@ void Pokedex::loadSpecies(const std::string &path) {
         sp.baseStats.speed = std::stoi(tokens[9]);
         sp.catchRate = std::stoi(tokens[10]);
         sp.baseExpYield = std::stoi(tokens[11]);
+
+        if (tokens.size() >= 16 && !tokens[15].empty() && tokens[15] != "none") {
+            const auto effortYield = parseBaseStatsField(tokens[15]);
+            if (!effortYield.has_value()) {
+                std::cerr << "Invalid EV yield for species " << sp.name << std::endl;
+                continue;
+            }
+            sp.effortYield = *effortYield;
+        }
 
         // Parse learnset: "moveId:level,moveId:level,..."
         if (!tokens[12].empty() && tokens[12] != "none") {

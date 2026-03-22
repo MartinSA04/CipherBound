@@ -57,6 +57,11 @@ BaseStats normalizeEVs(const BaseStats &stats) {
     return fromArray(scaled);
 }
 
+int totalStats(const BaseStats &stats) {
+    const auto values = toArray(stats);
+    return std::accumulate(values.begin(), values.end(), 0);
+}
+
 enum class NatureAffectedStat { none, attack, defense, speed, specialAttack, specialDefense };
 
 NatureAffectedStat increasedStatFor(Nature nature) {
@@ -367,6 +372,30 @@ bool Daemon::useMove(int slot) {
 }
 
 void Daemon::addExp(int amount) { exp += amount; }
+
+BaseStats Daemon::gainEffortValues(const BaseStats &yield) {
+    const int oldMaxHP = getMaxHP();
+
+    auto currentValues = toArray(evs);
+    const auto yieldValues = toArray(clampStats(yield, 0, maxEVPerStat));
+    std::array<int, 6> applied{};
+    int total = totalStats(evs);
+
+    for (std::size_t i = 0; i < currentValues.size(); ++i) {
+        const int perStatRoom = maxEVPerStat - currentValues[i];
+        const int totalRoom = maxTotalEVs - total;
+        const int gained = std::clamp(yieldValues[i], 0, std::min(perStatRoom, totalRoom));
+        currentValues[i] += gained;
+        applied[i] = gained;
+        total += gained;
+    }
+
+    evs = fromArray(currentValues);
+
+    const int newMaxHP = getMaxHP();
+    currentHP = std::clamp(currentHP + (newMaxHP - oldMaxHP), 0, newMaxHP);
+    return fromArray(applied);
+}
 
 int Daemon::getExpNeeded() const {
     if (level >= maxDaemonLevel)

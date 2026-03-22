@@ -88,6 +88,8 @@ class Daemon {
     int getExpNeeded() const;
     /// Adds EXP without immediately resolving level-up UI.
     void addExp(int amount);
+    /// Awards EVs using Gen 4 caps and returns the EVs that were actually applied.
+    BaseStats gainEffortValues(const BaseStats &yield);
     /// Applies pending level-up rules and returns whether a level was gained.
     bool checkLevelUp();
     /// Resolves one pending level-up and returns the resulting stat gains.

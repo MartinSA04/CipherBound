@@ -91,6 +91,7 @@ struct Species {
     ElementType secondaryType;
     GrowthRate growthRate{GrowthRate::mediumFast};
     BaseStats baseStats;
+    BaseStats effortYield{0, 0, 0, 0, 0, 0};
     int catchRate;
     int baseExpYield;
     std::vector<LearnableMove> learnset;

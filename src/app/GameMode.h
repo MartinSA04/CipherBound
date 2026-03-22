@@ -37,6 +37,7 @@ enum class GameState {
     battle,        ///< Main turn-based battle loop.
     battleIntro,   ///< Battle entry animation and setup.
     menu,          ///< Pause menu.
+    playerStats,   ///< Trainer stats and badge overview.
     party,         ///< Party management screen.
     bag,           ///< Inventory screen.
     shop,          ///< Shop interaction screen.

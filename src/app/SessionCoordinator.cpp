@@ -16,6 +16,7 @@
 #include "modes/OverworldMode.h"
 #include "modes/PCBoxMode.h"
 #include "modes/PartyMode.h"
+#include "modes/PlayerStatsMode.h"
 #include "modes/SaveMode.h"
 #include "modes/ShopMode.h"
 #include "modes/TitleScreenMode.h"
@@ -265,6 +266,8 @@ std::unique_ptr<GameMode> SessionCoordinator::createMode(GameState state) {
         return std::make_unique<BattleMode>();
     case GameState::menu:
         return std::make_unique<MenuMode>();
+    case GameState::playerStats:
+        return std::make_unique<PlayerStatsMode>();
     case GameState::party:
         return std::make_unique<PartyMode>();
     case GameState::bag:
@@ -293,6 +296,8 @@ ScreenType SessionCoordinator::screenForState(GameState gs) {
     case GameState::battle:
         return ScreenType::battle;
     case GameState::menu:
+        return ScreenType::menu;
+    case GameState::playerStats:
         return ScreenType::menu;
     case GameState::party:
         return ScreenType::party;

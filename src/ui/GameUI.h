@@ -70,6 +70,8 @@ class GameUI {
     void drawPartyList(const Player &player, int selected);
     /// Draws the bag screen UI.
     void drawBagScreen(const Player &player, const Pokedex &pokedex, int selected);
+    /// Draws the trainer stats overview screen.
+    void drawPlayerStatsScreen(const Player &player);
     /// Draws the shop screen UI.
     void drawShopScreen(const Player &player, const Pokedex &pokedex,
                         const std::vector<int> &itemIds, int selected,

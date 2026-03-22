@@ -9,8 +9,8 @@ void MenuMode::render(GameContext &ctx) {
     Renderer &renderer = ctx.ui.getRenderer();
     SpriteFont &spriteFont = ctx.ui.getSpriteFont();
 
-    static const std::vector<std::string> menuItems = {"Daemondex", "Daemons", "Bag", "Save",
-                                                       "Exit"};
+    static const std::vector<std::string> menuItems = {"Daemondex", "Stats", "Daemons",
+                                                       "Bag",       "Save",  "Exit"};
     int scale = PIXEL_SCALE;
 
     int maxTextW = 0;

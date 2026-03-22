@@ -550,3 +550,85 @@ void GameUI::drawShopScreen(const Player &player, const Pokedex &pokedex,
     spriteFont.drawText(renderer, footerText, outerPadding + sectionGap * 4, hintY + 5 * scale,
                         scale);
 }
+
+void GameUI::drawPlayerStatsScreen(const Player &player) {
+    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{210, 220, 238});
+
+    const int scale = PIXEL_SCALE;
+    const int outerPadding = 8 * scale;
+    const int gap = 4 * scale;
+    const int headerHeight = 18 * scale;
+    const int leftPanelWidth = 88 * scale;
+    const int panelY = outerPadding + headerHeight + gap;
+    const int panelHeight = WINDOW_HEIGHT - panelY - 22 * scale;
+    const int rightPanelX = outerPadding + leftPanelWidth + gap;
+    const int rightPanelWidth = WINDOW_WIDTH - rightPanelX - outerPadding;
+
+    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, headerHeight + outerPadding,
+                            TDT4102::Color{68, 86, 128});
+    spriteFont.drawText(renderer, "TRAINER STATS", outerPadding, 4 * scale, scale);
+
+    renderer.drawFilledRect(outerPadding, panelY, leftPanelWidth, panelHeight,
+                            TDT4102::Color{236, 241, 252});
+    renderer.drawRect(outerPadding, panelY, leftPanelWidth, panelHeight, TDT4102::Color::transparent,
+                      TDT4102::Color{72, 82, 108});
+
+    renderer.drawFilledRect(rightPanelX, panelY, rightPanelWidth, panelHeight,
+                            TDT4102::Color{244, 247, 255});
+    renderer.drawRect(rightPanelX, panelY, rightPanelWidth, panelHeight,
+                      TDT4102::Color::transparent, TDT4102::Color{72, 82, 108});
+
+    int lineY = panelY + 6 * scale;
+    spriteFont.drawText(renderer, "Name", outerPadding + 4 * scale, lineY, scale - 1);
+    lineY += 12 * scale;
+    spriteFont.drawTextPartial(renderer, player.getName(), player.getName().size(),
+                               outerPadding + 4 * scale, lineY, scale - 1, 1,
+                               leftPanelWidth - 8 * scale);
+
+    lineY += 14 * scale;
+    spriteFont.drawText(renderer, "Money", outerPadding + 4 * scale, lineY, scale - 1);
+    lineY += 12 * scale;
+    const std::string moneyText = "$" + std::to_string(player.getMoney());
+    spriteFont.drawText(renderer, moneyText, outerPadding + 4 * scale, lineY, scale - 1);
+
+    lineY += 14 * scale;
+    spriteFont.drawText(renderer, "Badges", outerPadding + 4 * scale, lineY, scale - 1);
+    lineY += 12 * scale;
+    spriteFont.drawText(renderer, std::to_string(player.badgeCount()), outerPadding + 4 * scale,
+                        lineY, scale - 1);
+
+    lineY += 14 * scale;
+    spriteFont.drawText(renderer, "Party", outerPadding + 4 * scale, lineY, scale - 1);
+    lineY += 12 * scale;
+    spriteFont.drawText(renderer, std::to_string(player.partySize()), outerPadding + 4 * scale,
+                        lineY, scale - 1);
+
+    lineY += 14 * scale;
+    spriteFont.drawText(renderer, "Dex", outerPadding + 4 * scale, lineY, scale - 1);
+    lineY += 12 * scale;
+    const std::string dexText =
+        std::to_string(player.seenCount()) + "/" + std::to_string(player.caughtCount());
+    spriteFont.drawText(renderer, dexText, outerPadding + 4 * scale, lineY, scale - 1);
+
+    int contentX = rightPanelX + 6 * scale;
+    int contentY = panelY + 6 * scale;
+    spriteFont.drawText(renderer, "BADGES", contentX, contentY, scale);
+
+    const auto &badges = player.getBadges();
+    if (badges.empty()) {
+        spriteFont.drawText(renderer, "No badges yet.", contentX, contentY + 16 * scale, scale - 1);
+    } else {
+        const int badgeRowHeight = 16 * scale;
+        const int badgeWidth = rightPanelWidth - 12 * scale;
+        for (std::size_t i = 0; i < badges.size(); ++i) {
+            const int rowY = contentY + 14 * scale + static_cast<int>(i) * badgeRowHeight;
+            renderer.drawFilledRect(rightPanelX + 3 * scale, rowY - scale / 2,
+                                    badgeWidth, 14 * scale, TDT4102::Color{224, 230, 246});
+            spriteFont.drawText(renderer, badges[i], contentX, rowY, scale - 1);
+        }
+    }
+
+    const int hintY = WINDOW_HEIGHT - 16 * scale;
+    drawNarrowTextBar(outerPadding, hintY, 150, scale);
+    spriteFont.drawText(renderer, "Z/X: Back", outerPadding + 4 * scale, hintY + 4 * scale, scale);
+}

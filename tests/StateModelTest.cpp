@@ -44,6 +44,7 @@ int main() {
     assert(storage.getBoxCount(0) == 0);
 
     Player player("Tester", {1, 1});
+    assert(player.getMoney() == 0);
     player.addItem(42, 3);
     assert(player.getItemCount(42) == 3);
     assert(player.removeItem(42, 2));

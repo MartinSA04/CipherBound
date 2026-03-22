@@ -7,7 +7,7 @@
 #pragma once
 #include "../GameMode.h"
 
-/// Pause menu mode for opening party, bag, save, and related screens.
+/// Pause menu mode for opening stats, party, bag, save, and related screens.
 class MenuMode : public GameMode {
   public:
     /// Updates menu navigation and request dispatch.

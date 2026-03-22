@@ -17,6 +17,8 @@ void TitleScreenMode::onEnter(GameContext &ctx) {
 }
 
 void TitleScreenMode::update(GameContext &ctx, InputManager &input) {
+    constexpr int startingMoney = 3000;
+
     switch (phase) {
     case Phase::titleCard: {
         titleTimer++;
@@ -43,6 +45,7 @@ void TitleScreenMode::update(GameContext &ctx, InputManager &input) {
                 // New game — give starter items
                 constexpr int potionId = 1;
                 constexpr int daemonBallId = 5;
+                ctx.world.getPlayer().setMoney(startingMoney);
                 ctx.world.getPlayer().addItem(potionId, 5);
                 ctx.world.getPlayer().addItem(daemonBallId, 10);
                 ctx.pushRequest(ModeRequest::dialogue(

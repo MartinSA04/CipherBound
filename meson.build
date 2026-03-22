@@ -48,6 +48,7 @@ app_src = [
   'src/app/modes/menu/Render.cpp',
   'src/app/modes/TitleScreenMode.cpp',
   'src/app/modes/TransitionMode.cpp',
+  'src/app/modes/PlayerStatsMode.cpp',
   'src/app/modes/PartyMode.cpp',
   'src/app/modes/BagMode.cpp',
   'src/app/modes/ShopMode.cpp',

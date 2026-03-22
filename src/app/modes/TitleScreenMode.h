@@ -7,6 +7,7 @@
 #pragma once
 #include "../../save/SaveManager.h"
 #include "../GameMode.h"
+#include <string>
 #include <vector>
 
 /// Opening mode showing the title card and available save slots.
@@ -24,11 +25,14 @@ class TitleScreenMode : public GameMode {
     enum class Phase {
         titleCard,      ///< Show the title and wait for confirmation.
         saveSlotSelect, ///< Show save slots and allow selection.
+        nameEntry,      ///< Enter a new player name for an empty save slot.
     };
 
     Phase phase{Phase::titleCard};        ///< Active title-screen phase.
     int selected{0};                      ///< Selected save slot index.
     int titleTimer{0};                    ///< Title-card timer.
+    int nameKeySelected{0};               ///< Selected key in the on-screen name grid.
+    std::string pendingName;              ///< Name currently being entered.
 
     std::vector<SaveManager::SlotInfo> slotInfos; ///< Cached slot metadata.
 };

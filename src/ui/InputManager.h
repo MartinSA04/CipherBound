@@ -14,6 +14,11 @@ class InputManager {
     bool isLeftHeld() const;
     bool isRightHeld() const;
 
+    bool isUpPressed() const;
+    bool isDownPressed() const;
+    bool isLeftPressed() const;
+    bool isRightPressed() const;
+
     bool getMovementDirection(Direction &outDirection) const;
 
     bool isConfirmHeld() const;
@@ -30,6 +35,10 @@ class InputManager {
   private:
     TDT4102::AnimationWindow &window;
 
+    bool prevUp;
+    bool prevDown;
+    bool prevLeft;
+    bool prevRight;
     bool prevConfirm;
     bool prevCancel;
     bool prevMenu;

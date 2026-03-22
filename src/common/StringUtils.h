@@ -3,6 +3,8 @@
 #include <cctype>
 #include <sstream>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 namespace StringUtils {
@@ -53,6 +55,34 @@ inline std::vector<std::string> splitDoubleAt(const std::string &s) {
         start = pos + 2;
     }
     return parts;
+}
+
+inline std::string replaceAll(std::string s, std::string_view needle,
+                              std::string_view replacement) {
+    if (needle.empty())
+        return s;
+
+    std::size_t pos = 0;
+    while ((pos = s.find(needle, pos)) != std::string::npos) {
+        s.replace(pos, needle.size(), replacement);
+        pos += replacement.size();
+    }
+    return s;
+}
+
+inline std::string substitutePlayerName(std::string s, std::string_view playerName) {
+    s = replaceAll(std::move(s), "{player}", playerName);
+    s = replaceAll(std::move(s), "{player_name}", playerName);
+    return s;
+}
+
+inline std::vector<std::string> substitutePlayerName(const std::vector<std::string> &lines,
+                                                     std::string_view playerName) {
+    std::vector<std::string> resolved;
+    resolved.reserve(lines.size());
+    for (const auto &line : lines)
+        resolved.push_back(substitutePlayerName(line, playerName));
+    return resolved;
 }
 
 inline Direction parseDirection(const std::string &s) {

@@ -2,6 +2,7 @@
 #include "../audio/MusicManager.h"
 #include "../battle/Battle.h"
 #include "../battle/TrainerApproachCutscene.h"
+#include "../common/StringUtils.h"
 #include "../battle/mode/BattleIntroMode.h"
 #include "../battle/mode/BattleMode.h"
 #include "../common/VariantUtils.h"
@@ -31,6 +32,15 @@ bool isAdjacentToPlayer(const NPC &trainer, const Player &player) {
     const int distance =
         std::abs(trainerPosition.x - playerPosition.x) + std::abs(trainerPosition.y - playerPosition.y);
     return distance == 1;
+}
+
+std::string resolveDialogueSpeaker(const Player &player, const std::string &speaker) {
+    return StringUtils::substitutePlayerName(speaker, player.getName());
+}
+
+std::vector<std::string> resolveDialogueLines(const Player &player,
+                                              const std::vector<std::string> &lines) {
+    return StringUtils::substitutePlayerName(lines, player.getName());
 }
 
 } // namespace
@@ -172,13 +182,19 @@ void SessionCoordinator::handleRequest(const TransitionToMapRequest &req) {
 void SessionCoordinator::handleRequest(const StartDialogueRequest &req) {
     ctx.flow.dialogueReturnState = req.returnState;
     switchToMode(GameState::dialogue,
-                 std::make_unique<DialogueMode>(req.speaker, req.lines, req.npc, req.returnState));
+                 std::make_unique<DialogueMode>(resolveDialogueSpeaker(ctx.world.getPlayer(),
+                                                                       req.speaker),
+                                                resolveDialogueLines(ctx.world.getPlayer(),
+                                                                     req.lines),
+                                                req.npc, req.returnState));
 }
 
 void SessionCoordinator::handleRequest(const StartDialogueChoiceRequest &req) {
     switchToMode(GameState::dialogueChoice,
-                 std::make_unique<DialogueChoiceMode>(req.choiceOptions, req.choiceContext,
-                                                      ctx.flow.dialogueReturnState));
+                 std::make_unique<DialogueChoiceMode>(
+                     StringUtils::substitutePlayerName(req.choiceOptions,
+                                                       ctx.world.getPlayer().getName()),
+                     req.choiceContext, ctx.flow.dialogueReturnState));
 }
 
 void SessionCoordinator::handleRequest(const OpenShopRequest &req) {

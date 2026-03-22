@@ -1,6 +1,7 @@
 #include "CutsceneRunner.h"
 #include "CutsceneLoader.h"
 #include "CutsceneWorldOps.h"
+#include "../common/StringUtils.h"
 #include "../audio/SoundManager.h"
 #include "../ui/GameUI.h"
 #include <filesystem>
@@ -107,7 +108,9 @@ void CutsceneRunner::processSteps(World &world, GameUI &ui) {
             break;
 
         case CutsceneStep::Type::say:
-            ui.startDialogue(step.speaker, step.lines);
+            ui.startDialogue(StringUtils::substitutePlayerName(step.speaker, world.getPlayer().getName()),
+                             StringUtils::substitutePlayerName(step.lines,
+                                                               world.getPlayer().getName()));
             playback.beginDialogue();
             return;
 

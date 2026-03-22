@@ -1,10 +1,15 @@
 #include "InputManager.h"
 
 InputManager::InputManager(TDT4102::AnimationWindow &window)
-    : window(window), prevConfirm(false), prevCancel(false), prevMenu(false) {}
+    : window(window), prevUp(false), prevDown(false), prevLeft(false), prevRight(false),
+      prevConfirm(false), prevCancel(false), prevMenu(false) {}
 
 void InputManager::update() {
     // Store previous state for edge detection
+    prevUp = isUpHeld();
+    prevDown = isDownHeld();
+    prevLeft = isLeftHeld();
+    prevRight = isRightHeld();
     prevConfirm = isConfirmHeld();
     prevCancel = isCancelHeld();
     prevMenu = isMenuHeld();
@@ -25,6 +30,14 @@ bool InputManager::isLeftHeld() const {
 bool InputManager::isRightHeld() const {
     return window.is_key_down(KeyboardKey::RIGHT) || window.is_key_down(KeyboardKey::D);
 }
+
+bool InputManager::isUpPressed() const { return isUpHeld() && !prevUp; }
+
+bool InputManager::isDownPressed() const { return isDownHeld() && !prevDown; }
+
+bool InputManager::isLeftPressed() const { return isLeftHeld() && !prevLeft; }
+
+bool InputManager::isRightPressed() const { return isRightHeld() && !prevRight; }
 
 bool InputManager::getMovementDirection(Direction &outDirection) const {
     if (isUpHeld()) {

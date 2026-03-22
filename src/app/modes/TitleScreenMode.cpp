@@ -120,12 +120,20 @@ void TitleScreenMode::render(GameContext &ctx) {
             bool isSelected = i == selected;
 
             TDT4102::Color bgColor =
-                isSelected ? TDT4102::Color{60, 60, 120} : TDT4102::Color{35, 35, 80};
+                isSelected ? TDT4102::Color{228, 236, 255} : TDT4102::Color{35, 35, 80};
             renderer.drawFilledRect(startX, y, slotBoxW, slotBoxH, bgColor);
 
             TDT4102::Color borderColor =
-                isSelected ? TDT4102::Color{200, 200, 255} : TDT4102::Color{80, 80, 130};
-            renderer.drawRect(startX, y, slotBoxW, slotBoxH, borderColor);
+                isSelected ? TDT4102::Color{24, 32, 74} : TDT4102::Color{80, 80, 130};
+            renderer.drawRect(startX, y, slotBoxW, slotBoxH, TDT4102::Color::transparent,
+                              borderColor);
+
+            const TDT4102::Color labelColor =
+                isSelected ? TDT4102::Color{12, 18, 48} : TDT4102::Color{220, 225, 245};
+            const TDT4102::Color infoColor =
+                isSelected ? TDT4102::Color{20, 30, 70} : TDT4102::Color{190, 196, 220};
+            const TDT4102::Color emptySlotColor =
+                isSelected ? TDT4102::Color{20, 30, 70} : TDT4102::Color{140, 140, 180};
 
             if (isSelected)
                 ctx.ui.drawSelectionArrow(startX + 8, y + slotBoxH / 2 - PIXEL_SCALE * 3,
@@ -135,7 +143,7 @@ void TitleScreenMode::render(GameContext &ctx) {
             int textY = y + 10;
 
             std::string slotLabel = "Slot " + std::to_string(i + 1);
-            renderer.drawText(slotLabel, textX, textY, TDT4102::Color::white, 18);
+            renderer.drawText(slotLabel, textX, textY, labelColor, 18);
 
             const auto &slotInfo = slotInfos[static_cast<std::size_t>(i)];
             if (slotInfo.exists) {
@@ -144,9 +152,9 @@ void TitleScreenMode::render(GameContext &ctx) {
                 info += "   Badges: " + std::to_string(slotInfo.badgeCount);
                 if (!slotInfo.mapId.empty())
                     info += "   Map: " + slotInfo.mapId;
-                renderer.drawText(info, textX, textY + 30, TDT4102::Color::light_gray, 14);
+                renderer.drawText(info, textX, textY + 30, infoColor, 14);
             } else {
-                renderer.drawText("New Game", textX, textY + 30, TDT4102::Color{140, 140, 180}, 14);
+                renderer.drawText("New Game", textX, textY + 30, emptySlotColor, 14);
             }
         }
 

@@ -46,6 +46,7 @@ void Session::init() {
     pokedex.loadMoves("assets/data/moves.txt");
     pokedex.loadItems("assets/data/items.txt");
 
+    ui.loadBattleAssets();
     ui.getOverworldRenderer().loadSprites();
     world.generate(pokedex);
     ui.getOverworldRenderer().loadMapBackgrounds(world);

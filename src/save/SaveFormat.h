@@ -49,6 +49,7 @@ struct SavedDaemonData {
     StatusEffect status{StatusEffect::none}; ///< Persistent status condition.
     BaseStats ivs{0, 0, 0, 0, 0, 0}; ///< Individual values.
     BaseStats evs{0, 0, 0, 0, 0, 0}; ///< Effort values.
+    Nature nature{Nature::hardy}; ///< Gen 4 nature affecting non-HP stats.
     std::array<MoveSlot, 4> moves{{{-1, 0, 0}, {-1, 0, 0}, {-1, 0, 0}, {-1, 0, 0}}}; ///< Move slots with PP state.
 };
 

@@ -1,11 +1,157 @@
 #include "Daemon.h"
 #include <algorithm>
+#include <numeric>
 
 namespace {
 
 constexpr int maxDaemonLevel = 100;
+constexpr int maxIVValue = 31;
+constexpr int maxEVPerStat = 255;
+constexpr int maxTotalEVs = 510;
 
 int clampLevel(int level) { return std::clamp(level, 1, maxDaemonLevel); }
+
+std::array<int, 6> toArray(const BaseStats &stats) {
+    return {stats.hp, stats.attack, stats.defense, stats.specialAttack, stats.specialDefense,
+            stats.speed};
+}
+
+BaseStats fromArray(const std::array<int, 6> &values) {
+    return {values[0], values[1], values[2], values[3], values[4], values[5]};
+}
+
+BaseStats clampStats(const BaseStats &stats, int minValue, int maxValue) {
+    auto values = toArray(stats);
+    for (int &value : values)
+        value = std::clamp(value, minValue, maxValue);
+    return fromArray(values);
+}
+
+BaseStats normalizeEVs(const BaseStats &stats) {
+    const auto clamped = toArray(clampStats(stats, 0, maxEVPerStat));
+    const int total = std::accumulate(clamped.begin(), clamped.end(), 0);
+    if (total <= maxTotalEVs)
+        return fromArray(clamped);
+
+    std::array<int, 6> scaled{};
+    std::array<int, 6> remainders{};
+    int used = 0;
+    for (std::size_t i = 0; i < clamped.size(); ++i) {
+        scaled[i] = clamped[i] * maxTotalEVs / total;
+        remainders[i] = clamped[i] * maxTotalEVs % total;
+        used += scaled[i];
+    }
+
+    int remaining = maxTotalEVs - used;
+    while (remaining > 0) {
+        std::size_t bestIndex = 0;
+        for (std::size_t i = 1; i < remainders.size(); ++i) {
+            if (remainders[i] > remainders[bestIndex])
+                bestIndex = i;
+        }
+        scaled[bestIndex]++;
+        remainders[bestIndex] = -1;
+        remaining--;
+    }
+
+    return fromArray(scaled);
+}
+
+enum class NatureAffectedStat { none, attack, defense, speed, specialAttack, specialDefense };
+
+NatureAffectedStat increasedStatFor(Nature nature) {
+    switch (nature) {
+    case Nature::lonely:
+    case Nature::brave:
+    case Nature::adamant:
+    case Nature::naughty:
+        return NatureAffectedStat::attack;
+    case Nature::bold:
+    case Nature::relaxed:
+    case Nature::impish:
+    case Nature::lax:
+        return NatureAffectedStat::defense;
+    case Nature::timid:
+    case Nature::hasty:
+    case Nature::jolly:
+    case Nature::naive:
+        return NatureAffectedStat::speed;
+    case Nature::modest:
+    case Nature::mild:
+    case Nature::quiet:
+    case Nature::rash:
+        return NatureAffectedStat::specialAttack;
+    case Nature::calm:
+    case Nature::gentle:
+    case Nature::sassy:
+    case Nature::careful:
+        return NatureAffectedStat::specialDefense;
+    default:
+        return NatureAffectedStat::none;
+    }
+}
+
+NatureAffectedStat decreasedStatFor(Nature nature) {
+    switch (nature) {
+    case Nature::bold:
+    case Nature::timid:
+    case Nature::modest:
+    case Nature::calm:
+        return NatureAffectedStat::attack;
+    case Nature::lonely:
+    case Nature::hasty:
+    case Nature::mild:
+    case Nature::gentle:
+        return NatureAffectedStat::defense;
+    case Nature::brave:
+    case Nature::relaxed:
+    case Nature::quiet:
+    case Nature::sassy:
+        return NatureAffectedStat::speed;
+    case Nature::adamant:
+    case Nature::impish:
+    case Nature::jolly:
+    case Nature::careful:
+        return NatureAffectedStat::specialAttack;
+    case Nature::naughty:
+    case Nature::lax:
+    case Nature::naive:
+    case Nature::rash:
+        return NatureAffectedStat::specialDefense;
+    default:
+        return NatureAffectedStat::none;
+    }
+}
+
+NatureAffectedStat natureStatForIndex(int statIndex) {
+    switch (statIndex) {
+    case 1:
+        return NatureAffectedStat::attack;
+    case 2:
+        return NatureAffectedStat::defense;
+    case 3:
+        return NatureAffectedStat::specialAttack;
+    case 4:
+        return NatureAffectedStat::specialDefense;
+    case 5:
+        return NatureAffectedStat::speed;
+    default:
+        return NatureAffectedStat::none;
+    }
+}
+
+int applyNatureModifier(int value, Nature nature, NatureAffectedStat stat) {
+    if (stat == NatureAffectedStat::none)
+        return value;
+
+    const NatureAffectedStat increased = increasedStatFor(nature);
+    const NatureAffectedStat decreased = decreasedStatFor(nature);
+    if (stat == increased && stat != decreased)
+        return value * 11 / 10;
+    if (stat == decreased && stat != increased)
+        return value * 9 / 10;
+    return value;
+}
 
 int totalExpForLevel(GrowthRate growthRate, int level) {
     const int n = clampLevel(level);
@@ -86,7 +232,7 @@ int normalizeTotalExp(const Species &species, int level, int savedExp) {
 Daemon::Daemon(const Species &species, int level)
     : speciesId(species.id), level(clampLevel(level)),
       exp(totalExpForCurrentLevel(species, level)), currentHP(0), status(StatusEffect::none),
-      ivs{0, 0, 0, 0, 0, 0}, evs{0, 0, 0, 0, 0, 0}, speciesRef(species) {
+      ivs{0, 0, 0, 0, 0, 0}, evs{0, 0, 0, 0, 0, 0}, nature(Nature::hardy), speciesRef(species) {
     nickname = species.name;
 
     // Init moves to empty
@@ -109,45 +255,61 @@ Daemon::Daemon(const Species &species, int level)
                                                  15};
     }
 
-    currentHP = calculateStat(species.baseStats.hp, ivs.hp, evs.hp, true);
+    currentHP = calculateStat(species.baseStats.hp, ivs.hp, evs.hp, 0);
+}
+
+Daemon Daemon::generateRandomized(const Species &species, int level, std::mt19937 &rng) {
+    std::uniform_int_distribution<int> ivRoll(0, maxIVValue);
+    std::uniform_int_distribution<int> natureRoll(static_cast<int>(Nature::hardy),
+                                                  static_cast<int>(Nature::quirky));
+
+    Daemon daemon(species, level);
+    daemon.ivs = {ivRoll(rng), ivRoll(rng), ivRoll(rng),
+                  ivRoll(rng), ivRoll(rng), ivRoll(rng)};
+    daemon.evs = {0, 0, 0, 0, 0, 0};
+    daemon.nature = static_cast<Nature>(natureRoll(rng));
+    daemon.currentHP = daemon.getMaxHP();
+    return daemon;
 }
 
 Daemon::Daemon(const Species &species, int level, int exp, int currentHP,
                const std::string &nickname, StatusEffect status, const BaseStats &ivs,
-               const BaseStats &evs, const std::array<MoveSlot, 4> &moves)
+               const BaseStats &evs, const std::array<MoveSlot, 4> &moves, Nature nature)
     : speciesId(species.id), level(clampLevel(level)),
-      exp(normalizeTotalExp(species, level, exp)), currentHP(currentHP), status(status), ivs(ivs),
-      evs(evs), moves(moves), speciesRef(species) {
+      exp(normalizeTotalExp(species, level, exp)), currentHP(currentHP), status(status),
+      ivs(clampStats(ivs, 0, maxIVValue)), evs(normalizeEVs(evs)), nature(nature), moves(moves),
+      speciesRef(species) {
     this->level = levelFromTotalExp(species, this->exp);
     this->currentHP = std::clamp(this->currentHP, 0, getMaxHP());
     this->nickname = nickname;
 }
 
-int Daemon::calculateStatAtLevel(int base, int iv, int ev, int statLevel, bool isHP) const {
-    if (isHP) {
+int Daemon::calculateStatAtLevel(int base, int iv, int ev, int statLevel, int statIndex) const {
+    if (statIndex == 0) {
         return ((2 * base + iv + ev / 4) * statLevel / 100) + statLevel + 10;
     }
-    return ((2 * base + iv + ev / 4) * statLevel / 100) + 5;
+    const int rawStat = ((2 * base + iv + ev / 4) * statLevel / 100) + 5;
+    return applyNatureModifier(rawStat, nature, natureStatForIndex(statIndex));
 }
 
-int Daemon::calculateStat(int base, int iv, int ev, bool isHP) const {
-    return calculateStatAtLevel(base, iv, ev, level, isHP);
+int Daemon::calculateStat(int base, int iv, int ev, int statIndex) const {
+    return calculateStatAtLevel(base, iv, ev, level, statIndex);
 }
 
 BaseStats Daemon::calculateStatsForLevel(int statLevel) const {
     const BaseStats &baseStats = speciesRef.get().baseStats;
-    return {calculateStatAtLevel(baseStats.hp, ivs.hp, evs.hp, statLevel, true),
-            calculateStatAtLevel(baseStats.attack, ivs.attack, evs.attack, statLevel, false),
-            calculateStatAtLevel(baseStats.defense, ivs.defense, evs.defense, statLevel, false),
+    return {calculateStatAtLevel(baseStats.hp, ivs.hp, evs.hp, statLevel, 0),
+            calculateStatAtLevel(baseStats.attack, ivs.attack, evs.attack, statLevel, 1),
+            calculateStatAtLevel(baseStats.defense, ivs.defense, evs.defense, statLevel, 2),
             calculateStatAtLevel(baseStats.specialAttack, ivs.specialAttack, evs.specialAttack,
-                                 statLevel, false),
+                                 statLevel, 3),
             calculateStatAtLevel(baseStats.specialDefense, ivs.specialDefense, evs.specialDefense,
-                                 statLevel, false),
-            calculateStatAtLevel(baseStats.speed, ivs.speed, evs.speed, statLevel, false)};
+                                 statLevel, 4),
+            calculateStatAtLevel(baseStats.speed, ivs.speed, evs.speed, statLevel, 5)};
 }
 
 int Daemon::getMaxHP() const {
-    return calculateStat(speciesRef.get().baseStats.hp, ivs.hp, evs.hp, true);
+    return calculateStat(speciesRef.get().baseStats.hp, ivs.hp, evs.hp, 0);
 }
 
 int Daemon::getCurrentHP() const { return currentHP; }
@@ -176,6 +338,7 @@ const Species &Daemon::getSpecies() const { return speciesRef.get(); }
 int Daemon::getSpeciesId() const { return speciesId; }
 const BaseStats &Daemon::getIVs() const { return ivs; }
 const BaseStats &Daemon::getEVs() const { return evs; }
+Nature Daemon::getNature() const { return nature; }
 StatusEffect Daemon::getStatus() const { return status; }
 void Daemon::setStatus(StatusEffect s) { status = s; }
 void Daemon::clearStatus() { status = StatusEffect::none; }
@@ -279,15 +442,15 @@ int Daemon::getStat(int statIndex) const {
     case 0:
         return getMaxHP();
     case 1:
-        return calculateStat(bs.attack, ivs.attack, evs.attack, false);
+        return calculateStat(bs.attack, ivs.attack, evs.attack, 1);
     case 2:
-        return calculateStat(bs.defense, ivs.defense, evs.defense, false);
+        return calculateStat(bs.defense, ivs.defense, evs.defense, 2);
     case 3:
-        return calculateStat(bs.specialAttack, ivs.specialAttack, evs.specialAttack, false);
+        return calculateStat(bs.specialAttack, ivs.specialAttack, evs.specialAttack, 3);
     case 4:
-        return calculateStat(bs.specialDefense, ivs.specialDefense, evs.specialDefense, false);
+        return calculateStat(bs.specialDefense, ivs.specialDefense, evs.specialDefense, 4);
     case 5:
-        return calculateStat(bs.speed, ivs.speed, evs.speed, false);
+        return calculateStat(bs.speed, ivs.speed, evs.speed, 5);
     default:
         return 0;
     }

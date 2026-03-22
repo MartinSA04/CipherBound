@@ -9,8 +9,17 @@
 
 namespace {
 
-Daemon makeDaemon(const Pokedex &pokedex, int speciesId, int level) {
-    return Daemon(pokedex.getSpecies(speciesId), level);
+std::array<MoveSlot, 4> emptyMoves() {
+    return {{{-1, 0, 0}, {-1, 0, 0}, {-1, 0, 0}, {-1, 0, 0}}};
+}
+
+Daemon makeDaemon(const Pokedex &pokedex, int speciesId, int level, Nature nature = Nature::hardy,
+                  const BaseStats &ivs = {0, 0, 0, 0, 0, 0},
+                  const BaseStats &evs = {0, 0, 0, 0, 0, 0}) {
+    const Species &species = pokedex.getSpecies(speciesId);
+    const Daemon base(species, level);
+    return Daemon(species, level, base.getExp(), base.getCurrentHP(), species.name,
+                  StatusEffect::none, ivs, evs, emptyMoves(), nature);
 }
 
 } // namespace
@@ -43,7 +52,8 @@ int main() {
     original.markSeen(1);
     original.markSeen(3);
     original.markCaught(1);
-    original.restorePartyDaemon(makeDaemon(pokedex, 1, 5));
+    original.restorePartyDaemon(
+        makeDaemon(pokedex, 1, 5, Nature::jolly, {31, 30, 29, 28, 27, 26}, {4, 252, 0, 0, 0, 252}));
     original.restorePartyDaemon(makeDaemon(pokedex, 2, 6));
     assert(original.restoreBoxDaemon(3, makeDaemon(pokedex, 3, 8)));
     original.setCurrentBox(3);
@@ -78,6 +88,11 @@ int main() {
     assert(world.getPlayer().hasBadge("badge_alpha"));
     assert(world.getPlayer().hasFlag("intro_done"));
     assert(world.getPlayer().partySize() == 2);
+    assert(world.getPlayer().getDaemon(0).getNature() == Nature::jolly);
+    assert(world.getPlayer().getDaemon(0).getIVs().hp == 31);
+    assert(world.getPlayer().getDaemon(0).getIVs().speed == 26);
+    assert(world.getPlayer().getDaemon(0).getEVs().attack == 252);
+    assert(world.getPlayer().getDaemon(0).getEVs().speed == 252);
     assert(world.getPlayer().getBoxCount(0) == 0);
     assert(world.getPlayer().getBoxCount(3) == 1);
     assert(world.getPlayer().getCurrentBox() == 3);

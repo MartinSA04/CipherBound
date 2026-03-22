@@ -19,10 +19,10 @@ badge_alpha
 [inventory]
 5|7
 [party]
-1;5;10;22;Bulbulum;0;1,2,3,4,5,6;6,5,4,3,2,1;1:15:15,-1:0:0,-1:0:0,-1:0:0
+1;5;10;22;Bulbulum;0;1,2,3,4,5,6;6,5,4,3,2,1;13;1:15:15,-1:0:0,-1:0:0,-1:0:0
 [pc_boxes]
 current_box|3
-box|3|7;8;80;30;Gravitonion;0;0,0,0,0,0,0;1,1,1,1,1,1;2:10:10,-1:0:0,-1:0:0,-1:0:0
+box|3|7;8;80;30;Gravitonion;0;0,0,0,0,0,0;1,1,1,1,1,1;0;2:10:10,-1:0:0,-1:0:0,-1:0:0
 [npcs]
 lab|trainer_1|defeated
 [daemondex]
@@ -57,6 +57,7 @@ caught|7
     assert(partyDaemon.speciesId == 1);
     assert(partyDaemon.level == 5);
     assert(partyDaemon.nickname == "Bulbulum");
+    assert(partyDaemon.nature == Nature::jolly);
     assert(partyDaemon.moves[0].moveId == 1);
 
     const SaveFormat::SaveSlotSummary summary = SaveFormat::summarize(parsed.data);
@@ -64,4 +65,12 @@ caught|7
     assert(summary.partySize == 1);
     assert(summary.badgeCount == 1);
     assert(summary.mapId == "lab");
+
+    std::istringstream legacyInput(R"([party]
+1;5;10;22;Legacy;0;1,2,3,4,5,6;6,5,4,3,2,1;1:15:15,-1:0:0,-1:0:0,-1:0:0
+)");
+    const SaveFormat::SaveParseResult legacyParsed = SaveFormat::parse(legacyInput);
+    assert(legacyParsed.warnings.empty());
+    assert(legacyParsed.data.party.size() == 1);
+    assert(legacyParsed.data.party[0].nature == Nature::hardy);
 }

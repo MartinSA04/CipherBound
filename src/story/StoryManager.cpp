@@ -33,7 +33,7 @@ StoryAction StoryManager::onChoiceSelected(const std::string &context, int choic
         // Extract species id from "pokeball_N"
         int speciesId = std::stoi(context.substr(9));
         const Species &species = pokedex.getSpecies(speciesId);
-        Daemon starter{species, 5};
+        Daemon starter = Daemon::generateRandomized(species, 5, world.getRng());
         world.getPlayer().addDaemon(starter);
         world.getPlayer().setFlag("has_starter");
 

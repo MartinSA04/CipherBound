@@ -10,6 +10,7 @@
 #include <array>
 #include <functional>
 #include <optional>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -18,6 +19,35 @@ struct MoveSlot {
     int moveId;    ///< Move id, or `-1` for an empty slot.
     int currentPP; ///< Current PP.
     int maxPP;     ///< Maximum PP.
+};
+
+/// Gen 4 nature table in canonical order.
+enum class Nature {
+    hardy,
+    lonely,
+    brave,
+    adamant,
+    naughty,
+    bold,
+    docile,
+    relaxed,
+    impish,
+    lax,
+    timid,
+    hasty,
+    serious,
+    jolly,
+    naive,
+    modest,
+    mild,
+    quiet,
+    bashful,
+    rash,
+    calm,
+    gentle,
+    sassy,
+    careful,
+    quirky,
 };
 
 /// Detailed information about one resolved level-up.
@@ -35,11 +65,13 @@ class Daemon {
   public:
     /// Creates a new daemon from species data and a starting level.
     Daemon(const Species &species, int level);
+    /// Creates a fresh daemon with Gen 4-style random IVs/nature and zero EVs.
+    static Daemon generateRandomized(const Species &species, int level, std::mt19937 &rng);
 
     /// Reconstructs a daemon from serialized save data.
     Daemon(const Species &species, int level, int exp, int currentHP, const std::string &nickname,
            StatusEffect status, const BaseStats &ivs, const BaseStats &evs,
-           const std::array<MoveSlot, 4> &moves);
+           const std::array<MoveSlot, 4> &moves, Nature nature = Nature::hardy);
 
     /// Returns the current nickname.
     const std::string &getNickname() const;
@@ -109,6 +141,8 @@ class Daemon {
     const BaseStats &getIVs() const;
     /// Returns the EV set.
     const BaseStats &getEVs() const;
+    /// Returns the nature.
+    Nature getNature() const;
 
   private:
     std::string nickname;
@@ -120,11 +154,12 @@ class Daemon {
 
     BaseStats ivs; ///< Individual values.
     BaseStats evs; ///< Effort values.
+    Nature nature;
 
     std::array<MoveSlot, 4> moves; ///< Learned move slots.
 
-    int calculateStatAtLevel(int base, int iv, int ev, int statLevel, bool isHP) const;
-    int calculateStat(int base, int iv, int ev, bool isHP) const;
+    int calculateStatAtLevel(int base, int iv, int ev, int statLevel, int statIndex) const;
+    int calculateStat(int base, int iv, int ev, int statIndex) const;
     BaseStats calculateStatsForLevel(int statLevel) const;
 
     std::reference_wrapper<const Species> speciesRef; ///< Referenced species definition.

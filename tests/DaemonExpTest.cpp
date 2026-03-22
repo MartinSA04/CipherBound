@@ -2,6 +2,7 @@
 #include "../src/state/Daemon.h"
 #include <array>
 #include <cassert>
+#include <random>
 
 namespace {
 
@@ -98,6 +99,65 @@ int main() {
                        {0, 0, 0, 0, 0, 0}, fullMoves());
     assert(fullMoveSet.firstEmptyMoveSlot() == -1);
     assert(fullMoveSet.knowsMove(1));
+
+    Species statSpecies = makeSpecies(12, GrowthRate::mediumFast);
+    const int level50Exp = Daemon(statSpecies, 50).getExp();
+    Daemon adamant(statSpecies, 50, level50Exp, 120, "Adamant", StatusEffect::none,
+                   {31, 31, 31, 31, 31, 31}, {0, 252, 0, 0, 0, 4}, emptyMoves(),
+                   Nature::adamant);
+    assert(adamant.getMaxHP() == 120);
+    assert(adamant.getStat(1) == 111);
+    assert(adamant.getStat(2) == 69);
+    assert(adamant.getStat(3) == 76);
+    assert(adamant.getStat(4) == 85);
+    assert(adamant.getStat(5) == 66);
+
+    Daemon normalized(statSpecies, 50, level50Exp, 120, "Normalized", StatusEffect::none,
+                      {99, -5, 31, 40, 12, 77}, {255, 255, 255, 255, 255, 255}, emptyMoves(),
+                      Nature::jolly);
+    assert(normalized.getIVs().hp == 31);
+    assert(normalized.getIVs().attack == 0);
+    assert(normalized.getIVs().defense == 31);
+    assert(normalized.getIVs().specialAttack == 31);
+    assert(normalized.getIVs().specialDefense == 12);
+    assert(normalized.getIVs().speed == 31);
+    assert(normalized.getEVs().hp == 85);
+    assert(normalized.getEVs().attack == 85);
+    assert(normalized.getEVs().defense == 85);
+    assert(normalized.getEVs().specialAttack == 85);
+    assert(normalized.getEVs().specialDefense == 85);
+    assert(normalized.getEVs().speed == 85);
+    assert(normalized.getNature() == Nature::jolly);
+
+    std::mt19937 rngA(1337);
+    std::mt19937 rngB(1337);
+    Daemon generatedA = Daemon::generateRandomized(statSpecies, 8, rngA);
+    Daemon generatedB = Daemon::generateRandomized(statSpecies, 8, rngB);
+    assert(generatedA.getLevel() == 8);
+    assert(generatedA.getNature() == generatedB.getNature());
+    assert(generatedA.getIVs().hp == generatedB.getIVs().hp);
+    assert(generatedA.getIVs().attack == generatedB.getIVs().attack);
+    assert(generatedA.getIVs().defense == generatedB.getIVs().defense);
+    assert(generatedA.getIVs().specialAttack == generatedB.getIVs().specialAttack);
+    assert(generatedA.getIVs().specialDefense == generatedB.getIVs().specialDefense);
+    assert(generatedA.getIVs().speed == generatedB.getIVs().speed);
+    assert(generatedA.getEVs().hp == 0);
+    assert(generatedA.getEVs().attack == 0);
+    assert(generatedA.getEVs().defense == 0);
+    assert(generatedA.getEVs().specialAttack == 0);
+    assert(generatedA.getEVs().specialDefense == 0);
+    assert(generatedA.getEVs().speed == 0);
+    assert(generatedA.getCurrentHP() == generatedA.getMaxHP());
+    assert(generatedA.getIVs().hp >= 0 && generatedA.getIVs().hp <= 31);
+    assert(generatedA.getIVs().attack >= 0 && generatedA.getIVs().attack <= 31);
+    assert(generatedA.getIVs().defense >= 0 && generatedA.getIVs().defense <= 31);
+    assert(generatedA.getIVs().specialAttack >= 0 && generatedA.getIVs().specialAttack <= 31);
+    assert(generatedA.getIVs().specialDefense >= 0 && generatedA.getIVs().specialDefense <= 31);
+    assert(generatedA.getIVs().speed >= 0 && generatedA.getIVs().speed <= 31);
+    assert(generatedA.getNature() != Nature::hardy || generatedA.getIVs().hp != 0 ||
+           generatedA.getIVs().attack != 0 || generatedA.getIVs().defense != 0 ||
+           generatedA.getIVs().specialAttack != 0 || generatedA.getIVs().specialDefense != 0 ||
+           generatedA.getIVs().speed != 0);
 
     return 0;
 }

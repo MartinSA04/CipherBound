@@ -46,9 +46,18 @@ std::optional<BaseStats> parseBaseStats(std::string_view encoded) {
                      (*values)[3], (*values)[4], (*values)[5]};
 }
 
+std::optional<Nature> parseNature(std::string_view encoded) {
+    const auto value = TextParse::parseInt(encoded);
+    if (!value.has_value())
+        return std::nullopt;
+    if (*value < static_cast<int>(Nature::hardy) || *value > static_cast<int>(Nature::quirky))
+        return std::nullopt;
+    return static_cast<Nature>(*value);
+}
+
 std::optional<SavedDaemonData> parseDaemon(std::string_view line) {
     const auto parts = TextParse::splitView(line, ';');
-    if (parts.size() != 9)
+    if (parts.size() != 9 && parts.size() != 10)
         return std::nullopt;
 
     const auto speciesId = TextParse::parseInt(parts[0]);
@@ -58,9 +67,11 @@ std::optional<SavedDaemonData> parseDaemon(std::string_view line) {
     const auto statusRaw = TextParse::parseInt(parts[5]);
     const auto ivs = parseBaseStats(parts[6]);
     const auto evs = parseBaseStats(parts[7]);
+    const std::optional<Nature> nature =
+        parts.size() == 10 ? parseNature(parts[8]) : std::optional<Nature>(Nature::hardy);
     if (!speciesId.has_value() || !level.has_value() || !exp.has_value() ||
         !currentHP.has_value() || !statusRaw.has_value() || !ivs.has_value() ||
-        !evs.has_value()) {
+        !evs.has_value() || !nature.has_value()) {
         return std::nullopt;
     }
 
@@ -73,8 +84,10 @@ std::optional<SavedDaemonData> parseDaemon(std::string_view line) {
     saved.status = static_cast<StatusEffect>(*statusRaw);
     saved.ivs = *ivs;
     saved.evs = *evs;
+    saved.nature = *nature;
 
-    const auto moveParts = TextParse::splitView(parts[8], ',');
+    const std::size_t moveFieldIndex = parts.size() == 10 ? 9 : 8;
+    const auto moveParts = TextParse::splitView(parts[moveFieldIndex], ',');
     int slot = 0;
     for (const auto moveToken : moveParts) {
         if (slot >= 4)
@@ -104,7 +117,8 @@ std::string serializeDaemon(const Daemon &daemon) {
     encoded << daemon.getSpeciesId() << ";" << daemon.getLevel() << ";" << daemon.getExp() << ";"
             << daemon.getCurrentHP() << ";" << daemon.getNickname() << ";"
             << static_cast<int>(daemon.getStatus()) << ";" << serializeBaseStats(daemon.getIVs())
-            << ";" << serializeBaseStats(daemon.getEVs()) << ";";
+            << ";" << serializeBaseStats(daemon.getEVs()) << ";"
+            << static_cast<int>(daemon.getNature()) << ";";
 
     const auto &moves = daemon.getMoves();
     for (int i = 0; i < 4; ++i) {
@@ -285,7 +299,7 @@ SaveSlotSummary summarize(const SaveFileData &data) {
 Daemon hydrateDaemon(const SavedDaemonData &saved, const Pokedex &pokedex) {
     const Species &species = pokedex.getSpecies(saved.speciesId);
     return Daemon(species, saved.level, saved.exp, saved.currentHP, saved.nickname, saved.status,
-                  saved.ivs, saved.evs, saved.moves);
+                  saved.ivs, saved.evs, saved.moves, saved.nature);
 }
 
 } // namespace SaveFormat

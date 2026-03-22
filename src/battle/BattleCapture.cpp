@@ -55,7 +55,7 @@ BattleCaptureOutcome BattleCapture::resolve(const Daemon &target, const ItemData
 Daemon BattleCapture::caughtDaemon(const Daemon &target) {
     return Daemon(target.getSpecies(), target.getLevel(), target.getExp(), target.getCurrentHP(),
                   target.getNickname(), target.getStatus(), target.getIVs(), target.getEVs(),
-                  target.getMoves());
+                  target.getMoves(), target.getNature());
 }
 
 std::string_view BattleCapture::failureMessage(int shakes) {

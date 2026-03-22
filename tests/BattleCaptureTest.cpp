@@ -27,7 +27,7 @@ int main() {
     const Species species = makeSpecies();
     std::array<MoveSlot, 4> moves = {{{1, 5, 5}, {2, 10, 10}, {-1, 0, 0}, {-1, 0, 0}}};
     Daemon target(species, 8, 120, 9, "Cipher", StatusEffect::entangled, {1, 2, 3, 4, 5, 6},
-                  {6, 5, 4, 3, 2, 1}, moves);
+                  {6, 5, 4, 3, 2, 1}, moves, Nature::timid);
 
     ItemData ultraBall{1, "Ultra Ball", "", ItemCategory::capture, 0, 255};
     std::mt19937 rng(42);
@@ -43,6 +43,7 @@ int main() {
     assert(caught.getCurrentHP() == target.getCurrentHP());
     assert(caught.getNickname() == target.getNickname());
     assert(caught.getStatus() == target.getStatus());
+    assert(caught.getNature() == target.getNature());
     assert(caught.getMoves()[0].moveId == target.getMoves()[0].moveId);
 
     return 0;

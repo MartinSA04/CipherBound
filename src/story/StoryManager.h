@@ -6,6 +6,7 @@
 
 #pragma once
 #include "StoryAction.h"
+#include <optional>
 #include <string>
 
 class NPC;
@@ -21,6 +22,9 @@ struct WarpPoint;
 class StoryManager {
   public:
     StoryManager() = default;
+
+    /// Returns the species id associated with a starter-choice context, if any.
+    static std::optional<int> starterSpeciesIdForChoiceContext(const std::string &context);
 
     /// Decides what should happen after dialogue closes.
     StoryAction onDialogueEnd(NPC *npc, World &world);

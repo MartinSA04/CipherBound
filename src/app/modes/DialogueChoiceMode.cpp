@@ -25,29 +25,43 @@ void DialogueChoiceMode::render(GameContext &ctx) {
         renderOverworld(ctx);
 
     // If choosing a starter pokeball, show the Daemon sprite above the dialogue
-    if (choiceContext.starts_with("pokeball_")) {
-        int speciesId = std::stoi(choiceContext.substr(9));
-        if (speciesId > 0 && speciesId <= ctx.pokedex.speciesCount()) {
-            const Species &sp = ctx.pokedex.getSpecies(speciesId);
-            ctx.ui.loadDaemonSprite(sp.name);
-            std::string spriteId = "daemon_" + sp.name;
+    if (const auto speciesId = StoryManager::starterSpeciesIdForChoiceContext(choiceContext);
+        speciesId.has_value()) {
+        const Species &sp = ctx.pokedex.getSpecies(*speciesId);
+        ctx.ui.loadDaemonSprite(sp.name);
+        std::string spriteId = "daemon_" + sp.name;
 
-            Renderer &r = ctx.ui.getRenderer();
-            if (r.hasTexture(spriteId)) {
-                int spriteScale = 3; // 80 * 3 = 240px
-                int spriteSize = 80 * spriteScale;
-                int spriteX = WINDOW_WIDTH / 2 - spriteSize / 2;
-                int panelY = WINDOW_HEIGHT - UI_PANEL_HEIGHT;
-                int spriteY = panelY - spriteSize - 8;
+        Renderer &r = ctx.ui.getRenderer();
+        if (r.hasTexture(spriteId)) {
+            int spriteScale = 3; // 80 * 3 = 240px
+            int spriteSize = 80 * spriteScale;
+            SpriteFont &font = ctx.ui.getSpriteFont();
+            int previewPadding = 3 * PIXEL_SCALE;
+            int labelGap = 2 * PIXEL_SCALE;
+            int labelHeight = 16 * PIXEL_SCALE;
+            int labelWidth = font.getTextWidth(sp.name, PIXEL_SCALE);
+            int previewWidth =
+                std::max(spriteSize + previewPadding * 2, labelWidth + previewPadding * 2);
+            int previewHeight =
+                spriteSize + labelGap + labelHeight + previewPadding * 2 + PIXEL_SCALE;
+            int previewX = WINDOW_WIDTH / 2 - previewWidth / 2;
+            int dialoguePanelY = WINDOW_HEIGHT - UI_PANEL_HEIGHT;
+            int previewY = dialoguePanelY - previewHeight - 8;
+            int spriteX = WINDOW_WIDTH / 2 - spriteSize / 2;
+            int spriteY = previewY + previewPadding;
 
-                r.drawSpriteRaw(spriteId, spriteX, spriteY, spriteSize, spriteSize);
+            r.drawFilledRect(previewX + PIXEL_SCALE, previewY + PIXEL_SCALE, previewWidth,
+                             previewHeight, TDT4102::Color{48, 58, 84});
+            r.drawFilledRect(previewX, previewY, previewWidth, previewHeight,
+                             TDT4102::Color{240, 245, 255});
+            r.drawRect(previewX, previewY, previewWidth, previewHeight,
+                       TDT4102::Color::transparent, TDT4102::Color{60, 70, 100});
 
-                // Draw name + type label below sprite
-                int labelY = spriteY + spriteSize + 4;
-                SpriteFont &font = ctx.ui.getSpriteFont();
-                int labelX = WINDOW_WIDTH / 2 - font.getTextWidth(sp.name, PIXEL_SCALE) / 2;
-                font.drawText(r, sp.name, labelX, labelY, PIXEL_SCALE);
-            }
+            r.drawSpriteRaw(spriteId, spriteX, spriteY, spriteSize, spriteSize);
+
+            int labelY = spriteY + spriteSize + labelGap;
+            int labelX = WINDOW_WIDTH / 2 - font.getTextWidth(sp.name, PIXEL_SCALE) / 2;
+            font.drawText(r, sp.name, labelX, labelY, PIXEL_SCALE);
         }
     }
 

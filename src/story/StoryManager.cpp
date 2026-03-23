@@ -2,6 +2,16 @@
 #include "../game_data/Pokedex.h"
 #include "../state/World.h"
 
+std::optional<int> StoryManager::starterSpeciesIdForChoiceContext(const std::string &context) {
+    if (context == "pokeball_1")
+        return 1;
+    if (context == "pokeball_2")
+        return 4;
+    if (context == "pokeball_3")
+        return 7;
+    return std::nullopt;
+}
+
 StoryAction StoryManager::onDialogueEnd(NPC *npc, World &world) {
     // Check for trainer battle
     if (!npc)
@@ -14,7 +24,8 @@ StoryAction StoryManager::onDialogueEnd(NPC *npc, World &world) {
     }
 
     // Pokeball on table — offer yes/no choice for that starter
-    if (npc->getId().starts_with("pokeball_") && !world.getPlayer().hasFlag("has_starter")) {
+    if (starterSpeciesIdForChoiceContext(npc->getId()).has_value() &&
+        !world.getPlayer().hasFlag("has_starter")) {
         return StoryAction::showChoice({"Yes", "No"}, npc->getId());
     }
 
@@ -29,10 +40,9 @@ StoryAction StoryManager::onDialogueEnd(NPC *npc, World &world) {
 StoryAction StoryManager::onChoiceSelected(const std::string &context, int choice, World &world,
                                            Pokedex &pokedex) {
     // Pokeball yes/no choice: choice 0 = Yes, 1 = No
-    if (context.starts_with("pokeball_") && choice == 0) {
-        // Extract species id from "pokeball_N"
-        int speciesId = std::stoi(context.substr(9));
-        const Species &species = pokedex.getSpecies(speciesId);
+    if (const auto speciesId = starterSpeciesIdForChoiceContext(context);
+        speciesId.has_value() && choice == 0) {
+        const Species &species = pokedex.getSpecies(*speciesId);
         Daemon starter = Daemon::generateRandomized(species, 5, world.getRng());
         world.getPlayer().addDaemon(starter);
         world.getPlayer().setFlag("has_starter");

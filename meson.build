@@ -447,6 +447,17 @@ daemon_exp_test = executable(
 
 test('daemon_exp', daemon_exp_test)
 
+starter_species_data_test = executable(
+  'starter_species_data_test',
+  [
+    'tests/StarterSpeciesDataTest.cpp',
+    'src/common/FilePaths.cpp',
+    'src/game_data/Pokedex.cpp',
+  ],
+)
+
+test('starter_species_data', starter_species_data_test)
+
 state_model_test = executable(
   'state_model_test',
   [

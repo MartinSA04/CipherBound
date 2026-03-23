@@ -36,5 +36,5 @@ background_overlay|assets/tilesets/pallet_town/maps/bart_iver_lab_overlay.png
 prof_bart_iver|Prof. Bart Iver|questGiver|6|3|down|0|has_starter?Did you get it yet?; Go to the faculty and retrieve it.; I will tell you more then.@@Come on, choose a Daemon!|bart_iver|
 
 pokeball_1|Pokeball|normal|8|4|down|0|has_starter?The Pokeball is empty.@@Bulbulum, the classical Daemon.;It manipulates classical forces with ease.|-|
-pokeball_2|Pokeball|normal|9|4|down|0|has_starter?The Pokeball is empty.@@Newtonion, placeholder.|-|
-pokeball_3|Pokeball|normal|10|4|down|0|has_starter?The Pokeball is empty.@@Gravitonion, placeholder.|-|
+pokeball_2|Pokeball|normal|9|4|down|0|has_starter?The Pokeball is empty.@@Abacub, the algebraic Daemon.;It shapes neat structures out of pure theory.|-|
+pokeball_3|Pokeball|normal|10|4|down|0|has_starter?The Pokeball is empty.@@Bugbit, the digital Daemon.;It turns tiny glitches into dangerous attacks.|-|

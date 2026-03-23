@@ -19,6 +19,7 @@
 
 class NPC;
 class MusicManager;
+enum class MusicTrack;
 class CutsceneRunner;
 class Battle;
 class SaveManager;
@@ -276,6 +277,12 @@ struct GameContext {
 
     /// Plays a sound effect through the shared sound manager.
     void playSound(SoundEffect sfx);
+    /// Plays looping background music through the shared music manager.
+    void playMusic(MusicTrack track);
+    /// Plays a one-shot music cue through the shared music manager.
+    void playMusicOneShot(MusicTrack track);
+    /// Stops the currently playing music track.
+    void stopMusic();
 
     /// Pushes a coordinator request into the shared mailbox.
     void pushRequest(ModeRequest req);

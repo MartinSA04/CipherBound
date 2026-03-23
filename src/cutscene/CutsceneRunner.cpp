@@ -1,5 +1,5 @@
 #include "CutsceneRunner.h"
-#include "../audio/SoundManager.h"
+#include "../app/GameMode.h"
 #include "../common/StringUtils.h"
 #include "../ui/GameUI.h"
 #include "CutsceneLoader.h"
@@ -40,7 +40,10 @@ bool CutsceneRunner::isShowingDialogue() const { return playback.isShowingDialog
 
 const std::string &CutsceneRunner::getId() const { return cutscene.id; }
 
-bool CutsceneRunner::update(World &world, GameUI &ui, bool confirmPressed, SoundManager &sound) {
+bool CutsceneRunner::update(GameContext &ctx, bool confirmPressed) {
+    World &world = ctx.world;
+    GameUI &ui = ctx.ui;
+
     if (playback.isFinished())
         return false;
 
@@ -48,7 +51,7 @@ bool CutsceneRunner::update(World &world, GameUI &ui, bool confirmPressed, Sound
 
     if (playback.isShowingDialogue()) {
         if (ui.updateTypewriter(confirmPressed)) {
-            sound.play(SoundEffect::select, ui.getRenderer().getWindow());
+            ctx.playSound(SoundEffect::select);
             if (!ui.advanceDialogueLine()) {
                 playback.endDialogue();
                 playback.advanceStep();

@@ -1,4 +1,5 @@
 #include "GameMode.h"
+#include "../audio/MusicManager.h"
 #include "../audio/SoundManager.h"
 #include "../battle/Battle.h"
 #include "../state/World.h"
@@ -58,6 +59,14 @@ void GameContext::clearBattle() {
 void GameContext::pushRequest(ModeRequest req) { mailbox.push(std::move(req)); }
 
 void GameContext::playSound(SoundEffect sfx) { sound.play(sfx, ui.getRenderer().getWindow()); }
+
+void GameContext::playMusic(MusicTrack track) { music.play(track, ui.getRenderer().getWindow()); }
+
+void GameContext::playMusicOneShot(MusicTrack track) {
+    music.playOneShot(track, ui.getRenderer().getWindow());
+}
+
+void GameContext::stopMusic() { music.stop(); }
 
 // ── GameMode helpers
 // ───────────────────────────────────────────────────────────

@@ -9,9 +9,9 @@
 #include "CutscenePlayback.h"
 #include <string>
 
+struct GameContext;
 class World;
 class GameUI;
-class SoundManager;
 
 /**
  * @brief Loads, starts, and advances cutscenes against the live world and UI.
@@ -31,7 +31,7 @@ class CutsceneRunner {
     void start();
 
     /// Advances playback by one frame and returns whether it is still running.
-    bool update(World &world, GameUI &ui, bool confirmPressed, SoundManager &sound);
+    bool update(GameContext &ctx, bool confirmPressed);
 
     /// Returns whether playback has completed.
     bool isFinished() const;

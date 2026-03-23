@@ -144,7 +144,7 @@ bool BattleMode::updateProgressionSequence(GameContext &ctx, InputManager &input
                                       ctx.pokedex.getSpecies(event.targetSpeciesId).name + "!";
 
         if (evolutionAnimFrame == 0)
-            ctx.music.play(MusicTrack::evolution, ctx.ui.getRenderer().getWindow());
+            ctx.playMusic(MusicTrack::evolution);
         if (evolutionAnimFrame < evolutionTotalFrames) {
             evolutionAnimFrame++;
             if (!evolutionApplied && evolutionAnimFrame >= evolutionTransformFrame) {
@@ -162,8 +162,7 @@ bool BattleMode::updateProgressionSequence(GameContext &ctx, InputManager &input
             }
 
             if (evolutionAnimFrame == evolutionTotalFrames)
-                ctx.music.playOneShot(MusicTrack::evolutionComplete,
-                                      ctx.ui.getRenderer().getWindow());
+                ctx.playMusicOneShot(MusicTrack::evolutionComplete);
             return true;
         }
 
@@ -252,9 +251,9 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
             MusicTrack victoryTrack = battle.getType() == BattleType::trainer
                                           ? MusicTrack::trainerVictory
                                           : MusicTrack::wildVictory;
-            ctx.music.play(victoryTrack, ctx.ui.getRenderer().getWindow());
+            ctx.playMusic(victoryTrack);
         } else if (bs == BattleState::defeat) {
-            ctx.music.stop();
+            ctx.stopMusic();
         }
 
         if (ctx.ui.updateTypewriter(input.isConfirmPressed())) {
@@ -292,7 +291,7 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
             MusicTrack victoryTrack = battle.getType() == BattleType::trainer
                                           ? MusicTrack::trainerVictory
                                           : MusicTrack::wildVictory;
-            ctx.music.play(victoryTrack, ctx.ui.getRenderer().getWindow());
+            ctx.playMusic(victoryTrack);
         }
 
         Daemon &daemon = battle.getPlayerDaemon();

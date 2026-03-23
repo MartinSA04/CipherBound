@@ -90,7 +90,7 @@ void startNewGame(GameContext &ctx, std::string playerName) {
              "I should see if my schedule has been delivered in the mail."}));
 
     const MusicTrack mapTrack = MusicManager::trackForMap(ctx.world.getCurrentMapId());
-    ctx.music.play(mapTrack, ctx.ui.getRenderer().getWindow());
+    ctx.playMusic(mapTrack);
 }
 
 } // namespace
@@ -129,7 +129,7 @@ void TitleScreenMode::update(GameContext &ctx, InputManager &input) {
                 ctx.pushRequest(ModeRequest::changeState(GameState::overworld));
 
                 const MusicTrack mapTrack = MusicManager::trackForMap(ctx.world.getCurrentMapId());
-                ctx.music.play(mapTrack, ctx.ui.getRenderer().getWindow());
+                ctx.playMusic(mapTrack);
             } else {
                 pendingName.clear();
                 nameKeySelected = 0;

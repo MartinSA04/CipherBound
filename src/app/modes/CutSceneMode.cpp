@@ -4,8 +4,7 @@
 #include "../../ui/InputManager.h"
 
 void CutSceneMode::update(GameContext &ctx, InputManager &input) {
-    bool running =
-        ctx.cutsceneRunner.update(ctx.world, ctx.ui, input.isConfirmPressed(), ctx.sound);
+    bool running = ctx.cutsceneRunner.update(ctx, input.isConfirmPressed());
     if (!running) {
         if (ctx.flow.cutsceneEndRequest.has_value()) {
             ctx.pushRequest(std::move(*ctx.flow.cutsceneEndRequest));

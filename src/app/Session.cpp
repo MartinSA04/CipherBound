@@ -54,7 +54,7 @@ void Session::init() {
     sound.loadAll();
 
     coordinator.switchMode(GameState::titleScreen);
-    music.play(MusicTrack::titleScreen, ui.getRenderer().getWindow());
+    ctx.playMusic(MusicTrack::titleScreen);
 }
 
 // ── Getters

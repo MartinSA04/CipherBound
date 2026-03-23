@@ -106,7 +106,7 @@ void SessionCoordinator::handleRequest(const StartWildBattleRequest &req) {
     ctx.resetBattlePresentation();
     switchToMode(GameState::battleIntro,
                  std::make_unique<BattleIntroMode>(req.speciesId, req.level));
-    ctx.music.play(MusicTrack::wildBattle, ctx.ui.getRenderer().getWindow());
+    ctx.playMusic(MusicTrack::wildBattle);
 }
 
 void SessionCoordinator::handleRequest(const StartTrainerBattleRequest &req) {
@@ -119,7 +119,7 @@ void SessionCoordinator::handleRequest(const StartTrainerBattleRequest &req) {
     }
 
     if (req.includePreBattleDialogue)
-        ctx.music.playOneShot(MusicTrack::trainerEyesMeet, ctx.ui.getRenderer().getWindow());
+        ctx.playMusicOneShot(MusicTrack::trainerEyesMeet);
 
     ctx.flow.cutsceneEndRequest = ModeRequest::trainerBattleIntro(req.npc);
 
@@ -136,7 +136,7 @@ void SessionCoordinator::handleRequest(const StartTrainerBattleRequest &req) {
 void SessionCoordinator::handleRequest(const StartTrainerBattleIntroRequest &req) {
     ctx.resetBattlePresentation();
     switchToMode(GameState::battleIntro, std::make_unique<BattleIntroMode>(req.npc));
-    ctx.music.play(MusicTrack::trainerBattle, ctx.ui.getRenderer().getWindow());
+    ctx.playMusic(MusicTrack::trainerBattle);
 }
 
 void SessionCoordinator::handleRequest(const EndBattleRequest & /*req*/) {
@@ -160,7 +160,7 @@ void SessionCoordinator::handleRequest(const EndBattleRequest & /*req*/) {
     switchMode(GameState::overworld);
 
     MusicTrack mapTrack = MusicManager::trackForMap(ctx.world.getCurrentMapId());
-    ctx.music.play(mapTrack, ctx.ui.getRenderer().getWindow());
+    ctx.playMusic(mapTrack);
 }
 
 void SessionCoordinator::handleRequest(const TransitionToMapRequest &req) {

@@ -42,7 +42,7 @@ void TransitionMode::completeFadeOut(GameContext &ctx) {
     phaseDuration = ctx.world.getPlayer().getMoveDelay();
 
     MusicTrack mapTrack = MusicManager::trackForMap(ctx.world.getCurrentMapId());
-    ctx.music.play(mapTrack, ctx.ui.getRenderer().getWindow());
+    ctx.playMusic(mapTrack);
 }
 
 void TransitionMode::update(GameContext &ctx, InputManager & /*input*/) {

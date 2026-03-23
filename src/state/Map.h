@@ -35,17 +35,17 @@ struct WildEncounterSlot {
 
 /// Map transition trigger located on one tile.
 struct WarpPoint {
-    Position from;             ///< Source tile that triggers the warp.
-    std::string targetMapId;   ///< Destination map id.
-    Position targetPosition;   ///< Spawn tile on the destination map.
+    Position from;           ///< Source tile that triggers the warp.
+    std::string targetMapId; ///< Destination map id.
+    Position targetPosition; ///< Spawn tile on the destination map.
 };
 
 /// Runtime tile data used by collision, occupancy, and rendering.
 struct Tile {
-    Position position;   ///< Tile coordinate inside the map grid.
-    TileType type;       ///< Semantic tile type.
-    bool isOccupied;     ///< Whether an entity currently occupies the tile.
-    bool hasCollision;   ///< Whether the tile blocks movement.
+    Position position; ///< Tile coordinate inside the map grid.
+    TileType type;     ///< Semantic tile type.
+    bool isOccupied;   ///< Whether an entity currently occupies the tile.
+    bool hasCollision; ///< Whether the tile blocks movement.
 };
 
 /**

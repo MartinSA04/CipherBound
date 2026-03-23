@@ -1,9 +1,9 @@
 #include "DialogueChoiceMode.h"
 #include "../../game_data/Pokedex.h"
 #include "../../state/World.h"
+#include "../../story/StoryManager.h"
 #include "../../ui/GameUI.h"
 #include "../../ui/InputManager.h"
-#include "../../story/StoryManager.h"
 
 DialogueChoiceMode::DialogueChoiceMode(const std::vector<std::string> &options,
                                        const std::string &context, GameState returnState)

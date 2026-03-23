@@ -74,8 +74,8 @@ class Renderer {
     void markTextureFailed(const std::string &id, const std::string &operation,
                            const std::string &message);
 
-    TDT4102::AnimationWindow window; ///< Backing render window.
-    std::unordered_map<std::string, TDT4102::Image> textures; ///< Loaded texture cache.
+    TDT4102::AnimationWindow window;                                     ///< Backing render window.
+    std::unordered_map<std::string, TDT4102::Image> textures;            ///< Loaded texture cache.
     std::unordered_map<std::string, std::filesystem::path> texturePaths; ///< Texture source paths.
     std::unordered_set<std::string> failedTextures; ///< Texture ids that failed to load.
 };

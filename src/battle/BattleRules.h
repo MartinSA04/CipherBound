@@ -6,10 +6,10 @@
 
 #pragma once
 
-#include "BattleTypes.h"
 #include "../game_data/Move.h"
 #include "../game_data/Species.h"
 #include "../state/Daemon.h"
+#include "BattleTypes.h"
 
 /**
  * @brief Deterministic battle rule calculations.

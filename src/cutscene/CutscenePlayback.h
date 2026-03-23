@@ -13,8 +13,8 @@
 
 /// Queued movement command waiting for the world to finish animating.
 struct CutscenePendingMove {
-    std::string targetId;   ///< Target entity id, or `player`.
-    Position destination;   ///< Destination tile for the queued move.
+    std::string targetId; ///< Target entity id, or `player`.
+    Position destination; ///< Destination tile for the queued move.
 };
 
 /**

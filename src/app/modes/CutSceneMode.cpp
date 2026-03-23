@@ -1,7 +1,7 @@
 #include "CutSceneMode.h"
+#include "../../cutscene/CutsceneRunner.h"
 #include "../../ui/GameUI.h"
 #include "../../ui/InputManager.h"
-#include "../../cutscene/CutsceneRunner.h"
 
 void CutSceneMode::update(GameContext &ctx, InputManager &input) {
     bool running =

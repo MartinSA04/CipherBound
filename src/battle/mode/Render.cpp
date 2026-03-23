@@ -1,6 +1,6 @@
+#include "../../ui/GameUI.h"
 #include "../Battle.h"
 #include "../ui/BattlePresentationState.h"
-#include "../../ui/GameUI.h"
 #include "BattleMode.h"
 #include <cmath>
 
@@ -51,10 +51,9 @@ void drawEvolutionScene(GameContext &ctx, int sourceSpeciesId, int targetSpecies
     const Species &sourceSpecies = ctx.pokedex.getSpecies(sourceSpeciesId);
     const Species &targetSpecies = ctx.pokedex.getSpecies(targetSpeciesId);
     const bool flashPhase = ((evolutionAnimFrame / 6) % 2) == 0;
-    const bool showTarget = evolutionApplied ||
-                            (evolutionAnimFrame > introFrame &&
-                             evolutionAnimFrame < transformFrame &&
-                             !flashPhase);
+    const bool showTarget =
+        evolutionApplied ||
+        (evolutionAnimFrame > introFrame && evolutionAnimFrame < transformFrame && !flashPhase);
     const int scaleBonus = 1 + (evolutionAnimFrame / 10) % 2;
     drawEvolutionSprite(ui, showTarget ? targetSpecies : sourceSpecies, centerX, centerY, scale,
                         scaleBonus);
@@ -79,8 +78,8 @@ void drawEvolutionScene(GameContext &ctx, int sourceSpeciesId, int targetSpecies
     } else {
         text = targetSpecies.name + " is taking shape!";
     }
-    font.drawTextPartial(renderer, text, text.size(), 18 * scale, panelY + 18 * scale,
-                         scale - 1, 1, WINDOW_WIDTH - 36 * scale);
+    font.drawTextPartial(renderer, text, text.size(), 18 * scale, panelY + 18 * scale, scale - 1, 1,
+                         WINDOW_WIDTH - 36 * scale);
 }
 
 } // namespace

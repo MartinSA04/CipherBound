@@ -7,8 +7,8 @@ int main() {
     ModeRequest enterBattle = ModeRequest::enterBattleMode();
     assert(std::holds_alternative<EnterBattleModeRequest>(enterBattle.payload));
 
-    ModeRequest dialogue = ModeRequest::dialogue("Cipher", {"Line 1", "Line 2"}, trainer,
-                                                 GameState::menu);
+    ModeRequest dialogue =
+        ModeRequest::dialogue("Cipher", {"Line 1", "Line 2"}, trainer, GameState::menu);
     assert(std::holds_alternative<StartDialogueRequest>(dialogue.payload));
     const auto &dialoguePayload = std::get<StartDialogueRequest>(dialogue.payload);
     assert(dialoguePayload.speaker == "Cipher");

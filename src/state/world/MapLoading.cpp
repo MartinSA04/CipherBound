@@ -89,7 +89,8 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
     if (!definition.backgroundImageOverlay.empty())
         map.setBackgroundImageOverlay(definition.backgroundImageOverlay);
 
-    for (int y = 0; y < definition.height && y < static_cast<int>(definition.tileRows.size()); ++y) {
+    for (int y = 0; y < definition.height && y < static_cast<int>(definition.tileRows.size());
+         ++y) {
         const std::string &row = definition.tileRows[static_cast<std::size_t>(y)];
         for (int x = 0; x < definition.width && x < static_cast<int>(row.size()); ++x) {
             TileType type = charToTileType(row[static_cast<std::size_t>(x)]);
@@ -113,8 +114,9 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
     addMap(definition.id, std::move(map));
 
     for (const auto &npcDefinition : definition.npcs) {
-        auto npc = std::make_unique<NPC>(npcDefinition.id, npcDefinition.name, npcDefinition.position,
-                                         npcDefinition.type, npcDefinition.spriteType);
+        auto npc =
+            std::make_unique<NPC>(npcDefinition.id, npcDefinition.name, npcDefinition.position,
+                                  npcDefinition.type, npcDefinition.spriteType);
         npc->setFacing(npcDefinition.facing);
         npc->setSightRange(npcDefinition.sightRange);
 
@@ -138,8 +140,7 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
             setDefaultRespawnPoint(definition.id, *definition.playerSpawn, player.getFacing());
         } else {
             std::cerr << "MapLoading(" << path.string()
-                      << "): ignoring additional player_spawn for map '" << definition.id
-                      << "'\n";
+                      << "): ignoring additional player_spawn for map '" << definition.id << "'\n";
         }
     }
 

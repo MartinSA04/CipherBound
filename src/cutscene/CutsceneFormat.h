@@ -20,7 +20,7 @@ namespace CutsceneFormat {
 
 /// Result of parsing a `.cutscene` file.
 struct ParseResult {
-    Cutscene cutscene;              ///< Parsed cutscene payload.
+    Cutscene cutscene;                 ///< Parsed cutscene payload.
     std::vector<std::string> warnings; ///< Non-fatal parse warnings.
 
     /// Returns whether the cutscene has the required header information.

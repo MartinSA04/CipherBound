@@ -78,15 +78,16 @@ Cutscene build(const NPC &trainer, const Player &player, bool includePreBattleDi
     Cutscene cutscene;
     cutscene.id = "trainer_approach_" + trainer.getId();
     cutscene.steps.push_back(makeFaceStep(trainer.getId(), approachDirection));
-    
+
     if (trainer.getPosition() != destination) {
         cutscene.steps.push_back(makeMoveStep(trainer.getId(), destination));
         cutscene.steps.push_back(makeSyncStep());
     }
-    
+
     cutscene.steps.push_back(makeFaceStep("player", opposite(approachDirection)));
     if (includePreBattleDialogue) {
-        const std::vector<std::string> &preBattleLines = trainer.getDialogueLines(player.getFlags());
+        const std::vector<std::string> &preBattleLines =
+            trainer.getDialogueLines(player.getFlags());
         if (!preBattleLines.empty())
             cutscene.steps.push_back(makeSayStep(trainer.getName(), preBattleLines));
     }

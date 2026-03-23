@@ -19,7 +19,7 @@ StoryAction StoryManager::onDialogueEnd(NPC *npc, World &world) {
     }
 
     // Intro mailbox
-    if (npc->getId()=="pallet_mailbox")
+    if (npc->getId() == "pallet_mailbox")
         world.getPlayer().setFlag("read_mail");
 
     // Default: return to previous state
@@ -38,9 +38,10 @@ StoryAction StoryManager::onChoiceSelected(const std::string &context, int choic
         world.getPlayer().setFlag("has_starter");
 
         // Show confirmation dialogue
-        return StoryAction::showDialogue("Prof. Bart Iver", {"So you chose " + species.name + "!",
-                                                             "Take good care of it.",
-                                                             "Go to the first faculty and retrieve what's mine.", "I promise you that everything will be explained."});
+        return StoryAction::showDialogue(
+            "Prof. Bart Iver", {"So you chose " + species.name + "!", "Take good care of it.",
+                                "Go to the first faculty and retrieve what's mine.",
+                                "I promise you that everything will be explained."});
     }
 
     // Default: return to previous state
@@ -49,22 +50,24 @@ StoryAction StoryManager::onChoiceSelected(const std::string &context, int choic
 
 StoryAction StoryManager::checkWarp(const WarpPoint &warp, Player &player) {
 
-    if (warp.targetMapId == "route_1"){
+    if (warp.targetMapId == "route_1") {
         if (!player.hasFlag("read_mail")) {
-            return StoryAction::blockWarp({"I need to get my schedule in the mail first.", "I won't know where to go without it."});
+            return StoryAction::blockWarp({"I need to get my schedule in the mail first.",
+                                           "I won't know where to go without it."});
         }
-    
+
         if (!player.hasFlag("bart_iver_intro_done")) {
-            return StoryAction::blockWarp({"I should go see what that guy wants first.", "It might be important."});
+            return StoryAction::blockWarp(
+                {"I should go see what that guy wants first.", "It might be important."});
         }
 
         if (!player.hasFlag("has_starter")) {
             return StoryAction::blockWarp({"I need to pick my Deamon first."});
         }
-    } 
+    }
 
-    if (warp.targetMapId == "bart_iver_lab"){
-        if (!player.hasFlag("read_mail")){
+    if (warp.targetMapId == "bart_iver_lab") {
+        if (!player.hasFlag("read_mail")) {
             return StoryAction::blockWarp({"I shouldn't just go into someones lab."});
         }
     }

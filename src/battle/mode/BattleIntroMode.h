@@ -22,7 +22,7 @@ class BattleIntroMode : public GameMode {
     void render(GameContext &ctx) override;
 
   private:
-    int speciesId{0};   ///< Wild species id for wild battles.
-    int level{0};       ///< Wild level for wild battles.
+    int speciesId{0};      ///< Wild species id for wild battles.
+    int level{0};          ///< Wild level for wild battles.
     NPC *trainer{nullptr}; ///< Non-owning trainer pointer for trainer battles.
 };

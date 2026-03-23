@@ -37,13 +37,13 @@ class ShopMode : public GameMode {
     int currentPurchaseTotal(const Pokedex &pokedex) const;
     const ItemData &selectedItem(const Pokedex &pokedex) const;
 
-    std::string shopTitle;          ///< Shop UI title.
-    std::string shopkeeperName;     ///< Shopkeeper display name.
-    std::vector<int> itemIds;       ///< Sellable item ids.
-    Phase phase{Phase::browsing};   ///< Current shop phase.
-    int selected{0};                ///< Current item selection.
-    int purchaseQuantity{1};        ///< Quantity selected for purchase.
-    int confirmSelected{0};         ///< Confirmation prompt selection.
-    std::string message;            ///< Active status/purchase message.
-    bool messageActive{false};      ///< Whether a status message is currently shown.
+    std::string shopTitle;        ///< Shop UI title.
+    std::string shopkeeperName;   ///< Shopkeeper display name.
+    std::vector<int> itemIds;     ///< Sellable item ids.
+    Phase phase{Phase::browsing}; ///< Current shop phase.
+    int selected{0};              ///< Current item selection.
+    int purchaseQuantity{1};      ///< Quantity selected for purchase.
+    int confirmSelected{0};       ///< Confirmation prompt selection.
+    std::string message;          ///< Active status/purchase message.
+    bool messageActive{false};    ///< Whether a status message is currently shown.
 };

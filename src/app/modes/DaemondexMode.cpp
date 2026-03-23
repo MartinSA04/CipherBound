@@ -1,11 +1,11 @@
 #include "DaemondexMode.h"
+#include "../../common/StringUtils.h"
 #include "../../game_data/Pokedex.h"
 #include "../../state/player/Player.h"
 #include "../../ui/GameUI.h"
 #include "../../ui/InputManager.h"
 #include "../../ui/Renderer.h"
 #include "../../ui/SpriteFont.h"
-#include "../../common/StringUtils.h"
 
 void DaemondexMode::update(GameContext &ctx, InputManager &input) {
     int totalEntries = ctx.pokedex.speciesCount();

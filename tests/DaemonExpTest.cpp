@@ -19,9 +19,7 @@ Species makeSpecies(int id, GrowthRate growthRate) {
     return species;
 }
 
-std::array<MoveSlot, 4> emptyMoves() {
-    return {{{-1, 0, 0}, {-1, 0, 0}, {-1, 0, 0}, {-1, 0, 0}}};
-}
+std::array<MoveSlot, 4> emptyMoves() { return {{{-1, 0, 0}, {-1, 0, 0}, {-1, 0, 0}, {-1, 0, 0}}}; }
 
 std::array<MoveSlot, 4> fullMoves() {
     return {{{1, 35, 35}, {2, 35, 35}, {3, 35, 35}, {4, 35, 35}}};
@@ -42,8 +40,7 @@ int main() {
     assert(mediumSlow.getExpNeeded() == 44);
 
     Daemon legacyProgress(makeSpecies(8, GrowthRate::mediumFast), 5, 10, 20, "Legacy",
-                          StatusEffect::none, {0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0},
-                          emptyMoves());
+                          StatusEffect::none, {0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0}, emptyMoves());
     assert(legacyProgress.getLevel() == 5);
     assert(legacyProgress.getExp() == 135);
     assert(legacyProgress.getExpProgress() == 10);
@@ -103,8 +100,7 @@ int main() {
     Species statSpecies = makeSpecies(12, GrowthRate::mediumFast);
     const int level50Exp = Daemon(statSpecies, 50).getExp();
     Daemon adamant(statSpecies, 50, level50Exp, 120, "Adamant", StatusEffect::none,
-                   {31, 31, 31, 31, 31, 31}, {0, 252, 0, 0, 0, 4}, emptyMoves(),
-                   Nature::adamant);
+                   {31, 31, 31, 31, 31, 31}, {0, 252, 0, 0, 0, 4}, emptyMoves(), Nature::adamant);
     assert(adamant.getMaxHP() == 120);
     assert(adamant.getStat(1) == 111);
     assert(adamant.getStat(2) == 69);
@@ -171,8 +167,7 @@ int main() {
     assert(evGain.getStat(1) == 70);
 
     Daemon cappedEVs(statSpecies, 50, level50Exp, 120, "Capped", StatusEffect::none,
-                     {31, 31, 31, 31, 31, 31}, {252, 252, 0, 0, 0, 0}, emptyMoves(),
-                     Nature::hardy);
+                     {31, 31, 31, 31, 31, 31}, {252, 252, 0, 0, 0, 0}, emptyMoves(), Nature::hardy);
     const BaseStats cappedApplied = cappedEVs.gainEffortValues({8, 8, 8, 8, 8, 8});
     assert(cappedApplied.hp == 3);
     assert(cappedApplied.attack == 3);

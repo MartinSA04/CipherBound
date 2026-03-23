@@ -35,7 +35,8 @@ int main() {
 
     assert(world.getCurrentMapId() == "player_house_2f");
     assert((world.getPlayer().getPosition() == Position{2, 3}));
-    assert(world.getMap(world.getCurrentMapId()).getTile(world.getPlayer().getPosition()).isOccupied);
+    assert(
+        world.getMap(world.getCurrentMapId()).getTile(world.getPlayer().getPosition()).isOccupied);
 
     const WarpPoint *playerHouseWarp = world.getMap("pallet_town").getWarp({6, 7});
     assert(playerHouseWarp != nullptr);

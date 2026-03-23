@@ -19,9 +19,9 @@ class PCBoxMode : public GameMode {
     void onEnter(GameContext &ctx) override;
 
   private:
-    int selected{0};          ///< Current selection index.
-    bool viewingParty{true};  ///< Whether the party column is active.
+    int selected{0};            ///< Current selection index.
+    bool viewingParty{true};    ///< Whether the party column is active.
     bool showingMessage{false}; ///< Whether a transient message is shown.
-    std::string message;      ///< Active transient message text.
-    bool lrHeld{false};       ///< Whether left/right is currently held for box switching.
+    std::string message;        ///< Active transient message text.
+    bool lrHeld{false};         ///< Whether left/right is currently held for box switching.
 };

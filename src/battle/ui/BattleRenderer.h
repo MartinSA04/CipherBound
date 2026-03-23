@@ -19,9 +19,8 @@ class BattleRenderer {
     void drawBattleMenu(GameUI &ui, int menuSelected) const;
     void drawMoveSelectScreen(GameUI &ui, const Daemon &daemon, const Pokedex &pokedex,
                               int moveSelected) const;
-    void drawCaptureScene(GameUI &ui, Battle &battle,
-                          const BattlePresentationState &presentation, int captureAnimFrame,
-                          bool captureAnimDone) const;
+    void drawCaptureScene(GameUI &ui, Battle &battle, const BattlePresentationState &presentation,
+                          int captureAnimFrame, bool captureAnimDone) const;
     void drawPlayerSwitchScene(GameUI &ui, Battle &battle,
                                const BattlePresentationState &presentation,
                                int battleAnimFrame) const;

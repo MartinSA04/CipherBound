@@ -1,8 +1,8 @@
-#include "../OverworldMode.h"
 #include "../../../state/World.h"
 #include "../../../state/player/Player.h"
-#include "../../../ui/InputManager.h"
 #include "../../../story/StoryManager.h"
+#include "../../../ui/InputManager.h"
+#include "../OverworldMode.h"
 
 void OverworldMode::handlePlayerMove(GameContext &ctx, InputManager &input) {
     Player &player = ctx.world.getPlayer();

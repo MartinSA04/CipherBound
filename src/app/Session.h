@@ -48,15 +48,15 @@ class Session {
 
   private:
     World world;                   ///< Owned world model.
-    Pokedex pokedex;              ///< Loaded game-data tables.
-    GameUI ui;                    ///< Owned UI facade.
-    SaveManager saveManager;      ///< Save/load orchestration.
-    StoryManager story;           ///< Story progression logic.
-    MusicManager music;           ///< Background music playback.
-    SoundManager sound;           ///< Sound effect playback.
+    Pokedex pokedex;               ///< Loaded game-data tables.
+    GameUI ui;                     ///< Owned UI facade.
+    SaveManager saveManager;       ///< Save/load orchestration.
+    StoryManager story;            ///< Story progression logic.
+    MusicManager music;            ///< Background music playback.
+    SoundManager sound;            ///< Sound effect playback.
     CutsceneRunner cutsceneRunner; ///< Scripted cutscene runner.
 
-    GameContext ctx;              ///< Shared mode context referencing owned subsystems.
+    GameContext ctx;                ///< Shared mode context referencing owned subsystems.
     SessionCoordinator coordinator; ///< Active mode coordinator.
 
     static constexpr int targetFPS = 60;

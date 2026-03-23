@@ -1,8 +1,8 @@
 #include "DialogueMode.h"
 #include "../../audio/SoundManager.h"
+#include "../../story/StoryManager.h"
 #include "../../ui/GameUI.h"
 #include "../../ui/InputManager.h"
-#include "../../story/StoryManager.h"
 
 DialogueMode::DialogueMode(const std::string &speaker, const std::vector<std::string> &lines,
                            NPC *npc, GameState returnState)

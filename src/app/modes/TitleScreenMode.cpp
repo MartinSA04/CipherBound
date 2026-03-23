@@ -21,11 +21,8 @@ constexpr int maxPlayerNameLength = 12;
 constexpr int nameGridColumns = 6;
 
 constexpr std::array<std::string_view, 30> nameKeys{
-    "A", "B", "C", "D", "E", "F",
-    "G", "H", "I", "J", "K", "L",
-    "M", "N", "O", "P", "Q", "R",
-    "S", "T", "U", "V", "W", "X",
-    "Y", "Z", "SPACE", "DEL", "BACK", "DONE",
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",     "M",   "N",    "O",
+    "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "SPACE", "DEL", "BACK", "DONE",
 };
 
 void moveNameSelection(int &selected, const InputManager &input) {
@@ -88,8 +85,7 @@ void startNewGame(GameContext &ctx, std::string playerName) {
 
     ctx.pushRequest(ModeRequest::dialogue(
         "", {"What a good night sleep!", "Its finally time to start my degree!",
-             "I will pursue my fathers great dream.",
-             "To understand what Daemons actually are!",
+             "I will pursue my fathers great dream.", "To understand what Daemons actually are!",
              "If only he would be alive to see it...",
              "I should see if my schedule has been delivered in the mail."}));
 
@@ -297,14 +293,15 @@ void TitleScreenMode::render(GameContext &ctx) {
 
         spriteFont.drawText(renderer, "CIPHERBOUND", WINDOW_WIDTH / 2 - 11 * 8 * PIXEL_SCALE / 2,
                             40, PIXEL_SCALE, 1);
-        renderer.drawText("Choose a name", WINDOW_WIDTH / 2 - 58, 90,
-                          TDT4102::Color::light_gray, 14);
+        renderer.drawText("Choose a name", WINDOW_WIDTH / 2 - 58, 90, TDT4102::Color::light_gray,
+                          14);
 
         const int nameBoxW = 520;
         const int nameBoxH = 72;
         const int nameBoxX = (WINDOW_WIDTH - nameBoxW) / 2;
         const int nameBoxY = 120;
-        renderer.drawFilledRect(nameBoxX, nameBoxY, nameBoxW, nameBoxH, TDT4102::Color{228, 236, 255});
+        renderer.drawFilledRect(nameBoxX, nameBoxY, nameBoxW, nameBoxH,
+                                TDT4102::Color{228, 236, 255});
         renderer.drawRect(nameBoxX, nameBoxY, nameBoxW, nameBoxH, TDT4102::Color::transparent,
                           TDT4102::Color{24, 32, 74});
         renderer.drawText("Name", nameBoxX + 18, nameBoxY + 12, TDT4102::Color{20, 30, 70}, 16);
@@ -349,11 +346,11 @@ void TitleScreenMode::render(GameContext &ctx) {
         }
 
         renderer.drawText("Arrows move. Z/Enter selects. X/Esc deletes or goes back.",
-                          WINDOW_WIDTH / 2 - 170, WINDOW_HEIGHT - 58,
-                          TDT4102::Color{190, 196, 220}, 13);
+                          WINDOW_WIDTH / 2 - 170, WINDOW_HEIGHT - 58, TDT4102::Color{190, 196, 220},
+                          13);
         renderer.drawText("Use BACK to return to the save slots and DONE to start.",
-                          WINDOW_WIDTH / 2 - 175, WINDOW_HEIGHT - 34,
-                          TDT4102::Color{120, 130, 175}, 12);
+                          WINDOW_WIDTH / 2 - 175, WINDOW_HEIGHT - 34, TDT4102::Color{120, 130, 175},
+                          12);
         break;
     }
     }

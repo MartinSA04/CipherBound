@@ -166,9 +166,9 @@ void ShopMode::render(GameContext &ctx) {
 
     if (phase == Phase::confirmingPurchase) {
         const ItemData &item = selectedItem(ctx.pokedex);
-        const std::string prompt =
-            "Buy " + item.name + " x" + std::to_string(purchaseQuantity) + " for $" +
-            std::to_string(currentPurchaseTotal(ctx.pokedex)) + "?";
+        const std::string prompt = "Buy " + item.name + " x" + std::to_string(purchaseQuantity) +
+                                   " for $" + std::to_string(currentPurchaseTotal(ctx.pokedex)) +
+                                   "?";
         ctx.ui.setDialogueText(prompt);
         ctx.ui.revealAllText();
         ctx.ui.drawDialogueBox(shopkeeperName, prompt);

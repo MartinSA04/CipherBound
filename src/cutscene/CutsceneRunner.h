@@ -5,8 +5,8 @@
  */
 
 #pragma once
-#include "CutscenePlayback.h"
 #include "../game_data/Cutscene.h"
+#include "CutscenePlayback.h"
 #include <string>
 
 class World;

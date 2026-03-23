@@ -2,10 +2,10 @@
 #include "../../audio/MusicManager.h"
 #include "../../state/World.h"
 #include "../../state/player/Player.h"
+#include "../../story/StoryManager.h"
 #include "../../ui/GameUI.h"
 #include "../../ui/InputManager.h"
 #include "../../ui/Renderer.h"
-#include "../../story/StoryManager.h"
 #include <algorithm>
 
 TransitionMode::TransitionMode(const std::string &targetMapId, const Position &targetSpawn)

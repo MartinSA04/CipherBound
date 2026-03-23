@@ -52,8 +52,8 @@ enum class Nature {
 
 /// Detailed information about one resolved level-up.
 struct LevelUpResult {
-    int oldLevel;       ///< Level before leveling up.
-    int newLevel;       ///< Level after leveling up.
+    int oldLevel;        ///< Level before leveling up.
+    int newLevel;        ///< Level after leveling up.
     BaseStats statGains; ///< Per-stat increases from the level-up.
 };
 

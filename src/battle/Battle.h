@@ -5,12 +5,12 @@
  */
 
 #pragma once
-#include "BattleEventQueue.h"
-#include "BattleTypes.h"
 #include "../game_data/Pokedex.h"
 #include "../state/Daemon.h"
 #include "../state/NPC.h"
 #include "../state/player/Player.h"
+#include "BattleEventQueue.h"
+#include "BattleTypes.h"
 #include <memory>
 #include <random>
 #include <vector>
@@ -118,15 +118,15 @@ class Battle {
 
     Player &player;
     std::unique_ptr<Daemon> opponentDaemon = nullptr;
-    NPC *opponent = nullptr;       ///< Non-owning trainer pointer for trainer battles.
-    BattleType type;               ///< Wild or trainer battle classification.
-    BattleState state;             ///< Current state of the battle state machine.
-    BattleState pendingState;      ///< State entered after the current message queue drains.
-    int introPhase{0};             ///< Current intro animation phase.
-    bool introComplete{false};     ///< Whether intro animation has fully completed.
-    int captureShakes{0};          ///< Number of ball shakes queued for capture animation.
-    bool captureSuccess{false};    ///< Whether the queued capture attempt succeeds.
-    bool attackAnimIsPlayer{true}; ///< Whether the active attack animation is from the player.
+    NPC *opponent = nullptr;        ///< Non-owning trainer pointer for trainer battles.
+    BattleType type;                ///< Wild or trainer battle classification.
+    BattleState state;              ///< Current state of the battle state machine.
+    BattleState pendingState;       ///< State entered after the current message queue drains.
+    int introPhase{0};              ///< Current intro animation phase.
+    bool introComplete{false};      ///< Whether intro animation has fully completed.
+    int captureShakes{0};           ///< Number of ball shakes queued for capture animation.
+    bool captureSuccess{false};     ///< Whether the queued capture attempt succeeds.
+    bool attackAnimIsPlayer{true};  ///< Whether the active attack animation is from the player.
     bool switchAnimIsRecall{false}; ///< Whether the active switch animation is a recall phase.
 
     int playerMoveSlot;
@@ -141,5 +141,5 @@ class Battle {
     const Pokedex &pokedex;
     BattleEventQueue eventQueue;
     std::vector<bool> playerParticipants;
-    std::string emptyMessage;      ///< Empty string returned when no message is available.
+    std::string emptyMessage; ///< Empty string returned when no message is available.
 };

@@ -34,8 +34,8 @@ struct CutsceneStep {
 
     Direction direction{Direction::down}; ///< Direction for `walk` and `face`.
 
-    std::string speaker;              ///< Speaker name for `say`.
-    std::vector<std::string> lines;   ///< Dialogue lines for `say`.
+    std::string speaker;            ///< Speaker name for `say`.
+    std::vector<std::string> lines; ///< Dialogue lines for `say`.
 
     int frames{0}; ///< Frame count for `wait`.
 
@@ -44,6 +44,6 @@ struct CutsceneStep {
 
 /// A complete parsed cutscene loaded from disk or created programmatically.
 struct Cutscene {
-    std::string id;                 ///< Stable cutscene id from the file header.
+    std::string id;                  ///< Stable cutscene id from the file header.
     std::vector<CutsceneStep> steps; ///< Ordered steps executed by the runner.
 };

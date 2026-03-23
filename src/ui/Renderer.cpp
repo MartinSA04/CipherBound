@@ -4,9 +4,9 @@
 
 Renderer::Renderer() : window{50, 50, WINDOW_WIDTH, WINDOW_HEIGHT, "CipherBound"} {
     window.setBackgroundColor(TDT4102::Color::black);
-    #ifndef __EMSCRIPTEN__
-        window.hide_cursor();
-    #endif
+#ifndef __EMSCRIPTEN__
+    window.hide_cursor();
+#endif
 }
 
 TDT4102::AnimationWindow &Renderer::getWindow() { return window; }
@@ -92,10 +92,9 @@ void Renderer::drawSpriteRegion(const std::string &textureId, int srcX, int srcY
                                 int srcH, int dstX, int dstY, int dstW, int dstH, bool flipH) {
     if (hasTexture(textureId)) {
         try {
-            window.draw_image_region({dstX, dstY}, textures.at(textureId), dstW, dstH,
-                                     {srcX, srcY}, srcW, srcH,
-                                     flipH ? TDT4102::FlipImage::HORIZONTAL
-                                           : TDT4102::FlipImage::NONE);
+            window.draw_image_region(
+                {dstX, dstY}, textures.at(textureId), dstW, dstH, {srcX, srcY}, srcW, srcH,
+                flipH ? TDT4102::FlipImage::HORIZONTAL : TDT4102::FlipImage::NONE);
             return;
         } catch (const std::exception &e) {
             markTextureFailed(textureId, "draw region", e.what());

@@ -74,8 +74,8 @@ class GameUI {
     void drawPlayerStatsScreen(const Player &player);
     /// Draws the shop screen UI.
     void drawShopScreen(const Player &player, const Pokedex &pokedex,
-                        const std::vector<int> &itemIds, int selected,
-                        const std::string &title, const std::string &footerText);
+                        const std::vector<int> &itemIds, int selected, const std::string &title,
+                        const std::string &footerText);
     /// Draws the daemon summary screen.
     void drawSummaryScreen(const Daemon &daemon, const Pokedex &pokedex, int page = 0,
                            int selectedMove = 0);
@@ -137,11 +137,11 @@ class GameUI {
     void drawNarrowTextBar(int x, int y, int srcW, int scale = PIXEL_SCALE);
 
   private:
-    Renderer renderer;             ///< Owned low-level renderer.
-    InputManager input;            ///< Owned input manager.
+    Renderer renderer;                   ///< Owned low-level renderer.
+    InputManager input;                  ///< Owned input manager.
     OverworldRenderer overworldRenderer; ///< Overworld rendering helper.
-    SpriteFont spriteFont;         ///< Bitmap font renderer.
-    ScreenType currentScreen;      ///< Active screen family.
+    SpriteFont spriteFont;               ///< Bitmap font renderer.
+    ScreenType currentScreen;            ///< Active screen family.
 
     bool battleAssetsLoaded{false};
 

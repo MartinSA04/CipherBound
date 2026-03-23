@@ -1,6 +1,6 @@
 #include "CutsceneLoader.h"
-#include "CutsceneFormat.h"
 #include "../common/FilePaths.h"
+#include "CutsceneFormat.h"
 #include <fstream>
 
 namespace CutsceneLoader {

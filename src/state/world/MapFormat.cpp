@@ -38,9 +38,8 @@ bool isDialogueFlagPrefix(std::string_view prefix) {
         return false;
 
     for (const char ch : prefix) {
-        const bool isIdentifierChar =
-            (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') ||
-            ch == '_';
+        const bool isIdentifierChar = (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
+                                      (ch >= '0' && ch <= '9') || ch == '_';
         if (!isIdentifierChar)
             return false;
     }
@@ -58,8 +57,7 @@ std::optional<WarpPoint> parseWarp(std::string_view line) {
     if (!from.has_value() || !target.has_value())
         return std::nullopt;
 
-    return WarpPoint{{(*from)[0], (*from)[1]}, std::string(parts[2]),
-                     {(*target)[0], (*target)[1]}};
+    return WarpPoint{{(*from)[0], (*from)[1]}, std::string(parts[2]), {(*target)[0], (*target)[1]}};
 }
 
 std::optional<WildEncounterSlot> parseEncounter(std::string_view line) {
@@ -127,7 +125,8 @@ std::optional<NPCDefinition> parseNPC(std::string_view line) {
 
     const auto coords = TextParse::parseFixedIntFields<2>(parts, 3);
     const auto sightRange = TextParse::parseInt(parts[6]);
-    if (!coords.has_value() || !sightRange.has_value() || parts[0].find('@') != std::string_view::npos)
+    if (!coords.has_value() || !sightRange.has_value() ||
+        parts[0].find('@') != std::string_view::npos)
         return std::nullopt;
 
     NPCDefinition npc;

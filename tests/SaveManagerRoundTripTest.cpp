@@ -9,9 +9,7 @@
 
 namespace {
 
-std::array<MoveSlot, 4> emptyMoves() {
-    return {{{-1, 0, 0}, {-1, 0, 0}, {-1, 0, 0}, {-1, 0, 0}}};
-}
+std::array<MoveSlot, 4> emptyMoves() { return {{{-1, 0, 0}, {-1, 0, 0}, {-1, 0, 0}, {-1, 0, 0}}}; }
 
 Daemon makeDaemon(const Pokedex &pokedex, int speciesId, int level, Nature nature = Nature::hardy,
                   const BaseStats &ivs = {0, 0, 0, 0, 0, 0},

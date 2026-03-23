@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CutscenePlayback.h"
 #include "../state/World.h"
+#include "CutscenePlayback.h"
 #include <optional>
 #include <string_view>
 #include <vector>

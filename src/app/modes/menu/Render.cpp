@@ -1,7 +1,7 @@
-#include "../MenuMode.h"
 #include "../../../ui/GameUI.h"
 #include "../../../ui/Renderer.h"
 #include "../../../ui/SpriteFont.h"
+#include "../MenuMode.h"
 
 void MenuMode::render(GameContext &ctx) {
     renderOverworld(ctx);

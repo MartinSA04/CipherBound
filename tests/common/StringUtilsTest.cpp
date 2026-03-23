@@ -21,11 +21,9 @@ int main() {
 
     assert(StringUtils::replaceAll("alpha beta alpha", "alpha", "gamma") == "gamma beta gamma");
     assert(StringUtils::substitutePlayerName("Hello, {player}!", "Ada") == "Hello, Ada!");
-    assert(StringUtils::substitutePlayerName("Hello, {player_name}!", "Ada") ==
-           "Hello, Ada!");
+    assert(StringUtils::substitutePlayerName("Hello, {player_name}!", "Ada") == "Hello, Ada!");
     assert((StringUtils::substitutePlayerName(std::vector<std::string>{"{player}", "{player_name}"},
-                                              "Ada") ==
-            std::vector<std::string>{"Ada", "Ada"}));
+                                              "Ada") == std::vector<std::string>{"Ada", "Ada"}));
 
     assert(StringUtils::parseDirection("up") == Direction::up);
     assert(StringUtils::parseDirection("right") == Direction::right);

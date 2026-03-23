@@ -12,7 +12,7 @@ constexpr int maxTotalEVs = 510;
 int clampLevel(int level) { return std::clamp(level, 1, maxDaemonLevel); }
 
 std::array<int, 6> toArray(const BaseStats &stats) {
-    return {stats.hp, stats.attack, stats.defense, stats.specialAttack, stats.specialDefense,
+    return {stats.hp,   stats.attack, stats.defense, stats.specialAttack, stats.specialDefense,
             stats.speed};
 }
 
@@ -235,9 +235,9 @@ int normalizeTotalExp(const Species &species, int level, int savedExp) {
 } // namespace
 
 Daemon::Daemon(const Species &species, int level)
-    : speciesId(species.id), level(clampLevel(level)),
-      exp(totalExpForCurrentLevel(species, level)), currentHP(0), status(StatusEffect::none),
-      ivs{0, 0, 0, 0, 0, 0}, evs{0, 0, 0, 0, 0, 0}, nature(Nature::hardy), speciesRef(species) {
+    : speciesId(species.id), level(clampLevel(level)), exp(totalExpForCurrentLevel(species, level)),
+      currentHP(0), status(StatusEffect::none), ivs{0, 0, 0, 0, 0, 0}, evs{0, 0, 0, 0, 0, 0},
+      nature(Nature::hardy), speciesRef(species) {
     nickname = species.name;
 
     // Init moves to empty
@@ -269,8 +269,7 @@ Daemon Daemon::generateRandomized(const Species &species, int level, std::mt1993
                                                   static_cast<int>(Nature::quirky));
 
     Daemon daemon(species, level);
-    daemon.ivs = {ivRoll(rng), ivRoll(rng), ivRoll(rng),
-                  ivRoll(rng), ivRoll(rng), ivRoll(rng)};
+    daemon.ivs = {ivRoll(rng), ivRoll(rng), ivRoll(rng), ivRoll(rng), ivRoll(rng), ivRoll(rng)};
     daemon.evs = {0, 0, 0, 0, 0, 0};
     daemon.nature = static_cast<Nature>(natureRoll(rng));
     daemon.currentHP = daemon.getMaxHP();
@@ -280,10 +279,9 @@ Daemon Daemon::generateRandomized(const Species &species, int level, std::mt1993
 Daemon::Daemon(const Species &species, int level, int exp, int currentHP,
                const std::string &nickname, StatusEffect status, const BaseStats &ivs,
                const BaseStats &evs, const std::array<MoveSlot, 4> &moves, Nature nature)
-    : speciesId(species.id), level(clampLevel(level)),
-      exp(normalizeTotalExp(species, level, exp)), currentHP(currentHP), status(status),
-      ivs(clampStats(ivs, 0, maxIVValue)), evs(normalizeEVs(evs)), nature(nature), moves(moves),
-      speciesRef(species) {
+    : speciesId(species.id), level(clampLevel(level)), exp(normalizeTotalExp(species, level, exp)),
+      currentHP(currentHP), status(status), ivs(clampStats(ivs, 0, maxIVValue)),
+      evs(normalizeEVs(evs)), nature(nature), moves(moves), speciesRef(species) {
     this->level = levelFromTotalExp(species, this->exp);
     this->currentHP = std::clamp(this->currentHP, 0, getMaxHP());
     this->nickname = nickname;
@@ -404,9 +402,7 @@ int Daemon::getExpNeeded() const {
            totalExpForCurrentLevel(speciesRef.get(), level);
 }
 
-bool Daemon::checkLevelUp() {
-    return resolveLevelUp().has_value();
-}
+bool Daemon::checkLevelUp() { return resolveLevelUp().has_value(); }
 
 std::optional<LevelUpResult> Daemon::resolveLevelUp() {
     if (level >= maxDaemonLevel)
@@ -423,14 +419,12 @@ std::optional<LevelUpResult> Daemon::resolveLevelUp() {
     const BaseStats newStats = calculateStatsForLevel(level);
     currentHP += (newStats.hp - oldStats.hp);
 
-    return LevelUpResult{oldLevel,
-                         level,
-                         {newStats.hp - oldStats.hp,
-                          newStats.attack - oldStats.attack,
-                          newStats.defense - oldStats.defense,
-                          newStats.specialAttack - oldStats.specialAttack,
-                          newStats.specialDefense - oldStats.specialDefense,
-                          newStats.speed - oldStats.speed}};
+    return LevelUpResult{
+        oldLevel,
+        level,
+        {newStats.hp - oldStats.hp, newStats.attack - oldStats.attack,
+         newStats.defense - oldStats.defense, newStats.specialAttack - oldStats.specialAttack,
+         newStats.specialDefense - oldStats.specialDefense, newStats.speed - oldStats.speed}};
 }
 
 std::vector<int> Daemon::getMovesLearnedAtLevel(int learnedLevel) const {

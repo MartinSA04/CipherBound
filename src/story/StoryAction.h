@@ -35,10 +35,9 @@ struct StoryStartCutsceneAction {
 };
 
 struct StoryAction {
-    using Payload =
-        std::variant<StoryNoAction, StoryBlockWarpAction, StoryShowChoiceAction,
-                     StoryStartBattleAction, StoryShowDialogueAction, StoryReturnToStateAction,
-                     StoryStartCutsceneAction>;
+    using Payload = std::variant<StoryNoAction, StoryBlockWarpAction, StoryShowChoiceAction,
+                                 StoryStartBattleAction, StoryShowDialogueAction,
+                                 StoryReturnToStateAction, StoryStartCutsceneAction>;
 
     Payload payload;
 
@@ -55,8 +54,7 @@ struct StoryAction {
     }
 
     static StoryAction showChoice(std::vector<std::string> options, std::string choiceContext) {
-        return StoryAction{
-            StoryShowChoiceAction{std::move(options), std::move(choiceContext)}};
+        return StoryAction{StoryShowChoiceAction{std::move(options), std::move(choiceContext)}};
     }
 
     static StoryAction startBattle(NPC *trainer) {

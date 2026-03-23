@@ -1,19 +1,19 @@
 #include "../../audio/MusicManager.h"
-#include "../Battle.h"
-#include "../ui/BattlePresentationState.h"
 #include "../../state/World.h"
 #include "../../state/player/Player.h"
 #include "../../ui/GameUI.h"
 #include "../../ui/InputManager.h"
+#include "../Battle.h"
+#include "../ui/BattlePresentationState.h"
 #include "BattleMode.h"
 
 namespace {
 
 std::string formatStatGainMessage(const BaseStats &gains) {
     return "Stat gains: HP +" + std::to_string(gains.hp) + ", Atk +" +
-           std::to_string(gains.attack) + ", Def +" + std::to_string(gains.defense) +
-           ", SpA +" + std::to_string(gains.specialAttack) + ", SpD +" +
-           std::to_string(gains.specialDefense) + ", Spe +" + std::to_string(gains.speed) + ".";
+           std::to_string(gains.attack) + ", Def +" + std::to_string(gains.defense) + ", SpA +" +
+           std::to_string(gains.specialAttack) + ", SpD +" + std::to_string(gains.specialDefense) +
+           ", Spe +" + std::to_string(gains.speed) + ".";
 }
 
 } // namespace
@@ -60,9 +60,8 @@ bool BattleMode::queueDaemonProgression(GameContext &ctx, int partyIndex, bool r
         progressionEvents.push_back(
             {ProgressionEventType::message, partyIndex, -1, -1, -1,
              daemon.getNickname() + " leveled up to Lv" + std::to_string(levelUp->newLevel) + "!"});
-        progressionEvents.push_back(
-            {ProgressionEventType::message, partyIndex, -1, -1, -1,
-             formatStatGainMessage(levelUp->statGains)});
+        progressionEvents.push_back({ProgressionEventType::message, partyIndex, -1, -1, -1,
+                                     formatStatGainMessage(levelUp->statGains)});
 
         for (int moveId : daemon.getMovesLearnedAtLevel(levelUp->newLevel)) {
             if (daemon.knowsMove(moveId))
@@ -72,9 +71,8 @@ bool BattleMode::queueDaemonProgression(GameContext &ctx, int partyIndex, bool r
             const int emptySlot = daemon.firstEmptyMoveSlot();
             if (emptySlot >= 0) {
                 daemon.learnMove(move.id, emptySlot, move.maxPP);
-                progressionEvents.push_back(
-                    {ProgressionEventType::message, partyIndex, -1, -1, -1,
-                     daemon.getNickname() + " learned " + move.name + "!"});
+                progressionEvents.push_back({ProgressionEventType::message, partyIndex, -1, -1, -1,
+                                             daemon.getNickname() + " learned " + move.name + "!"});
             } else {
                 progressionEvents.push_back(
                     {ProgressionEventType::message, partyIndex, -1, -1, -1,
@@ -142,8 +140,8 @@ bool BattleMode::updateProgressionSequence(GameContext &ctx, InputManager &input
     if (event.type == ProgressionEventType::evolution) {
         static constexpr int evolutionTransformFrame = 420;
         static constexpr int evolutionTotalFrames = 600;
-        const std::string finalText =
-            event.text + " evolved into " + ctx.pokedex.getSpecies(event.targetSpeciesId).name + "!";
+        const std::string finalText = event.text + " evolved into " +
+                                      ctx.pokedex.getSpecies(event.targetSpeciesId).name + "!";
 
         if (evolutionAnimFrame == 0)
             ctx.music.play(MusicTrack::evolution, ctx.ui.getRenderer().getWindow());
@@ -209,8 +207,8 @@ bool BattleMode::updateProgressionSequence(GameContext &ctx, InputManager &input
     std::string learnedMessage = daemon.getNickname() + " learned " + newMove.name + "!";
     if (oldSlot.moveId >= 0) {
         learnedMessage = daemon.getNickname() + " forgot " +
-                         ctx.pokedex.getMove(oldSlot.moveId).name + " and learned " +
-                         newMove.name + "!";
+                         ctx.pokedex.getMove(oldSlot.moveId).name + " and learned " + newMove.name +
+                         "!";
     }
 
     daemon.learnMove(newMove.id, progressionSelectedMove, newMove.maxPP);
@@ -280,11 +278,9 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
         return;
 
     case BattleState::animatingHP: {
-        const bool done =
-            presentation.tickHPAnimation(battle.getPlayerDaemon().getCurrentHP(),
-                                         battle.getOpponentDaemon().getCurrentHP(),
-                                         battle.getPlayerDaemon().getMaxHP(),
-                                         battle.getOpponentDaemon().getMaxHP());
+        const bool done = presentation.tickHPAnimation(
+            battle.getPlayerDaemon().getCurrentHP(), battle.getOpponentDaemon().getCurrentHP(),
+            battle.getPlayerDaemon().getMaxHP(), battle.getOpponentDaemon().getMaxHP());
         if (done)
             battle.finishHPAnimation();
         return;

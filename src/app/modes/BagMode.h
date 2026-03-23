@@ -33,10 +33,10 @@ class BagMode : public GameMode {
     /// Switches to the message substate with the given text.
     void showMessage(const std::string &msg, GameContext &ctx);
 
-    int selected{0};               ///< Current bag selection.
-    int partySelected{0};          ///< Current party target selection.
-    int useItemId{0};              ///< Item being used in the current flow.
-    std::string message;           ///< Active bag message text.
+    int selected{0};      ///< Current bag selection.
+    int partySelected{0}; ///< Current party target selection.
+    int useItemId{0};     ///< Item being used in the current flow.
+    std::string message;  ///< Active bag message text.
 
     SubStateType returnAfterMessage{SubStateType::browsing}; ///< Substate restored after a message.
 

@@ -28,35 +28,35 @@ struct NPCPartyMember {
 
 /// Parsed NPC definition from the `[npcs]` section of a map file.
 struct NPCDefinition {
-    std::string id;         ///< Stable NPC id referenced by story and cutscenes.
-    std::string spriteType; ///< Sprite sheet selector.
-    std::string name;       ///< Display name shown in dialogue and battles.
-    NPCType type{NPCType::normal}; ///< NPC role classification.
-    bool hidden{false};     ///< Whether the NPC starts hidden.
-    Position position{0, 0}; ///< Initial tile position.
-    Direction facing{Direction::down}; ///< Initial facing direction.
-    int sightRange{0};      ///< Trainer detection range in tiles.
+    std::string id;                            ///< Stable NPC id referenced by story and cutscenes.
+    std::string spriteType;                    ///< Sprite sheet selector.
+    std::string name;                          ///< Display name shown in dialogue and battles.
+    NPCType type{NPCType::normal};             ///< NPC role classification.
+    bool hidden{false};                        ///< Whether the NPC starts hidden.
+    Position position{0, 0};                   ///< Initial tile position.
+    Direction facing{Direction::down};         ///< Initial facing direction.
+    int sightRange{0};                         ///< Trainer detection range in tiles.
     std::vector<DialogueStage> dialogueStages; ///< Dialogue variants selected by flags.
-    std::vector<NPCPartyMember> party; ///< Trainer party members.
+    std::vector<NPCPartyMember> party;         ///< Trainer party members.
 };
 
 /// Parsed top-level map definition prior to runtime `Map` construction.
 struct MapDefinition {
-    std::string id;         ///< Unique map id.
-    int width{0};           ///< Width in tiles.
-    int height{0};          ///< Height in tiles.
-    std::string backgroundImage; ///< Base tileset image path.
-    std::string backgroundImageOverlay; ///< Overlay image path.
-    std::optional<Position> playerSpawn; ///< Optional player spawn tile.
-    std::vector<std::string> tileRows;   ///< Raw tile rows from the `[tiles]` section.
-    std::vector<WarpPoint> warps;        ///< Parsed warp triggers.
+    std::string id;                            ///< Unique map id.
+    int width{0};                              ///< Width in tiles.
+    int height{0};                             ///< Height in tiles.
+    std::string backgroundImage;               ///< Base tileset image path.
+    std::string backgroundImageOverlay;        ///< Overlay image path.
+    std::optional<Position> playerSpawn;       ///< Optional player spawn tile.
+    std::vector<std::string> tileRows;         ///< Raw tile rows from the `[tiles]` section.
+    std::vector<WarpPoint> warps;              ///< Parsed warp triggers.
     std::vector<WildEncounterSlot> encounters; ///< Parsed encounter table.
-    std::vector<NPCDefinition> npcs;     ///< Parsed NPC definitions.
+    std::vector<NPCDefinition> npcs;           ///< Parsed NPC definitions.
 };
 
 /// Result of parsing a `.map` file.
 struct ParseResult {
-    MapDefinition definition;      ///< Parsed definition, possibly partial.
+    MapDefinition definition;          ///< Parsed definition, possibly partial.
     std::vector<std::string> warnings; ///< Non-fatal parse warnings.
 
     /// Returns whether the parsed definition contains the required header fields.

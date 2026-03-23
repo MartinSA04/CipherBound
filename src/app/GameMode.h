@@ -32,22 +32,22 @@ class StoryManager;
  * @ingroup app_core
  */
 enum class GameState {
-    titleScreen,   ///< Title screen and save-slot selection.
-    overworld,     ///< Free movement in the world map.
-    battle,        ///< Main turn-based battle loop.
-    battleIntro,   ///< Battle entry animation and setup.
-    menu,          ///< Pause menu.
-    playerStats,   ///< Trainer stats and badge overview.
-    party,         ///< Party management screen.
-    bag,           ///< Inventory screen.
-    shop,          ///< Shop interaction screen.
-    saving,        ///< Save flow UI.
-    dialogue,      ///< Linear dialogue box.
-    dialogueChoice,///< Dialogue choice prompt.
-    transition,    ///< Fade or blackout transition.
-    pcBox,         ///< PC storage management.
-    cutscene,      ///< Scripted cutscene playback.
-    daemondex,     ///< Daemondex viewer.
+    titleScreen,    ///< Title screen and save-slot selection.
+    overworld,      ///< Free movement in the world map.
+    battle,         ///< Main turn-based battle loop.
+    battleIntro,    ///< Battle entry animation and setup.
+    menu,           ///< Pause menu.
+    playerStats,    ///< Trainer stats and badge overview.
+    party,          ///< Party management screen.
+    bag,            ///< Inventory screen.
+    shop,           ///< Shop interaction screen.
+    saving,         ///< Save flow UI.
+    dialogue,       ///< Linear dialogue box.
+    dialogueChoice, ///< Dialogue choice prompt.
+    transition,     ///< Fade or blackout transition.
+    pcBox,          ///< PC storage management.
+    cutscene,       ///< Scripted cutscene playback.
+    daemondex,      ///< Daemondex viewer.
 };
 
 /// Requests a direct state switch to an existing mode.
@@ -66,7 +66,7 @@ struct StartWildBattleRequest {
 
 /// Requests a trainer battle and optional pre-battle cutscene.
 struct StartTrainerBattleRequest {
-    NPC *npc{nullptr};                  ///< Non-owning pointer to the trainer NPC.
+    NPC *npc{nullptr};                    ///< Non-owning pointer to the trainer NPC.
     bool includePreBattleDialogue{false}; ///< Whether the eyes-meet cutscene should run first.
 };
 
@@ -80,30 +80,30 @@ struct EndBattleRequest {};
 
 /// Requests a map transition and spawn position update.
 struct TransitionToMapRequest {
-    std::string mapId;   ///< Destination map id.
+    std::string mapId;    ///< Destination map id.
     Position spawn{0, 0}; ///< Spawn tile on the destination map.
 };
 
 /// Requests a dialogue screen with explicit return-state information.
 struct StartDialogueRequest {
-    std::string speaker;                ///< Speaker name shown in the UI.
-    std::vector<std::string> lines;     ///< Dialogue lines displayed in order.
-    NPC *npc{nullptr};                  ///< Optional NPC associated with the dialogue.
+    std::string speaker;                         ///< Speaker name shown in the UI.
+    std::vector<std::string> lines;              ///< Dialogue lines displayed in order.
+    NPC *npc{nullptr};                           ///< Optional NPC associated with the dialogue.
     GameState returnState{GameState::overworld}; ///< State to resume after dialogue closes.
 };
 
 /// Requests a dialogue choice prompt.
 struct StartDialogueChoiceRequest {
-    std::vector<std::string> choiceOptions; ///< Ordered list of choices shown to the player.
-    std::string choiceContext;              ///< Story context key used to resolve the choice.
+    std::vector<std::string> choiceOptions;      ///< Ordered list of choices shown to the player.
+    std::string choiceContext;                   ///< Story context key used to resolve the choice.
     GameState returnState{GameState::overworld}; ///< State to resume after the choice.
 };
 
 /// Requests that the shop UI opens with a concrete inventory.
 struct OpenShopRequest {
-    std::string title;           ///< UI title for the shop screen.
-    std::string shopkeeperName;  ///< Display name of the shopkeeper.
-    std::vector<int> itemIds;    ///< Item ids offered for sale.
+    std::string title;          ///< UI title for the shop screen.
+    std::string shopkeeperName; ///< Display name of the shopkeeper.
+    std::vector<int> itemIds;   ///< Item ids offered for sale.
 };
 
 /// Requests loading and playback of a cutscene file.
@@ -161,8 +161,7 @@ struct ModeRequest {
 
     /// Builds a dialogue request.
     static ModeRequest dialogue(std::string speaker, std::vector<std::string> lines,
-                                NPC *npc = nullptr,
-                                GameState retState = GameState::overworld) {
+                                NPC *npc = nullptr, GameState retState = GameState::overworld) {
         return ModeRequest{
             StartDialogueRequest{std::move(speaker), std::move(lines), npc, retState}};
     }
@@ -170,8 +169,8 @@ struct ModeRequest {
     /// Builds a dialogue-choice request.
     static ModeRequest dialogueChoice(std::vector<std::string> options, std::string context,
                                       GameState retState = GameState::overworld) {
-        return ModeRequest{StartDialogueChoiceRequest{
-            std::move(options), std::move(context), retState}};
+        return ModeRequest{
+            StartDialogueChoiceRequest{std::move(options), std::move(context), retState}};
     }
 
     /// Builds a shop-open request.
@@ -212,17 +211,18 @@ struct ModeMailbox {
 
 /// Runtime battle-related state shared across multiple modes.
 struct BattleSessionState {
-    std::unique_ptr<Battle> active;   ///< Owned active battle, if any.
-    std::string trainerNPCId;         ///< Trainer id tied to the current battle, if any.
+    std::unique_ptr<Battle> active;       ///< Owned active battle, if any.
+    std::string trainerNPCId;             ///< Trainer id tied to the current battle, if any.
     BattlePresentationState presentation; ///< UI/presentation state reused across battle phases.
 };
 
 /// Session flags that survive mode switches outside the world model itself.
 struct SessionFlowState {
-    int currentSaveSlot{-1}; ///< Save slot currently selected by the player.
+    int currentSaveSlot{-1};     ///< Save slot currently selected by the player.
     bool pendingPushBack{false}; ///< Whether dialogue exit should push the player backward.
     GameState dialogueReturnState{GameState::overworld}; ///< State to resume after dialogue.
-    std::optional<ModeRequest> cutsceneEndRequest; ///< Optional request dispatched when a cutscene ends.
+    std::optional<ModeRequest>
+        cutsceneEndRequest; ///< Optional request dispatched when a cutscene ends.
 };
 
 /**
@@ -233,14 +233,14 @@ struct SessionFlowState {
  * context for the duration of a session.
  */
 struct GameContext {
-    World &world;                 ///< World state and map ownership.
-    Pokedex &pokedex;             ///< Loaded game-data catalog.
-    GameUI &ui;                   ///< High-level UI facade and renderer access.
-    SaveManager &saveManager;     ///< Save/load orchestration.
-    StoryManager &story;          ///< Story progression logic.
-    MusicManager &music;          ///< Background music playback.
+    World &world;                   ///< World state and map ownership.
+    Pokedex &pokedex;               ///< Loaded game-data catalog.
+    GameUI &ui;                     ///< High-level UI facade and renderer access.
+    SaveManager &saveManager;       ///< Save/load orchestration.
+    StoryManager &story;            ///< Story progression logic.
+    MusicManager &music;            ///< Background music playback.
     CutsceneRunner &cutsceneRunner; ///< Scripted cutscene executor.
-    SoundManager &sound;          ///< Sound effect playback.
+    SoundManager &sound;            ///< Sound effect playback.
 
     BattleSessionState battleSession; ///< Shared battle session state.
     SessionFlowState flow;            ///< Cross-mode flow flags.

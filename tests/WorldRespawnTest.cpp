@@ -40,7 +40,8 @@ int main() {
     assert(world.getCurrentMapId() == "bedroom");
     assert((world.getPlayer().getPosition() == Position{1, 2}));
     assert(world.getPlayer().getFacing() == Direction::left);
-    assert(world.getPlayer().getDaemon(0).getCurrentHP() == world.getPlayer().getDaemon(0).getMaxHP());
+    assert(world.getPlayer().getDaemon(0).getCurrentHP() ==
+           world.getPlayer().getDaemon(0).getMaxHP());
 
     world.getMap("bedroom").setOccupied(world.getPlayer().getPosition(), false);
     world.setCurrentMap("center");
@@ -60,5 +61,6 @@ int main() {
     assert(world.getCurrentMapId() == "center");
     assert((world.getPlayer().getPosition() == Position{3, 3}));
     assert(world.getPlayer().getFacing() == Direction::up);
-    assert(world.getPlayer().getDaemon(0).getCurrentHP() == world.getPlayer().getDaemon(0).getMaxHP());
+    assert(world.getPlayer().getDaemon(0).getCurrentHP() ==
+           world.getPlayer().getDaemon(0).getMaxHP());
 }

@@ -256,10 +256,9 @@ void GameUI::drawSummaryScreen(const Daemon &daemon, const Pokedex &pokedex, int
         const int expNeeded = daemon.getExpNeeded();
         drawSpriteEXPBar(expBarX, expY + 4 * scale, expBarW, daemon.getExpProgress(), expNeeded,
                          scale);
-        spriteFont.drawText(renderer,
-                            std::to_string(daemon.getExpProgress()) + "-" +
-                                std::to_string(expNeeded),
-                            expBarX + expBarW + 4 * scale, expY, scale);
+        spriteFont.drawText(
+            renderer, std::to_string(daemon.getExpProgress()) + "-" + std::to_string(expNeeded),
+            expBarX + expBarW + 4 * scale, expY, scale);
 
         const int movesHeaderY = expY + 16 * scale;
         renderer.drawFilledRect(20, movesHeaderY, WINDOW_WIDTH - 40, 2,
@@ -402,8 +401,7 @@ void GameUI::drawMoveLearningScreen(const Daemon &daemon, const Pokedex &pokedex
         renderer.drawFilledRect(detailX, listY, detailW, currentH, TDT4102::Color{228, 233, 248});
         renderer.drawRect(detailX, listY, detailW, currentH, TDT4102::Color::transparent,
                           TDT4102::Color{70, 80, 110});
-        spriteFont.drawText(renderer, "FORGET", detailX + 4 * scale, listY + 4 * scale,
-                            scale - 1);
+        spriteFont.drawText(renderer, "FORGET", detailX + 4 * scale, listY + 4 * scale, scale - 1);
         spriteFont.drawText(renderer, "Keep current moves.", detailX + 6 * scale,
                             listY + 18 * scale, scale);
     } else {
@@ -469,8 +467,8 @@ void GameUI::drawBagScreen(const Player &player, const Pokedex &pokedex, int sel
 }
 
 void GameUI::drawShopScreen(const Player &player, const Pokedex &pokedex,
-                            const std::vector<int> &itemIds, int selected,
-                            const std::string &title, const std::string &footerText) {
+                            const std::vector<int> &itemIds, int selected, const std::string &title,
+                            const std::string &footerText) {
     renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{182, 172, 145});
 
     const int scale = PIXEL_SCALE;
@@ -505,8 +503,7 @@ void GameUI::drawShopScreen(const Player &player, const Pokedex &pokedex,
             const ItemData &item = pokedex.getItem(itemIds[i]);
             if (isSelected) {
                 renderer.drawFilledRect(listX + scale, sy - scale / 2, listWidth - 2 * scale,
-                                        16 * scale,
-                                        TDT4102::Color{255, 239, 181});
+                                        16 * scale, TDT4102::Color{255, 239, 181});
                 drawSelectionArrow(listX + scale / 2, sy + 4 * scale, scale);
             }
 
@@ -541,8 +538,8 @@ void GameUI::drawShopScreen(const Player &player, const Pokedex &pokedex,
         const int descriptionX = detailTextX;
         const int descriptionY = detailY + 54 * scale;
         const int descriptionWidth = detailW - 16 * scale;
-        spriteFont.drawTextPartial(renderer, item.description, item.description.size(), descriptionX,
-                                   descriptionY, scale, 1, descriptionWidth);
+        spriteFont.drawTextPartial(renderer, item.description, item.description.size(),
+                                   descriptionX, descriptionY, scale, 1, descriptionWidth);
     }
 
     const int hintY = WINDOW_HEIGHT - 20 * scale;
@@ -570,8 +567,8 @@ void GameUI::drawPlayerStatsScreen(const Player &player) {
 
     renderer.drawFilledRect(outerPadding, panelY, leftPanelWidth, panelHeight,
                             TDT4102::Color{236, 241, 252});
-    renderer.drawRect(outerPadding, panelY, leftPanelWidth, panelHeight, TDT4102::Color::transparent,
-                      TDT4102::Color{72, 82, 108});
+    renderer.drawRect(outerPadding, panelY, leftPanelWidth, panelHeight,
+                      TDT4102::Color::transparent, TDT4102::Color{72, 82, 108});
 
     renderer.drawFilledRect(rightPanelX, panelY, rightPanelWidth, panelHeight,
                             TDT4102::Color{244, 247, 255});
@@ -622,8 +619,8 @@ void GameUI::drawPlayerStatsScreen(const Player &player) {
         const int badgeWidth = rightPanelWidth - 12 * scale;
         for (std::size_t i = 0; i < badges.size(); ++i) {
             const int rowY = contentY + 14 * scale + static_cast<int>(i) * badgeRowHeight;
-            renderer.drawFilledRect(rightPanelX + 3 * scale, rowY - scale / 2,
-                                    badgeWidth, 14 * scale, TDT4102::Color{224, 230, 246});
+            renderer.drawFilledRect(rightPanelX + 3 * scale, rowY - scale / 2, badgeWidth,
+                                    14 * scale, TDT4102::Color{224, 230, 246});
             spriteFont.drawText(renderer, badges[i], contentX, rowY, scale - 1);
         }
     }

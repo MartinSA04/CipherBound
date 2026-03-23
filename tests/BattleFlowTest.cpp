@@ -86,7 +86,8 @@ int main() {
     const int expectedMoney = BattleRules::calculateMoneyReward(rewardTarget, BattleType::wild);
     const int expectedWildExp = BattleRules::calculateExpYield(rewardTarget, BattleType::wild);
 
-    Battle winBattle(winner, std::make_unique<Daemon>(rewardTarget), BattleType::wild, rng, pokedex);
+    Battle winBattle(winner, std::make_unique<Daemon>(rewardTarget), BattleType::wild, rng,
+                     pokedex);
     winBattle.start();
     drainBattle(winBattle);
     assert(winBattle.getState() == BattleState::choosingAction);
@@ -169,8 +170,8 @@ int main() {
     switchBattle.chooseAction(BattleAction::fight);
     switchBattle.chooseMove(0);
     drainBattle(switchBattle);
-    const int splitExp = BattleRules::calculateExpYield(makeDaemon(pokedex, 3, 8, 1), BattleType::wild,
-                                                        2);
+    const int splitExp =
+        BattleRules::calculateExpYield(makeDaemon(pokedex, 3, 8, 1), BattleType::wild, 2);
     assert(switchBattle.getResult().expGained == splitExp * 2);
     assert(switcher.getDaemon(0).getExpProgress() == splitExp);
     assert(switcher.getDaemon(1).getExpProgress() == splitExp);

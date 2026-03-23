@@ -1,8 +1,8 @@
 #include "BattleTurnResolver.h"
-#include "BattleAI.h"
-#include "BattleRules.h"
 #include "../game_data/Pokedex.h"
 #include "../state/Daemon.h"
+#include "BattleAI.h"
+#include "BattleRules.h"
 #include <array>
 
 namespace {
@@ -41,8 +41,8 @@ BattleMoveSelection BattleTurnResolver::prepareOpponentMove(Daemon &opponentDaem
                 BattleAI::MoveCandidate{&pokedex.getMove(slot.moveId), slot.currentPP};
     }
 
-    const int slot = BattleAI::chooseMoveSlot(candidates, opponentDaemon.getSpecies(), playerDaemon,
-                                              rng);
+    const int slot =
+        BattleAI::chooseMoveSlot(candidates, opponentDaemon.getSpecies(), playerDaemon, rng);
     if (slot < 0 || slot >= moveSlotCount ||
         opponentMoves[static_cast<std::size_t>(slot)].moveId < 0) {
         return BattleMoveSelection{BattleMoveSelectionError::invalidSelection, slot, nullptr};
@@ -56,8 +56,7 @@ BattleMoveSelection BattleTurnResolver::prepareOpponentMove(Daemon &opponentDaem
 }
 
 BattleAttackResolution BattleTurnResolver::resolveAttack(Daemon &attacker, Daemon &defender,
-                                                         const MoveData &move,
-                                                         std::mt19937 &rng) {
+                                                         const MoveData &move, std::mt19937 &rng) {
     std::uniform_int_distribution<int> accuracyRoll(1, 100);
     if (accuracyRoll(rng) > move.accuracy)
         return BattleAttackResolution{};

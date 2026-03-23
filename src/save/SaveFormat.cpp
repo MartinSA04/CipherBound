@@ -70,8 +70,8 @@ std::optional<SavedDaemonData> parseDaemon(std::string_view line) {
     const std::optional<Nature> nature =
         parts.size() == 10 ? parseNature(parts[8]) : std::optional<Nature>(Nature::hardy);
     if (!speciesId.has_value() || !level.has_value() || !exp.has_value() ||
-        !currentHP.has_value() || !statusRaw.has_value() || !ivs.has_value() ||
-        !evs.has_value() || !nature.has_value()) {
+        !currentHP.has_value() || !statusRaw.has_value() || !ivs.has_value() || !evs.has_value() ||
+        !nature.has_value()) {
         return std::nullopt;
     }
 
@@ -254,8 +254,8 @@ SaveParseResult parse(std::istream &input) {
                 result.warnings.push_back("Invalid NPC state entry: " + line);
                 break;
             }
-            result.data.npcStates.push_back(
-                SavedNPCState{std::string(parts[0]), std::string(parts[1]), parts[2] == "defeated"});
+            result.data.npcStates.push_back(SavedNPCState{
+                std::string(parts[0]), std::string(parts[1]), parts[2] == "defeated"});
             break;
         }
         case SaveSection::daemondex: {

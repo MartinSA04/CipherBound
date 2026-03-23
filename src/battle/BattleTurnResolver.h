@@ -22,7 +22,7 @@ enum class BattleMoveSelectionError {
 /// Result of validating a selected move slot.
 struct BattleMoveSelection {
     BattleMoveSelectionError error{BattleMoveSelectionError::none}; ///< Validation outcome.
-    int slot{-1};               ///< Resolved slot index, or `-1` on failure.
+    int slot{-1};                  ///< Resolved slot index, or `-1` on failure.
     const MoveData *move{nullptr}; ///< Selected move data, if validation succeeded.
 };
 

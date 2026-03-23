@@ -37,11 +37,11 @@ class SaveManager {
 
     /// Lightweight metadata used by the title screen save-slot picker.
     struct SlotInfo {
-        bool exists{false};      ///< Whether a valid save file exists for the slot.
-        std::string playerName;  ///< Saved player name.
-        int partySize{0};        ///< Number of daemons in the active party.
-        int badgeCount{0};       ///< Number of earned badges.
-        std::string mapId;       ///< Map id stored in the save.
+        bool exists{false};     ///< Whether a valid save file exists for the slot.
+        std::string playerName; ///< Saved player name.
+        int partySize{0};       ///< Number of daemons in the active party.
+        int badgeCount{0};      ///< Number of earned badges.
+        std::string mapId;      ///< Map id stored in the save.
     };
     /// Returns summary information for one slot.
     SlotInfo getSlotInfo(int slot) const;

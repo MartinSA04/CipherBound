@@ -1,5 +1,5 @@
-#include "../../src/cutscene/CutscenePlayback.h"
 #include "../../src/cutscene/CutsceneWorldOps.h"
+#include "../../src/cutscene/CutscenePlayback.h"
 #include "../src/state/Map.h"
 #include "../src/state/NPC.h"
 #include "../src/state/World.h"

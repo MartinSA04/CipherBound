@@ -27,7 +27,7 @@ class DialogueMode : public GameMode {
 
   private:
     NPC *dialogueNPC;                    ///< Optional NPC tied to the dialogue outcome.
-    GameState returnState;              ///< State resumed after dialogue finishes.
-    std::string savedSpeaker;           ///< Stored speaker name.
+    GameState returnState;               ///< State resumed after dialogue finishes.
+    std::string savedSpeaker;            ///< Stored speaker name.
     std::vector<std::string> savedLines; ///< Stored dialogue lines.
 };

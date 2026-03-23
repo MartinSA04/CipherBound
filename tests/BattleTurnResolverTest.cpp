@@ -21,8 +21,8 @@ Species makeSpecies(int id, const std::string &name) {
 }
 
 MoveData makeMove(int accuracy) {
-    return MoveData{1, "Proof Strike", "", ElementType::classical, MoveCategory::physical, 50,
-                    accuracy, 20, StatusEffect::none, 0};
+    return MoveData{1,  "Proof Strike", "", ElementType::classical, MoveCategory::physical,
+                    50, accuracy,       20, StatusEffect::none,     0};
 }
 
 } // namespace

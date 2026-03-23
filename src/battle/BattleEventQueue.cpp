@@ -8,23 +8,20 @@ void BattleEventQueue::pushHPAnimation() { entries.push_back({EventType::hpAnima
 
 void BattleEventQueue::pushEXPAnimation() { entries.push_back({EventType::expAnimation, {}}); }
 
-void BattleEventQueue::pushIntroAnimation() {
-    entries.push_back({EventType::introAnimation, {}});
-}
+void BattleEventQueue::pushIntroAnimation() { entries.push_back({EventType::introAnimation, {}}); }
 
 void BattleEventQueue::pushCaptureAnimation() {
     entries.push_back({EventType::captureAnimation, {}});
 }
 
 void BattleEventQueue::pushAttackAnimation(bool isPlayer) {
-    entries.push_back({isPlayer ? EventType::attackAnimationPlayer : EventType::attackAnimationOpponent,
-                       {}});
+    entries.push_back(
+        {isPlayer ? EventType::attackAnimationPlayer : EventType::attackAnimationOpponent, {}});
 }
 
 void BattleEventQueue::pushSwitchAnimation(bool isRecall) {
-    entries.push_back({isRecall ? EventType::switchAnimationRecall
-                                : EventType::switchAnimationSendOut,
-                       {}});
+    entries.push_back(
+        {isRecall ? EventType::switchAnimationRecall : EventType::switchAnimationSendOut, {}});
 }
 
 void BattleEventQueue::pushLevelUpResume(std::string message) {

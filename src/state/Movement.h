@@ -84,8 +84,8 @@ class Movement : public WalkAnimation {
     void setFacingOpposite(Direction direction);
 
   protected:
-    Position position;   ///< Current tile position.
-    Direction facing;    ///< Current facing direction.
+    Position position; ///< Current tile position.
+    Direction facing;  ///< Current facing direction.
 
   private:
     int turnCooldown{0}; ///< Frames to wait after turning before moving.

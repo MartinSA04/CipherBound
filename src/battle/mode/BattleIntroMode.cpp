@@ -28,8 +28,8 @@ void BattleIntroMode::update(GameContext &ctx, InputManager & /*input*/) {
                 ctx.world.getPlayer().markSeen(d.getSpeciesId());
         } else {
             const Species &sp = ctx.pokedex.getSpecies(speciesId);
-            auto daemon = std::make_unique<Daemon>(Daemon::generateRandomized(
-                sp, level, ctx.world.getRng()));
+            auto daemon =
+                std::make_unique<Daemon>(Daemon::generateRandomized(sp, level, ctx.world.getRng()));
             ctx.setBattle(std::make_unique<Battle>(ctx.world.getPlayer(), std::move(daemon),
                                                    BattleType::wild, ctx.world.getRng(),
                                                    ctx.pokedex));

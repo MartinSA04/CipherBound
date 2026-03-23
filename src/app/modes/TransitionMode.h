@@ -5,8 +5,8 @@
  */
 
 #pragma once
-#include "../GameMode.h"
 #include "../../battle/ui/BattleRenderer.h"
+#include "../GameMode.h"
 #include <string>
 
 /// Transitional mode that fades between overworld/battle-adjacent states.
@@ -39,12 +39,12 @@ class TransitionMode : public GameMode {
 
     void completeFadeOut(GameContext &ctx);
 
-    Kind kind{Kind::mapWarp};            ///< Selected transition behavior.
-    Phase phase{Phase::fadingOut};       ///< Active fade phase.
-    std::string targetMapId;             ///< Destination map for map-warp transitions.
-    Position targetSpawn;                ///< Destination spawn point for map-warp transitions.
-    int phaseFrame{0};                   ///< Frame counter within the current phase.
-    int phaseDuration{1};                ///< Duration in frames of one fade phase.
-    bool renderBattleBackdrop{false};    ///< Whether to draw the battle backdrop during transition.
-    BattleRenderer battleRenderer;       ///< Battle backdrop renderer used by some transitions.
+    Kind kind{Kind::mapWarp};         ///< Selected transition behavior.
+    Phase phase{Phase::fadingOut};    ///< Active fade phase.
+    std::string targetMapId;          ///< Destination map for map-warp transitions.
+    Position targetSpawn;             ///< Destination spawn point for map-warp transitions.
+    int phaseFrame{0};                ///< Frame counter within the current phase.
+    int phaseDuration{1};             ///< Duration in frames of one fade phase.
+    bool renderBattleBackdrop{false}; ///< Whether to draw the battle backdrop during transition.
+    BattleRenderer battleRenderer;    ///< Battle backdrop renderer used by some transitions.
 };

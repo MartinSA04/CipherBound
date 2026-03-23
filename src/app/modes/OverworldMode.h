@@ -5,8 +5,8 @@
  */
 
 #pragma once
-#include "../GameMode.h"
 #include "../../story/StoryAction.h"
+#include "../GameMode.h"
 
 /**
  * @brief Default exploration mode for walking the player around the world.
@@ -31,11 +31,11 @@ class OverworldMode : public GameMode {
     void handlePlayerWarpAttempt(GameContext &ctx);
     void handlePlayerInteraction(GameContext &ctx);
 
-    bool pendingWarpBlock{false};           ///< Whether a blocked warp should trigger after movement settles.
+    bool pendingWarpBlock{false}; ///< Whether a blocked warp should trigger after movement settles.
     StoryBlockWarpAction pendingWarpBlockAction; ///< Deferred warp-block action.
 
-    bool justStepped{false};                ///< Whether the player completed a step this frame.
+    bool justStepped{false}; ///< Whether the player completed a step this frame.
 
-    bool wallHitPlayed{false};              ///< Prevents repeated wall-hit sounds while holding a direction.
-    Direction wallHitDir{Direction::down};  ///< Direction tied to the last wall-hit sound.
+    bool wallHitPlayed{false}; ///< Prevents repeated wall-hit sounds while holding a direction.
+    Direction wallHitDir{Direction::down}; ///< Direction tied to the last wall-hit sound.
 };

@@ -1,9 +1,9 @@
 #include "CutsceneRunner.h"
+#include "../audio/SoundManager.h"
+#include "../common/StringUtils.h"
+#include "../ui/GameUI.h"
 #include "CutsceneLoader.h"
 #include "CutsceneWorldOps.h"
-#include "../common/StringUtils.h"
-#include "../audio/SoundManager.h"
-#include "../ui/GameUI.h"
 #include <filesystem>
 #include <iostream>
 
@@ -19,8 +19,7 @@ bool CutsceneRunner::load(const std::string &path) {
         std::cerr << "CutsceneRunner: " << warning << "\n";
 
     if (!loaded.valid()) {
-        std::cerr << "CutsceneRunner: invalid cutscene '" << loaded.resolvedPath.string()
-                  << "'\n";
+        std::cerr << "CutsceneRunner: invalid cutscene '" << loaded.resolvedPath.string() << "'\n";
         return false;
     }
 
@@ -108,9 +107,9 @@ void CutsceneRunner::processSteps(World &world, GameUI &ui) {
             break;
 
         case CutsceneStep::Type::say:
-            ui.startDialogue(StringUtils::substitutePlayerName(step.speaker, world.getPlayer().getName()),
-                             StringUtils::substitutePlayerName(step.lines,
-                                                               world.getPlayer().getName()));
+            ui.startDialogue(
+                StringUtils::substitutePlayerName(step.speaker, world.getPlayer().getName()),
+                StringUtils::substitutePlayerName(step.lines, world.getPlayer().getName()));
             playback.beginDialogue();
             return;
 

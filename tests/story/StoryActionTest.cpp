@@ -14,8 +14,7 @@ int main() {
     assert(choicePayload->options.size() == 2);
     assert(choicePayload->choiceContext == "pokeball_1");
 
-    StoryAction dialogue =
-        StoryAction::showDialogue("Prof. Bart Iver", {"Line 1", "Line 2"});
+    StoryAction dialogue = StoryAction::showDialogue("Prof. Bart Iver", {"Line 1", "Line 2"});
     assert(dialogue.is<StoryShowDialogueAction>());
     const auto *dialoguePayload = dialogue.tryGet<StoryShowDialogueAction>();
     assert(dialoguePayload != nullptr);

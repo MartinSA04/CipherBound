@@ -24,10 +24,10 @@ class PartyMode : public GameMode {
         showingSummary, ///< Showing the daemon summary screen.
     };
 
-    int selected{0};                    ///< Current party selection.
+    int selected{0};                       ///< Current party selection.
     SubState subState{SubState::browsing}; ///< Active party substate.
-    int actionSelected{0};              ///< Current action submenu selection.
-    int swapSource{0};                  ///< Source party index for swaps.
-    int summaryPage{0};                 ///< Active summary page.
-    int summaryMoveSelected{0};         ///< Selected move on the summary move page.
+    int actionSelected{0};                 ///< Current action submenu selection.
+    int swapSource{0};                     ///< Source party index for swaps.
+    int summaryPage{0};                    ///< Active summary page.
+    int summaryMoveSelected{0};            ///< Selected move on the summary move page.
 };

@@ -14,20 +14,19 @@
 
 /// Runtime NPC role used by story flow, interaction logic, and battle setup.
 enum class NPCType {
-    trainer,      ///< Standard trainer battle NPC.
-    gymLeader,    ///< Stronger trainer with gym-leader semantics.
-    shopkeeper,   ///< NPC that opens the shop screen.
-    healer,       ///< NPC that heals the player's party.
-    questGiver,   ///< NPC with quest/story progression logic.
-    wildEncounter,///< NPC-like trigger for forced wild encounters.
-    normal,       ///< Generic dialogue-only NPC.
-    pc,           ///< Computer terminal for PC box access.
+    trainer,    ///< Standard trainer battle NPC.
+    gymLeader,  ///< Stronger trainer with gym-leader semantics.
+    shopkeeper, ///< NPC that opens the shop screen.
+    healer,     ///< NPC that heals the player's party.
+    questGiver, ///< NPC with quest/story progression logic.
+    normal,     ///< Generic dialogue-only NPC.
+    pc,         ///< Computer terminal for PC box access.
 };
 
 /// Conditional dialogue stage selected by player event flags.
 struct DialogueStage {
-    std::string requiredFlag;        ///< Required player flag, or empty for default dialogue.
-    std::vector<std::string> lines;  ///< Dialogue lines shown when the stage matches.
+    std::string requiredFlag;       ///< Required player flag, or empty for default dialogue.
+    std::vector<std::string> lines; ///< Dialogue lines shown when the stage matches.
 };
 
 /**
@@ -93,15 +92,15 @@ class NPC : public Entity {
     void setHidden(bool h);
 
   private:
-    std::string id;                 ///< Unique identifier for story and save-state lookups.
-    std::string spriteType;         ///< Render sprite key.
-    NPCType type;                   ///< Runtime NPC role.
-    bool defeated;                  ///< Whether the NPC has already been defeated.
-    int sightRange;                 ///< Trainer detection range.
+    std::string id;         ///< Unique identifier for story and save-state lookups.
+    std::string spriteType; ///< Render sprite key.
+    NPCType type;           ///< Runtime NPC role.
+    bool defeated;          ///< Whether the NPC has already been defeated.
+    int sightRange;         ///< Trainer detection range.
     std::vector<DialogueStage> dialogueStages; ///< Ordered dialogue stages.
-    Party party;                    ///< Trainer party.
+    Party party;                               ///< Trainer party.
 
-    bool hidden{false};             ///< Whether the NPC is currently hidden.
+    bool hidden{false}; ///< Whether the NPC is currently hidden.
 
     static const std::vector<std::string> emptyLines; ///< Shared empty dialogue result.
 };

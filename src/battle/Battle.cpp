@@ -212,8 +212,8 @@ void Battle::executeTurn() {
         addMessage("It dealt " + std::to_string(resolution.damage) + " damage!");
 
         if (resolution.defenderFainted) {
-            const int expShare = BattleRules::calculateExpYield(getOpponentDaemon(), type,
-                                                                participantCount());
+            const int expShare =
+                BattleRules::calculateExpYield(getOpponentDaemon(), type, participantCount());
             const BaseStats effortYield = getOpponentDaemon().getSpecies().effortYield;
             expGained = 0;
             for (int i = 0; i < player.partySize(); ++i) {
@@ -227,7 +227,8 @@ void Battle::executeTurn() {
             if (moneyGained > 0)
                 player.addMoney(moneyGained);
             addMessage("The opposing " + getOpponentDaemon().getNickname() + " fainted!");
-            addMessage(playerDaemon.getNickname() + " gained " + std::to_string(expShare) + " EXP!");
+            addMessage(playerDaemon.getNickname() + " gained " + std::to_string(expShare) +
+                       " EXP!");
             addEXPAnimMarker();
             if (moneyGained > 0)
                 addMessage("Received " + std::to_string(moneyGained) + " dollars!");

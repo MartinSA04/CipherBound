@@ -52,6 +52,8 @@ class NPC : public Entity {
     const std::vector<Daemon> &getParty() const;
     /// Returns the party size.
     int partySize() const;
+    /// Swaps two party indices.
+    void swapDaemon(int indexA, int indexB);
     /// Returns whether the trainer party is empty.
     bool partyEmpty() const;
     /// Clears the trainer party.

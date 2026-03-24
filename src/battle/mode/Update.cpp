@@ -32,18 +32,30 @@ void BattleMode::updateSwitchAnim(GameContext &ctx) {
     BattlePresentationState &presentation = ctx.battlePresentation();
 
     if (presentation.switchFrame == 0) {
-        if (battle.isSwitchRecalling()) {
-            presentation.playerFieldVisible = true;
+        if (battle.isSwitchPlayerSide()) {
+            if (battle.isSwitchRecalling()) {
+                presentation.playerFieldVisible = true;
+            } else {
+                presentation.playerDisplayHP = battle.getPlayerDaemon().getCurrentHP();
+                presentation.playerDisplayEXP = battle.getPlayerDaemon().getExpProgress();
+                presentation.playerFieldVisible = false;
+                presentation.resetExpAnimation();
+            }
         } else {
-            presentation.playerDisplayHP = battle.getPlayerDaemon().getCurrentHP();
-            presentation.playerDisplayEXP = battle.getPlayerDaemon().getExpProgress();
-            presentation.playerFieldVisible = false;
-            presentation.resetExpAnimation();
+            if (battle.isSwitchRecalling()) {
+                presentation.opponentFieldVisible = true;
+            } else {
+                presentation.opponentDisplayHP = battle.getOpponentDaemon().getCurrentHP();
+                presentation.opponentFieldVisible = false;
+            }
         }
     }
 
     if (presentation.tickSwitchAnimation()) {
-        presentation.playerFieldVisible = !battle.isSwitchRecalling();
+        if (battle.isSwitchPlayerSide())
+            presentation.playerFieldVisible = !battle.isSwitchRecalling();
+        else
+            presentation.opponentFieldVisible = !battle.isSwitchRecalling();
         battle.finishSwitchAnimation();
     }
 }

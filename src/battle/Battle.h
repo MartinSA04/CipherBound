@@ -101,6 +101,8 @@ class Battle {
     bool isPlayerAttacking() const;
     /// Returns whether the active player switch animation is recalling the current daemon.
     bool isSwitchRecalling() const;
+    /// Returns whether the active switch animation affects the player's side.
+    bool isSwitchPlayerSide() const;
     /// Returns whether the given party index participated and therefore gained battle EXP.
     bool didPlayerParticipate(int partyIndex) const;
 
@@ -111,10 +113,11 @@ class Battle {
     void addIntroAnimMarker();               // Insert marker to continue intro animation
     void addCaptureAnimMarker();             // Insert marker to trigger capture animation
     void addAttackAnimMarker(bool isPlayer); // Insert marker to trigger attack animation
-    void addSwitchAnimMarker(bool isRecall); // Insert marker to trigger player switch animation
+    void addSwitchAnimMarker(bool isRecall, bool isPlayerSide);
     int participantCount() const;
     void transitionToQueuedState();
     void executeTurn();
+    int findOpponentReplacementIndex() const;
 
     Player &player;
     std::unique_ptr<Daemon> opponentDaemon = nullptr;
@@ -128,12 +131,14 @@ class Battle {
     bool captureSuccess{false};     ///< Whether the queued capture attempt succeeds.
     bool attackAnimIsPlayer{true};  ///< Whether the active attack animation is from the player.
     bool switchAnimIsRecall{false}; ///< Whether the active switch animation is a recall phase.
+    bool switchAnimIsPlayerSide{true}; ///< Whether the active switch animation affects player.
 
     int playerMoveSlot;
     int itemChoice;
     int switchTarget;
     BattleAction currentAction;
     int pendingPlayerSwitchIndex{-1};
+    int pendingOpponentSwitchIndex{-1};
     int expGained{0};
     int moneyGained{0};
 

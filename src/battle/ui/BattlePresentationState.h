@@ -21,6 +21,7 @@ struct BattlePresentationState {
     int introFrame{0};
     int introPhase{0};
     bool playerFieldVisible{true};
+    bool opponentFieldVisible{true};
 
     void reset();
     void beginBattle(int playerHP, int opponentHP, int playerEXP);

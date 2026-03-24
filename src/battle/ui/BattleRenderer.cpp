@@ -297,7 +297,8 @@ void BattleRenderer::drawPlayerSwitchScene(GameUI &ui, Battle &battle,
         std::sin((static_cast<float>(battleAnimFrame) + bobPeriod / 2.0f) * 6.2832f / bobPeriod) *
         bobAmplitude);
 
-    drawOpponentDaemon(ui, opponentDaemon, 0, opponentBobY);
+    if (presentation.opponentFieldVisible)
+        drawOpponentDaemon(ui, opponentDaemon, 0, opponentBobY);
     drawOpponentInfoBar(ui, opponentDaemon, presentation);
 
     float t = static_cast<float>(presentation.switchFrame) /
@@ -315,6 +316,47 @@ void BattleRenderer::drawPlayerSwitchScene(GameUI &ui, Battle &battle,
         const int infoIn = static_cast<int>(WINDOW_WIDTH * (1.0f - t));
         drawPlayerDaemon(ui, playerDaemon, daemonIn);
         drawPlayerInfoBar(ui, playerDaemon, presentation, infoIn);
+    }
+}
+
+void BattleRenderer::drawOpponentSwitchScene(GameUI &ui, Battle &battle,
+                                             const BattlePresentationState &presentation,
+                                             int battleAnimFrame) const {
+    ui.loadBattleAssets();
+    Renderer &renderer = ui.getRenderer();
+    drawBattleBackground(renderer);
+    drawOpponentBase(renderer);
+    drawPlayerBase(renderer);
+
+    const Daemon *playerDaemon = &battle.getPlayerDaemon();
+    const Daemon *opponentDaemon = &battle.getOpponentDaemon();
+
+    constexpr float bobPeriod = 120.0f;
+    constexpr float bobAmplitude = 6.0f;
+    const int playerBobY =
+        static_cast<int>(std::sin(static_cast<float>(battleAnimFrame) * 6.2832f / bobPeriod) *
+                         bobAmplitude);
+
+    if (presentation.playerFieldVisible)
+        drawPlayerDaemon(ui, playerDaemon, 0, playerBobY);
+    if (presentation.playerFieldVisible)
+        drawPlayerInfoBar(ui, playerDaemon, presentation);
+
+    float t = static_cast<float>(presentation.switchFrame) /
+              static_cast<float>(BattlePresentationState::switchSceneDuration);
+    if (t > 1.0f)
+        t = 1.0f;
+
+    if (battle.isSwitchRecalling()) {
+        const int daemonOut = static_cast<int>(WINDOW_WIDTH * t);
+        const int infoOut = -static_cast<int>(WINDOW_WIDTH * t);
+        drawOpponentDaemon(ui, opponentDaemon, daemonOut);
+        drawOpponentInfoBar(ui, opponentDaemon, presentation, infoOut);
+    } else {
+        const int daemonIn = static_cast<int>(WINDOW_WIDTH * (1.0f - t));
+        const int infoIn = -static_cast<int>(WINDOW_WIDTH * (1.0f - t));
+        drawOpponentDaemon(ui, opponentDaemon, daemonIn);
+        drawOpponentInfoBar(ui, opponentDaemon, presentation, infoIn);
     }
 }
 
@@ -367,11 +409,13 @@ void BattleRenderer::drawBattleScene(GameUI &ui, Battle &battle,
         const auto [baseX, baseY, baseW, baseH] = getOpponentBaseGeometry();
         drawBallCentered(renderer, 0, baseX + baseW / 2, baseY + baseH / 2);
     } else {
-        drawOpponentDaemon(ui, opponentDaemon, opponentAttackOffsetX, opponentBobY);
+        if (presentation.opponentFieldVisible)
+            drawOpponentDaemon(ui, opponentDaemon, opponentAttackOffsetX, opponentBobY);
     }
     if (presentation.playerFieldVisible)
         drawPlayerDaemon(ui, playerDaemon, playerAttackOffsetX, playerBobY);
-    drawOpponentInfoBar(ui, opponentDaemon, presentation);
+    if (presentation.opponentFieldVisible)
+        drawOpponentInfoBar(ui, opponentDaemon, presentation);
     if (presentation.playerFieldVisible)
         drawPlayerInfoBar(ui, playerDaemon, presentation);
 }

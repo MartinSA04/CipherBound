@@ -9,6 +9,7 @@ void BattlePresentationState::reset() {
     introFrame = 0;
     introPhase = 0;
     playerFieldVisible = true;
+    opponentFieldVisible = true;
     resetExpAnimation();
     resetSwitchAnimation();
 }
@@ -20,6 +21,7 @@ void BattlePresentationState::beginBattle(int playerHP, int opponentHP, int play
     introFrame = 0;
     introPhase = 0;
     playerFieldVisible = true;
+    opponentFieldVisible = true;
     resetExpAnimation();
     resetSwitchAnimation();
 }

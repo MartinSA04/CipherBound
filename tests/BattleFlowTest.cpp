@@ -117,6 +117,35 @@ int main() {
     assert(trainerBattle.getResult().expGained ==
            BattleRules::calculateExpYield(rewardTarget, BattleType::trainer));
 
+    Player trainerGauntlet("TrainerGauntlet", {0, 0});
+    trainerGauntlet.restorePartyDaemon(makeDaemon(pokedex, 3, 20, 7));
+    NPC multiTrainer("trainer_2", "Trainer", {0, 0}, NPCType::trainer);
+    const Daemon firstTarget = makeDaemon(pokedex, 1, 1, 1, 1, "First");
+    const Daemon secondTarget = makeDaemon(pokedex, 2, 1, 1, 1, "Second");
+    multiTrainer.addDaemon(firstTarget);
+    multiTrainer.addDaemon(secondTarget);
+
+    Battle multiTrainerBattle(trainerGauntlet, &multiTrainer, BattleType::trainer, rng, pokedex);
+    multiTrainerBattle.start();
+    drainBattle(multiTrainerBattle);
+    multiTrainerBattle.chooseAction(BattleAction::fight);
+    multiTrainerBattle.chooseMove(0);
+    drainBattle(multiTrainerBattle);
+    assert(multiTrainerBattle.getState() == BattleState::choosingAction);
+    assert(multiTrainerBattle.getOpponentDaemon().getNickname() == "Second");
+    assert(!multiTrainerBattle.getResult().playerWon);
+
+    multiTrainerBattle.chooseAction(BattleAction::fight);
+    multiTrainerBattle.chooseMove(0);
+    drainBattle(multiTrainerBattle);
+    assert(multiTrainerBattle.getState() == BattleState::victory);
+    assert(multiTrainerBattle.getResult().playerWon);
+    assert(multiTrainerBattle.getResult().expGained ==
+           BattleRules::calculateExpYield(firstTarget, BattleType::trainer) +
+               BattleRules::calculateExpYield(secondTarget, BattleType::trainer));
+    assert(multiTrainerBattle.getResult().moneyGained ==
+           BattleRules::calculateMoneyReward(secondTarget, BattleType::trainer));
+
     Player switcher("Switcher", {0, 0});
     switcher.restorePartyDaemon(makeDaemon(pokedex, 1, 8, 1, -1, "Lead"));
     switcher.restorePartyDaemon(makeDaemon(pokedex, 2, 8, 1, -1, "Backup"));

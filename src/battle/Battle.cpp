@@ -152,9 +152,9 @@ void Battle::chooseSwitchTarget(int partyIndex) {
     const std::string newName = target.getNickname();
     pendingPlayerSwitchIndex = partyIndex;
     addMessage("Come back, " + oldName + "!");
-    addSwitchAnimMarker(true);
+    addSwitchAnimMarker(true, true);
     addMessage("Go, " + newName + "!");
-    addSwitchAnimMarker(false);
+    addSwitchAnimMarker(false, true);
 
     // Opponent gets a turn after switching
     pendingState = BattleState::opponentTurn;
@@ -215,7 +215,6 @@ void Battle::executeTurn() {
             const int expShare =
                 BattleRules::calculateExpYield(getOpponentDaemon(), type, participantCount());
             const BaseStats effortYield = getOpponentDaemon().getSpecies().effortYield;
-            expGained = 0;
             for (int i = 0; i < player.partySize(); ++i) {
                 if (!playerParticipants[static_cast<std::size_t>(i)])
                     continue;
@@ -223,15 +222,30 @@ void Battle::executeTurn() {
                 player.getDaemon(i).addExp(expShare);
                 expGained += expShare;
             }
-            moneyGained = BattleRules::calculateMoneyReward(getOpponentDaemon(), type);
-            if (moneyGained > 0)
-                player.addMoney(moneyGained);
             addMessage("The opposing " + getOpponentDaemon().getNickname() + " fainted!");
             addMessage(playerDaemon.getNickname() + " gained " + std::to_string(expShare) +
                        " EXP!");
             addEXPAnimMarker();
-            if (moneyGained > 0)
+
+            if (opponent != nullptr) {
+                const int replacementIndex = findOpponentReplacementIndex();
+                if (replacementIndex >= 0) {
+                    pendingOpponentSwitchIndex = replacementIndex;
+                    const std::string nextName = opponent->getDaemon(replacementIndex).getNickname();
+                    addSwitchAnimMarker(true, false);
+                    addMessage(opponent->getName() + " sent out " + nextName + "!");
+                    addSwitchAnimMarker(false, false);
+                    pendingState = BattleState::choosingAction;
+                    state = BattleState::showingMessages;
+                    return;
+                }
+            }
+
+            moneyGained = BattleRules::calculateMoneyReward(getOpponentDaemon(), type);
+            if (moneyGained > 0) {
+                player.addMoney(moneyGained);
                 addMessage("Received " + std::to_string(moneyGained) + " dollars!");
+            }
             addMessage("You won!");
             pendingState = BattleState::victory;
             state = BattleState::showingMessages;
@@ -286,7 +300,7 @@ void Battle::executeOpponentTurn() {
         const int replacementIndex = player.findFirstUsableDaemonIndex(1);
         if (replacementIndex >= 0) {
             pendingPlayerSwitchIndex = replacementIndex;
-            addSwitchAnimMarker(false);
+            addSwitchAnimMarker(false, true);
             addMessage("Go, " + player.getDaemon(replacementIndex).getNickname() + "!");
             pendingState = BattleState::choosingAction;
         } else {
@@ -404,6 +418,8 @@ bool Battle::isPlayerAttacking() const { return attackAnimIsPlayer; }
 
 bool Battle::isSwitchRecalling() const { return switchAnimIsRecall; }
 
+bool Battle::isSwitchPlayerSide() const { return switchAnimIsPlayerSide; }
+
 bool Battle::didPlayerParticipate(int partyIndex) const {
     if (partyIndex < 0 || partyIndex >= static_cast<int>(playerParticipants.size()))
         return false;
@@ -428,27 +444,47 @@ void Battle::addCaptureAnimMarker() { eventQueue.pushCaptureAnimation(); }
 
 void Battle::addAttackAnimMarker(bool isPlayer) { eventQueue.pushAttackAnimation(isPlayer); }
 
-void Battle::addSwitchAnimMarker(bool isRecall) { eventQueue.pushSwitchAnimation(isRecall); }
+void Battle::addSwitchAnimMarker(bool isRecall, bool isPlayerSide) {
+    eventQueue.pushSwitchAnimation(isRecall, isPlayerSide);
+}
+
+int Battle::findOpponentReplacementIndex() const {
+    if (opponent == nullptr)
+        return -1;
+    for (int i = 1; i < opponent->partySize(); ++i) {
+        if (!opponent->getDaemon(i).isFainted())
+            return i;
+    }
+    return -1;
+}
 
 int Battle::participantCount() const {
     return static_cast<int>(std::count(playerParticipants.begin(), playerParticipants.end(), true));
 }
 
 void Battle::transitionToQueuedState() {
-    state = eventQueue.consume(pendingState, introPhase, attackAnimIsPlayer, switchAnimIsRecall);
-    if (state == BattleState::animatingSwitch && !switchAnimIsRecall &&
-        pendingPlayerSwitchIndex >= 0) {
-        if (pendingPlayerSwitchIndex < static_cast<int>(playerParticipants.size())) {
-            const std::size_t pendingIndex = static_cast<std::size_t>(pendingPlayerSwitchIndex);
-            const bool activeParticipant = playerParticipants[0];
-            playerParticipants[0] = playerParticipants[pendingIndex];
-            playerParticipants[pendingIndex] = activeParticipant;
+    state = eventQueue.consume(pendingState, introPhase, attackAnimIsPlayer, switchAnimIsRecall,
+                               switchAnimIsPlayerSide);
+    if (state == BattleState::animatingSwitch && !switchAnimIsRecall) {
+        if (switchAnimIsPlayerSide && pendingPlayerSwitchIndex >= 0) {
+            if (pendingPlayerSwitchIndex < static_cast<int>(playerParticipants.size())) {
+                const std::size_t pendingIndex = static_cast<std::size_t>(pendingPlayerSwitchIndex);
+                const bool activeParticipant = playerParticipants[0];
+                playerParticipants[0] = playerParticipants[pendingIndex];
+                playerParticipants[pendingIndex] = activeParticipant;
+            }
+            player.swapDaemon(0, pendingPlayerSwitchIndex);
+            if (!playerParticipants.empty())
+                playerParticipants[0] = true;
+            pendingPlayerSwitchIndex = -1;
+            return;
         }
-        player.swapDaemon(0, pendingPlayerSwitchIndex);
-        if (!playerParticipants.empty())
-            playerParticipants[0] = true;
-        pendingPlayerSwitchIndex = -1;
-        return;
+
+        if (!switchAnimIsPlayerSide && pendingOpponentSwitchIndex >= 0 && opponent != nullptr) {
+            opponent->swapDaemon(0, pendingOpponentSwitchIndex);
+            pendingOpponentSwitchIndex = -1;
+            return;
+        }
     }
 
     if (state == pendingState && eventQueue.empty() && pendingPlayerSwitchIndex >= 0) {
@@ -462,6 +498,12 @@ void Battle::transitionToQueuedState() {
         if (!playerParticipants.empty())
             playerParticipants[0] = true;
         pendingPlayerSwitchIndex = -1;
+    }
+
+    if (state == pendingState && eventQueue.empty() && pendingOpponentSwitchIndex >= 0 &&
+        opponent != nullptr) {
+        opponent->swapDaemon(0, pendingOpponentSwitchIndex);
+        pendingOpponentSwitchIndex = -1;
     }
 }
 

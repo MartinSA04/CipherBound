@@ -96,6 +96,14 @@ int main() {
                        {0, 0, 0, 0, 0, 0}, fullMoves());
     assert(fullMoveSet.firstEmptyMoveSlot() == -1);
     assert(fullMoveSet.knowsMove(1));
+    assert(fullMoveSet.useMove(0));
+    assert(fullMoveSet.getMoves()[0].currentPP == 34);
+    fullMoveSet.setStatus(StatusEffect::segfault);
+    fullMoveSet.takeDamage(5);
+    fullMoveSet.fullHeal();
+    assert(fullMoveSet.getCurrentHP() == fullMoveSet.getMaxHP());
+    assert(fullMoveSet.getStatus() == StatusEffect::none);
+    assert(fullMoveSet.getMoves()[0].currentPP == fullMoveSet.getMoves()[0].maxPP);
 
     Species statSpecies = makeSpecies(12, GrowthRate::mediumFast);
     const int level50Exp = Daemon(statSpecies, 50).getExp();

@@ -22,6 +22,8 @@ const std::vector<Daemon> &NPC::getParty() const { return party.getParty(); }
 
 int NPC::partySize() const { return party.partySize(); }
 
+void NPC::swapDaemon(int indexA, int indexB) { party.swapDaemon(indexA, indexB); }
+
 bool NPC::partyEmpty() const { return party.partyEmpty(); }
 
 void NPC::clearParty() { party.clearParty(); }

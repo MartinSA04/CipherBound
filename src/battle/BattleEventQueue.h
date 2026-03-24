@@ -14,8 +14,10 @@ class BattleEventQueue {
         captureAnimation,
         attackAnimationPlayer,
         attackAnimationOpponent,
-        switchAnimationRecall,
-        switchAnimationSendOut,
+        switchAnimationRecallPlayer,
+        switchAnimationSendOutPlayer,
+        switchAnimationRecallOpponent,
+        switchAnimationSendOutOpponent,
     };
 
     void pushMessage(std::string message);
@@ -24,7 +26,7 @@ class BattleEventQueue {
     void pushIntroAnimation();
     void pushCaptureAnimation();
     void pushAttackAnimation(bool isPlayer);
-    void pushSwitchAnimation(bool isRecall);
+    void pushSwitchAnimation(bool isRecall, bool isPlayerSide);
     void pushLevelUpResume(std::string message);
 
     bool empty() const;
@@ -32,7 +34,7 @@ class BattleEventQueue {
     void popCurrentMessage();
 
     BattleState consume(BattleState pendingState, int &introPhase, bool &attackAnimIsPlayer,
-                        bool &switchAnimIsRecall);
+                        bool &switchAnimIsRecall, bool &switchAnimIsPlayerSide);
 
   private:
     struct Event {

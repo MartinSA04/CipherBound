@@ -19,9 +19,15 @@ void BattleEventQueue::pushAttackAnimation(bool isPlayer) {
         {isPlayer ? EventType::attackAnimationPlayer : EventType::attackAnimationOpponent, {}});
 }
 
-void BattleEventQueue::pushSwitchAnimation(bool isRecall) {
-    entries.push_back(
-        {isRecall ? EventType::switchAnimationRecall : EventType::switchAnimationSendOut, {}});
+void BattleEventQueue::pushSwitchAnimation(bool isRecall, bool isPlayerSide) {
+    EventType type = EventType::switchAnimationRecallPlayer;
+    if (isPlayerSide)
+        type = isRecall ? EventType::switchAnimationRecallPlayer
+                        : EventType::switchAnimationSendOutPlayer;
+    else
+        type = isRecall ? EventType::switchAnimationRecallOpponent
+                        : EventType::switchAnimationSendOutOpponent;
+    entries.push_back({type, {}});
 }
 
 void BattleEventQueue::pushLevelUpResume(std::string message) {
@@ -43,7 +49,8 @@ void BattleEventQueue::popCurrentMessage() {
 }
 
 BattleState BattleEventQueue::consume(BattleState pendingState, int &introPhase,
-                                      bool &attackAnimIsPlayer, bool &switchAnimIsRecall) {
+                                      bool &attackAnimIsPlayer, bool &switchAnimIsRecall,
+                                      bool &switchAnimIsPlayerSide) {
     if (entries.empty())
         return pendingState;
 
@@ -72,13 +79,25 @@ BattleState BattleEventQueue::consume(BattleState pendingState, int &introPhase,
         entries.pop_front();
         attackAnimIsPlayer = false;
         return BattleState::animatingAttack;
-    case EventType::switchAnimationRecall:
+    case EventType::switchAnimationRecallPlayer:
         entries.pop_front();
         switchAnimIsRecall = true;
+        switchAnimIsPlayerSide = true;
         return BattleState::animatingSwitch;
-    case EventType::switchAnimationSendOut:
+    case EventType::switchAnimationSendOutPlayer:
         entries.pop_front();
         switchAnimIsRecall = false;
+        switchAnimIsPlayerSide = true;
+        return BattleState::animatingSwitch;
+    case EventType::switchAnimationRecallOpponent:
+        entries.pop_front();
+        switchAnimIsRecall = true;
+        switchAnimIsPlayerSide = false;
+        return BattleState::animatingSwitch;
+    case EventType::switchAnimationSendOutOpponent:
+        entries.pop_front();
+        switchAnimIsRecall = false;
+        switchAnimIsPlayerSide = false;
         return BattleState::animatingSwitch;
     }
 

@@ -24,6 +24,9 @@ class BattleRenderer {
     void drawPlayerSwitchScene(GameUI &ui, Battle &battle,
                                const BattlePresentationState &presentation,
                                int battleAnimFrame) const;
+    void drawOpponentSwitchScene(GameUI &ui, Battle &battle,
+                                 const BattlePresentationState &presentation,
+                                 int battleAnimFrame) const;
 
   private:
     struct BaseGeometry {

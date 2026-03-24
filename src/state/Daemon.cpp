@@ -324,6 +324,10 @@ void Daemon::heal(int amount) { currentHP = std::min(getMaxHP(), currentHP + amo
 void Daemon::fullHeal() {
     currentHP = getMaxHP();
     status = StatusEffect::none;
+    for (MoveSlot &moveSlot : moves) {
+        if (moveSlot.moveId >= 0)
+            moveSlot.currentPP = moveSlot.maxPP;
+    }
 }
 
 bool Daemon::isFainted() const { return currentHP <= 0; }

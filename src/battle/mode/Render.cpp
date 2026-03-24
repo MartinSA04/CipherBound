@@ -121,7 +121,10 @@ void BattleMode::render(GameContext &ctx) {
     }
 
     if (bs == BattleState::animatingSwitch) {
-        battleRenderer.drawPlayerSwitchScene(ctx.ui, battle, presentation, battleAnimFrame);
+        if (battle.isSwitchPlayerSide())
+            battleRenderer.drawPlayerSwitchScene(ctx.ui, battle, presentation, battleAnimFrame);
+        else
+            battleRenderer.drawOpponentSwitchScene(ctx.ui, battle, presentation, battleAnimFrame);
         return;
     }
 

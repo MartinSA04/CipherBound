@@ -48,5 +48,49 @@ int main() {
     assert(fatalisk.secondaryType == ElementType::chaotic);
     assert(fatalisk.evolutions.empty());
 
+    const Species &fibonib = pokedex.getSpecies(10);
+    assert(fibonib.name == "Fibonib");
+    assert(fibonib.primaryType == ElementType::recursive);
+    assert(fibonib.secondaryType == ElementType::algebraic);
+    assert(fibonib.evolutions.size() == 1);
+    assert(fibonib.evolutions[0].targetSpeciesId == 11);
+    assert(fibonib.evolutions[0].levelRequired == 16);
+
+    const Species &rabbonacci = pokedex.getSpecies(11);
+    assert(rabbonacci.name == "Rabbonacci");
+    assert(rabbonacci.primaryType == ElementType::recursive);
+    assert(rabbonacci.secondaryType == ElementType::algebraic);
+    assert(rabbonacci.evolutions.size() == 1);
+    assert(rabbonacci.evolutions[0].targetSpeciesId == 12);
+    assert(rabbonacci.evolutions[0].levelRequired == 32);
+
+    const Species &mandelhare = pokedex.getSpecies(12);
+    assert(mandelhare.name == "Mandelhare");
+    assert(mandelhare.primaryType == ElementType::recursive);
+    assert(mandelhare.secondaryType == ElementType::chaotic);
+    assert(mandelhare.evolutions.empty());
+
+    const Species &isotad = pokedex.getSpecies(13);
+    assert(isotad.name == "Isotad");
+    assert(isotad.primaryType == ElementType::radioactive);
+    assert(isotad.secondaryType == ElementType::radioactive);
+    assert(isotad.evolutions.size() == 1);
+    assert(isotad.evolutions[0].targetSpeciesId == 14);
+    assert(isotad.evolutions[0].levelRequired == 16);
+
+    const Species &raditoad = pokedex.getSpecies(14);
+    assert(raditoad.name == "Raditoad");
+    assert(raditoad.primaryType == ElementType::radioactive);
+    assert(raditoad.secondaryType == ElementType::nuclear);
+    assert(raditoad.evolutions.size() == 1);
+    assert(raditoad.evolutions[0].targetSpeciesId == 15);
+    assert(raditoad.evolutions[0].levelRequired == 32);
+
+    const Species &meltoad = pokedex.getSpecies(15);
+    assert(meltoad.name == "Meltoad");
+    assert(meltoad.primaryType == ElementType::nuclear);
+    assert(meltoad.secondaryType == ElementType::thermal);
+    assert(meltoad.evolutions.empty());
+
     return 0;
 }

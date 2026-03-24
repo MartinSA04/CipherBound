@@ -55,9 +55,8 @@ background_overlay|assets/tilesets/pallet_town/maps/overworld_overlay.png
 
 [encounters]
 # Format: speciesId|minLevel|maxLevel|weight
-1|2|5|40
-4|2|4|30
-7|3|5|20
+10|2|4|55
+13|2|5|45
 
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party

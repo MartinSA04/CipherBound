@@ -79,12 +79,10 @@ background_overlay|assets/tilesets/route_1/route_1_overlay.png
 
 [encounters]
 # Format: speciesId|minLevel|maxLevel|weight
-1|2|5|40
-
-# 4|2|4|30
-# 7|3|5|20
+10|2|4|55
+13|2|5|45
 
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue stages separated by @@, each can have flag? prefix
-route1_trainer1|Bug Catcher|trainer|10|24|up|4|defeated_route1_trainer1?I can't believe I lost...@@Hey! You have Daemons too?;Let's battle!|bug_catcher|1:4
+route1_trainer1|Field Student|trainer|10|24|up|4|defeated_route1_trainer1?I can't believe I lost...@@Hey! You have Daemons too?;Let's battle!|bug_catcher|13:4

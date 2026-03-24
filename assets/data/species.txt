@@ -27,23 +27,17 @@
 
 
 
-#10|Photon|electromagnetic|electromagnetic|40|35|35|60|50|70|45|64|2:1,18:7|11:16
-#11|Maxwellia|electromagnetic|quantum|55|50|50|80|70|85|45|142|2:1,18:1,3:10|none
-#12|Qubit|quantum|quantum|44|40|40|62|55|55|45|64|3:1,16:6|13:16
-#13|Superposer|quantum|probabilistic|59|55|55|82|75|70|45|142|3:1,16:1,10:8|none
-#
-## Math Daemons
-#14|Fibonacchi|algebraic|recursive|50|45|50|55|55|45|120|50|8:1,14:8|none
-#15|Eigenmo|algebraic|algebraic|55|50|60|65|65|40|120|50|8:1,9:6|none
-#16|Chaotica|chaotic|probabilistic|48|42|42|58|48|62|100|55|15:1,10:5|none
-#
-## CS Daemons
-#17|Boolbit|logic|digital|42|35|45|58|60|50|150|45|12:1,13:5|none
-#18|Sortex|algorithmic|algorithmic|50|60|50|45|45|55|150|45|11:1,17:7|none
-#
-#19|Ohmlet|electromagnetic|electromagnetic|45|55|45|40|40|50|45|64|1:1,11:5|none
+# Recursive field line
+10|Fibonib|recursive|recursive|48|42|44|52|50|54|180|60|8:1,14:7|11:16|mediumFast|0,0,0,0,0,1
+11|Rabbonacci|recursive|recursive|63|57|59|68|65|69|90|128|8:1,14:1|12:32|mediumFast|0,0,0,1,0,1
+12|Mandelhare|recursive|chaotic|81|72|74|94|82|96|45|170|8:1,14:1,15:1|none|mediumFast|0,0,0,2,0,1
 
-# ideas: Maxwelder (electromagnetic, thermal), Assembler (digital, algorithmic), Gausstrophobe (calculus, chaotic)
+# Radioactive marsh line
+13|Isotad|radioactive|radioactive|46|48|47|52|50|42|180|60|5:1|14:16|mediumFast|0,0,0,1,0,0
+14|Raditoad|radioactive|nuclear|61|64|62|68|66|54|90|128|5:1,4:10|15:32|mediumFast|0,0,0,2,0,0
+15|Meltoad|nuclear|thermal|82|79|75|95|83|64|45|170|4:1,5:1,6:36,20:44|none|mediumFast|0,0,0,3,0,0
+
+# ideas: Voltridge, Ampheasant, Qwailent, Posteriowl
 
 #starters:
 # Bulbulum (classical) -> Newtonion (classical) -> Gravitonion (gravitational | quantum)

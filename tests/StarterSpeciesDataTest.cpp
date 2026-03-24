@@ -51,7 +51,7 @@ int main() {
     const Species &fibonib = pokedex.getSpecies(10);
     assert(fibonib.name == "Fibonib");
     assert(fibonib.primaryType == ElementType::recursive);
-    assert(fibonib.secondaryType == ElementType::algebraic);
+    assert(fibonib.secondaryType == ElementType::recursive);
     assert(fibonib.evolutions.size() == 1);
     assert(fibonib.evolutions[0].targetSpeciesId == 11);
     assert(fibonib.evolutions[0].levelRequired == 16);
@@ -59,7 +59,7 @@ int main() {
     const Species &rabbonacci = pokedex.getSpecies(11);
     assert(rabbonacci.name == "Rabbonacci");
     assert(rabbonacci.primaryType == ElementType::recursive);
-    assert(rabbonacci.secondaryType == ElementType::algebraic);
+    assert(rabbonacci.secondaryType == ElementType::recursive);
     assert(rabbonacci.evolutions.size() == 1);
     assert(rabbonacci.evolutions[0].targetSpeciesId == 12);
     assert(rabbonacci.evolutions[0].levelRequired == 32);
@@ -91,6 +91,28 @@ int main() {
     assert(meltoad.primaryType == ElementType::nuclear);
     assert(meltoad.secondaryType == ElementType::thermal);
     assert(meltoad.evolutions.empty());
+
+    const Species &ohmlet = pokedex.getSpecies(16);
+    assert(ohmlet.name == "Ohmlet");
+    assert(ohmlet.primaryType == ElementType::electromagnetic);
+    assert(ohmlet.secondaryType == ElementType::electromagnetic);
+    assert(ohmlet.evolutions.size() == 1);
+    assert(ohmlet.evolutions[0].targetSpeciesId == 17);
+    assert(ohmlet.evolutions[0].levelRequired == 16);
+
+    const Species &voltridge = pokedex.getSpecies(17);
+    assert(voltridge.name == "Voltridge");
+    assert(voltridge.primaryType == ElementType::electromagnetic);
+    assert(voltridge.secondaryType == ElementType::electromagnetic);
+    assert(voltridge.evolutions.size() == 1);
+    assert(voltridge.evolutions[0].targetSpeciesId == 18);
+    assert(voltridge.evolutions[0].levelRequired == 32);
+
+    const Species &ampheasant = pokedex.getSpecies(18);
+    assert(ampheasant.name == "Ampheasant");
+    assert(ampheasant.primaryType == ElementType::electromagnetic);
+    assert(ampheasant.secondaryType == ElementType::quantum);
+    assert(ampheasant.evolutions.empty());
 
     return 0;
 }

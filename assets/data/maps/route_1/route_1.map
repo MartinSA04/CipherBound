@@ -79,8 +79,9 @@ background_overlay|assets/tilesets/route_1/route_1_overlay.png
 
 [encounters]
 # Format: speciesId|minLevel|maxLevel|weight
-10|2|4|55
-13|2|5|45
+10|2|4|40
+13|2|5|35
+16|3|5|25
 
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party

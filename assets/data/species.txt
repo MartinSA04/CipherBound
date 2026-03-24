@@ -37,7 +37,12 @@
 14|Raditoad|radioactive|nuclear|61|64|62|68|66|54|90|128|5:1,4:10|15:32|mediumFast|0,0,0,2,0,0
 15|Meltoad|nuclear|thermal|82|79|75|95|83|64|45|170|4:1,5:1,6:36,20:44|none|mediumFast|0,0,0,3,0,0
 
-# ideas: Voltridge, Ampheasant, Qwailent, Posteriowl
+# Electromagnetic aviary line
+16|Ohmlet|electromagnetic|electromagnetic|45|40|45|60|50|68|180|60|2:1,18:7|17:16|mediumFast|0,0,0,0,0,1
+17|Voltridge|electromagnetic|electromagnetic|60|55|60|80|70|86|90|128|2:1,18:1|18:32|mediumFast|0,0,0,1,0,1
+18|Ampheasant|electromagnetic|quantum|78|68|72|104|90|109|45|170|2:1,18:1,3:1,16:38|none|mediumFast|0,0,0,2,0,1
+
+# ideas: Qwailent, Posteriowl, Tortoise-O
 
 #starters:
 # Bulbulum (classical) -> Newtonion (classical) -> Gravitonion (gravitational | quantum)

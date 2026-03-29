@@ -28,5 +28,5 @@ background_overlay|assets/tilesets/viridian_town/maps/academy_overlay.png
 
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
-# Dialogue stages separated by @@, each can have flag? prefix
-academy_archivist|Archivist|normal|2|3|right|0|academy_archive_searched?So the terminal spoke to you too.;Keep that badge visible if anyone asks.@@The archive only opens sealed transfer logs to badge holders.;If a record feels missing, check the reassignment ledger first.|girl|
+# Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
+academy_archivist|Archivist|normal|2|3|right|0|dialogue:assets/data/dialogue/viridian_town/academy_archivist.npcdialogue|girl|

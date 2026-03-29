@@ -29,7 +29,7 @@ background_overlay|assets/tilesets/center_overlay.png
 
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
-# Dialogue stages separated by @@, each can have flag? prefix
-viridian_center_healer|Nurse|healer|7|3|down|0|We've restored your party to full health!|@hidden|
+# Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
+viridian_center_healer|Nurse|healer|7|3|down|0|dialogue:assets/data/dialogue/viridian_town/viridian_center_healer.npcdialogue|@hidden|
 viridian_center_nurse_dummy|Nurse|normal|7|2|down|0||girl|
 pc_viridian_center|PC|pc|11|1|down|0||-|

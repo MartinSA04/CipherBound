@@ -85,5 +85,5 @@ background_overlay|assets/tilesets/route_1/route_1_overlay.png
 
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
-# Dialogue stages separated by @@, each can have flag? prefix
-route1_trainer1|Field Student|trainer|10|24|up|4|defeated_route1_trainer1?That confidence disappeared fast.@@First year, right?;Then let's do this properly.;Battle me!|bug_catcher|13:4
+# Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
+route1_trainer1|Field Student|trainer|10|24|up|4|dialogue:assets/data/dialogue/route_1/route1_trainer1.npcdialogue|bug_catcher|13:4

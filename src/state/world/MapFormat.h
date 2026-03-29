@@ -33,6 +33,7 @@ struct NPCDefinition {
     std::string name;                          ///< Display name shown in dialogue and battles.
     NPCType type{NPCType::normal};             ///< NPC role classification.
     bool hidden{false};                        ///< Whether the NPC starts hidden.
+    std::string dialogueSourcePath;            ///< Optional external dialogue file path.
     Position position{0, 0};                   ///< Initial tile position.
     Direction facing{Direction::down};         ///< Initial facing direction.
     int sightRange{0};                         ///< Trainer detection range in tiles.

@@ -10,6 +10,8 @@ using StringUtils::trimRightInPlace;
 namespace MapFormat {
 namespace {
 
+constexpr std::string_view dialogueSourcePrefix = "dialogue:";
+
 struct NPCSpriteSpec {
     std::string spriteType;
     bool hidden{false};
@@ -136,7 +138,10 @@ std::optional<NPCDefinition> parseNPC(std::string_view line) {
     npc.position = {(*coords)[0], (*coords)[1]};
     npc.facing = parseDirection(std::string(parts[5]));
     npc.sightRange = *sightRange;
-    npc.dialogueStages = parseDialogueStages(parts[7]);
+    if (parts[7].rfind(dialogueSourcePrefix, 0) == 0)
+        npc.dialogueSourcePath = std::string(parts[7].substr(dialogueSourcePrefix.size()));
+    else
+        npc.dialogueStages = parseDialogueStages(parts[7]);
     const NPCSpriteSpec spriteSpec = parseNPCSpriteSpec(parts[8]);
     npc.spriteType = spriteSpec.spriteType;
     npc.hidden = spriteSpec.hidden;

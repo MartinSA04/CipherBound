@@ -74,6 +74,7 @@ state_src = [
   'src/state/NPC.cpp',
   'src/state/Map.cpp',
   'src/state/World.cpp',
+  'src/state/world/NPCDialogueFormat.cpp',
   'src/state/world/MapLoading.cpp',
   'src/state/world/MapFormat.cpp',
   'src/state/world/NPCs.cpp',
@@ -186,6 +187,16 @@ doxygen_prog = find_program('doxygen', required : false)
 dot_prog = find_program('dot', required : false)
 
 if get_option('build_tests')
+  npc_dialogue_format_test = executable(
+    'npc_dialogue_format_test',
+    [
+      'tests/NPCDialogueFormatTest.cpp',
+      'src/state/world/NPCDialogueFormat.cpp',
+    ],
+  )
+
+  test('npc_dialogue_format', npc_dialogue_format_test)
+
   string_utils_test = executable(
     'string_utils_test',
     'tests/common/StringUtilsTest.cpp'
@@ -515,6 +526,7 @@ if get_option('build_tests')
       'src/state/World.cpp',
       'src/state/world/Encounters.cpp',
       'src/state/world/MapFormat.cpp',
+      'src/state/world/NPCDialogueFormat.cpp',
       'src/state/world/MapLoading.cpp',
       'src/state/world/NPCs.cpp',
       'src/state/player/DaemonDex.cpp',

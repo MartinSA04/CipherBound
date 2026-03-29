@@ -60,8 +60,8 @@ background_overlay|assets/tilesets/pallet_town/maps/overworld_overlay.png
 
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
-# Dialogue stages separated by @@, each can have flag? prefix
-pallet_girl|Girl|normal|10|9|down|0|Welcome to the student village.;It's been quiet lately.;Almost too quiet.;The strangest place left is Bart Iver's old lab.;People say he talks about an old language;hidden inside Daemons.|girl|
-pallet_sign|Sign|normal|9|11|down|0|Pallet Student Accommodation.|@hidden|
-pallet_sign_2|You|normal|5|14|down|0|The sign is old and barely readable.;It says: Bart Iver Research Group.;So this whole block used to be faculty property,; before it became student housing.|@hidden|
-pallet_mailbox|You|normal|4|7|down|0|read_mail?There is no new mail.@@My schedule isn't here.;Just an unmarked envelope.;I should probably ignore this...;\"Sorry for writing instead of speaking.;No one can see us together.;Come to my lab around the corner and I'll explain.\";Bart Iver?;This is strange, but it sounds important.|@hidden|
+# Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
+pallet_girl|Girl|normal|10|9|down|0|dialogue:assets/data/dialogue/pallet_town/pallet_girl.npcdialogue|girl|
+pallet_sign|Sign|normal|9|11|down|0|dialogue:assets/data/dialogue/pallet_town/pallet_sign.npcdialogue|@hidden|
+pallet_sign_2|You|normal|5|14|down|0|dialogue:assets/data/dialogue/pallet_town/pallet_sign_2.npcdialogue|@hidden|
+pallet_mailbox|You|normal|4|7|down|0|dialogue:assets/data/dialogue/pallet_town/pallet_mailbox.npcdialogue|@hidden|

@@ -2,6 +2,7 @@
 #include "../../game_data/Pokedex.h"
 #include "../World.h"
 #include "MapFormat.h"
+#include "NPCDialogueFormat.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -67,6 +68,22 @@ std::vector<std::filesystem::path> discoverMapFiles(const std::filesystem::path 
     return mapFiles;
 }
 
+std::filesystem::path resolveDialoguePath(const std::filesystem::path &mapPath,
+                                          const std::string &dialogueSourcePath) {
+    if (dialogueSourcePath.empty())
+        return {};
+
+    const std::filesystem::path rawPath(dialogueSourcePath);
+    if (rawPath.is_absolute())
+        return rawPath;
+
+    const std::filesystem::path mapRelative = mapPath.parent_path() / rawPath;
+    if (std::filesystem::exists(mapRelative))
+        return mapRelative;
+
+    return FilePaths::resolveExistingPath(rawPath);
+}
+
 } // namespace
 
 std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pokedex) {
@@ -120,7 +137,30 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
         npc->setFacing(npcDefinition.facing);
         npc->setSightRange(npcDefinition.sightRange);
 
-        for (const auto &stage : npcDefinition.dialogueStages)
+        std::vector<DialogueStage> dialogueStages = npcDefinition.dialogueStages;
+        if (!npcDefinition.dialogueSourcePath.empty()) {
+            const std::filesystem::path dialoguePath =
+                resolveDialoguePath(path, npcDefinition.dialogueSourcePath);
+            std::ifstream dialogueFile(dialoguePath);
+            if (!dialogueFile.is_open()) {
+                throw std::runtime_error("Cannot open NPC dialogue file: " +
+                                         dialoguePath.string());
+            }
+
+            const auto parsedDialogue = NPCDialogueFormat::parse(dialogueFile);
+            for (const auto &warning : parsedDialogue.warnings) {
+                std::cerr << "MapLoading(" << path.string() << ", npc=" << npcDefinition.id
+                          << "): " << warning << "\n";
+            }
+            if (!parsedDialogue.valid()) {
+                throw std::runtime_error("Invalid NPC dialogue file for '" + npcDefinition.id +
+                                         "': " + dialoguePath.string());
+            }
+
+            dialogueStages = parsedDialogue.stages;
+        }
+
+        for (const auto &stage : dialogueStages)
             npc->addDialogueStage(stage.requiredFlag, stage.lines);
 
         for (const auto &entry : npcDefinition.party) {

@@ -21,7 +21,7 @@ player_spawn|1|2
 broken|entry
 [npcs]
 guide|Guide|normal|1|1|left|0|hello there@@quest_done?thanks for helping@@Hey! You have Daemons too?;Let's battle!|villager_f@hidden|
-trainer_1|Trainer|trainer|2|2|up|4|Ready?;Let's battle!|bart_iver|1:5,7:8
+trainer_1|Trainer|trainer|2|2|up|4|dialogue:assets/data/dialogue/test/trainer_1.npcdialogue|bart_iver|1:5,7:8
 )");
 
     const MapFormat::ParseResult parsed = MapFormat::parse(input);
@@ -61,6 +61,8 @@ trainer_1|Trainer|trainer|2|2|up|4|Ready?;Let's battle!|bart_iver|1:5,7:8
     assert(trainer.type == NPCType::trainer);
     assert(!trainer.hidden);
     assert(trainer.sightRange == 4);
+    assert(trainer.dialogueStages.empty());
+    assert(trainer.dialogueSourcePath == "assets/data/dialogue/test/trainer_1.npcdialogue");
     assert(trainer.party.size() == 2);
     assert(trainer.party[0].speciesId == 1);
     assert(trainer.party[1].level == 8);

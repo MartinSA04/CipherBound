@@ -28,6 +28,6 @@ background_overlay|assets/tilesets/viridian_town/maps/npc_house_overlay.png
 
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
-# Dialogue stages separated by @@, each can have flag? prefix
-viridian_resident1|Resident|normal|3|3|down|0|Math faculty students rent half this block.;They still leave proofs on the kitchen table.|girl|
-viridian_resident2|Resident|normal|8|3|left|0|Tip: heal before a faculty challenge.;The center is faster than a long walk home.|bug_catcher|
+# Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
+viridian_resident1|Resident|normal|3|3|down|0|dialogue:assets/data/dialogue/viridian_town/viridian_resident1.npcdialogue|girl|
+viridian_resident2|Resident|normal|8|3|left|0|dialogue:assets/data/dialogue/viridian_town/viridian_resident2.npcdialogue|bug_catcher|

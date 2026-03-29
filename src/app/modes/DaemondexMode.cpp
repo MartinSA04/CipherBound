@@ -29,16 +29,13 @@ void DaemondexMode::update(GameContext &ctx, InputManager &input) {
         }
 
         if (input.isConfirmPressed()) {
-            int speciesId = selected + 1;
-            const Player &player = ctx.world.getPlayer();
-            if (player.hasSeen(speciesId)) {
-                ctx.playSound(SoundEffect::select);
-                subState = SubState::detail;
-            }
+            ctx.playSound(SoundEffect::select);
+            subState = SubState::detail;
         }
         break;
     }
     case SubState::detail: {
+        ctx.ui.navigateVertical(selected, totalEntries);
         if (input.isCancelPressed() || input.isConfirmPressed()) {
             subState = SubState::list;
         }
@@ -166,6 +163,12 @@ void DaemondexMode::drawDetail(GameContext &ctx) {
     std::string numStr = std::to_string(speciesId);
     while (numStr.size() < 3)
         numStr = "0" + numStr;
+
+    if (!player.hasSeen(speciesId)) {
+        std::string header = "No." + numStr + "  ???";
+        font.drawText(renderer, header, 12 * scale, 10 * scale, scale);
+        return;
+    }
     std::string header = "No." + numStr + "  " + sp.name;
     font.drawText(renderer, header, 12 * scale, 10 * scale, scale);
 

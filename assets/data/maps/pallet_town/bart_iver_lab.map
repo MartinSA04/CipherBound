@@ -33,8 +33,8 @@ background_overlay|assets/tilesets/pallet_town/maps/bart_iver_lab_overlay.png
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue stages separated by @@, each can have flag? prefix
-prof_bart_iver|Prof. Bart Iver|questGiver|6|3|down|0|has_starter?Did you get it yet?; Go to the faculty and retrieve it.; I will tell you more then.@@Come on, choose a Daemon!|bart_iver|
+prof_bart_iver|Prof. Bart Iver|questGiver|6|3|down|0|academy_archive_searched?Applied Physics took the next fragment.;We move carefully from here, not blindly.@@bart_concordance_reveal_done?The academy archive should have the transfer ledger by now.;Take the Foundations Badge and search the restricted records.@@has_starter?The first faculty is still holding part of my confiscated archive.;Bring back anything sealed under my old faculty mark.@@Choose carefully.;Whichever Daemon you take from this table will carry you through the first faculty.|bart_iver|
 
-pokeball_1|Pokeball|normal|8|4|down|0|has_starter?The Pokeball is empty.@@Bulbulum, the classical Daemon.;It manipulates classical forces with ease.|-|
-pokeball_2|Pokeball|normal|9|4|down|0|has_starter?The Pokeball is empty.@@Abacub, the algebraic Daemon.;It shapes neat structures out of pure theory.|-|
-pokeball_3|Pokeball|normal|10|4|down|0|has_starter?The Pokeball is empty.@@Bugbit, the digital Daemon.;It turns tiny glitches into dangerous attacks.|-|
+pokeball_1|Pokeball|normal|8|4|down|0|has_starter?The capsule is empty.@@Bulbulum, the classical Daemon.;Steady, forceful, and precise.|-|
+pokeball_2|Pokeball|normal|9|4|down|0|has_starter?The capsule is empty.@@Abacub, the algebraic Daemon.;Elegant, disciplined, and relentlessly structured.|-|
+pokeball_3|Pokeball|normal|10|4|down|0|has_starter?The capsule is empty.@@Bugbit, the digital Daemon.;Fast, unstable, and far sharper than it looks.|-|

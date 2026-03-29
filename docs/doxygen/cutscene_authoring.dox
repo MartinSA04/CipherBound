@@ -36,6 +36,8 @@
  * - `wait|frames`
  * - `sync`
  * - `flag|name`
+ * - `badge|name`
+ * - `item|id|qty`
  * - `hide|npc_id`
  * - `show|npc_id`
  *

@@ -1,0 +1,18 @@
+# First faculty aftermath after defeating Marius Thaule.
+
+[header]
+id|first_faculty_aftermath
+
+[steps]
+say|Marius Thaule|Enough.;You didn't come here for a routine student exercise.;Bart Iver sent you.
+say|Marius Thaule|Then hear me clearly.;He was removed because he would not stop.;Not because he was easy to ignore.
+say|Marius Thaule|Still, you beat every assistant I put in your path, and then you beat me.;That earns you this.
+badge|Foundations Badge
+flag|got_foundations_badge
+say|Marius Thaule|The Foundations Badge is more than a trophy.;It opens doors this faculty normally keeps shut.
+say|Marius Thaule|There is one more thing.;A sealed index page from Bart Iver's confiscated Concordance.
+item|8|1
+flag|received_concordance_index
+say|Marius Thaule|I was ordered to keep it out of his hands.;Now I am placing that choice on you instead.
+say|Marius Thaule|If you carry it back to Bart, do it knowing this was never a harmless errand.
+flag|first_faculty_aftermath_done

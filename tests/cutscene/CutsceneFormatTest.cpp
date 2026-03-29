@@ -3,12 +3,14 @@
 #include <sstream>
 
 int main() {
-    std::istringstream input(R"([header]
+std::istringstream input(R"([header]
 id|intro_scene
 [steps]
 move|player|3|4
 say|Professor|Line one;Line two
 wait|30
+badge|Foundations Badge
+item|8|1
 sync
 bad_step|ignored
 )");
@@ -17,7 +19,7 @@ bad_step|ignored
     assert(parsed.valid());
     assert(parsed.warnings.size() == 1);
     assert(parsed.cutscene.id == "intro_scene");
-    assert(parsed.cutscene.steps.size() == 4);
+    assert(parsed.cutscene.steps.size() == 6);
 
     assert(parsed.cutscene.steps[0].type == CutsceneStep::Type::move);
     assert(parsed.cutscene.steps[0].target == "player");
@@ -30,5 +32,10 @@ bad_step|ignored
 
     assert(parsed.cutscene.steps[2].type == CutsceneStep::Type::wait);
     assert(parsed.cutscene.steps[2].frames == 30);
-    assert(parsed.cutscene.steps[3].type == CutsceneStep::Type::sync);
+    assert(parsed.cutscene.steps[3].type == CutsceneStep::Type::badge);
+    assert(parsed.cutscene.steps[3].badgeName == "Foundations Badge");
+    assert(parsed.cutscene.steps[4].type == CutsceneStep::Type::item);
+    assert(parsed.cutscene.steps[4].itemId == 8);
+    assert(parsed.cutscene.steps[4].itemQuantity == 1);
+    assert(parsed.cutscene.steps[5].type == CutsceneStep::Type::sync);
 }

@@ -140,6 +140,7 @@ CI validates the docs on pushes and pull requests. Pushes to `main` also publish
 - **Daemon sprites** — Some Daemon sprite artwork was generated with the help of AI image generation tools.
 - **Emscripten/web build setup** — AI coding assistance (GitHub Copilot) was used to help configure the Meson build system for Emscripten cross-compilation, create the custom HTML shell template, and resolve compatibility issues (main loop adaptation, font system fallbacks, exception handling flags).
 - **Testing and restructuring help** — AI coding assistance, including OpenAI Codex, was also used to help set up automated tests and CI checks, and to suggest parts of the codebase restructuring and cleanup work (for example session coordination, battle support code extraction, parser cleanup, and typed cross-mode requests).
+- **Story development** — AI assistance was also used to help brainstorm and refine story beats, character hooks, and story documentation for the game's narrative direction.
 - **Documentation** — Some contributor-facing documentation text, Doxygen comments, and documentation pages were drafted with AI assistance and are rendered into the docs site by Doxygen. These generated docs are intended as maintained project documentation, not as an automatically trusted source of truth.
 - **Best practices** — ChatGPT and OpenAI Codex has been used to figure out best code practices, and as help to find useful methods in the standard library. In Addition to helping with more advanced syntax.
 

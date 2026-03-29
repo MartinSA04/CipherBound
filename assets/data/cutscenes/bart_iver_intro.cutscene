@@ -26,25 +26,23 @@ move|prof_bart_iver|6|6
 sync
 
 say|???|Ah, there you are!;I've been waiting for you.
-say|???|Welcome to my lab!;I am Professor Bart Iver.
+say|???|Welcome to my lab.;I am Professor Bart Iver.
 
-say|Prof. Bart Iver|You're probably wondering what's going on.;I can assure you all will be explained.
-say|Prof. Bart Iver|First of all, sorry for all the secrecy.;But you can never be too careful these days.
-say|Prof. Bart Iver|To get to the point... I need your help.;
+say|Prof. Bart Iver|You deserve an explanation.;Just not the whole of it, not yet.
+say|Prof. Bart Iver|I asked you here in secret because the university dismissed me.;Officially for misconduct.;Unofficially for getting too close to something they wanted buried.
+say|Prof. Bart Iver|They seized my notes, sealed my archive,;and banned me from campus.;So I need someone they are still willing to underestimate.
 
-say|You|With what exactly?;And why can't we be seen talking with each other?
+say|You|And that someone is me?;Why?
 
-say|Prof. Bart Iver|Well, about that...;The university leadership has fired me,;and doesn't want me interacting with the students anymore.
-say|Prof. Bart Iver|Now, back to the issue. I need your help.;Since they fired me, I am not allowed on campus anymore.
-say|Prof. Bart Iver|That's where you come in...;When they fired me they took something very important.;I will explain what later...
-say|Prof. Bart Iver|For now I just need you to trust me.;If you do, I can help you with your ambition.;To find out what Daemons actually are.
+say|Prof. Bart Iver|Because you are already asking the question they fear most.;What Daemons actually are.
+say|Prof. Bart Iver|The first faculty is holding part of what they confiscated from me.;Bring back anything sealed from my archive, and I will tell you why it matters.
+say|Prof. Bart Iver|Expect resistance.;The university has turned knowledge into a gauntlet, and every faculty now plays its part.
 
-say|You|H-H-How do you know about that?
+say|You|How do you know that's what I want?
 
-say|Prof. Bart Iver|That's not important.;I need you to go to the first faculty and get what they took from me.
-say|Prof. Bart Iver|But be careful, they won't give it up without a fight.
+say|Prof. Bart Iver|Because questions leave traces.;Yours did.
 
-say|Prof. Bart Iver|Anyways, to help you on your journey through university,;I have gathered some rather rare Daemons.;Come! Follow me!
+say|Prof. Bart Iver|Still, I will not send you there empty-handed.;I kept three rare Daemons hidden from the inventory sweep.;Come, choose one.
 
 move|prof_bart_iver|7|4
 move|player|6|6
@@ -55,9 +53,9 @@ face|player|up
 
 wait|30
 
-say|Prof. Bart Iver|On this table are three Daemons.;Each one is unique and powerful.
-say|Prof. Bart Iver|Bulbulum manipulates classical forces.;Abacub bends algebra into reality.;Bugbit weaponizes digital chaos.
-say|Prof. Bart Iver|Go ahead - pick one!
+say|Prof. Bart Iver|On this table are three Daemons.;Each responds to a different way of seeing the world.
+say|Prof. Bart Iver|Bulbulum commands classical force.;Abacub shapes algebra into structure.;Bugbit thrives on digital instability.
+say|Prof. Bart Iver|Choose carefully.;The Daemon you take from this room will shape everything that follows.
 
 wait|30
 

@@ -35,7 +35,7 @@ background|assets/tilesets/viridian_town/maps/viridian_faculty.png
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue stages separated by @@, each can have flag? prefix
-faculty_trainer1|TA Ingrid|trainer|4|10|right|3|defeated_faculty_trainer1?Recurrence isn't so scary after all.@@If you can solve one case, you can solve them all.;Let's see if you can solve mine!|girl|10:5
-faculty_trainer2|TA Rolf|trainer|3|8|right|3|defeated_faculty_trainer2?Guess I should have worn lead gloves.@@Careful around the lab tanks.;The specimens bite back.|bug_catcher|13:5
-faculty_trainer3|TA Liv|trainer|9|8|left|3|defeated_faculty_trainer3?Static got grounded.@@We've been calibrating charge all day.;Show me your control!|girl|16:6
-faculty_leader|Marius Thaule|gymLeader|6|5|down|0|defeated_faculty_leader?You have earned the faculty badge.@@Theory is easy.;Control under pressure is what matters.;Let's see what you've learned.|bart_iver|11:8,14:8,17:9
+faculty_trainer1|TA Ingrid|trainer|4|10|right|3|defeated_faculty_trainer1?You solved the recurrence before I could.@@If you can handle one base case, prove you can handle the rest.;Show me your line of reasoning!|girl|10:5
+faculty_trainer2|TA Rolf|trainer|3|8|right|3|defeated_faculty_trainer2?I should have kept the shielding on.@@These tanks train radioactive lineages.;Let's see how well you handle unstable material.|bug_catcher|13:5
+faculty_trainer3|TA Liv|trainer|9|8|left|3|defeated_faculty_trainer3?So much for perfect charge balance.@@We've been calibrating field response all morning.;Show me how steady your control really is.|girl|16:6
+faculty_leader|Marius Thaule|gymLeader|6|5|down|0|academy_archive_searched?So the archive pointed you onward.;Then Viridian was only your first threshold.@@bart_concordance_reveal_done?The archive will have the transfer record by now.;Take the badge seriously, and whatever you find there even more seriously.@@first_faculty_aftermath_done?I gave you warning enough.;What you carry back to Bart is your decision now.@@defeated_faculty_leader?You proved your control.;That does not mean you understand what you have stepped into.@@I know why Bart sent you.;If you want what he lost, defeat me and earn it.|bart_iver|11:8,14:8,17:9

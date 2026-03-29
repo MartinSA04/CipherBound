@@ -2,6 +2,20 @@
 #include "../game_data/Pokedex.h"
 #include "../state/World.h"
 
+namespace {
+
+constexpr const char *bartIntroCutscenePath = "assets/data/cutscenes/bart_iver_intro.cutscene";
+constexpr const char *firstFacultyAftermathCutscenePath =
+    "assets/data/cutscenes/first_faculty_aftermath.cutscene";
+constexpr const char *rivalInterceptCutscenePath =
+    "assets/data/cutscenes/rival_intercept.cutscene";
+constexpr const char *bartConcordanceRevealCutscenePath =
+    "assets/data/cutscenes/bart_concordance_reveal.cutscene";
+constexpr const char *academyArchiveCutscenePath =
+    "assets/data/cutscenes/academy_archive.cutscene";
+
+} // namespace
+
 std::optional<int> StoryManager::starterSpeciesIdForChoiceContext(const std::string &context) {
     if (context == "pokeball_1")
         return 1;
@@ -47,11 +61,12 @@ StoryAction StoryManager::onChoiceSelected(const std::string &context, int choic
         world.getPlayer().addDaemon(starter);
         world.getPlayer().setFlag("has_starter");
 
-        // Show confirmation dialogue
         return StoryAction::showDialogue(
-            "Prof. Bart Iver", {"So you chose " + species.name + "!", "Take good care of it.",
-                                "Go to the first faculty and retrieve what's mine.",
-                                "I promise you that everything will be explained."});
+            "Prof. Bart Iver",
+            {"Then " + species.name + " it is.",
+             "Take care of it, and it will carry you farther than lectures ever could.",
+             "Go to the first faculty and bring back anything sealed from my confiscated archive.",
+             "When you return, I'll tell you why they were so desperate to bury it."});
     }
 
     // Default: return to previous state
@@ -62,23 +77,25 @@ StoryAction StoryManager::checkWarp(const WarpPoint &warp, Player &player) {
 
     if (warp.targetMapId == "route_1") {
         if (!player.hasFlag("read_mail")) {
-            return StoryAction::blockWarp({"I need to get my schedule in the mail first.",
-                                           "I won't know where to go without it."});
+            return StoryAction::blockWarp(
+                {"I should check my mailbox first.", "If my schedule's there, I need it."});
         }
 
         if (!player.hasFlag("bart_iver_intro_done")) {
             return StoryAction::blockWarp(
-                {"I should go see what that guy wants first.", "It might be important."});
+                {"I should hear Bart out before I wander off.",
+                 "If he sent that letter, it wasn't for nothing."});
         }
 
         if (!player.hasFlag("has_starter")) {
-            return StoryAction::blockWarp({"I need to pick my Deamon first."});
+            return StoryAction::blockWarp({"I should choose a Daemon first."});
         }
     }
 
     if (warp.targetMapId == "bart_iver_lab") {
         if (!player.hasFlag("read_mail")) {
-            return StoryAction::blockWarp({"I shouldn't just go into someones lab."});
+            return StoryAction::blockWarp(
+                {"I shouldn't just walk into a stranger's lab for no reason."});
         }
     }
 
@@ -86,9 +103,28 @@ StoryAction StoryManager::checkWarp(const WarpPoint &warp, Player &player) {
 }
 
 StoryAction StoryManager::checkMapEnter(const std::string &mapId, Player &player) {
-    // Trigger Bart Iver intro cutscene on first visit
     if (mapId == "bart_iver_lab" && !player.hasFlag("bart_iver_intro_done")) {
-        return StoryAction::startCutscene("assets/data/cutscenes/bart_iver_intro.cutscene");
+        return StoryAction::startCutscene(bartIntroCutscenePath);
+    }
+
+    if (mapId == "viridian_faculty" && player.hasFlag("defeated_faculty_leader") &&
+        !player.hasFlag("first_faculty_aftermath_done")) {
+        return StoryAction::startCutscene(firstFacultyAftermathCutscenePath);
+    }
+
+    if (mapId == "viridian_town" && player.hasFlag("first_faculty_aftermath_done") &&
+        !player.hasFlag("rival_intro_done")) {
+        return StoryAction::startCutscene(rivalInterceptCutscenePath);
+    }
+
+    if (mapId == "bart_iver_lab" && player.hasFlag("received_concordance_index") &&
+        player.hasFlag("rival_intro_done") && !player.hasFlag("bart_concordance_reveal_done")) {
+        return StoryAction::startCutscene(bartConcordanceRevealCutscenePath);
+    }
+
+    if (mapId == "viridian_academy" && player.hasFlag("academy_archive_unlocked") &&
+        !player.hasFlag("academy_archive_searched")) {
+        return StoryAction::startCutscene(academyArchiveCutscenePath);
     }
 
     return StoryAction::none();

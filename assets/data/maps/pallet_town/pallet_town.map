@@ -61,7 +61,7 @@ background_overlay|assets/tilesets/pallet_town/maps/overworld_overlay.png
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue stages separated by @@, each can have flag? prefix
-pallet_girl|Girl|normal|10|9|down|0|Hi there! Welcome to the student village.;Not much happens here as there have been few students lately.;There is the crazy professors lab though.;I wouldn't go there, the guy is a maniac.;Keeps rambling on about some ancient language.|girl|
-pallet_sign|Sign|normal|9|11|down|0|Pallet student accomodation.|@hidden|
-pallet_sign_2|You|normal|5|14|down|0|The sign is old and barely readable;It reads: Prof. Bart Iver's research group.;Seems like this area used to be a research facility,;before it got turned into a student village.|@hidden|
-pallet_mailbox|You|normal|4|7|down|0|read_mail?There is no new mail.@@Hmm thats weird, there is no schedule.; But there is an unmarked envelope, I probably shouldn't open it.;But fuck it...;Hey, sorry about contacting you via letter.;But nobody must see us talking together.;Come to my lab just around the corner and i will explain.; Huh, that was weird.;I should probably go and find out what he wants.; It sounded important.|@hidden|
+pallet_girl|Girl|normal|10|9|down|0|Welcome to the student village.;It's been quiet lately, almost too quiet.;The strangest place left is Bart Iver's old lab.;People say he keeps talking about some ancient language hidden inside Daemons.|girl|
+pallet_sign|Sign|normal|9|11|down|0|Pallet Student Accommodation.|@hidden|
+pallet_sign_2|You|normal|5|14|down|0|The sign is old and barely readable.;It says: Bart Iver Research Group.;So this whole block used to be faculty property, before it became student housing.|@hidden|
+pallet_mailbox|You|normal|4|7|down|0|read_mail?There is no new mail.@@My schedule isn't here.;Just an unmarked envelope.;I should probably ignore this...;\"Sorry for writing instead of speaking.;No one can see us together.;Come to my lab around the corner and I'll explain.\";Bart Iver?;This is strange, but it sounds important.|@hidden|

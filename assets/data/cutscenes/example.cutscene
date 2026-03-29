@@ -9,6 +9,8 @@
 #   wait|frames            Wait N frames. Blocking.
 #   sync                   Wait for all pending moves to finish. Blocking.
 #   flag|name              Set a player event flag. Immediate.
+#   badge|name             Award a badge. Immediate.
+#   item|id|qty            Add an item to the bag. Immediate.
 #   hide|npc_id            Hide an NPC. Immediate.
 #   show|npc_id            Show a hidden NPC. Immediate.
 #

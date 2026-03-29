@@ -71,6 +71,23 @@ std::optional<CutsceneStep> parseStep(std::string_view line) {
         return step;
     }
 
+    if (command == "badge" && parts.size() >= 2) {
+        step.type = CutsceneStep::Type::badge;
+        step.badgeName = std::string(parts[1]);
+        return step;
+    }
+
+    if (command == "item" && parts.size() >= 3) {
+        const auto itemId = TextParse::parseInt(parts[1]);
+        const auto quantity = TextParse::parseInt(parts[2]);
+        if (!itemId.has_value() || !quantity.has_value())
+            return std::nullopt;
+        step.type = CutsceneStep::Type::item;
+        step.itemId = *itemId;
+        step.itemQuantity = *quantity;
+        return step;
+    }
+
     if (command == "hide" && parts.size() >= 2) {
         step.type = CutsceneStep::Type::hide;
         step.target = std::string(parts[1]);

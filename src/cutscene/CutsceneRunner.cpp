@@ -128,6 +128,17 @@ void CutsceneRunner::processSteps(World &world, GameUI &ui) {
             playback.advanceStep();
             break;
 
+        case CutsceneStep::Type::badge:
+            world.getPlayer().addBadge(step.badgeName);
+            playback.advanceStep();
+            break;
+
+        case CutsceneStep::Type::item:
+            if (step.itemId > 0 && step.itemQuantity > 0)
+                world.getPlayer().addItem(step.itemId, step.itemQuantity);
+            playback.advanceStep();
+            break;
+
         case CutsceneStep::Type::hide:
             CutsceneWorldOps::setHidden(world, step.target, true);
             playback.advanceStep();

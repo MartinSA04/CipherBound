@@ -41,6 +41,11 @@ void World::setCurrentMap(const std::string &id) {
     if (maps.find(id) == maps.end())
         throw std::runtime_error("Cannot set current map, not found: " + id);
     currentMapId = id;
+
+    if (const auto it = npcs.find(currentMapId); it != npcs.end()) {
+        for (auto &npc : it->second)
+            npc->resetToSpawnState();
+    }
 }
 
 // --- Player ---

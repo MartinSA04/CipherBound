@@ -6,7 +6,7 @@ const std::vector<std::string> NPC::emptyLines = {};
 NPC::NPC(const std::string &id, const std::string &name, Position position, NPCType type,
          std::string spriteType)
     : Entity(name, position), id(id), spriteType(std::move(spriteType)), type(type),
-      defeated(false), sightRange(4) {}
+      defeated(false), sightRange(4), spawnPosition(position) {}
 
 void NPC::update() {
     // NPC AI (turn toward player, patrol, etc.) — future use
@@ -27,6 +27,11 @@ void NPC::swapDaemon(int indexA, int indexB) { party.swapDaemon(indexA, indexB);
 bool NPC::partyEmpty() const { return party.partyEmpty(); }
 
 void NPC::clearParty() { party.clearParty(); }
+
+void NPC::fullHealParty() {
+    for (int i = 0; i < partySize(); ++i)
+        getDaemon(i).fullHeal();
+}
 
 const std::string &NPC::getId() const { return id; }
 const std::string &NPC::getSpriteType() const { return spriteType; }
@@ -82,3 +87,17 @@ bool NPC::willFight() const {
 
 bool NPC::isHidden() const { return hidden; }
 void NPC::setHidden(bool h) { hidden = h; }
+
+void NPC::captureSpawnState() {
+    spawnPosition = getPosition();
+    spawnFacing = getFacing();
+    spawnHidden = hidden;
+}
+
+void NPC::resetToSpawnState() {
+    setPosition(spawnPosition);
+    setFacing(spawnFacing);
+    setHidden(spawnHidden);
+    setMoveDelay(12);
+    resetAnimation();
+}

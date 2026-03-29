@@ -72,7 +72,7 @@ class World {
     /// Returns immutable NPC storage for one map.
     const NPCList &getNPCs(const std::string &mapId) const;
     /// Finds an NPC occupying the given position on the given map.
-    NPC *findNPCAt(const std::string &mapId, const Position &pos);
+    NPC *findNPCAt(const std::string &mapId, const Position &pos, bool includeHidden = true);
     /// Finds an NPC by id across all loaded maps.
     NPC *findNPCById(const std::string &npcId);
     /// Finds an NPC by id within one map.

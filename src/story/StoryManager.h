@@ -8,6 +8,7 @@
 #include "StoryAction.h"
 #include <optional>
 #include <string>
+#include <vector>
 
 class NPC;
 class Pokedex;
@@ -21,6 +22,11 @@ struct WarpPoint;
  */
 class StoryManager {
   public:
+    struct ObjectiveInfo {
+        std::string title;
+        std::vector<std::string> lines;
+    };
+
     StoryManager() = default;
 
     /// Returns the species id associated with a starter-choice context, if any.
@@ -38,4 +44,7 @@ class StoryManager {
 
     /// Returns any story action triggered by entering a new map.
     StoryAction checkMapEnter(const std::string &mapId, Player &player);
+
+    /// Returns the current main objective shown in the pause menu.
+    ObjectiveInfo currentObjective(const Player &player) const;
 };

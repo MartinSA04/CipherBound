@@ -417,53 +417,102 @@ void GameUI::drawMoveLearningScreen(const Daemon &daemon, const Pokedex &pokedex
 void GameUI::drawBagScreen(const Player &player, const Pokedex &pokedex, int selected) {
     renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{170, 155, 130});
 
-    int scale = PIXEL_SCALE;
-    spriteFont.drawText(renderer, "BAG", 28, 10, scale);
+    const int scale = PIXEL_SCALE;
+    const int outerPadding = 5 * scale;
+    const int headerHeight = 20 * scale;
+    const int sectionGap = 3 * scale;
+    const int listX = outerPadding;
+    const int listY = headerHeight + 6 * scale;
+    const int descPanelY = WINDOW_HEIGHT - UI_PANEL_HEIGHT;
+    const int listW = WINDOW_WIDTH - outerPadding * 2;
+    const int listBottom = descPanelY - sectionGap;
+    const int slotHeight = 14 * scale;
+    const int slotGap = 2 * scale;
+
+    renderer.drawFilledRect(0, 0, WINDOW_WIDTH, headerHeight + 6 * scale,
+                            TDT4102::Color{104, 81, 53});
+    spriteFont.drawText(renderer, "BAG", outerPadding, 4 * scale, scale);
 
     const auto &inventory = player.getInventory();
+    const int inventoryCount = static_cast<int>(inventory.size());
+    const int visibleSlots = std::max(1, (listBottom - listY) / (slotHeight + slotGap));
+    const int clampedSelected =
+        inventoryCount <= 0 ? 0 : std::clamp(selected, 0, inventoryCount - 1);
+
+    renderer.drawFilledRect(listX, listY, listW, listBottom - listY, TDT4102::Color{228, 215, 191});
+    renderer.drawRect(listX, listY, listW, listBottom - listY, TDT4102::Color::transparent,
+                      TDT4102::Color{80, 62, 43});
 
     if (inventory.empty()) {
-        spriteFont.drawText(renderer, "No items", 28, 60, scale);
+        spriteFont.drawText(renderer, "No items", listX + 6 * scale, listY + 6 * scale, scale);
+    } else {
+        const int maxTopIndex = std::max(0, inventoryCount - visibleSlots);
+        const int topIndex = std::clamp(clampedSelected - visibleSlots + 1, 0, maxTopIndex);
+        int sy = listY + sectionGap;
+
+        for (int i = topIndex; i < std::min(inventoryCount, topIndex + visibleSlots); ++i) {
+            const bool isSelected = i == clampedSelected;
+
+            const TDT4102::Color bgColor =
+                isSelected ? TDT4102::Color{255, 230, 180} : TDT4102::Color{240, 220, 200};
+
+            renderer.drawFilledRect(listX + scale, sy, listW - 2 * scale, slotHeight, bgColor);
+            renderer.drawRect(listX + scale, sy, listW - 2 * scale, slotHeight,
+                              TDT4102::Color::transparent, TDT4102::Color::black);
+
+            const ItemData &item = pokedex.getItem(inventory[static_cast<std::size_t>(i)].itemId);
+
+            if (isSelected)
+                drawSelectionArrow(listX + 2 * scale, sy + 3 * scale, scale);
+
+            spriteFont.drawText(renderer, item.name, listX + 6 * scale, sy + scale, scale);
+
+            const std::string qtyStr =
+                "x" + std::to_string(inventory[static_cast<std::size_t>(i)].quantity);
+            const int qtyX = listX + listW - spriteFont.getTextWidth(qtyStr, scale) - 5 * scale;
+            spriteFont.drawText(renderer, qtyStr, qtyX, sy + scale, scale);
+
+            sy += slotHeight + slotGap;
+        }
+
+        if (topIndex > 0)
+            spriteFont.drawText(renderer, "...", listX + listW - 8 * scale, listY + scale,
+                                scale - 1);
+        if (topIndex + visibleSlots < inventoryCount)
+            spriteFont.drawText(renderer, "...", listX + listW - 8 * scale,
+                                listBottom - 5 * scale, scale - 1);
+    }
+
+    drawTextBar(descPanelY);
+
+    if (inventory.empty())
         return;
+
+    const ItemData &item = pokedex.getItem(inventory[static_cast<std::size_t>(clampedSelected)].itemId);
+    const int textBarW = 252 * scale;
+    const int textBarH = 46 * scale;
+    const int textBarX = (WINDOW_WIDTH - textBarW) / 2;
+    const int textBarY = descPanelY + (UI_PANEL_HEIGHT - textBarH) / 2;
+    const int textX = textBarX + 12 * scale;
+    const int textY = textBarY + 4 * scale;
+    const int textMaxW = textBarW - 24 * scale;
+    const int maxDescLines = 3;
+
+    const auto wrappedDescription = spriteFont.wrapText(item.description, scale, 1, textMaxW);
+    const int wrappedDescriptionCount = static_cast<int>(wrappedDescription.size());
+    for (int line = 0; line < std::min(maxDescLines, wrappedDescriptionCount); ++line) {
+        spriteFont.drawText(renderer, wrappedDescription[static_cast<std::size_t>(line)], textX,
+                            textY + line * spriteFont.getLineHeight(scale), scale);
     }
 
-    int slotHeight = 16 * scale + 8;
-    int startY = 10 + 20 * scale;
-
-    int sy = startY;
-    int inventoryCount = static_cast<int>(inventory.size());
-    for (int i = 0; i < inventoryCount; ++i) {
-
-        bool isSelected = i == selected;
-
-        TDT4102::Color bgColor =
-            isSelected ? TDT4102::Color{255, 230, 180} : TDT4102::Color{240, 220, 200};
-
-        renderer.drawFilledRect(20, sy, WINDOW_WIDTH - 40, slotHeight, bgColor);
-        renderer.drawRect(20, sy, WINDOW_WIDTH - 40, slotHeight, TDT4102::Color::transparent,
-                          TDT4102::Color::black);
-
-        const ItemData &item = pokedex.getItem(inventory[static_cast<std::size_t>(i)].itemId);
-
-        if (isSelected)
-            drawSelectionArrow(28, sy + 4 * scale, scale);
-
-        spriteFont.drawText(renderer, item.name, 28 + 6 * scale, sy + 4, scale);
-
-        std::string qtyStr = "x" + std::to_string(inventory[static_cast<std::size_t>(i)].quantity);
-        int qtyX = WINDOW_WIDTH - 60 - spriteFont.getTextWidth(qtyStr, scale);
-        spriteFont.drawText(renderer, qtyStr, qtyX, sy + 4, scale);
-
-        sy += slotHeight + 8;
-    }
-
-    if (selected >= 0 && selected < static_cast<int>(inventory.size())) {
-        const ItemData &item =
-            pokedex.getItem(inventory[static_cast<std::size_t>(selected)].itemId);
-        int descY = WINDOW_HEIGHT - 30 * scale;
-        drawNarrowTextBar(20, descY, 180, scale);
-        spriteFont.drawText(renderer, item.description, 28 + 4 * scale, descY + 5 * scale, scale);
-    }
+    const int labelW = spriteFont.getTextWidth(item.name, scale) + 6 * scale;
+    const int labelH = 20 * scale;
+    const int labelX = textBarX + 4 * scale;
+    const int labelY = textBarY - labelH - 2;
+    renderer.drawFilledRect(labelX, labelY, labelW, labelH, TDT4102::Color::white);
+    renderer.drawRect(labelX, labelY, labelW, labelH, TDT4102::Color::transparent,
+                      TDT4102::Color::black);
+    spriteFont.drawText(renderer, item.name, labelX + 3 * scale, labelY + 2 * scale, scale);
 }
 
 void GameUI::drawShopScreen(const Player &player, const Pokedex &pokedex,
@@ -548,7 +597,8 @@ void GameUI::drawShopScreen(const Player &player, const Pokedex &pokedex,
                         scale);
 }
 
-void GameUI::drawPlayerStatsScreen(const Player &player) {
+void GameUI::drawPlayerStatsScreen(const Player &player, const std::string &objectiveTitle,
+                                   const std::vector<std::string> &objectiveLines) {
     renderer.drawFilledRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, TDT4102::Color{210, 220, 238});
 
     const int scale = PIXEL_SCALE;
@@ -563,7 +613,7 @@ void GameUI::drawPlayerStatsScreen(const Player &player) {
 
     renderer.drawFilledRect(0, 0, WINDOW_WIDTH, headerHeight + outerPadding,
                             TDT4102::Color{68, 86, 128});
-    spriteFont.drawText(renderer, "TRAINER STATS", outerPadding, 4 * scale, scale);
+    spriteFont.drawText(renderer, "FIELD JOURNAL", outerPadding, 4 * scale, scale);
 
     renderer.drawFilledRect(outerPadding, panelY, leftPanelWidth, panelHeight,
                             TDT4102::Color{236, 241, 252});
@@ -609,20 +659,32 @@ void GameUI::drawPlayerStatsScreen(const Player &player) {
 
     int contentX = rightPanelX + 6 * scale;
     int contentY = panelY + 6 * scale;
-    spriteFont.drawText(renderer, "BADGES", contentX, contentY, scale);
+    spriteFont.drawText(renderer, "CURRENT OBJECTIVE", contentX, contentY, scale - 1);
 
-    const auto &badges = player.getBadges();
-    if (badges.empty()) {
-        spriteFont.drawText(renderer, "No badges yet.", contentX, contentY + 16 * scale, scale - 1);
-    } else {
-        const int badgeRowHeight = 16 * scale;
-        const int badgeWidth = rightPanelWidth - 12 * scale;
-        for (std::size_t i = 0; i < badges.size(); ++i) {
-            const int rowY = contentY + 14 * scale + static_cast<int>(i) * badgeRowHeight;
-            renderer.drawFilledRect(rightPanelX + 3 * scale, rowY - scale / 2, badgeWidth,
-                                    14 * scale, TDT4102::Color{224, 230, 246});
-            spriteFont.drawText(renderer, badges[i], contentX, rowY, scale - 1);
+    const int objectiveBoxX = rightPanelX + 3 * scale;
+    const int objectiveBoxY = contentY + 10 * scale;
+    const int objectiveBoxW = rightPanelWidth - 6 * scale;
+    const int objectiveBoxH = panelHeight - 20 * scale;
+    renderer.drawFilledRect(objectiveBoxX, objectiveBoxY, objectiveBoxW, objectiveBoxH,
+                            TDT4102::Color{232, 238, 251});
+    renderer.drawRect(objectiveBoxX, objectiveBoxY, objectiveBoxW, objectiveBoxH,
+                      TDT4102::Color::transparent, TDT4102::Color{72, 82, 108});
+
+    const int objectiveTextX = objectiveBoxX + 4 * scale;
+    const int objectiveTextY = objectiveBoxY + 4 * scale;
+    const int objectiveTextW = objectiveBoxW - 8 * scale;
+    spriteFont.drawTextPartial(renderer, objectiveTitle, objectiveTitle.size(), objectiveTextX,
+                               objectiveTextY, scale, 1, objectiveTextW);
+
+    int objectiveLineY = objectiveTextY + 14 * scale;
+    for (const auto &paragraph : objectiveLines) {
+        const auto wrappedParagraph =
+            spriteFont.wrapText(paragraph, scale - 1, 1, objectiveTextW);
+        for (const auto &line : wrappedParagraph) {
+            spriteFont.drawText(renderer, line, objectiveTextX, objectiveLineY, scale - 1);
+            objectiveLineY += spriteFont.getLineHeight(scale - 1);
         }
+        objectiveLineY += 2 * scale;
     }
 
     const int hintY = WINDOW_HEIGHT - 16 * scale;

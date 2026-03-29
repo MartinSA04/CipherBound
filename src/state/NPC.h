@@ -58,6 +58,8 @@ class NPC : public Entity {
     bool partyEmpty() const;
     /// Clears the trainer party.
     void clearParty();
+    /// Fully heals every daemon in the NPC's party.
+    void fullHealParty();
 
     /// Returns the stable NPC id used by story and save systems.
     const std::string &getId() const;
@@ -92,6 +94,10 @@ class NPC : public Entity {
     bool isHidden() const;
     /// Sets whether the NPC is hidden from the overworld.
     void setHidden(bool h);
+    /// Captures the current state as the NPC's map-entry spawn state.
+    void captureSpawnState();
+    /// Restores position, facing, visibility, and animation to the spawn state.
+    void resetToSpawnState();
 
   private:
     std::string id;         ///< Unique identifier for story and save-state lookups.
@@ -103,6 +109,9 @@ class NPC : public Entity {
     Party party;                               ///< Trainer party.
 
     bool hidden{false}; ///< Whether the NPC is currently hidden.
+    Position spawnPosition{0, 0}; ///< Position restored when re-entering the map.
+    Direction spawnFacing{Direction::down}; ///< Facing restored when re-entering the map.
+    bool spawnHidden{false}; ///< Hidden state restored when re-entering the map.
 
     static const std::vector<std::string> emptyLines; ///< Shared empty dialogue result.
 };

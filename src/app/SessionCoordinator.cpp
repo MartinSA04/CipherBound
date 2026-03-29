@@ -143,6 +143,10 @@ void SessionCoordinator::handleRequest(const EndBattleRequest & /*req*/) {
     bool playerBlackedOut = false;
     if (ctx.hasBattle()) {
         playerBlackedOut = ctx.battle().getState() == BattleState::defeat;
+        if (playerBlackedOut) {
+            if (NPC *trainer = ctx.battle().getOpponent(); trainer != nullptr)
+                trainer->fullHealParty();
+        }
         if (!ctx.battleTrainerNPCId().empty()) {
             BattleResult result = ctx.battle().getResult();
             if (result.playerWon)

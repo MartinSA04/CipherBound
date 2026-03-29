@@ -4,9 +4,14 @@
 id|academy_archive
 
 [steps]
+move|player|4|5
+sync
+face|player|up
 say|You|The Foundations Badge unlocks a sealed records terminal.
-say|Archive Terminal|Transfer ledger 7-C located.;Confiscated Concordance fragment C-2 reassigned to Applied Physics Faculty, Aureate Campus.
-say|Archive Terminal|Personnel note.;One senior student attached to the transfer vanished during the reassignment.;Record sealed by Rectorate order.
-say|You|So the next fragment was moved.;And someone disappeared with the trail.
+say|Archive Terminal|Transfer ledger 7-C located.
+say|Archive Terminal|Concordance fragment C-2 reassigned.;Applied Physics Faculty.;Aureate Campus.
+say|Archive Terminal|Personnel note.
+say|Archive Terminal|One senior student vanished during the transfer.;Record sealed by Rectorate order.
+say|You|So the next fragment moved there.;And someone disappeared with the trail.
 say|You|Bart needs this.;The rival probably does too.
 flag|academy_archive_searched

@@ -36,6 +36,8 @@ class WalkAnimation {
     int getPixelOffsetY() const;
     /// Returns the walk-cycle frame used for sprite selection.
     int getWalkFrame() const;
+    /// Clears transient offsets and active movement state.
+    void resetAnimation();
 
   protected:
     /// Advances offsets and walk-cycle state for one frame.

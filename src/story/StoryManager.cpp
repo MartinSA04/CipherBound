@@ -129,3 +129,57 @@ StoryAction StoryManager::checkMapEnter(const std::string &mapId, Player &player
 
     return StoryAction::none();
 }
+
+StoryManager::ObjectiveInfo StoryManager::currentObjective(const Player &player) const {
+    if (!player.hasFlag("read_mail")) {
+        return {"Check Your Mail",
+                {"Read the letter waiting in your mailbox.",
+                 "Bart Iver asked to meet you at the lab around the corner."}};
+    }
+
+    if (!player.hasFlag("bart_iver_intro_done")) {
+        return {"Meet Bart Iver",
+                {"Go to Bart Iver's lab in Pallet.",
+                 "Hear why he called you there in secret."}};
+    }
+
+    if (!player.hasFlag("has_starter")) {
+        return {"Choose A Daemon",
+                {"Pick one of Bart Iver's hidden Daemons.",
+                 "You will need it before you can challenge the first faculty."}};
+    }
+
+    if (!player.hasFlag("defeated_faculty_leader")) {
+        return {"Challenge Math Faculty",
+                {"Travel to Viridian and defeat Marius Thaule.",
+                 "Bart believes the first faculty still holds one of his sealed records."}};
+    }
+
+    if (!player.hasFlag("first_faculty_aftermath_done")) {
+        return {"Claim Your Reward",
+                {"Speak to Marius after the battle.",
+                 "He still has more to tell you about Bart's sealed record."}};
+    }
+
+    if (!player.hasFlag("rival_intro_done")) {
+        return {"Leave The Faculty",
+                {"Step back into Viridian Town.",
+                 "Someone outside wants to warn you about Bart Iver."}};
+    }
+
+    if (!player.hasFlag("bart_concordance_reveal_done")) {
+        return {"Return To Bart",
+                {"Bring the Concordance Index back to Bart Iver's lab.",
+                 "He promised to explain what the sealed fragment really is."}};
+    }
+
+    if (!player.hasFlag("academy_archive_searched")) {
+        return {"Search The Archive",
+                {"Use the Foundations Badge at Viridian Academy.",
+                 "Find the transfer ledger for the next Concordance fragment."}};
+    }
+
+    return {"Follow The Transfer",
+            {"The archive points toward the Applied Physics Faculty at Aureate Campus.",
+             "That is where the next Concordance fragment was sent."}};
+}

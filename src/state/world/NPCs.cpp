@@ -36,12 +36,14 @@ NPC *World::findNPCById(const std::string &mapId, const std::string &npcId) {
     return nullptr;
 }
 
-NPC *World::findNPCAt(const std::string &mapId, const Position &pos) {
+NPC *World::findNPCAt(const std::string &mapId, const Position &pos, bool includeHidden) {
     auto it = npcs.find(mapId);
     if (it == npcs.end())
         return nullptr;
 
     for (auto &npc : it->second) {
+        if (!includeHidden && npc->isHidden())
+            continue;
         if (npc->getPosition() == pos)
             return npc.get();
     }

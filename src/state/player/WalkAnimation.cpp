@@ -8,6 +8,13 @@ int WalkAnimation::getAnimationFrame() { return animFramesLeft; }
 int WalkAnimation::getPixelOffsetX() const { return pixelOffsetX; }
 int WalkAnimation::getPixelOffsetY() const { return pixelOffsetY; }
 int WalkAnimation::getWalkFrame() const { return walkFrame; }
+void WalkAnimation::resetAnimation() {
+    pixelOffsetX = 0;
+    pixelOffsetY = 0;
+    animFramesLeft = 0;
+    walkFrame = 0;
+    wasMoving = false;
+}
 
 void WalkAnimation::startAnimation(const Direction &direction) {
     animFramesLeft = moveDelay;

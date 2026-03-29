@@ -4,11 +4,24 @@
 id|rival_intercept
 
 [steps]
-say|???|Hold it.
-say|Rival|So it's true.;Marius actually handed Bart Iver's courier something sealed.
-say|You|Courier?;I only helped him recover what the faculty took.
-say|Rival|That's how it starts.;Bart never tells the whole story until someone else is already paying for it.
-say|Rival|My brother was attached to a restricted project tied to Bart's old research.;He disappeared, and the university buried the trail.
-say|Rival|So if you're carrying one of Bart's fragments, you're already inside the same mess.
-say|Rival|Take it back to him if you want.;Just don't pretend you weren't warned.
+show|viridian_rival
+move|player|35|11
+move|viridian_rival|34|11
+sync
+face|player|left
+face|viridian_rival|right
+say|Rival|Hold it.
+say|Rival|So it is true.;Marius actually handed Bart Iver's courier something sealed.
+say|You|Courier?;I only recovered what the faculty took.
+say|Rival|That is how it starts.;Bart never tells the whole story;until someone else pays for it.
+say|Rival|My brother was assigned to one of Bart's restricted projects.;He vanished.;The university buried the trail.
+say|Rival|So if you are carrying one of Bart's fragments,;you are already inside the same mess.
+say|Rival|Take it back to him if you want.;Just do not pretend you were not warned.
+move|viridian_rival|31|11
+sync
+move|viridian_rival|31|7
+sync
+move|viridian_rival|25|7
+sync
+hide|viridian_rival
 flag|rival_intro_done

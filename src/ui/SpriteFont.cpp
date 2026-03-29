@@ -149,7 +149,7 @@ void SpriteFont::drawTextPartial(Renderer &renderer, const std::string &text, st
                                  int maxWidth) const {
     int cursorX = screenX;
     int cursorY = screenY;
-    int lineHeight = (FONT_GLYPH_H + 2) * scale;
+    int lineHeight = getLineHeight(scale);
     std::size_t drawn = 0;
 
     if (maxWidth <= 0) {
@@ -259,6 +259,66 @@ int SpriteFont::getTextWidth(const std::string &text, int scale, int spacing) co
         }
     }
     return width;
+}
+
+int SpriteFont::getLineHeight(int scale) const { return (FONT_GLYPH_H + 2) * scale; }
+
+std::vector<std::string> SpriteFont::wrapText(const std::string &text, int scale, int spacing,
+                                              int maxWidth) const {
+    if (maxWidth <= 0)
+        return {text};
+
+    std::vector<std::string> wrapped;
+    std::size_t paragraphStart = 0;
+
+    while (paragraphStart <= text.size()) {
+        const std::size_t paragraphEnd = text.find('\n', paragraphStart);
+        const std::string paragraph =
+            text.substr(paragraphStart, paragraphEnd == std::string::npos
+                                            ? std::string::npos
+                                            : paragraphEnd - paragraphStart);
+
+        if (paragraph.empty()) {
+            wrapped.push_back("");
+        } else {
+            std::string currentLine;
+            std::size_t i = 0;
+            while (i < paragraph.size()) {
+                while (i < paragraph.size() && paragraph[i] == ' ')
+                    ++i;
+
+                const std::size_t wordStart = i;
+                while (i < paragraph.size() && paragraph[i] != ' ')
+                    ++i;
+
+                if (wordStart == i)
+                    break;
+
+                const std::string word = paragraph.substr(wordStart, i - wordStart);
+                const std::string candidate =
+                    currentLine.empty() ? word : currentLine + " " + word;
+
+                if (!currentLine.empty() && getTextWidth(candidate, scale, spacing) > maxWidth) {
+                    wrapped.push_back(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine = candidate;
+                }
+            }
+
+            if (!currentLine.empty())
+                wrapped.push_back(currentLine);
+        }
+
+        if (paragraphEnd == std::string::npos)
+            break;
+        paragraphStart = paragraphEnd + 1;
+    }
+
+    if (wrapped.empty())
+        wrapped.push_back("");
+
+    return wrapped;
 }
 
 int SpriteFont::getBattleNumberWidth(const std::string &text, int scale) const {

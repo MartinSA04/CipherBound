@@ -1,4 +1,5 @@
 #include "PlayerStatsMode.h"
+#include "../../story/StoryManager.h"
 #include "../../ui/GameUI.h"
 #include "../../ui/InputManager.h"
 
@@ -8,5 +9,6 @@ void PlayerStatsMode::update(GameContext &ctx, InputManager &input) {
 }
 
 void PlayerStatsMode::render(GameContext &ctx) {
-    ctx.ui.drawPlayerStatsScreen(ctx.world.getPlayer());
+    const auto objective = ctx.story.currentObjective(ctx.world.getPlayer());
+    ctx.ui.drawPlayerStatsScreen(ctx.world.getPlayer(), objective.title, objective.lines);
 }

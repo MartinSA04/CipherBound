@@ -57,7 +57,13 @@ if [ ! -f "$BUILD_DIR/build.ninja" ]; then
         --default-library static \
         --buildtype release \
         -Dcpp_std=c++20 \
-        -Dc_std=c11
+        -Dc_std=c11 \
+        -Dbuild_tests=false
+else
+    echo "=== Reconfiguring Emscripten build options ==="
+    meson setup "$BUILD_DIR" \
+        --reconfigure \
+        -Dbuild_tests=false
 fi
 
 echo "=== Building for WebAssembly ==="

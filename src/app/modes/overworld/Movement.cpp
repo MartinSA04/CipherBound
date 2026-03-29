@@ -37,7 +37,7 @@ void OverworldMode::handlePlayerMove(GameContext &ctx, InputManager &input) {
 
     Position target = player.getPosition();
     target.moveDirection(dir);
-    if (ctx.world.findNPCAt(ctx.world.getCurrentMapId(), target))
+    if (ctx.world.findNPCAt(ctx.world.getCurrentMapId(), target, false))
         return;
 
     map.setOccupied(player.getPosition(), false);

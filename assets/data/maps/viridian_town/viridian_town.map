@@ -69,3 +69,10 @@ mmmmmm################pppp######################
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue stages separated by @@, each can have flag? prefix
+viridian_student|Student|normal|22|14|left|0|If a faculty battle feels impossible, train on Route 1.;A few levels can turn panic into a plan.|bug_catcher|
+viridian_guide|Guide|normal|24|12|down|0|The academy archive only opens to students with clearance.;Badges count as clearance, if you have one.|girl|
+viridian_shopper|Shopper|normal|33|20|down|0|The mart stocks Potions and capture gear.;A prepared bag beats bravado every time.|girl|
+viridian_rival|Rival|normal|30|11|right|0||bug_catcher@hidden|
+
+viridian_sign_town|Sign|normal|20|16|down|0|Viridian Town.;Theory on paper, practice in the field.|@hidden|
+viridian_sign_faculty|Sign|normal|32|10|down|0|Viridian Mathematics Faculty.;Proof first, intuition second.|@hidden|

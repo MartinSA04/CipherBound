@@ -105,6 +105,10 @@ int main() {
     trainer.addDaemon(Daemon(species[0], 5));
     assert(trainer.partySize() == 1);
     assert(trainer.willFight());
+    trainer.getDaemon(0).takeDamage(5);
+    assert(trainer.getDaemon(0).getCurrentHP() < trainer.getDaemon(0).getMaxHP());
+    trainer.fullHealParty();
+    assert(trainer.getDaemon(0).getCurrentHP() == trainer.getDaemon(0).getMaxHP());
     trainer.setDefeated(true);
     assert(!trainer.willFight());
     trainer.setHidden(true);

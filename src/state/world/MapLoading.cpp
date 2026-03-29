@@ -131,6 +131,7 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
         if (npcDefinition.hidden || npc->getType() == NPCType::pc)
             npc->setHidden(true);
 
+        npc->captureSpawnState();
         addNPC(definition.id, std::move(npc));
     }
 

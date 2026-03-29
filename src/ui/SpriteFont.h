@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 struct GlyphInfo {
     int srcX;
@@ -34,6 +35,9 @@ class SpriteFont {
                                 int screenY, int scale = PIXEL_SCALE) const;
 
     int getTextWidth(const std::string &text, int scale = PIXEL_SCALE, int spacing = 1) const;
+    int getLineHeight(int scale = PIXEL_SCALE) const;
+    std::vector<std::string> wrapText(const std::string &text, int scale = PIXEL_SCALE,
+                                      int spacing = 1, int maxWidth = 0) const;
 
     int getBattleNumberWidth(const std::string &text, int scale = PIXEL_SCALE) const;
 

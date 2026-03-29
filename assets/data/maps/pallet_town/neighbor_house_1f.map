@@ -25,3 +25,9 @@ background_overlay|assets/tilesets/pallet_town/maps/house2_1f_overlay.png
 4|9|pallet_town|15|8
 
 [encounters]
+
+[npcs]
+# Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
+# Dialogue stages separated by @@, each can have flag? prefix
+neighbor_tenant|Tenant|normal|3|3|down|0|Bart and your father used to trade notes over the fence.;After the inquiry, nobody said either name out loud.|bug_catcher|
+neighbor_landlady|Landlady|normal|9|3|left|0|If your Daemons look worn down, buy a Potion or two.;Cheap supplies save long walks.|girl|

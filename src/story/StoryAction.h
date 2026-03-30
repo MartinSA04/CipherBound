@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../state/Daemon.h"
 #include <string>
 #include <utility>
 #include <variant>
@@ -28,6 +29,12 @@ struct StoryShowDialogueAction {
     std::vector<std::string> lines;
 };
 
+struct StoryPromptStarterNicknameAction {
+    Daemon daemon;
+    std::string speaker;
+    std::vector<std::string> lines;
+};
+
 struct StoryReturnToStateAction {};
 
 struct StoryStartCutsceneAction {
@@ -37,7 +44,8 @@ struct StoryStartCutsceneAction {
 struct StoryAction {
     using Payload = std::variant<StoryNoAction, StoryBlockWarpAction, StoryShowChoiceAction,
                                  StoryStartBattleAction, StoryShowDialogueAction,
-                                 StoryReturnToStateAction, StoryStartCutsceneAction>;
+                                 StoryPromptStarterNicknameAction, StoryReturnToStateAction,
+                                 StoryStartCutsceneAction>;
 
     Payload payload;
 
@@ -63,6 +71,12 @@ struct StoryAction {
 
     static StoryAction showDialogue(std::string speaker, std::vector<std::string> lines) {
         return StoryAction{StoryShowDialogueAction{std::move(speaker), std::move(lines)}};
+    }
+
+    static StoryAction promptStarterNickname(Daemon daemon, std::string speaker,
+                                             std::vector<std::string> lines) {
+        return StoryAction{StoryPromptStarterNicknameAction{
+            std::move(daemon), std::move(speaker), std::move(lines)}};
     }
 
     static StoryAction returnToState() { return StoryAction{StoryReturnToStateAction{}}; }

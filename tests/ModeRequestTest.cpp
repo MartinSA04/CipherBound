@@ -16,6 +16,27 @@ int main() {
     assert(dialoguePayload.npc == trainer);
     assert(dialoguePayload.returnState == GameState::menu);
 
+    const Species species{7,
+                          "Bound",
+                          ElementType::classical,
+                          ElementType::logic,
+                          GrowthRate::mediumFast,
+                          {30, 15, 15, 15, 15, 15},
+                          {0, 0, 0, 0, 0, 0},
+                          255,
+                          64,
+                          {},
+                          {}};
+    ModeRequest naming = ModeRequest::daemonNaming(
+        Daemon(species, 8), DaemonNamingPurpose::starter, "Prof. Bart Iver", {"Line 3"});
+    assert(std::holds_alternative<StartDaemonNamingRequest>(naming.payload));
+    const auto &namingPayload = std::get<StartDaemonNamingRequest>(naming.payload);
+    assert(namingPayload.daemon.getSpeciesId() == 7);
+    assert(namingPayload.purpose == DaemonNamingPurpose::starter);
+    assert(namingPayload.completionSpeaker == "Prof. Bart Iver");
+    assert(namingPayload.completionLines.size() == 1);
+    assert(namingPayload.completionLines[0] == "Line 3");
+
     ModeMailbox mailbox;
     mailbox.push(ModeRequest::changeState(GameState::party));
     mailbox.push(ModeRequest::trainerBattle(trainer));

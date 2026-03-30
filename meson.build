@@ -47,6 +47,7 @@ app_src = [
   'src/app/modes/MenuMode.cpp',
   'src/app/modes/menu/Render.cpp',
   'src/app/modes/TitleScreenMode.cpp',
+  'src/app/modes/NameEntryPanel.cpp',
   'src/app/modes/TransitionMode.cpp',
   'src/app/modes/PlayerStatsMode.cpp',
   'src/app/modes/PartyMode.cpp',
@@ -55,6 +56,7 @@ app_src = [
   'src/app/modes/SaveMode.cpp',
   'src/app/modes/DialogueMode.cpp',
   'src/app/modes/DialogueChoiceMode.cpp',
+  'src/app/modes/DaemonNamingMode.cpp',
   'src/app/modes/PCBoxMode.cpp',
   'src/app/modes/bag/BrowsingState.cpp',
   'src/app/modes/bag/TargetState.cpp',
@@ -206,14 +208,20 @@ if get_option('build_tests')
 
   mode_request_test = executable(
     'mode_request_test',
-    'tests/ModeRequestTest.cpp'
+    [
+      'tests/ModeRequestTest.cpp',
+      'src/state/Daemon.cpp',
+    ],
   )
 
   test('mode_request', mode_request_test)
 
   story_action_test = executable(
     'story_action_test',
-    'tests/story/StoryActionTest.cpp'
+    [
+      'tests/story/StoryActionTest.cpp',
+      'src/state/Daemon.cpp',
+    ],
   )
 
   test('story_action', story_action_test)

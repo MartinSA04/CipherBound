@@ -12,6 +12,7 @@
 #include "BattleEventQueue.h"
 #include "BattleTypes.h"
 #include <memory>
+#include <optional>
 #include <random>
 #include <vector>
 
@@ -105,6 +106,10 @@ class Battle {
     bool isSwitchPlayerSide() const;
     /// Returns whether the given party index participated and therefore gained battle EXP.
     bool didPlayerParticipate(int partyIndex) const;
+    /// Returns whether a successful capture is waiting to be named and claimed.
+    bool hasCapturedDaemon() const;
+    /// Removes and returns the successfully captured daemon.
+    Daemon takeCapturedDaemon();
 
   private:
     void addMessage(const std::string &msg);
@@ -141,6 +146,7 @@ class Battle {
     int pendingOpponentSwitchIndex{-1};
     int expGained{0};
     int moneyGained{0};
+    std::optional<Daemon> capturedDaemon;
 
     std::mt19937 &rng;
     const Pokedex &pokedex;

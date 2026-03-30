@@ -103,6 +103,29 @@ int main() {
     assert(expectedMoney == 0);
     assert(winBattle.getResult().expGained == expectedWildExp);
 
+    std::mt19937 captureRng(42);
+    Player catcher("Catcher", {0, 0});
+    catcher.restorePartyDaemon(makeDaemon(pokedex, 3, 20, 7));
+    Battle captureBattle(catcher, std::make_unique<Daemon>(makeDaemon(pokedex, 1, 1, 1, 1, "Wild")),
+                         BattleType::wild, captureRng, pokedex);
+    captureBattle.start();
+    drainBattle(captureBattle);
+    assert(captureBattle.getState() == BattleState::choosingAction);
+    const int partySizeBeforeCapture = catcher.partySize();
+
+    assert(captureBattle.attemptCapture(7));
+    drainBattle(captureBattle);
+    assert(captureBattle.getState() == BattleState::captured);
+    assert(captureBattle.hasCapturedDaemon());
+    assert(catcher.partySize() == partySizeBeforeCapture);
+
+    Daemon caught = captureBattle.takeCapturedDaemon();
+    assert(caught.getNickname() == "Wild");
+    assert(!captureBattle.hasCapturedDaemon());
+    catcher.addDaemon(std::move(caught));
+    assert(catcher.partySize() == partySizeBeforeCapture + 1);
+    assert(catcher.getDaemon(catcher.partySize() - 1).getNickname() == "Wild");
+
     Player trainerWinner("TrainerWinner", {0, 0});
     trainerWinner.restorePartyDaemon(makeDaemon(pokedex, 3, 20, 7));
     NPC trainer("trainer_1", "Trainer", {0, 0}, NPCType::trainer);

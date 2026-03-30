@@ -49,6 +49,7 @@ enum class GameState {
     pcBox,          ///< PC storage management.
     cutscene,       ///< Scripted cutscene playback.
     daemondex,      ///< Daemondex viewer.
+    daemonNaming,   ///< Naming prompt for a newly obtained daemon.
 };
 
 /// Requests a direct state switch to an existing mode.
@@ -100,6 +101,21 @@ struct StartDialogueChoiceRequest {
     GameState returnState{GameState::overworld}; ///< State to resume after the choice.
 };
 
+/// Follow-up flow for a newly obtained daemon naming prompt.
+enum class DaemonNamingPurpose {
+    starter,      ///< Naming a newly selected starter daemon.
+    battleCapture ///< Naming a daemon caught in battle.
+};
+
+/// Requests a naming prompt for a newly obtained daemon.
+struct StartDaemonNamingRequest {
+    Daemon daemon;                               ///< Daemon instance being named.
+    DaemonNamingPurpose purpose;                 ///< Why the naming prompt was opened.
+    std::string completionSpeaker;               ///< Optional speaker for post-name dialogue.
+    std::vector<std::string> completionLines;    ///< Optional lines shown after naming.
+    GameState returnState{GameState::overworld}; ///< State to resume after any follow-up dialogue.
+};
+
 /// Requests that the shop UI opens with a concrete inventory.
 struct OpenShopRequest {
     std::string title;          ///< UI title for the shop screen.
@@ -127,7 +143,8 @@ struct ModeRequest {
         std::variant<ChangeStateRequest, EnterBattleModeRequest, StartWildBattleRequest,
                      StartTrainerBattleRequest, StartTrainerBattleIntroRequest, EndBattleRequest,
                      TransitionToMapRequest, StartDialogueRequest, StartDialogueChoiceRequest,
-                     OpenShopRequest, StartCutsceneRequest, StoryActionRequest>;
+                     StartDaemonNamingRequest, OpenShopRequest, StartCutsceneRequest,
+                     StoryActionRequest>;
 
     Payload payload; ///< Concrete request stored in this envelope.
 
@@ -172,6 +189,15 @@ struct ModeRequest {
                                       GameState retState = GameState::overworld) {
         return ModeRequest{
             StartDialogueChoiceRequest{std::move(options), std::move(context), retState}};
+    }
+
+    /// Builds a daemon-naming request.
+    static ModeRequest daemonNaming(Daemon daemon, DaemonNamingPurpose purpose,
+                                    std::string speaker = {},
+                                    std::vector<std::string> lines = {},
+                                    GameState retState = GameState::overworld) {
+        return ModeRequest{StartDaemonNamingRequest{std::move(daemon), purpose, std::move(speaker),
+                                                    std::move(lines), retState}};
     }
 
     /// Builds a shop-open request.

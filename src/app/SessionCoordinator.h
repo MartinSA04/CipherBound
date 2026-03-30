@@ -40,6 +40,7 @@ class SessionCoordinator {
     void handleRequest(const TransitionToMapRequest &req);
     void handleRequest(const StartDialogueRequest &req);
     void handleRequest(const StartDialogueChoiceRequest &req);
+    void handleRequest(const StartDaemonNamingRequest &req);
     void handleRequest(const OpenShopRequest &req);
     void handleRequest(const StartCutsceneRequest &req);
     void handleRequest(const StoryActionRequest &req);
@@ -48,6 +49,7 @@ class SessionCoordinator {
     void handleStoryAction(const StoryShowChoiceAction &action);
     void handleStoryAction(const StoryStartBattleAction &action);
     void handleStoryAction(const StoryShowDialogueAction &action);
+    void handleStoryAction(const StoryPromptStarterNicknameAction &action);
     void handleStoryAction(const StoryReturnToStateAction &action);
     void handleStoryAction(const StoryStartCutsceneAction &action);
 

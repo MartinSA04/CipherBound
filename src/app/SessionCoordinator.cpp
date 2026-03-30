@@ -10,6 +10,7 @@
 #include "../ui/GameUI.h"
 #include "modes/BagMode.h"
 #include "modes/CutSceneMode.h"
+#include "modes/DaemonNamingMode.h"
 #include "modes/DaemondexMode.h"
 #include "modes/DialogueChoiceMode.h"
 #include "modes/DialogueMode.h"
@@ -23,6 +24,7 @@
 #include "modes/TitleScreenMode.h"
 #include "modes/TransitionMode.h"
 #include <iostream>
+#include <stdexcept>
 
 namespace {
 
@@ -79,6 +81,7 @@ void SessionCoordinator::processRequests() {
                     [this](const TransitionToMapRequest &request) { handleRequest(request); },
                     [this](const StartDialogueRequest &request) { handleRequest(request); },
                     [this](const StartDialogueChoiceRequest &request) { handleRequest(request); },
+                    [this](const StartDaemonNamingRequest &request) { handleRequest(request); },
                     [this](const OpenShopRequest &request) { handleRequest(request); },
                     [this](const StartCutsceneRequest &request) { handleRequest(request); },
                     [this](const StoryActionRequest &request) { handleRequest(request); }},
@@ -190,6 +193,16 @@ void SessionCoordinator::handleRequest(const StartDialogueChoiceRequest &req) {
             req.choiceContext, ctx.flow.dialogueReturnState));
 }
 
+void SessionCoordinator::handleRequest(const StartDaemonNamingRequest &req) {
+    switchToMode(GameState::daemonNaming,
+                 std::make_unique<DaemonNamingMode>(req.daemon, req.purpose,
+                                                    resolveDialogueSpeaker(ctx.world.getPlayer(),
+                                                                          req.completionSpeaker),
+                                                    resolveDialogueLines(ctx.world.getPlayer(),
+                                                                         req.completionLines),
+                                                    req.returnState));
+}
+
 void SessionCoordinator::handleRequest(const OpenShopRequest &req) {
     switchToMode(GameState::shop,
                  std::make_unique<ShopMode>(req.title, req.shopkeeperName, req.itemIds));
@@ -212,6 +225,9 @@ void SessionCoordinator::handleRequest(const StoryActionRequest &req) {
                    [this](const StoryShowChoiceAction &action) { handleStoryAction(action); },
                    [this](const StoryStartBattleAction &action) { handleStoryAction(action); },
                    [this](const StoryShowDialogueAction &action) { handleStoryAction(action); },
+                   [this](const StoryPromptStarterNicknameAction &action) {
+                       handleStoryAction(action);
+                   },
                    [this](const StoryReturnToStateAction &action) { handleStoryAction(action); },
                    [this](const StoryStartCutsceneAction &action) { handleStoryAction(action); }},
                req.action.payload);
@@ -237,6 +253,11 @@ void SessionCoordinator::handleStoryAction(const StoryStartBattleAction &action)
 void SessionCoordinator::handleStoryAction(const StoryShowDialogueAction &action) {
     handleRequest(
         StartDialogueRequest{action.speaker, action.lines, nullptr, GameState::overworld});
+}
+
+void SessionCoordinator::handleStoryAction(const StoryPromptStarterNicknameAction &action) {
+    handleRequest(StartDaemonNamingRequest{action.daemon, DaemonNamingPurpose::starter,
+                                           action.speaker, action.lines, GameState::overworld});
 }
 
 void SessionCoordinator::handleStoryAction(const StoryReturnToStateAction & /*action*/) {
@@ -289,6 +310,8 @@ std::unique_ptr<GameMode> SessionCoordinator::createMode(GameState state) {
         return std::make_unique<CutSceneMode>();
     case GameState::daemondex:
         return std::make_unique<DaemondexMode>();
+    case GameState::daemonNaming:
+        throw std::logic_error("Daemon naming mode requires explicit request data");
     default:
         return std::make_unique<OverworldMode>();
     }
@@ -328,6 +351,8 @@ ScreenType SessionCoordinator::screenForState(GameState gs) {
         return ScreenType::overworld;
     case GameState::daemondex:
         return ScreenType::menu;
+    case GameState::daemonNaming:
+        return ScreenType::dialogue;
     default:
         return ScreenType::overworld;
     }

@@ -58,10 +58,8 @@ StoryAction StoryManager::onChoiceSelected(const std::string &context, int choic
         speciesId.has_value() && choice == 0) {
         const Species &species = pokedex.getSpecies(*speciesId);
         Daemon starter = Daemon::generateRandomized(species, 5, world.getRng());
-        world.getPlayer().addDaemon(starter);
-        world.getPlayer().setFlag("has_starter");
-
-        return StoryAction::showDialogue(
+        return StoryAction::promptStarterNickname(
+            std::move(starter),
             "Prof. Bart Iver",
             {"Then " + species.name + " it is.",
              "Take care of it, and it will carry you farther than lectures ever could.",

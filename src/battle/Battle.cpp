@@ -3,6 +3,7 @@
 #include "BattleRules.h"
 #include "BattleTurnResolver.h"
 #include <algorithm>
+#include <stdexcept>
 #include <string_view>
 
 namespace {
@@ -365,8 +366,7 @@ bool Battle::attemptCapture(int itemId) {
         pendingState = BattleState::captured;
         state = BattleState::showingMessages;
 
-        player.addDaemon(BattleCapture::caughtDaemon(target));
-        player.markCaught(target.getSpeciesId());
+        capturedDaemon = BattleCapture::caughtDaemon(target);
         return true;
     }
 
@@ -424,6 +424,17 @@ bool Battle::didPlayerParticipate(int partyIndex) const {
     if (partyIndex < 0 || partyIndex >= static_cast<int>(playerParticipants.size()))
         return false;
     return playerParticipants[static_cast<std::size_t>(partyIndex)];
+}
+
+bool Battle::hasCapturedDaemon() const { return capturedDaemon.has_value(); }
+
+Daemon Battle::takeCapturedDaemon() {
+    if (!capturedDaemon.has_value())
+        throw std::logic_error("No captured daemon available");
+
+    Daemon daemon = std::move(*capturedDaemon);
+    capturedDaemon.reset();
+    return daemon;
 }
 
 void Battle::addLevelUpMessage(const std::string &msg) {

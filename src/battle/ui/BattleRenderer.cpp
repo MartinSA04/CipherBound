@@ -230,7 +230,7 @@ void BattleRenderer::drawOpponentDaemon(GameUI &ui, const Daemon *opponentDaemon
     const int spriteW = sprite.width * scale;
     const int spriteH = sprite.height * scale;
     const int spriteX = baseX + baseW / 2 - spriteW / 2 + offsetX;
-    const int spriteY = baseY - spriteH + baseH - 10 * scale + offsetY;
+    const int spriteY = baseY - spriteH + baseH - 20 * scale + offsetY;
     renderer.drawSpriteRaw(spriteId, spriteX, spriteY, spriteW, spriteH);
 }
 
@@ -249,7 +249,7 @@ void BattleRenderer::drawPlayerDaemon(GameUI &ui, const Daemon *playerDaemon, in
     const int spriteW = sprite.width * scale;
     const int spriteH = sprite.height * scale;
     const int spriteX = baseX + baseW / 2 - spriteW / 2 + offsetX;
-    const int spriteY = baseY - spriteH + baseH + offsetY;
+    const int spriteY = baseY - spriteH + baseH + offsetY + 10 * scale;
     renderer.drawSpriteRaw(spriteId, spriteX, spriteY, spriteW, spriteH);
 }
 
@@ -333,9 +333,8 @@ void BattleRenderer::drawOpponentSwitchScene(GameUI &ui, Battle &battle,
 
     constexpr float bobPeriod = 120.0f;
     constexpr float bobAmplitude = 6.0f;
-    const int playerBobY =
-        static_cast<int>(std::sin(static_cast<float>(battleAnimFrame) * 6.2832f / bobPeriod) *
-                         bobAmplitude);
+    const int playerBobY = static_cast<int>(
+        std::sin(static_cast<float>(battleAnimFrame) * 6.2832f / bobPeriod) * bobAmplitude);
 
     if (presentation.playerFieldVisible)
         drawPlayerDaemon(ui, playerDaemon, 0, playerBobY);

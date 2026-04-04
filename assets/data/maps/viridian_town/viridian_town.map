@@ -69,10 +69,10 @@ mmmmmm################pppp######################
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
-viridian_student|Student|normal|22|14|left|0|dialogue:assets/data/dialogue/viridian_town/viridian_student.npcdialogue|bug_catcher|
+viridian_student|Student|normal|22|14|left|0|dialogue:assets/data/dialogue/viridian_town/viridian_student.npcdialogue|schoolboy|
 viridian_guide|Guide|normal|24|12|down|0|dialogue:assets/data/dialogue/viridian_town/viridian_guide.npcdialogue|girl|
 viridian_shopper|Shopper|normal|33|20|down|0|dialogue:assets/data/dialogue/viridian_town/viridian_shopper.npcdialogue|girl|
-viridian_rival|Rival|normal|30|11|right|0||bug_catcher@hidden|
+viridian_rival|Rival|normal|30|11|right|0||blue@hidden|
 
 viridian_sign_town|Sign|normal|20|16|down|0|dialogue:assets/data/dialogue/viridian_town/viridian_sign_town.npcdialogue|@hidden|
 viridian_sign_faculty|Sign|normal|32|10|down|0|dialogue:assets/data/dialogue/viridian_town/viridian_sign_faculty.npcdialogue|@hidden|

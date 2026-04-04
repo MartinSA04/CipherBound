@@ -35,7 +35,7 @@ background|assets/tilesets/viridian_town/maps/viridian_faculty.png
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
-faculty_trainer1|TA Ingrid|trainer|4|10|right|3|dialogue:assets/data/dialogue/viridian_town/faculty_trainer1.npcdialogue|girl|10:5
-faculty_trainer2|TA Rolf|trainer|3|8|right|3|dialogue:assets/data/dialogue/viridian_town/faculty_trainer2.npcdialogue|bug_catcher|4:5
-faculty_trainer3|TA Liv|trainer|9|8|left|3|dialogue:assets/data/dialogue/viridian_town/faculty_trainer3.npcdialogue|girl|5:6
+faculty_trainer1|TA Ingrid|trainer|4|10|right|3|dialogue:assets/data/dialogue/viridian_town/faculty_trainer1.npcdialogue|schoolgirl|10:5
+faculty_trainer2|TA Rolf|trainer|3|8|right|3|dialogue:assets/data/dialogue/viridian_town/faculty_trainer2.npcdialogue|schoolboy|4:5
+faculty_trainer3|TA Liv|trainer|9|8|left|3|dialogue:assets/data/dialogue/viridian_town/faculty_trainer3.npcdialogue|schoolgirl|5:6
 faculty_leader|Marius Thaule|gymLeader|6|5|down|0|dialogue:assets/data/dialogue/viridian_town/faculty_leader.npcdialogue|bart_iver|10:8,11:9

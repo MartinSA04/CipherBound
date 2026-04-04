@@ -29,5 +29,5 @@ background_overlay|assets/tilesets/mart_overlay.png
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue stages separated by @@, each can have flag? prefix
-viridian_mart_shopkeeper|Clerk|shopkeeper|3|3|right|0||@hidden|
-viridian_mart_clerk_dummy|Clerk|normal|2|3|right|0||girl|
+viridian_mart_shopkeeper|Clerk|shopkeeper|3|3|right|0||saleswoman@hidden|
+viridian_mart_clerk_dummy|Clerk|normal|2|3|right|0||saleswoman|

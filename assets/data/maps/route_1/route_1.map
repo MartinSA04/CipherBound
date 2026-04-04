@@ -86,4 +86,4 @@ background_overlay|assets/tilesets/route_1/route_1_overlay.png
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
-route1_trainer1|Field Student|trainer|10|24|up|4|dialogue:assets/data/dialogue/route_1/route1_trainer1.npcdialogue|bug_catcher|13:4
+route1_trainer1|Field Student|trainer|10|24|up|4|dialogue:assets/data/dialogue/route_1/route1_trainer1.npcdialogue|schoolboy|13:4

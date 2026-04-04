@@ -29,4 +29,4 @@ background_overlay|assets/tilesets/viridian_town/maps/academy_overlay.png
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
-academy_archivist|Archivist|normal|2|3|right|0|dialogue:assets/data/dialogue/viridian_town/academy_archivist.npcdialogue|girl|
+academy_archivist|Archivist|normal|2|3|right|0|dialogue:assets/data/dialogue/viridian_town/academy_archivist.npcdialogue|schoolgirl|

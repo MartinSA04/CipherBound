@@ -29,6 +29,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPlainTextEdit,
     QPushButton,
+    QScrollArea,
     QSlider,
     QSplitter,
     QStatusBar,
@@ -990,15 +991,86 @@ class CutsceneSimulator:
 
 
 class CutscenePreviewView(QGraphicsView):
-    def __init__(self, scene: QGraphicsScene, parent: QWidget | None = None) -> None:
+    MIN_ZOOM = 0.5
+    MAX_ZOOM = 6.0
+    ZOOM_STEP = 1.2
+
+    def __init__(
+        self,
+        scene: QGraphicsScene,
+        *,
+        zoom_changed_callback: Callable[[str], None] | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
         super().__init__(scene, parent)
         self.setRenderHints(self.renderHints())
         self.setBackgroundBrush(QColor("#171717"))
+        self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+        self.setResizeAnchor(QGraphicsView.AnchorUnderMouse)
+        self.zoom_changed_callback = zoom_changed_callback
+        self.zoom_factor = 1.0
+        self._base_transform = self.transform()
+        self._manual_zoom = False
+
+    def _notify_zoom_changed(self) -> None:
+        if self.zoom_changed_callback is not None:
+            self.zoom_changed_callback(self.zoom_text())
+
+    def zoom_text(self) -> str:
+        if not self._manual_zoom:
+            return "Fit"
+        return f"{int(round(self.zoom_factor * 100))}%"
+
+    def _recompute_base_transform(self) -> None:
+        scene = self.scene()
+        if scene is None or scene.sceneRect().isNull():
+            self._base_transform = self.transform()
+            return
+        self.resetTransform()
+        self.fitInView(scene.sceneRect(), Qt.KeepAspectRatio)
+        self._base_transform = self.transform()
+
+    def _apply_zoom_transform(self) -> None:
+        self.setTransform(self._base_transform)
+        if self.zoom_factor != 1.0:
+            self.scale(self.zoom_factor, self.zoom_factor)
+
+    def sync_view_to_scene(self) -> None:
+        self._recompute_base_transform()
+        self._apply_zoom_transform()
+        self._notify_zoom_changed()
+
+    def zoom_in(self) -> None:
+        self._manual_zoom = True
+        self.zoom_factor = min(self.MAX_ZOOM, self.zoom_factor * self.ZOOM_STEP)
+        self._apply_zoom_transform()
+        self._notify_zoom_changed()
+
+    def zoom_out(self) -> None:
+        self._manual_zoom = True
+        self.zoom_factor = max(self.MIN_ZOOM, self.zoom_factor / self.ZOOM_STEP)
+        self._apply_zoom_transform()
+        self._notify_zoom_changed()
+
+    def reset_zoom(self) -> None:
+        self._manual_zoom = False
+        self.zoom_factor = 1.0
+        self.sync_view_to_scene()
 
     def resizeEvent(self, event) -> None:  # type: ignore[override]
         super().resizeEvent(event)
         if self.scene() is not None:
-            self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
+            self.sync_view_to_scene()
+
+    def wheelEvent(self, event) -> None:  # type: ignore[override]
+        if event.modifiers() & Qt.ControlModifier:
+            if event.angleDelta().y() > 0:
+                self.zoom_in()
+            elif event.angleDelta().y() < 0:
+                self.zoom_out()
+            event.accept()
+            return
+        super().wheelEvent(event)
 
 
 class CutsceneEditorWidget(QWidget):
@@ -1033,7 +1105,11 @@ class CutsceneEditorWidget(QWidget):
         self.play_timer.timeout.connect(self.play_next_frame)
 
         self.preview_scene = QGraphicsScene(self)
-        self.preview_view = CutscenePreviewView(self.preview_scene, self)
+        self.preview_view = CutscenePreviewView(
+            self.preview_scene,
+            zoom_changed_callback=self.update_preview_zoom_label,
+            parent=self,
+        )
 
         self._build_ui()
         self.source_edit.textChanged.connect(self.on_source_changed)
@@ -1048,29 +1124,62 @@ class CutsceneEditorWidget(QWidget):
         root.setContentsMargins(8, 8, 8, 8)
         root.setSpacing(8)
 
-        setup_box = QGroupBox("Cutscene")
-        setup_layout = QVBoxLayout(setup_box)
+        toolbar = QHBoxLayout()
+        root.addLayout(toolbar)
 
-        file_button_row = QHBoxLayout()
         self.new_button = QPushButton("New")
         self.open_button = QPushButton("Open...")
         self.save_button = QPushButton("Save")
         self.save_as_button = QPushButton("Save As...")
         self.close_button = QPushButton("Close Tab")
+        self.reload_button = QPushButton("Reload")
+        self.simulate_button = QPushButton("Simulate")
+        self.zoom_out_button = QPushButton("Zoom -")
+        self.zoom_reset_button = QPushButton("Fit")
+        self.zoom_in_button = QPushButton("Zoom +")
+        self.preview_zoom_label = QLabel("Fit")
         self.new_button.clicked.connect(self.request_new_cutscene)
         self.open_button.clicked.connect(self.request_open_cutscene)
         self.save_button.clicked.connect(self.save_cutscene)
         self.save_as_button.clicked.connect(self.save_cutscene_as)
         self.close_button.clicked.connect(self.request_close_editor)
-        file_button_row.addWidget(self.new_button)
-        file_button_row.addWidget(self.open_button)
-        file_button_row.addWidget(self.save_button)
-        file_button_row.addWidget(self.save_as_button)
-        file_button_row.addWidget(self.close_button)
-        file_button_row.addStretch(1)
+        self.reload_button.clicked.connect(self.reload_current_cutscene)
+        self.simulate_button.clicked.connect(self.simulate_current_source)
+        self.zoom_out_button.clicked.connect(self.zoom_preview_out)
+        self.zoom_reset_button.clicked.connect(self.reset_preview_zoom)
+        self.zoom_in_button.clicked.connect(self.zoom_preview_in)
+        for button in (
+            self.new_button,
+            self.open_button,
+            self.save_button,
+            self.save_as_button,
+            self.close_button,
+            self.reload_button,
+            self.simulate_button,
+            self.zoom_out_button,
+            self.zoom_reset_button,
+            self.zoom_in_button,
+        ):
+            toolbar.addWidget(button)
+        toolbar.addWidget(self.preview_zoom_label)
+        toolbar.addStretch(1)
         self.dirty_label = QLabel("Source saved")
-        file_button_row.addWidget(self.dirty_label)
-        setup_layout.addLayout(file_button_row)
+        toolbar.addWidget(self.dirty_label)
+
+        splitter = QSplitter(Qt.Horizontal)
+        root.addWidget(splitter, 1)
+
+        sidebar_scroll = QScrollArea()
+        sidebar_scroll.setWidgetResizable(True)
+        sidebar_container = QWidget()
+        sidebar_scroll.setWidget(sidebar_container)
+        sidebar_layout = QVBoxLayout(sidebar_container)
+        sidebar_layout.setContentsMargins(0, 0, 0, 0)
+        sidebar_layout.setSpacing(8)
+        splitter.addWidget(sidebar_scroll)
+
+        setup_box = QGroupBox("Setup")
+        setup_layout = QVBoxLayout(setup_box)
 
         form = QFormLayout()
 
@@ -1080,9 +1189,6 @@ class CutsceneEditorWidget(QWidget):
         cutscene_row_layout = QHBoxLayout(cutscene_row)
         cutscene_row_layout.setContentsMargins(0, 0, 0, 0)
         cutscene_row_layout.addWidget(self.cutscene_path_edit, 1)
-        self.reload_button = QPushButton("Reload")
-        self.reload_button.clicked.connect(self.reload_current_cutscene)
-        cutscene_row_layout.addWidget(self.reload_button)
         form.addRow("File", cutscene_row)
 
         self.cutscene_id_edit = QLineEdit()
@@ -1127,64 +1233,10 @@ class CutsceneEditorWidget(QWidget):
         form.addRow("", self.auto_advance_dialogue_checkbox)
 
         setup_layout.addLayout(form)
+        sidebar_layout.addWidget(setup_box)
 
-        self.simulate_button = QPushButton("Simulate")
-        self.simulate_button.clicked.connect(self.simulate_current_source)
-        setup_layout.addWidget(self.simulate_button)
-
-        root.addWidget(setup_box)
-
-        splitter = QSplitter(Qt.Horizontal)
-        root.addWidget(splitter, 1)
-
-        preview_panel = QWidget()
-        preview_layout = QVBoxLayout(preview_panel)
-        preview_layout.setContentsMargins(0, 0, 0, 0)
-        preview_layout.setSpacing(8)
-        preview_layout.addWidget(self.preview_view, 1)
-
-        nav_row = QHBoxLayout()
-        self.prev_step_button = QPushButton("Prev Step")
-        self.prev_frame_button = QPushButton("Prev Frame")
-        self.play_button = QPushButton("Play")
-        self.next_frame_button = QPushButton("Next Frame")
-        self.next_step_button = QPushButton("Next Step")
-        self.frame_slider = QSlider(Qt.Horizontal)
-        self.frame_slider.setMinimum(0)
-        self.frame_slider.setMaximum(0)
-        self.frame_slider.valueChanged.connect(self.on_frame_changed)
-        self.prev_step_button.clicked.connect(self.jump_to_previous_step)
-        self.prev_frame_button.clicked.connect(self.jump_to_previous_frame)
-        self.play_button.clicked.connect(self.toggle_playback)
-        self.next_frame_button.clicked.connect(self.jump_to_next_frame)
-        self.next_step_button.clicked.connect(self.jump_to_next_step)
-        nav_row.addWidget(self.prev_step_button)
-        nav_row.addWidget(self.prev_frame_button)
-        nav_row.addWidget(self.play_button)
-        nav_row.addWidget(self.next_frame_button)
-        nav_row.addWidget(self.next_step_button)
-        nav_row.addWidget(self.frame_slider, 1)
-        self.frame_label = QLabel("Frame 0 / 0")
-        nav_row.addWidget(self.frame_label)
-        preview_layout.addLayout(nav_row)
-
-        self.snapshot_label = QLabel("Load a cutscene and map to see the simulated timeline.")
-        self.snapshot_label.setWordWrap(True)
-        preview_layout.addWidget(self.snapshot_label)
-
-        self.dialogue_preview = QLabel("")
-        self.dialogue_preview.setWordWrap(True)
-        preview_layout.addWidget(self.dialogue_preview)
-        splitter.addWidget(preview_panel)
-
-        right_tabs = QTabWidget()
-        splitter.addWidget(right_tabs)
-        splitter.setSizes([980, 620])
-
-        steps_tab = QWidget()
-        steps_layout = QVBoxLayout(steps_tab)
-        steps_layout.setContentsMargins(0, 0, 0, 0)
-        steps_layout.setSpacing(8)
+        steps_box = QGroupBox("Steps")
+        steps_layout = QVBoxLayout(steps_box)
 
         step_button_row = QHBoxLayout()
         self.add_step_button = QPushButton("Add Step")
@@ -1209,8 +1261,14 @@ class CutsceneEditorWidget(QWidget):
         steps_layout.addLayout(step_button_row)
 
         self.step_list = QListWidget()
+        self.step_list.setMinimumHeight(240)
         self.step_list.currentItemChanged.connect(self.on_step_selected)
         steps_layout.addWidget(self.step_list, 1)
+
+        self.warning_summary = QLabel("")
+        self.warning_summary.setWordWrap(True)
+        steps_layout.addWidget(self.warning_summary)
+        sidebar_layout.addWidget(steps_box)
 
         step_form_box = QGroupBox("Selected Step")
         step_form_layout = QVBoxLayout(step_form_box)
@@ -1293,37 +1351,75 @@ class CutsceneEditorWidget(QWidget):
         self.step_help_label = QLabel("This step has no extra fields.")
         self.step_help_label.setWordWrap(True)
         step_form_layout.addWidget(self.step_help_label)
-        steps_layout.addWidget(step_form_box)
+        sidebar_layout.addWidget(step_form_box)
 
-        self.warning_summary = QLabel("")
-        self.warning_summary.setWordWrap(True)
-        steps_layout.addWidget(self.warning_summary)
-        right_tabs.addTab(steps_tab, "Steps")
-
-        source_tab = QWidget()
-        source_layout = QVBoxLayout(source_tab)
-        source_layout.setContentsMargins(0, 0, 0, 0)
-        source_layout.setSpacing(8)
+        source_box = QGroupBox("Source")
+        source_layout = QVBoxLayout(source_box)
         self.source_edit = QPlainTextEdit()
         self.source_edit.setFont(QFontDatabase.systemFont(QFontDatabase.FixedFont))
+        self.source_edit.setMinimumHeight(220)
         source_layout.addWidget(self.source_edit, 1)
-        right_tabs.addTab(source_tab, "Source")
+        sidebar_layout.addWidget(source_box)
 
-        warnings_tab = QWidget()
-        warnings_layout = QVBoxLayout(warnings_tab)
-        warnings_layout.setContentsMargins(0, 0, 0, 0)
-        warnings_layout.setSpacing(8)
+        warnings_box = QGroupBox("Warnings")
+        warnings_layout = QVBoxLayout(warnings_box)
         self.warnings_edit = QPlainTextEdit()
         self.warnings_edit.setReadOnly(True)
         self.warnings_edit.setFont(QFontDatabase.systemFont(QFontDatabase.FixedFont))
+        self.warnings_edit.setMinimumHeight(140)
         warnings_layout.addWidget(self.warnings_edit, 1)
-        right_tabs.addTab(warnings_tab, "Warnings")
+        sidebar_layout.addWidget(warnings_box)
+        sidebar_layout.addStretch(1)
+
+        preview_panel = QWidget()
+        preview_layout = QVBoxLayout(preview_panel)
+        preview_layout.setContentsMargins(0, 0, 0, 0)
+        preview_layout.setSpacing(8)
+        preview_layout.addWidget(self.preview_view, 1)
+
+        nav_row = QHBoxLayout()
+        self.prev_step_button = QPushButton("Prev Step")
+        self.prev_frame_button = QPushButton("Prev Frame")
+        self.play_button = QPushButton("Play")
+        self.next_frame_button = QPushButton("Next Frame")
+        self.next_step_button = QPushButton("Next Step")
+        self.frame_slider = QSlider(Qt.Horizontal)
+        self.frame_slider.setMinimum(0)
+        self.frame_slider.setMaximum(0)
+        self.frame_slider.valueChanged.connect(self.on_frame_changed)
+        self.prev_step_button.clicked.connect(self.jump_to_previous_step)
+        self.prev_frame_button.clicked.connect(self.jump_to_previous_frame)
+        self.play_button.clicked.connect(self.toggle_playback)
+        self.next_frame_button.clicked.connect(self.jump_to_next_frame)
+        self.next_step_button.clicked.connect(self.jump_to_next_step)
+        nav_row.addWidget(self.prev_step_button)
+        nav_row.addWidget(self.prev_frame_button)
+        nav_row.addWidget(self.play_button)
+        nav_row.addWidget(self.next_frame_button)
+        nav_row.addWidget(self.next_step_button)
+        nav_row.addWidget(self.frame_slider, 1)
+        self.frame_label = QLabel("Frame 0 / 0")
+        nav_row.addWidget(self.frame_label)
+        preview_layout.addLayout(nav_row)
+
+        self.snapshot_label = QLabel("Load a cutscene and map to see the simulated timeline.")
+        self.snapshot_label.setWordWrap(True)
+        preview_layout.addWidget(self.snapshot_label)
+
+        self.dialogue_preview = QLabel("")
+        self.dialogue_preview.setWordWrap(True)
+        preview_layout.addWidget(self.dialogue_preview)
+        splitter.addWidget(preview_panel)
+        splitter.setStretchFactor(0, 0)
+        splitter.setStretchFactor(1, 1)
+        splitter.setSizes([430, 1150])
 
         self.cutscene_id_edit.editingFinished.connect(self.mark_structured_dirty)
         self.player_x_edit.editingFinished.connect(self.mark_structured_dirty)
         self.player_y_edit.editingFinished.connect(self.mark_structured_dirty)
         self.player_facing_combo.currentTextChanged.connect(lambda _text: self.mark_structured_dirty())
         self.update_step_form_visibility()
+        self.update_preview_zoom_label()
 
     def current_map_path(self) -> Path | None:
         return self.current_map_path_value
@@ -1335,6 +1431,18 @@ class CutsceneEditorWidget(QWidget):
         path_text = self.current_cutscene_path.name if self.current_cutscene_path else "unsaved.cutscene"
         prefix = "*" if self.source_dirty else ""
         self.setWindowTitle(f"{prefix}{path_text} - Cutscene Editor")
+
+    def update_preview_zoom_label(self, label: str | None = None) -> None:
+        self.preview_zoom_label.setText(label if label is not None else self.preview_view.zoom_text())
+
+    def zoom_preview_in(self) -> None:
+        self.preview_view.zoom_in()
+
+    def zoom_preview_out(self) -> None:
+        self.preview_view.zoom_out()
+
+    def reset_preview_zoom(self) -> None:
+        self.preview_view.reset_zoom()
 
     def set_map_path(self, path: Path, *, sync_source: bool = False) -> None:
         resolved = resolve_repo_path(str(path))
@@ -2071,7 +2179,7 @@ class CutsceneEditorWidget(QWidget):
         self.preview_scene.clear()
         if self.current_simulation is None or self.current_map_data is None:
             self.preview_scene.setSceneRect(0, 0, 640, 480)
-            self.preview_view.fitInView(self.preview_scene.sceneRect(), Qt.KeepAspectRatio)
+            self.preview_view.sync_view_to_scene()
             return
 
         snapshot = self.current_snapshot()
@@ -2182,7 +2290,7 @@ class CutsceneEditorWidget(QWidget):
             label_item.setBrush(QColor(best_text_color(color.name())))
             label_item.setPos(sprite_x, sprite_y - 16)
 
-        self.preview_view.fitInView(self.preview_scene.sceneRect(), Qt.KeepAspectRatio)
+        self.preview_view.sync_view_to_scene()
 
     def update_snapshot_labels(self) -> None:
         snapshot = self.current_snapshot()

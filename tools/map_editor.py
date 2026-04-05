@@ -373,6 +373,10 @@ def best_text_color(hex_color: str) -> str:
 
 
 class MapCanvas(QGraphicsView):
+    MIN_ZOOM = 0.25
+    MAX_ZOOM = 8.0
+    ZOOM_STEP = 1.2
+
     def __init__(self, editor: "MapEditorWindow") -> None:
         super().__init__()
         self.editor = editor
@@ -381,7 +385,31 @@ class MapCanvas(QGraphicsView):
         self.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
         self.setBackgroundBrush(QColor("#202020"))
         self.setDragMode(QGraphicsView.NoDrag)
+        self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+        self.setResizeAnchor(QGraphicsView.AnchorUnderMouse)
         self._painting = False
+        self.zoom_factor = 1.0
+
+    def set_zoom(self, zoom_factor: float) -> None:
+        clamped = max(self.MIN_ZOOM, min(self.MAX_ZOOM, zoom_factor))
+        if abs(clamped - self.zoom_factor) < 1e-6:
+            return
+        self.zoom_factor = clamped
+        self.resetTransform()
+        self.scale(self.zoom_factor, self.zoom_factor)
+        self.editor.update_canvas_zoom_label()
+
+    def zoom_in(self) -> None:
+        self.set_zoom(self.zoom_factor * self.ZOOM_STEP)
+
+    def zoom_out(self) -> None:
+        self.set_zoom(self.zoom_factor / self.ZOOM_STEP)
+
+    def reset_zoom(self) -> None:
+        self.set_zoom(1.0)
+
+    def zoom_percent_text(self) -> str:
+        return f"{int(round(self.zoom_factor * 100))}%"
 
     def mousePressEvent(self, event) -> None:  # type: ignore[override]
         if event.button() == Qt.LeftButton:
@@ -412,6 +440,16 @@ class MapCanvas(QGraphicsView):
                 self.editor.finish_rectangle_paint(tile)
             self._painting = False
         super().mouseReleaseEvent(event)
+
+    def wheelEvent(self, event) -> None:  # type: ignore[override]
+        if event.modifiers() & Qt.ControlModifier:
+            if event.angleDelta().y() > 0:
+                self.zoom_in()
+            elif event.angleDelta().y() < 0:
+                self.zoom_out()
+            event.accept()
+            return
+        super().wheelEvent(event)
 
     def tile_from_event(self, point: QPoint) -> tuple[int, int] | None:
         scene_point = self.mapToScene(point)
@@ -455,6 +493,7 @@ class MapEditorWindow(QMainWindow):
         self._build_ui()
         self._connect_signals()
         self.load_map_data(MapData.blank(), None)
+        self.update_canvas_zoom_label()
         if safe_mode:
             self.statusBar().showMessage("Safe mode enabled: preview layers start disabled.")
 
@@ -495,6 +534,16 @@ class MapEditorWindow(QMainWindow):
         toolbar.addWidget(self.show_bg_checkbox)
         toolbar.addWidget(self.show_overlay_checkbox)
         toolbar.addWidget(self.show_tile_chars_checkbox)
+
+        toolbar.addSpacing(16)
+        self.zoom_out_button = QPushButton("Zoom -")
+        self.zoom_reset_button = QPushButton("100%")
+        self.zoom_in_button = QPushButton("Zoom +")
+        self.zoom_label = QLabel("100%")
+        toolbar.addWidget(self.zoom_out_button)
+        toolbar.addWidget(self.zoom_reset_button)
+        toolbar.addWidget(self.zoom_in_button)
+        toolbar.addWidget(self.zoom_label)
         toolbar.addStretch(1)
 
         splitter = QSplitter(Qt.Horizontal)
@@ -725,6 +774,9 @@ class MapEditorWindow(QMainWindow):
         self.show_bg_checkbox.toggled.connect(self.refresh_canvas)
         self.show_overlay_checkbox.toggled.connect(self.refresh_canvas)
         self.show_tile_chars_checkbox.toggled.connect(self.refresh_canvas)
+        self.zoom_out_button.clicked.connect(self.zoom_canvas_out)
+        self.zoom_reset_button.clicked.connect(self.reset_canvas_zoom)
+        self.zoom_in_button.clicked.connect(self.zoom_canvas_in)
 
         self.add_warp_button.clicked.connect(self.add_warp)
         self.remove_warp_button.clicked.connect(self.remove_warp)
@@ -778,6 +830,18 @@ class MapEditorWindow(QMainWindow):
         path_text = self.current_path.name if self.current_path else "unsaved.map"
         prefix = "*" if self.dirty else ""
         self.setWindowTitle(f"{prefix}{path_text} - Map Editor")
+
+    def update_canvas_zoom_label(self) -> None:
+        self.zoom_label.setText(self.canvas.zoom_percent_text())
+
+    def zoom_canvas_in(self) -> None:
+        self.canvas.zoom_in()
+
+    def zoom_canvas_out(self) -> None:
+        self.canvas.zoom_out()
+
+    def reset_canvas_zoom(self) -> None:
+        self.canvas.reset_zoom()
 
     def load_map_data(self, map_data: MapData, path: Path | None) -> None:
         self.map_data = map_data

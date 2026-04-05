@@ -109,12 +109,20 @@ class Map {
     /// Returns whether an overlay image has been configured.
     bool hasBackgroundImageOverlay() const;
 
+    /// Sets the looping background music file path for this map.
+    void setMusicPath(const std::string &path);
+    /// Returns the configured background music file path.
+    const std::string &getMusicPath() const;
+    /// Returns whether a map-specific music file has been configured.
+    bool hasMusicPath() const;
+
   private:
     std::string id;
     int width;
     int height;
     std::string backgroundImagePath;
     std::string backgroundImageOverlayPath;
+    std::string musicPath;
     std::vector<std::vector<Tile>> grid;
     std::vector<WildEncounterSlot> encounterSlots;
     std::vector<WarpPoint> warps;

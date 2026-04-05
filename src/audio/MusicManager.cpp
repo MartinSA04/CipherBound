@@ -37,6 +37,7 @@ void MusicManager::play(MusicTrack track, TDT4102::AnimationWindow &window) {
     Mix_HaltMusic();
 
     currentTrack = track;
+    currentPath.clear();
 
     if (track == MusicTrack::none)
         return;
@@ -49,6 +50,7 @@ void MusicManager::play(MusicTrack track, TDT4102::AnimationWindow &window) {
 void MusicManager::playOneShot(MusicTrack track, TDT4102::AnimationWindow &window) {
     Mix_HaltMusic();
     currentTrack = track;
+    currentPath.clear();
 
     if (track == MusicTrack::none)
         return;
@@ -58,24 +60,31 @@ void MusicManager::playOneShot(MusicTrack track, TDT4102::AnimationWindow &windo
         window.play_audio(*it->second, 0);
 }
 
+void MusicManager::playPath(const std::string &path, TDT4102::AnimationWindow &window) {
+    if (path.empty()) {
+        stop();
+        return;
+    }
+
+    if (currentTrack == MusicTrack::none && currentPath == path)
+        return;
+
+    Mix_HaltMusic();
+    currentTrack = MusicTrack::none;
+    currentPath = path;
+
+    auto [it, inserted] = pathTracks.try_emplace(path);
+    if (inserted || !it->second)
+        it->second = std::make_unique<TDT4102::Audio>(path);
+
+    if (it->second)
+        window.play_audio(*it->second, 9999);
+}
+
 void MusicManager::stop() {
     Mix_HaltMusic();
     currentTrack = MusicTrack::none;
-}
-
-MusicTrack MusicManager::trackForMap(const std::string &mapId) {
-    if (mapId == "bart_iver_lab")
-        return MusicTrack::lab;
-    if (mapId == "route_1")
-        return MusicTrack::route;
-    if (mapId == "viridian_town")
-        return MusicTrack::city;
-    if (mapId == "viridian_center")
-        return MusicTrack::center;
-    if (mapId == "viridian_mart")
-        return MusicTrack::mart;
-    // Towns and houses
-    return MusicTrack::town;
+    currentPath.clear();
 }
 
 MusicTrack MusicManager::getCurrentTrack() const { return currentTrack; }

@@ -307,6 +307,8 @@ struct GameContext {
     void playMusic(MusicTrack track);
     /// Plays a one-shot music cue through the shared music manager.
     void playMusicOneShot(MusicTrack track);
+    /// Plays the current map's configured looping music path, if any.
+    void playCurrentMapMusic();
     /// Stops the currently playing music track.
     void stopMusic();
 

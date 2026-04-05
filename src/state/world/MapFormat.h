@@ -48,6 +48,7 @@ struct MapDefinition {
     int height{0};                             ///< Height in tiles.
     std::string backgroundImage;               ///< Base tileset image path.
     std::string backgroundImageOverlay;        ///< Overlay image path.
+    std::string musicPath;                     ///< Looping background music file path.
     std::optional<Position> playerSpawn;       ///< Optional player spawn tile.
     std::vector<std::string> tileRows;         ///< Raw tile rows from the `[tiles]` section.
     std::vector<WarpPoint> warps;              ///< Parsed warp triggers.

@@ -8,6 +8,7 @@ width|24
 height|20
 background|assets/tilesets/pallet_town/maps/overworld.png
 background_overlay|assets/tilesets/pallet_town/maps/overworld_overlay.png
+music|assets/audio/1-04. New Bark Town_.mp3
 
 # Tile type grid (one char per tile, row by row)
 # Legend:

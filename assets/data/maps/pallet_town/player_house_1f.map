@@ -7,6 +7,7 @@ width|13
 height|10
 background|assets/tilesets/pallet_town/maps/house1_1f.png
 background_overlay|assets/tilesets/pallet_town/maps/house1_1f_overlay.png
+music|assets/audio/1-04. New Bark Town_.mp3
 
 [tiles]
 #############

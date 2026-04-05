@@ -7,6 +7,7 @@ width|48
 height|40
 background|assets/tilesets/viridian_town/maps/viridian_town.png
 background_overlay|assets/tilesets/viridian_town/maps/viridian_town_overlay.png
+music|assets/audio/022 Violet City.mp3
 
 [tiles]
 mmmmmmmm###########.....########################

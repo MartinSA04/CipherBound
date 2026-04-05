@@ -9,6 +9,7 @@ width|4
 height|3
 background|bg.png
 background_overlay|overlay.png
+music|assets/audio/test_theme.mp3
 player_spawn|1|2
 [tiles]
 ....
@@ -34,6 +35,7 @@ trainer_1|Trainer|trainer|2|2|up|4|dialogue:assets/data/dialogue/test/trainer_1.
     assert(definition.height == 3);
     assert(definition.backgroundImage == "bg.png");
     assert(definition.backgroundImageOverlay == "overlay.png");
+    assert(definition.musicPath == "assets/audio/test_theme.mp3");
     assert(definition.playerSpawn.has_value());
     assert((*definition.playerSpawn == Position{1, 2}));
     assert(definition.tileRows.size() == 3);

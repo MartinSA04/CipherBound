@@ -8,6 +8,7 @@ width|24
 height|40
 background|assets/tilesets/route_1/route_1.png
 background_overlay|assets/tilesets/route_1/route_1_overlay.png
+music|assets/audio/020 Route 30.mp3
 
 # Tile type grid (one char per tile, row by row)
 # Legend:

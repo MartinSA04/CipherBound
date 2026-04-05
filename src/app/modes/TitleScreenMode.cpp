@@ -1,5 +1,4 @@
 #include "TitleScreenMode.h"
-#include "../../audio/MusicManager.h"
 #include "../../save/SaveManager.h"
 #include "../../state/World.h"
 #include "../../state/player/Player.h"
@@ -30,8 +29,7 @@ void startNewGame(GameContext &ctx, std::string playerName) {
              "If only he would be alive to see it...",
              "I should see if my schedule has been delivered in the mail."}));
 
-    const MusicTrack mapTrack = MusicManager::trackForMap(ctx.world.getCurrentMapId());
-    ctx.playMusic(mapTrack);
+    ctx.playCurrentMapMusic();
 }
 
 } // namespace
@@ -68,8 +66,7 @@ void TitleScreenMode::update(GameContext &ctx, InputManager &input) {
                                          ctx.world.getPlayer(), ctx.world, ctx.pokedex);
                 ctx.pushRequest(ModeRequest::changeState(GameState::overworld));
 
-                const MusicTrack mapTrack = MusicManager::trackForMap(ctx.world.getCurrentMapId());
-                ctx.playMusic(mapTrack);
+                ctx.playCurrentMapMusic();
             } else {
                 nameEntry.reset();
                 phase = Phase::nameEntry;

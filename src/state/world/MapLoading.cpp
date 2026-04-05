@@ -105,6 +105,8 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
         map.setBackgroundImage(definition.backgroundImage);
     if (!definition.backgroundImageOverlay.empty())
         map.setBackgroundImageOverlay(definition.backgroundImageOverlay);
+    if (!definition.musicPath.empty())
+        map.setMusicPath(definition.musicPath);
 
     for (int y = 0; y < definition.height && y < static_cast<int>(definition.tileRows.size());
          ++y) {

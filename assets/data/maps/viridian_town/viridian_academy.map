@@ -7,6 +7,7 @@ width|10
 height|9
 background|assets/tilesets/viridian_town/maps/academy.png
 background_overlay|assets/tilesets/viridian_town/maps/academy_overlay.png
+music|assets/audio/1-04. New Bark Town_.mp3
 
 [tiles]
 ##########

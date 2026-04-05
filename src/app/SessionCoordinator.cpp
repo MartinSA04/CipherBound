@@ -166,8 +166,7 @@ void SessionCoordinator::handleRequest(const EndBattleRequest & /*req*/) {
     ctx.clearBattle();
     switchMode(GameState::overworld);
 
-    MusicTrack mapTrack = MusicManager::trackForMap(ctx.world.getCurrentMapId());
-    ctx.playMusic(mapTrack);
+    ctx.playCurrentMapMusic();
 }
 
 void SessionCoordinator::handleRequest(const TransitionToMapRequest &req) {

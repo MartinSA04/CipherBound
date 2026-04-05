@@ -66,6 +66,10 @@ void GameContext::playMusicOneShot(MusicTrack track) {
     music.playOneShot(track, ui.getRenderer().getWindow());
 }
 
+void GameContext::playCurrentMapMusic() {
+    music.playPath(world.getMap(world.getCurrentMapId()).getMusicPath(), ui.getRenderer().getWindow());
+}
+
 void GameContext::stopMusic() { music.stop(); }
 
 // ── GameMode helpers

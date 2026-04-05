@@ -36,15 +36,17 @@ class MusicManager {
     // Play a track once immediately, interrupting current music.
     void playOneShot(MusicTrack track, TDT4102::AnimationWindow &window);
 
+    // Play a looping music file by path, interrupting current music if needed.
+    void playPath(const std::string &path, TDT4102::AnimationWindow &window);
+
     // Stop current music
     void stop();
-
-    // Get the appropriate track for a map id
-    static MusicTrack trackForMap(const std::string &mapId);
 
     MusicTrack getCurrentTrack() const;
 
   private:
     MusicTrack currentTrack{MusicTrack::none};
+    std::string currentPath;
     std::map<MusicTrack, std::unique_ptr<TDT4102::Audio>> tracks;
+    std::map<std::string, std::unique_ptr<TDT4102::Audio>> pathTracks;
 };

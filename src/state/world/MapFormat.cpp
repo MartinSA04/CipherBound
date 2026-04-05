@@ -208,6 +208,8 @@ ParseResult parse(std::istream &input) {
                 result.definition.backgroundImage = std::string(parts[1]);
             else if (key == "background_overlay")
                 result.definition.backgroundImageOverlay = std::string(parts[1]);
+            else if (key == "music")
+                result.definition.musicPath = std::string(parts[1]);
             else if (key == "player_spawn") {
                 if (const auto spawn = TextParse::parseFixedIntFields<2>(parts, 1);
                     spawn.has_value()) {

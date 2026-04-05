@@ -7,6 +7,7 @@ width|11
 height|9
 background|assets/tilesets/route_2/npc_house.png
 background_overlay|assets/tilesets/route_2/npc_house_overlay.png
+music|assets/audio/1-04. New Bark Town_.mp3
 
 [tiles]
 ###########

@@ -6,6 +6,7 @@ id|viridian_faculty
 width|13
 height|16
 background|assets/tilesets/viridian_town/maps/viridian_faculty.png
+music|assets/audio/1-04. New Bark Town_.mp3
 
 [tiles]
 #...........#

@@ -7,6 +7,7 @@ width|24
 height|80
 background|assets/tilesets/route_2/route_2.png
 background_overlay|assets/tilesets/route_2/route_2_overlay.png
+music|assets/audio/1-04. New Bark Town_.mp3
 
 [tiles]
 ########.ppp############

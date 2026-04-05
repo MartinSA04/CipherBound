@@ -1,5 +1,4 @@
 #include "TransitionMode.h"
-#include "../../audio/MusicManager.h"
 #include "../../state/World.h"
 #include "../../state/player/Player.h"
 #include "../../story/StoryManager.h"
@@ -41,8 +40,7 @@ void TransitionMode::completeFadeOut(GameContext &ctx) {
     phaseFrame = 0;
     phaseDuration = ctx.world.getPlayer().getMoveDelay();
 
-    MusicTrack mapTrack = MusicManager::trackForMap(ctx.world.getCurrentMapId());
-    ctx.playMusic(mapTrack);
+    ctx.playCurrentMapMusic();
 }
 
 void TransitionMode::update(GameContext &ctx, InputManager & /*input*/) {

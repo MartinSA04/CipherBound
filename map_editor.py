@@ -140,6 +140,7 @@ class MapData:
     height: int = 12
     background_image: str = ""
     background_overlay: str = ""
+    music_path: str = ""
     player_spawn: tuple[int, int] | None = None
     tiles: list[str] = field(default_factory=list)
     warps: list[WarpEntry] = field(default_factory=list)
@@ -231,6 +232,8 @@ def parse_map_file(path: Path) -> MapData:
                     result.background_image = parts[1].strip()
                 elif key == "background_overlay" and len(parts) >= 2:
                     result.background_overlay = parts[1].strip()
+                elif key == "music" and len(parts) >= 2:
+                    result.music_path = parts[1].strip()
                 elif key == "player_spawn" and len(parts) >= 3:
                     result.player_spawn = (int(parts[1]), int(parts[2]))
                 continue
@@ -313,6 +316,8 @@ def serialize_map(map_data: MapData) -> str:
         lines.append(f"background|{map_data.background_image.strip()}")
     if map_data.background_overlay.strip():
         lines.append(f"background_overlay|{map_data.background_overlay.strip()}")
+    if map_data.music_path.strip():
+        lines.append(f"music|{map_data.music_path.strip()}")
     if map_data.player_spawn is not None:
         lines.append(f"player_spawn|{map_data.player_spawn[0]}|{map_data.player_spawn[1]}")
 
@@ -522,6 +527,7 @@ class MapEditorWindow(QMainWindow):
         self.height_edit = QLineEdit()
         self.background_edit = QLineEdit()
         self.overlay_edit = QLineEdit()
+        self.music_edit = QLineEdit()
         form.addRow("Map ID", self.map_id_edit)
         form.addRow("Width", self.width_edit)
         form.addRow("Height", self.height_edit)
@@ -541,6 +547,12 @@ class MapEditorWindow(QMainWindow):
         self.overlay_browse = QPushButton("Browse...")
         overlay_layout.addWidget(self.overlay_browse)
         form.addRow("Overlay", overlay_row)
+
+        music_row = QWidget()
+        music_layout = QHBoxLayout(music_row)
+        music_layout.setContentsMargins(0, 0, 0, 0)
+        music_layout.addWidget(self.music_edit, 1)
+        form.addRow("Music", music_row)
         layout.addLayout(form)
 
         self.resize_grid_button = QPushButton("Resize Grid")
@@ -683,6 +695,7 @@ class MapEditorWindow(QMainWindow):
         self.map_id_edit.textChanged.connect(self.on_metadata_changed)
         self.background_edit.textChanged.connect(self.on_metadata_changed)
         self.overlay_edit.textChanged.connect(self.on_metadata_changed)
+        self.music_edit.textChanged.connect(self.on_metadata_changed)
         self.width_edit.editingFinished.connect(self.on_dimension_changed)
         self.height_edit.editingFinished.connect(self.on_dimension_changed)
         self.background_browse.clicked.connect(lambda: self.choose_image_path("background"))
@@ -725,6 +738,7 @@ class MapEditorWindow(QMainWindow):
         self.map_data.map_id = self.map_id_edit.text().strip()
         self.map_data.background_image = self.background_edit.text().strip()
         self.map_data.background_overlay = self.overlay_edit.text().strip()
+        self.map_data.music_path = self.music_edit.text().strip()
         self.reload_preview_images()
         self.refresh_canvas()
         self.mark_dirty()
@@ -760,6 +774,7 @@ class MapEditorWindow(QMainWindow):
         self.height_edit.setText(str(map_data.height))
         self.background_edit.setText(map_data.background_image)
         self.overlay_edit.setText(map_data.background_overlay)
+        self.music_edit.setText(map_data.music_path)
         self.spawn_label.setText("None" if map_data.player_spawn is None else f"({map_data.player_spawn[0]}, {map_data.player_spawn[1]})")
         self.encounters_edit.setPlainText("\n".join(map_data.encounters))
         self._suspend_updates = False
@@ -859,6 +874,7 @@ class MapEditorWindow(QMainWindow):
         self.map_data.map_id = self.map_id_edit.text().strip()
         self.map_data.background_image = self.background_edit.text().strip()
         self.map_data.background_overlay = self.overlay_edit.text().strip()
+        self.map_data.music_path = self.music_edit.text().strip()
         self.map_data.encounters = [
             line.strip()
             for line in self.encounters_edit.toPlainText().splitlines()
@@ -891,6 +907,8 @@ class MapEditorWindow(QMainWindow):
             errors.append(f"Background file does not exist: {self.map_data.background_image}")
         if self.map_data.background_overlay and not resolve_repo_path(self.map_data.background_overlay).exists():
             errors.append(f"Background overlay file does not exist: {self.map_data.background_overlay}")
+        if self.map_data.music_path and not resolve_repo_path(self.map_data.music_path).exists():
+            errors.append(f"Music file does not exist: {self.map_data.music_path}")
         if self.map_data.player_spawn is not None and not self.tile_in_bounds(*self.map_data.player_spawn):
             errors.append("Player spawn is outside the map bounds.")
 

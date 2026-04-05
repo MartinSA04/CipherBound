@@ -7,6 +7,7 @@ width|11
 height|9
 background|assets/tilesets/mart.png
 background_overlay|assets/tilesets/mart_overlay.png
+music|assets/audio/25. Poké Mart.mp3
 
 [tiles]
 ###########

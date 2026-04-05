@@ -132,3 +132,9 @@ void Map::setBackgroundImageOverlay(const std::string &path) { backgroundImageOv
 const std::string &Map::getBackgroundImageOverlay() const { return backgroundImageOverlayPath; }
 
 bool Map::hasBackgroundImageOverlay() const { return !backgroundImageOverlayPath.empty(); }
+
+void Map::setMusicPath(const std::string &path) { musicPath = path; }
+
+const std::string &Map::getMusicPath() const { return musicPath; }
+
+bool Map::hasMusicPath() const { return !musicPath.empty(); }

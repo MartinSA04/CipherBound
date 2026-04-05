@@ -7,14 +7,11 @@ namespace {
 constexpr const char *bartIntroCutscenePath = "assets/data/cutscenes/bart_iver_intro.cutscene";
 constexpr const char *firstFacultyAftermathCutscenePath =
     "assets/data/cutscenes/first_faculty_aftermath.cutscene";
-constexpr const char *rivalInterceptCutscenePath =
-    "assets/data/cutscenes/rival_intercept.cutscene";
+constexpr const char *rivalInterceptCutscenePath = "assets/data/cutscenes/rival_intercept.cutscene";
 constexpr const char *bartConcordanceRevealCutscenePath =
     "assets/data/cutscenes/bart_concordance_reveal.cutscene";
-constexpr const char *academyArchiveCutscenePath =
-    "assets/data/cutscenes/academy_archive.cutscene";
-constexpr const char *pewterArrivalCutscenePath =
-    "assets/data/cutscenes/pewter_arrival.cutscene";
+constexpr const char *academyArchiveCutscenePath = "assets/data/cutscenes/academy_archive.cutscene";
+constexpr const char *pewterArrivalCutscenePath = "assets/data/cutscenes/pewter_arrival.cutscene";
 constexpr const char *naturalSciencesLockdownCutscenePath =
     "assets/data/cutscenes/natural_sciences_lockdown.cutscene";
 constexpr const char *appliedPhysicsAftermathCutscenePath =
@@ -104,8 +101,7 @@ StoryAction StoryManager::onChoiceSelected(const std::string &context, int choic
         const Species &species = pokedex.getSpecies(*speciesId);
         Daemon starter = Daemon::generateRandomized(species, 5, world.getRng());
         return StoryAction::promptStarterNickname(
-            std::move(starter),
-            "Prof. Bart Iver",
+            std::move(starter), "Prof. Bart Iver",
             {"Then " + species.name + " it is.",
              "Take care of it, and it will carry you farther than any lecture.",
              "Go to the first faculty and bring back anything sealed with my mark.",
@@ -236,8 +232,7 @@ StoryManager::ObjectiveInfo StoryManager::currentObjective(const Player &player)
 
     if (!player.hasFlag("bart_iver_intro_done")) {
         return {"Meet Bart Iver",
-                {"Go to Bart Iver's lab in Pallet.",
-                 "Hear why he called you there in secret."}};
+                {"Go to Bart Iver's lab in Pallet.", "Hear why he called you there in secret."}};
     }
 
     if (!player.hasFlag("has_starter")) {

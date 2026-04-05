@@ -232,7 +232,8 @@ void Battle::executeTurn() {
                 const int replacementIndex = findOpponentReplacementIndex();
                 if (replacementIndex >= 0) {
                     pendingOpponentSwitchIndex = replacementIndex;
-                    const std::string nextName = opponent->getDaemon(replacementIndex).getNickname();
+                    const std::string nextName =
+                        opponent->getDaemon(replacementIndex).getNickname();
                     addSwitchAnimMarker(true, false);
                     addMessage(opponent->getName() + " sent out " + nextName + "!");
                     addSwitchAnimMarker(false, false);

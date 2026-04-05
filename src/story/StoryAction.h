@@ -75,8 +75,8 @@ struct StoryAction {
 
     static StoryAction promptStarterNickname(Daemon daemon, std::string speaker,
                                              std::vector<std::string> lines) {
-        return StoryAction{StoryPromptStarterNicknameAction{
-            std::move(daemon), std::move(speaker), std::move(lines)}};
+        return StoryAction{StoryPromptStarterNicknameAction{std::move(daemon), std::move(speaker),
+                                                            std::move(lines)}};
     }
 
     static StoryAction returnToState() { return StoryAction{StoryReturnToStateAction{}}; }

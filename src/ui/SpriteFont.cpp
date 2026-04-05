@@ -298,10 +298,9 @@ std::vector<std::string> SpriteFont::wrapText(const std::string &text, int scale
 
     while (paragraphStart <= text.size()) {
         const std::size_t paragraphEnd = text.find('\n', paragraphStart);
-        const std::string paragraph =
-            text.substr(paragraphStart, paragraphEnd == std::string::npos
-                                            ? std::string::npos
-                                            : paragraphEnd - paragraphStart);
+        const std::string paragraph = text.substr(
+            paragraphStart,
+            paragraphEnd == std::string::npos ? std::string::npos : paragraphEnd - paragraphStart);
 
         if (paragraph.empty()) {
             wrapped.push_back("");
@@ -320,8 +319,7 @@ std::vector<std::string> SpriteFont::wrapText(const std::string &text, int scale
                     break;
 
                 const std::string word = paragraph.substr(wordStart, i - wordStart);
-                const std::string candidate =
-                    currentLine.empty() ? word : currentLine + " " + word;
+                const std::string candidate = currentLine.empty() ? word : currentLine + " " + word;
 
                 if (!currentLine.empty() && getTextWidth(candidate, scale, spacing) > maxWidth) {
                     wrapped.push_back(currentLine);

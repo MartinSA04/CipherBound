@@ -27,8 +27,8 @@ int main() {
                           64,
                           {},
                           {}};
-    ModeRequest naming = ModeRequest::daemonNaming(
-        Daemon(species, 8), DaemonNamingPurpose::starter, "Prof. Bart Iver", {"Line 3"});
+    ModeRequest naming = ModeRequest::daemonNaming(Daemon(species, 8), DaemonNamingPurpose::starter,
+                                                   "Prof. Bart Iver", {"Line 3"});
     assert(std::holds_alternative<StartDaemonNamingRequest>(naming.payload));
     const auto &namingPayload = std::get<StartDaemonNamingRequest>(naming.payload);
     assert(namingPayload.daemon.getSpeciesId() == 7);

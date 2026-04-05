@@ -130,8 +130,7 @@ void NameEntryPanel::render(GameUI &ui, const NameEntryRenderOptions &options) c
     renderer.drawText(shownText, nameBoxX + nameBoxTextX, options.nameBoxY + nameBoxTextY,
                       TDT4102::Color{20, 30, 70}, 28);
 
-    const std::string countText =
-        std::to_string(text.size()) + "/" + std::to_string(maxLength);
+    const std::string countText = std::to_string(text.size()) + "/" + std::to_string(maxLength);
     renderer.drawText(countText, nameBoxX + nameBoxWidth - countTextOffsetX, options.nameBoxY + 18,
                       TDT4102::Color{70, 82, 120}, 14);
 

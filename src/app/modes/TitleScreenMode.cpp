@@ -23,11 +23,11 @@ void startNewGame(GameContext &ctx, std::string playerName) {
     player.addItem(potionId, 5);
     player.addItem(daemonBallId, 10);
 
-    ctx.pushRequest(ModeRequest::dialogue(
-        "", {"What a night.", "First day of my degree, and I barely slept.",
-             "Dad wanted to know whether Daemons were species or solutions.",
-             "I think I want to keep chasing that question.",
-             "I should check whether my schedule has arrived in the mail."}));
+    ctx.pushRequest(
+        ModeRequest::dialogue("", {"What a night.", "First day of my degree, and I barely slept.",
+                                   "Dad wanted to know whether Daemons were species or solutions.",
+                                   "I think I want to keep chasing that question.",
+                                   "I should check whether my schedule has arrived in the mail."}));
 
     ctx.playCurrentMapMusic();
 }
@@ -223,13 +223,11 @@ void TitleScreenMode::render(GameContext &ctx) {
                             40, PIXEL_SCALE, 1);
         renderer.drawText("Choose a name", WINDOW_WIDTH / 2 - 58, 90, TDT4102::Color::light_gray,
                           14);
-        nameEntry.render(ctx.ui,
-                         {.fieldLabel = "Name",
-                          .footerPrimary =
-                              "Arrows move. Z/Enter selects. X/Esc deletes or goes back.",
-                          .footerSecondary =
-                              "Use BACK to return to the save slots and DONE to start.",
-                          .nameBoxY = 120});
+        nameEntry.render(
+            ctx.ui, {.fieldLabel = "Name",
+                     .footerPrimary = "Arrows move. Z/Enter selects. X/Esc deletes or goes back.",
+                     .footerSecondary = "Use BACK to return to the save slots and DONE to start.",
+                     .nameBoxY = 120});
         break;
     }
     }

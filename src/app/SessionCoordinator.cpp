@@ -194,12 +194,11 @@ void SessionCoordinator::handleRequest(const StartDialogueChoiceRequest &req) {
 
 void SessionCoordinator::handleRequest(const StartDaemonNamingRequest &req) {
     switchToMode(GameState::daemonNaming,
-                 std::make_unique<DaemonNamingMode>(req.daemon, req.purpose,
-                                                    resolveDialogueSpeaker(ctx.world.getPlayer(),
-                                                                          req.completionSpeaker),
-                                                    resolveDialogueLines(ctx.world.getPlayer(),
-                                                                         req.completionLines),
-                                                    req.returnState));
+                 std::make_unique<DaemonNamingMode>(
+                     req.daemon, req.purpose,
+                     resolveDialogueSpeaker(ctx.world.getPlayer(), req.completionSpeaker),
+                     resolveDialogueLines(ctx.world.getPlayer(), req.completionLines),
+                     req.returnState));
 }
 
 void SessionCoordinator::handleRequest(const OpenShopRequest &req) {
@@ -218,18 +217,17 @@ void SessionCoordinator::handleRequest(const StartCutsceneRequest &req) {
 }
 
 void SessionCoordinator::handleRequest(const StoryActionRequest &req) {
-    std::visit(VariantUtils::Overloaded{
-                   [this](const StoryNoAction &action) { handleStoryAction(action); },
-                   [this](const StoryBlockWarpAction &action) { handleStoryAction(action); },
-                   [this](const StoryShowChoiceAction &action) { handleStoryAction(action); },
-                   [this](const StoryStartBattleAction &action) { handleStoryAction(action); },
-                   [this](const StoryShowDialogueAction &action) { handleStoryAction(action); },
-                   [this](const StoryPromptStarterNicknameAction &action) {
-                       handleStoryAction(action);
-                   },
-                   [this](const StoryReturnToStateAction &action) { handleStoryAction(action); },
-                   [this](const StoryStartCutsceneAction &action) { handleStoryAction(action); }},
-               req.action.payload);
+    std::visit(
+        VariantUtils::Overloaded{
+            [this](const StoryNoAction &action) { handleStoryAction(action); },
+            [this](const StoryBlockWarpAction &action) { handleStoryAction(action); },
+            [this](const StoryShowChoiceAction &action) { handleStoryAction(action); },
+            [this](const StoryStartBattleAction &action) { handleStoryAction(action); },
+            [this](const StoryShowDialogueAction &action) { handleStoryAction(action); },
+            [this](const StoryPromptStarterNicknameAction &action) { handleStoryAction(action); },
+            [this](const StoryReturnToStateAction &action) { handleStoryAction(action); },
+            [this](const StoryStartCutsceneAction &action) { handleStoryAction(action); }},
+        req.action.payload);
 }
 
 void SessionCoordinator::handleStoryAction(const StoryNoAction & /*action*/) {}

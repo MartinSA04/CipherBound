@@ -3,7 +3,7 @@
 #include <sstream>
 
 int main() {
-std::istringstream input(R"([header]
+    std::istringstream input(R"([header]
 id|intro_scene
 [steps]
 move|player|3|4

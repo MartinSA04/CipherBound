@@ -54,8 +54,8 @@ void DialogueChoiceMode::render(GameContext &ctx) {
                              previewHeight, TDT4102::Color{48, 58, 84});
             r.drawFilledRect(previewX, previewY, previewWidth, previewHeight,
                              TDT4102::Color{240, 245, 255});
-            r.drawRect(previewX, previewY, previewWidth, previewHeight,
-                       TDT4102::Color::transparent, TDT4102::Color{60, 70, 100});
+            r.drawRect(previewX, previewY, previewWidth, previewHeight, TDT4102::Color::transparent,
+                       TDT4102::Color{60, 70, 100});
 
             r.drawSpriteRaw(spriteId, spriteX, spriteY, spriteSize, spriteSize);
 

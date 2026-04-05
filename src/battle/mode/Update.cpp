@@ -271,8 +271,8 @@ void BattleMode::update(GameContext &ctx, InputManager &input) {
         if (ctx.ui.updateTypewriter(input.isConfirmPressed())) {
             ctx.playSound(SoundEffect::select);
             if (bs == BattleState::captured && battle.hasCapturedDaemon()) {
-                ctx.pushRequest(ModeRequest::daemonNaming(
-                    battle.takeCapturedDaemon(), DaemonNamingPurpose::battleCapture));
+                ctx.pushRequest(ModeRequest::daemonNaming(battle.takeCapturedDaemon(),
+                                                          DaemonNamingPurpose::battleCapture));
             } else {
                 ctx.pushRequest(ModeRequest::endBattle());
             }

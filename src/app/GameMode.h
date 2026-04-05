@@ -139,12 +139,11 @@ struct StoryActionRequest {
  */
 struct ModeRequest {
     /// Variant containing every supported cross-mode request type.
-    using Payload =
-        std::variant<ChangeStateRequest, EnterBattleModeRequest, StartWildBattleRequest,
-                     StartTrainerBattleRequest, StartTrainerBattleIntroRequest, EndBattleRequest,
-                     TransitionToMapRequest, StartDialogueRequest, StartDialogueChoiceRequest,
-                     StartDaemonNamingRequest, OpenShopRequest, StartCutsceneRequest,
-                     StoryActionRequest>;
+    using Payload = std::variant<ChangeStateRequest, EnterBattleModeRequest, StartWildBattleRequest,
+                                 StartTrainerBattleRequest, StartTrainerBattleIntroRequest,
+                                 EndBattleRequest, TransitionToMapRequest, StartDialogueRequest,
+                                 StartDialogueChoiceRequest, StartDaemonNamingRequest,
+                                 OpenShopRequest, StartCutsceneRequest, StoryActionRequest>;
 
     Payload payload; ///< Concrete request stored in this envelope.
 
@@ -193,8 +192,7 @@ struct ModeRequest {
 
     /// Builds a daemon-naming request.
     static ModeRequest daemonNaming(Daemon daemon, DaemonNamingPurpose purpose,
-                                    std::string speaker = {},
-                                    std::vector<std::string> lines = {},
+                                    std::string speaker = {}, std::vector<std::string> lines = {},
                                     GameState retState = GameState::overworld) {
         return ModeRequest{StartDaemonNamingRequest{std::move(daemon), purpose, std::move(speaker),
                                                     std::move(lines), retState}};

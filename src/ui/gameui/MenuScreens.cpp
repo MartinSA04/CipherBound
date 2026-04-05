@@ -479,8 +479,8 @@ void GameUI::drawBagScreen(const Player &player, const Pokedex &pokedex, int sel
             spriteFont.drawText(renderer, "...", listX + listW - 8 * scale, listY + scale,
                                 scale - 1);
         if (topIndex + visibleSlots < inventoryCount)
-            spriteFont.drawText(renderer, "...", listX + listW - 8 * scale,
-                                listBottom - 5 * scale, scale - 1);
+            spriteFont.drawText(renderer, "...", listX + listW - 8 * scale, listBottom - 5 * scale,
+                                scale - 1);
     }
 
     drawTextBar(descPanelY);
@@ -488,7 +488,8 @@ void GameUI::drawBagScreen(const Player &player, const Pokedex &pokedex, int sel
     if (inventory.empty())
         return;
 
-    const ItemData &item = pokedex.getItem(inventory[static_cast<std::size_t>(clampedSelected)].itemId);
+    const ItemData &item =
+        pokedex.getItem(inventory[static_cast<std::size_t>(clampedSelected)].itemId);
     const int textBarW = 252 * scale;
     const int textBarH = 46 * scale;
     const int textBarX = (WINDOW_WIDTH - textBarW) / 2;
@@ -678,8 +679,7 @@ void GameUI::drawPlayerStatsScreen(const Player &player, const std::string &obje
 
     int objectiveLineY = objectiveTextY + 14 * scale;
     for (const auto &paragraph : objectiveLines) {
-        const auto wrappedParagraph =
-            spriteFont.wrapText(paragraph, scale - 1, 1, objectiveTextW);
+        const auto wrappedParagraph = spriteFont.wrapText(paragraph, scale - 1, 1, objectiveTextW);
         for (const auto &line : wrappedParagraph) {
             spriteFont.drawText(renderer, line, objectiveTextX, objectiveLineY, scale - 1);
             objectiveLineY += spriteFont.getLineHeight(scale - 1);

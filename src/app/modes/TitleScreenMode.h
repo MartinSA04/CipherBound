@@ -5,9 +5,9 @@
  */
 
 #pragma once
-#include "NameEntryPanel.h"
 #include "../../save/SaveManager.h"
 #include "../GameMode.h"
+#include "NameEntryPanel.h"
 #include <vector>
 
 /// Opening mode showing the title card and available save slots.
@@ -28,9 +28,9 @@ class TitleScreenMode : public GameMode {
         nameEntry,      ///< Enter a new player name for an empty save slot.
     };
 
-    Phase phase{Phase::titleCard}; ///< Active title-screen phase.
-    int selected{0};               ///< Selected save slot index.
-    int titleTimer{0};             ///< Title-card timer.
+    Phase phase{Phase::titleCard};    ///< Active title-screen phase.
+    int selected{0};                  ///< Selected save slot index.
+    int titleTimer{0};                ///< Title-card timer.
     NameEntryPanel nameEntry{"BACK"}; ///< Shared name-entry panel for player naming.
 
     std::vector<SaveManager::SlotInfo> slotInfos; ///< Cached slot metadata.

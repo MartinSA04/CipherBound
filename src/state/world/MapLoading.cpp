@@ -145,8 +145,7 @@ std::string World::loadMap(const std::filesystem::path &path, const Pokedex &pok
                 resolveDialoguePath(path, npcDefinition.dialogueSourcePath);
             std::ifstream dialogueFile(dialoguePath);
             if (!dialogueFile.is_open()) {
-                throw std::runtime_error("Cannot open NPC dialogue file: " +
-                                         dialoguePath.string());
+                throw std::runtime_error("Cannot open NPC dialogue file: " + dialoguePath.string());
             }
 
             const auto parsedDialogue = NPCDialogueFormat::parse(dialogueFile);

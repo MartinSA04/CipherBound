@@ -12,36 +12,30 @@ int main() {
     assert(queue.currentMessage() != nullptr);
     assert(*queue.currentMessage() == "First");
     assert(queue.consume(BattleState::choosingAction, introPhase, playerAttack, switchRecall,
-                         switchPlayerSide) ==
-           BattleState::showingMessages);
+                         switchPlayerSide) == BattleState::showingMessages);
 
     queue.popCurrentMessage();
     queue.pushHPAnimation();
     assert(queue.consume(BattleState::choosingAction, introPhase, playerAttack, switchRecall,
-                         switchPlayerSide) ==
-           BattleState::animatingHP);
+                         switchPlayerSide) == BattleState::animatingHP);
 
     queue.pushIntroAnimation();
     assert(queue.consume(BattleState::choosingAction, introPhase, playerAttack, switchRecall,
-                         switchPlayerSide) ==
-           BattleState::intro);
+                         switchPlayerSide) == BattleState::intro);
     assert(introPhase == 1);
 
     queue.pushAttackAnimation(false);
     assert(queue.consume(BattleState::choosingAction, introPhase, playerAttack, switchRecall,
-                         switchPlayerSide) ==
-           BattleState::animatingAttack);
+                         switchPlayerSide) == BattleState::animatingAttack);
     assert(!playerAttack);
 
     queue.pushSwitchAnimation(true, false);
     assert(queue.consume(BattleState::choosingAction, introPhase, playerAttack, switchRecall,
-                         switchPlayerSide) ==
-           BattleState::animatingSwitch);
+                         switchPlayerSide) == BattleState::animatingSwitch);
     assert(switchRecall);
     assert(!switchPlayerSide);
 
     assert(queue.consume(BattleState::victory, introPhase, playerAttack, switchRecall,
-                         switchPlayerSide) ==
-           BattleState::victory);
+                         switchPlayerSide) == BattleState::victory);
     return 0;
 }

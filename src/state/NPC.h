@@ -108,10 +108,10 @@ class NPC : public Entity {
     std::vector<DialogueStage> dialogueStages; ///< Ordered dialogue stages.
     Party party;                               ///< Trainer party.
 
-    bool hidden{false}; ///< Whether the NPC is currently hidden.
-    Position spawnPosition{0, 0}; ///< Position restored when re-entering the map.
+    bool hidden{false};                     ///< Whether the NPC is currently hidden.
+    Position spawnPosition{0, 0};           ///< Position restored when re-entering the map.
     Direction spawnFacing{Direction::down}; ///< Facing restored when re-entering the map.
-    bool spawnHidden{false}; ///< Hidden state restored when re-entering the map.
+    bool spawnHidden{false};                ///< Hidden state restored when re-entering the map.
 
     static const std::vector<std::string> emptyLines; ///< Shared empty dialogue result.
 };

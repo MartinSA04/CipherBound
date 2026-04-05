@@ -126,16 +126,16 @@ class Battle {
 
     Player &player;
     std::unique_ptr<Daemon> opponentDaemon = nullptr;
-    NPC *opponent = nullptr;        ///< Non-owning trainer pointer for trainer battles.
-    BattleType type;                ///< Wild or trainer battle classification.
-    BattleState state;              ///< Current state of the battle state machine.
-    BattleState pendingState;       ///< State entered after the current message queue drains.
-    int introPhase{0};              ///< Current intro animation phase.
-    bool introComplete{false};      ///< Whether intro animation has fully completed.
-    int captureShakes{0};           ///< Number of ball shakes queued for capture animation.
-    bool captureSuccess{false};     ///< Whether the queued capture attempt succeeds.
-    bool attackAnimIsPlayer{true};  ///< Whether the active attack animation is from the player.
-    bool switchAnimIsRecall{false}; ///< Whether the active switch animation is a recall phase.
+    NPC *opponent = nullptr;           ///< Non-owning trainer pointer for trainer battles.
+    BattleType type;                   ///< Wild or trainer battle classification.
+    BattleState state;                 ///< Current state of the battle state machine.
+    BattleState pendingState;          ///< State entered after the current message queue drains.
+    int introPhase{0};                 ///< Current intro animation phase.
+    bool introComplete{false};         ///< Whether intro animation has fully completed.
+    int captureShakes{0};              ///< Number of ball shakes queued for capture animation.
+    bool captureSuccess{false};        ///< Whether the queued capture attempt succeeds.
+    bool attackAnimIsPlayer{true};     ///< Whether the active attack animation is from the player.
+    bool switchAnimIsRecall{false};    ///< Whether the active switch animation is a recall phase.
     bool switchAnimIsPlayerSide{true}; ///< Whether the active switch animation affects player.
 
     int playerMoveSlot;

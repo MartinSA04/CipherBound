@@ -5,8 +5,8 @@
  */
 
 #pragma once
-#include "NameEntryPanel.h"
 #include "../GameMode.h"
+#include "NameEntryPanel.h"
 
 /// Mode that lets the player edit a nickname for a newly obtained daemon.
 class DaemonNamingMode : public GameMode {

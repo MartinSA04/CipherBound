@@ -32,8 +32,7 @@ std::string promptText(DaemonNamingPurpose purpose, const Daemon &daemon) {
 
 DaemonNamingMode::DaemonNamingMode(Daemon daemon, DaemonNamingPurpose purpose,
                                    std::string completionSpeaker,
-                                   std::vector<std::string> completionLines,
-                                   GameState returnState)
+                                   std::vector<std::string> completionLines, GameState returnState)
     : daemon(std::move(daemon)), purpose(purpose), completionSpeaker(std::move(completionSpeaker)),
       completionLines(std::move(completionLines)), returnState(returnState) {
     nameEntry.reset(this->daemon.getNickname());
@@ -94,12 +93,12 @@ void DaemonNamingMode::render(GameContext &ctx) {
                       TDT4102::Color{240, 244, 255}, 22);
     renderer.drawText(promptText(purpose, daemon), WINDOW_WIDTH / 2 - 180, 78,
                       TDT4102::Color{190, 198, 230}, 14);
-    nameEntry.render(ctx.ui,
-                     {.fieldLabel = "Nickname",
-                      .footerPrimary = "Arrows move. Z/Enter selects. X/Esc deletes.",
-                      .footerSecondary =
-                          "DEFAULT restores the species name and DONE confirms the nickname.",
-                      .nameBoxY = 270});
+    nameEntry.render(
+        ctx.ui,
+        {.fieldLabel = "Nickname",
+         .footerPrimary = "Arrows move. Z/Enter selects. X/Esc deletes.",
+         .footerSecondary = "DEFAULT restores the species name and DONE confirms the nickname.",
+         .nameBoxY = 270});
 }
 
 void DaemonNamingMode::finishNaming(GameContext &ctx) {

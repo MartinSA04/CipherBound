@@ -14,17 +14,17 @@
 struct CutsceneStep {
     /// Kind of command represented by the step.
     enum class Type {
-        move, ///< Move an entity toward an absolute tile position.
-        walk, ///< Move an entity one tile in a direction.
-        face, ///< Change an entity's facing direction immediately.
-        say,  ///< Show dialogue and block until dismissed.
-        wait, ///< Wait a fixed number of frames.
-        sync, ///< Wait for all queued moves to complete.
-        flag, ///< Set a player event flag.
+        move,  ///< Move an entity toward an absolute tile position.
+        walk,  ///< Move an entity one tile in a direction.
+        face,  ///< Change an entity's facing direction immediately.
+        say,   ///< Show dialogue and block until dismissed.
+        wait,  ///< Wait a fixed number of frames.
+        sync,  ///< Wait for all queued moves to complete.
+        flag,  ///< Set a player event flag.
         badge, ///< Award a badge to the player.
-        item, ///< Add an item directly to the player's inventory.
-        hide, ///< Hide an NPC.
-        show, ///< Show a previously hidden NPC.
+        item,  ///< Add an item directly to the player's inventory.
+        hide,  ///< Hide an NPC.
+        show,  ///< Show a previously hidden NPC.
     };
 
     Type type; ///< Command type.
@@ -41,7 +41,7 @@ struct CutsceneStep {
 
     int frames{0}; ///< Frame count for `wait`.
 
-    std::string flagName; ///< Event flag name for `flag`.
+    std::string flagName;  ///< Event flag name for `flag`.
     std::string badgeName; ///< Badge name for `badge`.
     int itemId{0};         ///< Item id for `item`.
     int itemQuantity{0};   ///< Quantity for `item`.

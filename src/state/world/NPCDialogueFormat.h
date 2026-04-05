@@ -16,8 +16,8 @@ namespace NPCDialogueFormat {
 
 /// Result of parsing an external NPC dialogue file.
 struct ParseResult {
-    std::vector<DialogueStage> stages;   ///< Dialogue stages in author-defined order.
-    std::vector<std::string> warnings;   ///< Non-fatal parse warnings.
+    std::vector<DialogueStage> stages; ///< Dialogue stages in author-defined order.
+    std::vector<std::string> warnings; ///< Non-fatal parse warnings.
 
     /// Returns whether at least one dialogue stage was parsed.
     bool valid() const { return !stages.empty(); }

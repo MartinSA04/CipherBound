@@ -156,6 +156,12 @@ void SpriteFont::drawTextPartial(Renderer &renderer, const std::string &text, st
         for (char c : text) {
             if (drawn >= charCount)
                 break;
+            if (c == '\n') {
+                ++drawn;
+                cursorX = screenX;
+                cursorY += lineHeight;
+                continue;
+            }
             drawTextChar(renderer, c, cursorX, cursorY, scale, spacing, drawn);
         }
         return;
@@ -163,17 +169,36 @@ void SpriteFont::drawTextPartial(Renderer &renderer, const std::string &text, st
 
     std::size_t i = 0;
     while (i < text.size() && drawn < charCount) {
+        if (text[i] == '\n') {
+            ++drawn;
+            cursorX = screenX;
+            cursorY += lineHeight;
+            ++i;
+            continue;
+        }
+
         std::size_t spaceCount = 0;
         while (i < text.size() && text[i] == ' ') {
             ++spaceCount;
             ++i;
         }
 
+        if (i < text.size() && text[i] == '\n') {
+            ++drawn;
+            cursorX = screenX;
+            cursorY += lineHeight;
+            ++i;
+            continue;
+        }
+
         std::size_t wordStart = i;
-        while (i < text.size() && text[i] != ' ') {
+        while (i < text.size() && text[i] != ' ' && text[i] != '\n') {
             ++i;
         }
         std::size_t wordLength = i - wordStart;
+
+        if (wordLength == 0)
+            continue;
 
         int spacesWidth = static_cast<int>(spaceCount) * SPACE_WIDTH * scale;
         int wordWidth = getTextWidth(text.substr(wordStart, wordLength), scale, spacing);

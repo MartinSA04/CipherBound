@@ -1,19 +1,71 @@
 #include "../GameUI.h"
 #include <algorithm>
 
-void GameUI::setDialogueText(const std::string &text) {
-    if (text != typewriterFullText) {
-        typewriterFullText = text;
-        typewriterCharsRevealed = 0;
-        typewriterFrameCounter = 0;
-        typewriterIndicatorTimer = 0;
+int GameUI::getDialogueTextMaxWidth(int scale) const {
+    return (dialogueTextBarWidth - dialogueTextPaddingX * 2) * scale;
+}
+
+std::vector<std::string> GameUI::paginateDialogueText(const std::string &text) const {
+    const auto wrapped = spriteFont.wrapText(text, PIXEL_SCALE, 1, getDialogueTextMaxWidth());
+    std::vector<std::string> sections;
+
+    for (std::size_t i = 0; i < wrapped.size(); i += dialogueTextMaxLines) {
+        std::string section = wrapped[i];
+        const std::size_t sectionEnd =
+            std::min(i + static_cast<std::size_t>(dialogueTextMaxLines), wrapped.size());
+        for (std::size_t j = i + 1; j < sectionEnd; ++j) {
+            section += '\n';
+            section += wrapped[j];
+        }
+        sections.push_back(std::move(section));
     }
+
+    if (sections.empty())
+        sections.push_back("");
+
+    return sections;
+}
+
+void GameUI::resetTypewriterForCurrentSection() {
+    if (typewriterSections.empty()) {
+        typewriterFullText.clear();
+    } else {
+        typewriterFullText = typewriterSections[typewriterSectionIndex];
+    }
+
+    typewriterCharsRevealed = 0;
+    typewriterFrameCounter = 0;
+    typewriterIndicatorTimer = 0;
+}
+
+bool GameUI::advanceTextSection() {
+    if (typewriterSectionIndex + 1 >= typewriterSections.size())
+        return false;
+
+    ++typewriterSectionIndex;
+    resetTypewriterForCurrentSection();
+    return true;
+}
+
+void GameUI::setDialogueText(const std::string &text) {
+    if (text == typewriterSourceText)
+        return;
+
+    typewriterSourceText = text;
+    typewriterSections = paginateDialogueText(text);
+    typewriterSectionIndex = 0;
+    resetTypewriterForCurrentSection();
 }
 
 bool GameUI::updateTypewriter(const bool inputConfirm) {
     if (isTextFullyRevealed()) {
         typewriterIndicatorTimer++;
-        return inputConfirm;
+        if (!inputConfirm)
+            return false;
+
+        if (advanceTextSection())
+            return false;
+        return true;
     }
 
     bool fast = input.isConfirmHeld() || input.isCancelHeld();
@@ -49,10 +101,14 @@ void GameUI::revealAllText() {
 
 void GameUI::startDialogue(const std::string &speaker, const std::vector<std::string> &lines) {
     dialogueSpeaker = speaker;
-    dialogueLines = lines;
+    dialogueLines.clear();
+    for (const auto &line : lines) {
+        const auto paginatedLine = paginateDialogueText(line);
+        dialogueLines.insert(dialogueLines.end(), paginatedLine.begin(), paginatedLine.end());
+    }
     dialogueLineIndex = 0;
-    if (!lines.empty())
-        setDialogueText(lines[0]);
+    if (!dialogueLines.empty())
+        setDialogueText(dialogueLines[0]);
 }
 
 bool GameUI::advanceDialogueLine() {
@@ -82,17 +138,17 @@ void GameUI::drawDialogueBox(const std::string &speaker, const std::string &text
 
     drawTextBar(panelY);
 
-    int textBarW = 252 * scale;
-    int textBarH = 46 * scale;
+    int textBarW = dialogueTextBarWidth * scale;
+    int textBarH = dialogueTextBarHeight * scale;
     int textBarX = (WINDOW_WIDTH - textBarW) / 2;
     int textBarY = panelY + (UI_PANEL_HEIGHT - textBarH) / 2;
 
-    int textX = textBarX + 12 * scale;
+    int textX = textBarX + dialogueTextPaddingX * scale;
     int textY = textBarY + 6 * scale;
 
-    int textMaxW = textBarW - 24 * scale;
-    spriteFont.drawTextPartial(renderer, text, typewriterCharsRevealed, textX, textY, scale, 1,
-                               textMaxW);
+    const int textMaxW = getDialogueTextMaxWidth(scale);
+    spriteFont.drawTextPartial(renderer, typewriterFullText, typewriterCharsRevealed, textX, textY,
+                               scale, 1, textMaxW);
 
     if (isTextFullyRevealed()) {
         int bouncePhase = typewriterIndicatorTimer % 20;
@@ -180,8 +236,8 @@ void GameUI::drawTextBox(int x, int y, int width, int height, const std::string 
 
 void GameUI::drawTextBar(int panelY) {
     int scale = PIXEL_SCALE;
-    int barW = 252 * scale;
-    int barH = 46 * scale;
+    int barW = dialogueTextBarWidth * scale;
+    int barH = dialogueTextBarHeight * scale;
     int barX = (WINDOW_WIDTH - barW) / 2;
     int barY = panelY + (UI_PANEL_HEIGHT - barH) / 2;
     renderer.drawSpriteRaw("ui_text_bar", barX, barY, barW, barH);

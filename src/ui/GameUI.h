@@ -157,6 +157,9 @@ class GameUI {
     int dialogueLineIndex{0};
     std::string dialogueSpeaker;
 
+    std::string typewriterSourceText;
+    std::vector<std::string> typewriterSections;
+    std::size_t typewriterSectionIndex{0};
     std::string typewriterFullText;
     std::size_t typewriterCharsRevealed{0};
     int typewriterFrameCounter{0};
@@ -164,5 +167,14 @@ class GameUI {
     int typewriterFastSpeed{1};
     int typewriterIndicatorTimer{0};
 
+    static constexpr int dialogueTextBarWidth = 252;
+    static constexpr int dialogueTextBarHeight = 46;
+    static constexpr int dialogueTextPaddingX = 12;
+    static constexpr int dialogueTextMaxLines = 2;
+
     void drawTextBox(int x, int y, int width, int height, const std::string &text);
+    int getDialogueTextMaxWidth(int scale = PIXEL_SCALE) const;
+    std::vector<std::string> paginateDialogueText(const std::string &text) const;
+    void resetTypewriterForCurrentSection();
+    bool advanceTextSection();
 };

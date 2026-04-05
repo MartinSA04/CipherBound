@@ -1,5 +1,7 @@
 #include "MusicManager.h"
 #include <SDL_mixer.h>
+#include <iostream>
+#include <stdexcept>
 
 MusicManager::MusicManager() {}
 
@@ -77,8 +79,15 @@ void MusicManager::playPath(const std::string &path, TDT4102::AnimationWindow &w
     if (inserted || !it->second)
         it->second = std::make_unique<TDT4102::Audio>(path);
 
-    if (it->second)
+    if (!it->second)
+        return;
+
+    try {
         window.play_audio(*it->second, 9999);
+    } catch (const std::runtime_error &error) {
+        std::cerr << "Failed to play music with path '" << path << "': " << error.what()
+                  << std::endl;
+    }
 }
 
 void MusicManager::stop() {

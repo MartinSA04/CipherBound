@@ -552,6 +552,8 @@ class MapEditorWindow(QMainWindow):
         music_layout = QHBoxLayout(music_row)
         music_layout.setContentsMargins(0, 0, 0, 0)
         music_layout.addWidget(self.music_edit, 1)
+        self.music_browse = QPushButton("Browse...")
+        music_layout.addWidget(self.music_browse)
         form.addRow("Music", music_row)
         layout.addLayout(form)
 
@@ -700,6 +702,7 @@ class MapEditorWindow(QMainWindow):
         self.height_edit.editingFinished.connect(self.on_dimension_changed)
         self.background_browse.clicked.connect(lambda: self.choose_image_path("background"))
         self.overlay_browse.clicked.connect(lambda: self.choose_image_path("overlay"))
+        self.music_browse.clicked.connect(self.choose_music_path)
         self.resize_grid_button.clicked.connect(self.resize_grid)
         self.spawn_pick_button.clicked.connect(self.pick_player_spawn)
         self.spawn_clear_button.clicked.connect(self.clear_player_spawn)
@@ -1039,6 +1042,24 @@ class MapEditorWindow(QMainWindow):
         self.npc_dialogue_mode_combo.setCurrentText("file")
         self.mark_dirty()
         self.statusBar().showMessage("Selected NPC dialogue file.")
+
+    def choose_music_path(self) -> None:
+        current_value = self.music_edit.text().strip()
+        current_path = resolve_repo_path(current_value)
+        initial_dir = str(
+            current_path.parent if current_value and current_path.exists() else PROJECT_ROOT / "assets" / "audio"
+        )
+        path_str, _ = QFileDialog.getOpenFileName(
+            self,
+            "Choose Music File",
+            initial_dir,
+            "Audio files (*.mp3 *.ogg *.wav *.flac);;All files (*)",
+        )
+        if not path_str:
+            return
+        normalized = to_repo_relative(Path(path_str))
+        self.music_edit.setText(normalized)
+        self.statusBar().showMessage(f"Selected music file: {normalized}")
 
     def pick_player_spawn(self) -> None:
         self.pending_pick = ("spawn", None)

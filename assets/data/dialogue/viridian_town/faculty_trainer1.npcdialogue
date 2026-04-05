@@ -1,7 +1,7 @@
 [flag defeated_faculty_trainer1]
-You solved the recurrence before I could.
+You preserved the invariant longer than I did.
 
 [default]
-If you can handle one base case,
-prove you can handle the rest.
-Show me your reasoning!
+We teach induction here.
+Hold the base case, preserve the invariant,
+then show me the next step.

@@ -39,16 +39,18 @@ void applyMapStoryState(World &world) {
         setHiddenIfPresent(world, mapId, "route2_shortcut_aide", shortcutOpen);
     }
 
-    if (mapId == "natural_sciences_building") {
+    if (mapId == "pewter_town") {
         const bool buildingUnlocked = player.hasFlag("got_induction_badge");
-        setHiddenIfPresent(world, mapId, "ns_stair_guard", buildingUnlocked);
         setHiddenIfPresent(world, mapId, "ns_right_guard", buildingUnlocked);
     }
 
+    if (mapId == "natural_sciences_building") {
+        const bool buildingUnlocked = player.hasFlag("got_induction_badge");
+        setHiddenIfPresent(world, mapId, "ns_stair_guard", buildingUnlocked);
+    }
+
     if (mapId == "natural_sciences_building_2f") {
-        const bool hideRival = !player.hasFlag("got_induction_badge") ||
-                               player.hasFlag("received_resonance_ledger");
-        setHiddenIfPresent(world, mapId, "ns_rival", hideRival);
+        setHiddenIfPresent(world, mapId, "ns_rival", true);
     }
 }
 
@@ -85,6 +87,11 @@ StoryAction StoryManager::onDialogueEnd(NPC *npc, World &world) {
     if (npc->getId() == "pallet_mailbox")
         world.getPlayer().setFlag("read_mail");
 
+    if (npc->getId() == "nat_sci_bookshelf_6" && world.getPlayer().hasFlag("got_induction_badge") &&
+        !world.getPlayer().hasFlag("natural_sciences_reference_found")) {
+        world.getPlayer().setFlag("natural_sciences_reference_found");
+    }
+
     // Default: return to previous state
     return StoryAction::returnToState();
 }
@@ -100,9 +107,9 @@ StoryAction StoryManager::onChoiceSelected(const std::string &context, int choic
             std::move(starter),
             "Prof. Bart Iver",
             {"Then " + species.name + " it is.",
-             "Take care of it, and it will carry you farther than lectures ever could.",
-             "Go to the first faculty and bring back anything sealed from my confiscated archive.",
-             "When you return, I'll tell you why they were so desperate to bury it."});
+             "Take care of it, and it will carry you farther than any lecture.",
+             "Go to the first faculty and bring back anything sealed with my mark.",
+             "When you return, I'll tell you why they were so eager to bury the notation."});
     }
 
     // Default: return to previous state
@@ -114,13 +121,13 @@ StoryAction StoryManager::checkWarp(const WarpPoint &warp, Player &player) {
     if (warp.targetMapId == "route_1") {
         if (!player.hasFlag("read_mail")) {
             return StoryAction::blockWarp(
-                {"I should check my mailbox first.", "If my schedule's there, I need it."});
+                {"I should check my mailbox first.", "My schedule should be there."});
         }
 
         if (!player.hasFlag("bart_iver_intro_done")) {
             return StoryAction::blockWarp(
-                {"I should hear Bart out before I wander off.",
-                 "If he sent that letter, it wasn't for nothing."});
+                {"I should hear Bart out before heading north.",
+                 "If he risked sending that letter, there was a reason."});
         }
 
         if (!player.hasFlag("has_starter")) {
@@ -131,14 +138,14 @@ StoryAction StoryManager::checkWarp(const WarpPoint &warp, Player &player) {
     if (warp.targetMapId == "bart_iver_lab") {
         if (!player.hasFlag("read_mail")) {
             return StoryAction::blockWarp(
-                {"I shouldn't just walk into a stranger's lab for no reason."});
+                {"I should not walk into Bart Iver's lab without a reason."});
         }
     }
 
     if (warp.targetMapId == "route_2" && !player.hasFlag("academy_archive_searched")) {
         return StoryAction::blockWarp(
             {"Bart needs the academy transfer record first.",
-             "Route 2 can wait until I know where the next fragment went."});
+             "I should not head for Route 2 until I know where the next fragment went."});
     }
 
     if (warp.targetMapId == "pewter_faculty" && player.hasFlag("academy_archive_searched") &&
@@ -146,6 +153,15 @@ StoryAction StoryManager::checkWarp(const WarpPoint &warp, Player &player) {
         return StoryAction::blockWarp(
             {"The archive pointed to the Natural Sciences Building, not the faculty hall.",
              "I should inspect the transfer site before I challenge anyone here."});
+    }
+
+    if (warp.targetMapId == "natural_sciences_building_2f" &&
+        player.hasFlag("got_induction_badge") &&
+        !player.hasFlag("natural_sciences_reference_found") &&
+        !player.hasFlag("received_resonance_ledger")) {
+        return StoryAction::blockWarp(
+            {"The upstairs archive is too broad to search blind.",
+             "The east-wing project index should narrow the cabinet down."});
     }
 
     return StoryAction::none();
@@ -198,6 +214,7 @@ StoryAction StoryManager::checkMapEnter(World &world) {
     }
 
     if (mapId == "natural_sciences_building_2f" && player.hasFlag("got_induction_badge") &&
+        player.hasFlag("natural_sciences_reference_found") &&
         !player.hasFlag("received_resonance_ledger")) {
         return StoryAction::startCutscene(resonanceLabRevealCutscenePath);
     }
@@ -283,10 +300,16 @@ StoryManager::ObjectiveInfo StoryManager::currentObjective(const Player &player)
                  "Take the badge that opens the sealed Natural Sciences sections."}};
     }
 
+    if (!player.hasFlag("natural_sciences_reference_found")) {
+        return {"Search The Project Index",
+                {"The Induction Badge opened Natural Sciences.",
+                 "Search the sealed east wing for the Resonance project reference index."}};
+    }
+
     if (!player.hasFlag("received_resonance_ledger")) {
-        return {"Return To Natural Sciences",
-                {"The Induction Badge should open the blocked stair and east wing now.",
-                 "Search the upper floor for the missing Resonance records."}};
+        return {"Check Annex B Upstairs",
+                {"The east-wing index pointed to Annex B, cabinet 3.",
+                 "Use the Natural Sciences stair and search the second-floor archive."}};
     }
 
     if (!player.hasFlag("bart_resonance_followup_done")) {

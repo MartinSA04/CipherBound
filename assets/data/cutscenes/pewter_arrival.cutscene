@@ -6,16 +6,16 @@ id|pewter_arrival
 [steps]
 show|pewter_rival
 move|player|23|33
-move|pewter_rival|27|33
+move|pewter_rival|28|33
 sync
 face|player|right
 face|pewter_rival|left
 say|Rival|You made it through the forest.;Good.
-say|Rival|Applied Physics locked the east road after a field test went wrong.;They left students the long way around and called it containment.
+say|Rival|Applied Physics sealed the east road after a test failed.;Students got the long detour, and they called it containment.
 say|You|The archive said the fragment came here.
-say|Rival|Then start where the transfer did.;Natural Sciences first.;The faculty hall can wait.
-say|Rival|If my brother vanished in Aureate's system,;that building is where the lie starts.
-move|pewter_rival|31|33
+say|Rival|Then start where the transfer landed.;Natural Sciences first, the faculty hall second.
+say|Rival|If my brother disappeared inside Aureate's system.;That building is where the model breaks.
+move|pewter_rival|39|33
 sync
 hide|pewter_rival
 flag|aureate_intro_done

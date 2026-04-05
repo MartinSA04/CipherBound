@@ -32,4 +32,5 @@ music|assets/audio/1-07. Elm Pokemon Lab_.mp3
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
-ns_rival|Rival|normal|15|6|left|0||blue@hidden|
+ns_rival|Rival|normal|18|6|left|0||blue@hidden|
+pewter_nat_sci_display_sign_2f|Sign|normal|3|6|down|0|Annex B.;Archived accessions and restricted cabinets.;Cabinet 3 marked twice.|@hidden|

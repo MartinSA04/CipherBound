@@ -4,15 +4,16 @@
 id|first_faculty_aftermath
 
 [steps]
-say|Marius Thaule|Enough.;You did not come here;for a routine student exercise.;Bart Iver sent you.
-say|Marius Thaule|Then hear me clearly.;He was removed because he would not stop.;Not because he was easy to ignore.
-say|Marius Thaule|Still, you beat every assistant I set before you.;Then you beat me.;That earns you this.
+say|Marius Thaule|Enough.;You were never here for a routine student exercise.;Bart Iver sent you.
+say|Marius Thaule|Then hear me clearly.;He stopped treating Daemons as specimens.;He started treating them as a formal system.
+say|Marius Thaule|And the faculty feared where that proof led.
+say|Marius Thaule|You beat every assistant I set before you.;Then you beat me.;That earns you this.
 badge|Foundations Badge
 flag|got_foundations_badge
-say|Marius Thaule|The Foundations Badge is more than a trophy.;It opens doors this faculty keeps shut.
+say|Marius Thaule|The Foundations Badge is more than a trophy.;It opens records this faculty prefers to keep closed.
 say|Marius Thaule|There is one more thing.;A sealed index page from Bart Iver's confiscated Concordance.
 item|8|1
 flag|received_concordance_index
-say|Marius Thaule|I was ordered to keep it from him.;Now I am placing that choice on you instead.
-say|Marius Thaule|If you carry it back to Bart,;do it knowing this was never harmless.
+say|Marius Thaule|I was ordered to keep it from him.;Now I am leaving that choice with you instead.
+say|Marius Thaule|If you carry it back to Bart, remember this.;The work was never only academic.
 flag|first_faculty_aftermath_done

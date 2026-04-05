@@ -118,8 +118,11 @@ music|assets/audio/1-04. New Bark Town_.mp3
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
-route2_shortcut_guard|Research Guard|normal|18|57|down|0|Applied Physics sealed the east road after a failed field test.;If you're heading north before you have clearance, use the forest gate.|policeman|
-route2_shortcut_aide|Lab Aide|normal|11|13|up|0|No shortcut today.;The forest detour is the only student route we're allowing.|schoolgirl|
+route2_shortcut_guard|Research Guard|normal|18|57|down|0|Applied Physics sealed the east road after a failed test.;No clearance, no road north.;Use the forest path.|policeman|
+route2_shortcut_aide|Lab Aide|normal|11|13|up|0|No shortcut today.;The forest detour is the only route students may use.;Containment rules.|schoolgirl|
 route2_trainer1|Trail Researcher|trainer|8|71|right|4|dialogue:assets/data/dialogue/route_2/route2_trainer1.npcdialogue|hiker|10:7,16:7
 route2_trainer2|Cycling Tutor|trainer|5|63|left|3|dialogue:assets/data/dialogue/route_2/route2_trainer2.npcdialogue|biker_boy|7:8,13:8
 route2_trainer3|Archive Runner|trainer|8|8|down|5|dialogue:assets/data/dialogue/route_2/route2_trainer3.npcdialogue|girl|16:9,10:9
+route2_note_taker|Note Taker|normal|19|35|left|0|I sketch the terrain before I take samples.;The elevation map is smoother than the error bars out here.|painter_man|
+start_route_2_sign|Sign|normal|7|73|down|0|Route 2.;North: Viridian Forest and Pewter.;South: Viridian Town.;Detour route during east road closure.|@hidden|
+sealed_cave_sign_route_2|Sign|normal|14|12|down|0|Applied Physics Notice.;Field access beyond this point is suspended.;Boundary conditions under review.|@hidden|

@@ -1,7 +1,7 @@
 [flag defeated_forest_trainer3]
-I got lost and still found a loss.
+I optimized for speed and found a local minimum.
 
 [default]
-I told myself this forest would be a shortcut.
-Instead it became practice.
+I took a greedy shortcut
+and walked straight into a local minimum.
 Your turn.

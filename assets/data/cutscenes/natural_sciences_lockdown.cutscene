@@ -5,8 +5,8 @@ id|natural_sciences_lockdown
 
 [steps]
 face|player|up
-say|Receptionist|Induction Badge holders only.;The east wing and upper stair are sealed by Applied Physics order.
-say|You|Both halves?
-say|Receptionist|Both halves.;If you want that access, earn the badge at the faculty.
-say|You|Then the faculty challenge is the only way through this building.
+say|Receptionist|Induction Badge holders only.;The east entrance is staffed, and the upper stair is sealed.
+say|You|Both halves of the building?
+say|Receptionist|Both.;If you want access, earn the badge at the faculty.
+say|You|Then the faculty challenge is the only way through.
 flag|natural_sciences_access_denied

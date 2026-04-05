@@ -1,15 +1,17 @@
 [flag bart_resonance_followup_done]
-So Bart finally saw the ledger.
+So Bart has seen the ledger at last.
 Good.
-Now he can no longer pretend Applied Physics stopped at storage.
+He can stop pretending Applied Physics only archived his work.
 
 [flag received_resonance_ledger]
-You found what was still hidden upstairs.
-Whatever you do with it now, do not confuse access with innocence.
+So you found what was hidden upstairs.
+Do not confuse instrument access
+with innocence.
 
 [flag got_induction_badge]
 The badge opened the building.
-What you find there belongs to history more than it belongs to me.
+What you find there belongs to the record now,
+and to every failed calibration beneath it.
 
 [flag defeated_applied_physics_leader]
 You earned the badge.
@@ -18,4 +20,5 @@ the comfort of what it opens.
 
 [default]
 You want Applied Physics clearance?
-Then prove you can carry more than theory.
+Then show me you can carry unstable systems,
+not just clean theory.

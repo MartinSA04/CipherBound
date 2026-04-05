@@ -160,7 +160,7 @@ What is currently implemented:
 
 - Entering Pewter for the first time triggers a rival cutscene that points the player toward Natural Sciences.
 - Town NPCs reinforce that the east road and parts of Natural Sciences were sealed after a failed field test.
-- The Natural Sciences Building is split across two entrances, with the east side and upper stair blocked off before the second badge.
+- The Natural Sciences Building is split across two entrances, with the east side blocked from outside and the upper stair blocked inside before the second badge.
 - A first inspection of the building establishes that the faculty challenge is the only way to gain legitimate access.
 
 ### 12. Pewter Faculty
@@ -181,6 +181,7 @@ The chapter now continues back into Natural Sciences after the faculty battle.
 What is currently implemented:
 
 - the Induction Badge removes the Route 2 shortcut block and opens Natural Sciences
+- the player must search the east-wing reference shelves and read the correct project index before the upstairs archive reveal can trigger
 - the upper floor reveal introduces the Resonance Project
 - the rival confirms their brother's name appears in the project records
 - the player receives the Resonance Ledger as a new key item
@@ -222,6 +223,7 @@ The chapter planning docs that informed this implementation are preserved in [st
 | `defeated_applied_trainer3` | Win against Researcher Nils | Prevents repeat battle and changes dialogue |
 | `defeated_applied_physics_leader` | Win against Dean Solveig | Prevents repeat battle and unlocks the second-badge aftermath |
 | `got_induction_badge` | Finish the Applied Physics aftermath cutscene | Opens the sealed Natural Sciences sections and the Route 2 shortcut |
+| `natural_sciences_reference_found` | Read the correct east-wing project index after earning the badge | Unlocks the upstairs Natural Sciences reveal and updates the objective |
 | `resonance_project_discovered` | Finish the Resonance lab reveal cutscene | Marks the hidden project as discovered |
 | `received_resonance_ledger` | Finish the Resonance lab reveal cutscene | Adds the Resonance Ledger key item and updates Bart's dialogue |
 | `bart_resonance_followup_done` | Finish Bart's Resonance follow-up cutscene | Marks the second chapter's main reveal as complete |

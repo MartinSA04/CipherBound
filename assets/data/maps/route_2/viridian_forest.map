@@ -102,3 +102,10 @@ music|assets/audio/1-04. New Bark Town_.mp3
 forest_trainer1|Bug Collector Oda|trainer|10|28|down|8|dialogue:assets/data/dialogue/route_2/forest_trainer1.npcdialogue|bug_catcher|7:8,10:8
 forest_trainer2|Forager Signe|trainer|47|30|right|4|dialogue:assets/data/dialogue/route_2/forest_trainer2.npcdialogue|girl|13:9,16:9
 forest_trainer3|Lost Senior|trainer|36|61|up|8|dialogue:assets/data/dialogue/route_2/forest_trainer3.npcdialogue|schoolboy|10:10,13:10
+forest_volunteer|Volunteer|normal|19|44|right|0|We keep repainting trail markers.;The forest swallows the old ones.;Read the signs, and keep your lead Daemon healthy.|farmgirl|
+vir_for_sign_entrance|Sign|normal|31|60|down|0|Viridian Forest.;Marked trails only.;Branching paths behave badly.|@hidden|
+vir_for_sign_1|Sign|normal|39|59|down|0|Field Tip: heal before the next trainer.;Expected value collapses when your lead starts half spent.|@hidden|
+vir_for_sign_2|Sign|normal|28|44|down|0|Field Tip: wild battles are the cleanest training loop.;Lower HP before a Daemon Ball if you want better odds.|@hidden|
+vir_for_sign_3|Sign|normal|43|26|down|0|Field Tip: treat the type chart like a lookup table.;A super effective line beats blind leveling.|@hidden|
+vir_for_sign_4|Sign|normal|9|29|down|0|Field Tip: status shifts capture odds.;Entangled or deadlocked targets are easier to hold.|@hidden|
+vir_for_sign_exit|Sign|normal|6|12|down|0|North exit ahead.;Pewter route beyond the gate.|@hidden|

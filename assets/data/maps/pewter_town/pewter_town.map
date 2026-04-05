@@ -71,7 +71,15 @@ music|assets/audio/022 Violet City.mp3
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
-pewter_rival|Rival|normal|30|33|left|0||blue@hidden|
+pewter_rival|Rival|normal|39|33|left|0||blue@hidden|
 pewter_researcher|Researcher|normal|18|33|right|0|dialogue:assets/data/dialogue/pewter_town/pewter_researcher.npcdialogue|silver|
 pewter_officer|Officer|normal|22|8|down|0|dialogue:assets/data/dialogue/pewter_town/pewter_officer.npcdialogue|policeman|
+ns_right_guard|Project Aide|normal|25|5|down|0|East entrance restricted.;No badge, no archive, no exceptions.|schoolgirl|
 pewter_shopper|Shopper|normal|29|22|up|0|dialogue:assets/data/dialogue/pewter_town/pewter_shopper.npcdialogue|biker_girl|
+pewter_lab_runner|Runner|normal|24|21|down|0|Forms from every building keep ending up in Natural Sciences.;Half of them mention calibration review.|boy|
+pewter_vendor|Vendor|normal|35|23|left|0|Students buy notebooks, Potions, and batteries in one rush.;Pewter runs on lab deadlines.|saleswoman|
+pewter_groundskeeper|Groundskeeper|normal|13|33|right|0|They repaint closure signs faster than they answer questions.;That usually means the risk model changed overnight.|karate_man|
+pewter_sign_entrance|Sign|normal|20|30|down|0|Pewter Town.;Aureate Campus, west grounds.;Field labs and faculty housing.|@hidden|
+pewter_sign_east_path|Sign|normal|39|19|down|0|East path.;Natural Sciences east entrance.;Old field road under review.|@hidden|
+pewter_natural_sciences_bldg_sign|Sign|normal|19|7|down|0|Natural Sciences Building.;West lobby.;East archive entrance.|@hidden|
+pewter_faculty_sign|Sign|normal|11|16|down|0|Aureate Faculty of Applied Physics.;Induction challenge hall.;Protective eyewear beyond this point.|@hidden|

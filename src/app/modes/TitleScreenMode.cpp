@@ -24,10 +24,10 @@ void startNewGame(GameContext &ctx, std::string playerName) {
     player.addItem(daemonBallId, 10);
 
     ctx.pushRequest(ModeRequest::dialogue(
-        "", {"What a good night sleep!", "Its finally time to start my degree!",
-             "I will pursue my fathers great dream.", "To understand what Daemons actually are!",
-             "If only he would be alive to see it...",
-             "I should see if my schedule has been delivered in the mail."}));
+        "", {"What a night.", "First day of my degree, and I barely slept.",
+             "Dad wanted to know whether Daemons were species or solutions.",
+             "I think I want to keep chasing that question.",
+             "I should check whether my schedule has arrived in the mail."}));
 
     ctx.playCurrentMapMusic();
 }

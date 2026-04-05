@@ -36,5 +36,18 @@ music|assets/audio/1-07. Elm Pokemon Lab_.mp3
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
 ns_receptionist|Receptionist|normal|4|2|down|0|dialogue:assets/data/dialogue/pewter_town/ns_receptionist.npcdialogue|lyra|
 ns_grad_student|Grad Student|normal|2|5|right|0|dialogue:assets/data/dialogue/pewter_town/ns_grad_student.npcdialogue|schoolboy|
-ns_stair_guard|Security|normal|9|8|down|0|No stair access without the Induction Badge.|policeman|
-ns_right_guard|Project Aide|normal|21|9|left|0|East wing is sealed to general students.;Faculty clearance only.|schoolgirl|
+ns_docent|Docent|normal|12|3|left|0|The lobby exhibits survived every department reshuffle.;The equipment budget never survives the same equation.|saleswoman|
+ns_stair_guard|Security|normal|9|8|down|0|No stair access without the Induction Badge.;Orders are keyed to your clearance profile.|policeman|
+ns_lab_assistant|Lab Assistant|normal|23|5|left|0|The east wing never really closed.;It just stopped pretending to be public.;If you want records, trust the shelves before the terminals.|silver|
+pewter_nat_sci_pc1|Terminal|normal|27|7|down|0|Catalogue terminal.;Most searches time out.;One cached hit remains: Resonance project index.|@hidden|
+pewter_nat_sci_pc2|Terminal|normal|27|4|down|0|The login loop never resolves.;Sticky note: Project index mirrored to shelf 6.;Archive link still down.|@hidden|
+pewter_nat_sci_display_sign_1|Sign|normal|4|4|down|0|Display: Aureate bedrock from the western ridge.;Margin note: fracture planes track measured field gradients.|@hidden|
+pewter_nat_sci_display_sign_2|Sign|normal|4|7|down|0|Directory: East Wing Reference Shelves.;Project indexes and archive accessions line the right row.|@hidden|
+nat_sci_bookshelf_1|Book|normal|17|1|down|0|Mineral Atlas, Aureate Basin edition.;Phase diagrams and lattice notes fill the margins.|@hidden|
+nat_sci_bookshelf_2|Book|normal|18|1|down|0|Regional Ecology Survey.;The appendix is all confidence intervals and sampling bias.|@hidden|
+nat_sci_bookshelf_3|Book|normal|19|1|down|0|Field Sampling Procedures.;Stratified sampling, contamination control, chain of custody.|@hidden|
+nat_sci_bookshelf_4|Book|normal|20|1|down|0|Specimen Preservation Register.;Cabinet codes, solvents, and decay windows only.|@hidden|
+nat_sci_bookshelf_5|Book|normal|24|1|down|0|Induction Safety Manual.;Shielding tolerances, thermal drift, emergency cutoffs.|@hidden|
+nat_sci_bookshelf_6|Book|normal|25|1|down|0|dialogue:assets/data/dialogue/pewter_town/nat_sci_bookshelf_6.npcdialogue|@hidden|
+nat_sci_bookshelf_7|Book|normal|26|1|down|0|Equipment Maintenance Log.;Transformers, coil Q values, and calibration drift everywhere.|@hidden|
+nat_sci_bookshelf_8|Book|normal|27|1|down|0|Archived Journal Binder.;The dates stop just before the resonance array went live.|@hidden|

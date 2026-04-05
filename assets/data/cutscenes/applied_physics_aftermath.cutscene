@@ -4,8 +4,9 @@
 id|applied_physics_aftermath
 
 [steps]
-say|Dean Solveig|Enough.;You handled every circuit I placed in your path.;Then you can carry this clearance.
+say|Dean Solveig|Enough.;You kept the circuit stable under load.;That earns you this clearance.
 badge|Induction Badge
 flag|got_induction_badge
-say|Dean Solveig|The Induction Badge opens the sealed sections in Natural Sciences.
-say|Dean Solveig|If you insist on reading what we locked upstairs,;read it carefully.;Resonance work stopped being harmless long before you arrived.
+say|Dean Solveig|The Induction Badge opens Natural Sciences' sealed sections.
+say|Dean Solveig|If you mean to read what we locked upstairs,;start with the east-wing project index.;Without it the archive is just raw metadata.
+say|Dean Solveig|Read carefully.;Resonance stopped being harmless.;That ended when field testing began.

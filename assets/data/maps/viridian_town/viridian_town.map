@@ -80,3 +80,5 @@ viridian_shopper|Shopper|normal|33|20|down|0|dialogue:assets/data/dialogue/virid
 viridian_rival|Rival|normal|28|11|right|0||blue@hidden|
 viridian_sign_town|Sign|normal|20|16|down|0|dialogue:assets/data/dialogue/viridian_town/viridian_sign_town.npcdialogue|@hidden|
 viridian_sign_faculty|Sign|normal|32|10|down|0|dialogue:assets/data/dialogue/viridian_town/viridian_sign_faculty.npcdialogue|@hidden|
+viridian_old_sign_start|Sign|normal|20|31|down|0|Viridian Town ahead.;South: Route 1 and student housing.;North: archive and faculty district.|@hidden|
+viridian_old_sign_bf_route2|Sign|normal|23|1|down|0|North: Route 2.;Forest detour and Pewter beyond.|@hidden|

@@ -31,3 +31,4 @@ music|assets/audio/1-04. New Bark Town_.mp3
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
 route2_house_keeper|Caretaker|normal|6|3|down|0|dialogue:assets/data/dialogue/route_2/route2_house_keeper.npcdialogue|farmgirl|
+route_2_npc_tv|TV|normal|5|1|down|0|dialogue:assets/data/dialogue/tv_broadcast.npcdialogue|@hidden|

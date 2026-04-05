@@ -31,3 +31,4 @@ music|assets/audio/1-04. New Bark Town_.mp3
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
 pewter_house_student|Senior|normal|8|3|left|0|dialogue:assets/data/dialogue/pewter_town/pewter_house_student.npcdialogue|boy|
+pewter_npc_house_tv_2|TV|normal|5|1|down|0|dialogue:assets/data/dialogue/tv_broadcast.npcdialogue|@hidden|

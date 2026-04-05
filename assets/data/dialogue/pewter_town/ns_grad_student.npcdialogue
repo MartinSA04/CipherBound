@@ -1,8 +1,19 @@
 [flag received_resonance_ledger]
 You found something up there, didn't you?
-I knew those sealed cabinets weren't empty.
+I knew those cabinets hid more
+than failed prototypes.
+
+[flag natural_sciences_reference_found]
+So the shelf index really pointed upstairs.
+Good.
+I thought they had zeroed the metadata.
+
+[flag got_induction_badge]
+The east-wing computers barely work.
+Trust the shelf indexes before the terminals.
+Their cache tables are years out of date.
 
 [default]
-They cleared the right half after midnight
-and never told the rest of us why.
-Now we're all supposed to act normal about it.
+They cleared the right half overnight
+and never published the incident report.
+Now everyone is supposed to call sealed doors normal.

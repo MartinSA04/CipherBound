@@ -1,8 +1,9 @@
 [flag got_induction_badge]
 If the badge opened the stair,
-you are already deeper into that building than most seniors get.
+you are already deeper in that building
+than most seniors with lab access get.
 
 [default]
-Natural Sciences used to be one uninterrupted floor.
+Natural Sciences used to be one open floor.
 Then Applied Physics split it in two
-and started checking badges at both doors.
+and started enforcing boundary conditions at both doors.

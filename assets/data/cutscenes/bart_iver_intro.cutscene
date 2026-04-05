@@ -25,24 +25,24 @@ wait|40
 move|prof_bart_iver|6|6
 sync
 
-say|???|Ah, there you are!;I've been waiting for you.
+say|???|Ah, there you are.;I was hoping you would come.
 say|???|Welcome to my lab.;I am Professor Bart Iver.
 
-say|Prof. Bart Iver|You deserve an explanation.;Just not the whole of it, not yet.
-say|Prof. Bart Iver|I asked you here in secret because the university dismissed me.;Officially for misconduct.;Unofficially for getting too close to something they wanted buried.
-say|Prof. Bart Iver|They seized my notes, sealed my archive,;and banned me from campus.;So I need someone they are still willing to underestimate.
+say|Prof. Bart Iver|You deserve an explanation.;Just not the whole proof at once.
+say|Prof. Bart Iver|I asked you here in secret because the university fired me.;Officially it was misconduct.;In practice, I got too close to something they wanted buried.
+say|Prof. Bart Iver|They seized my notes, sealed my archive, and locked me out.;So now I need help from someone they still overlook.
 
 say|You|And that someone is me?;Why?
 
-say|Prof. Bart Iver|Because you are already asking the question they fear most.;What Daemons actually are.
-say|Prof. Bart Iver|The first faculty is holding part of what they confiscated from me.;Bring back anything sealed from my archive.;Then I will tell you why it matters.
-say|Prof. Bart Iver|Expect resistance.;The university turned knowledge into a gauntlet.;Every faculty now plays its part.
+say|Prof. Bart Iver|Because you are asking the question they dodged for years.;What Daemons are in formal terms.;Species, solutions, or something older.
+say|Prof. Bart Iver|The first faculty still holds part of what they took from me.;Bring back anything sealed with my mark.;Then I will tell you why it matters.
+say|Prof. Bart Iver|Do not expect them to hand it over.;At this university, gatekeeping passes for policy.;Someone will always battle to keep it.
 
 say|You|How do you know that's what I want?
 
-say|Prof. Bart Iver|Because questions leave traces.;Yours did.
+say|Prof. Bart Iver|Because questions leave traces.;Yours have been loud enough.
 
-say|Prof. Bart Iver|Still, I will not send you there empty-handed.;I kept three rare Daemons hidden from the inventory sweep.;Come, choose one.
+say|Prof. Bart Iver|Still, I will not send you there empty-handed.;I kept three rare Daemons out of the inventory sweep.;Choose the one that fits how you think.
 
 move|prof_bart_iver|7|4
 move|player|6|6
@@ -53,9 +53,9 @@ face|player|up
 
 wait|30
 
-say|Prof. Bart Iver|On this table are three Daemons.;Each responds to a different way of seeing the world.
-say|Prof. Bart Iver|Bulbulum commands classical force.;Abacub shapes algebra into structure.;Bugbit thrives on digital instability.
-say|Prof. Bart Iver|Choose carefully.;The Daemon you take from this room will shape everything that follows.
+say|Prof. Bart Iver|On this table are three Daemons.;Each rewards a different habit of mind.
+say|Prof. Bart Iver|Bulbulum favors direct force and classical stability.;Abacub rewards structure, substitution, and patience.;Bugbit wins on tempo, branching, and pressure.
+say|Prof. Bart Iver|Choose carefully.;The Daemon you take from this room will shape your next steps.
 
 wait|30
 

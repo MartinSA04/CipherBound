@@ -11,17 +11,18 @@ sync
 face|prof_bart_iver|down
 face|player|up
 say|Prof. Bart Iver|That seal...;I never thought Thaule would keep it intact.
-say|Prof. Bart Iver|This is the Concordance Index.;Not the Concordance itself.;Just the key to how the fragments were catalogued.
-say|You|You knew exactly what I was carrying.
-say|Prof. Bart Iver|I knew what I hoped survived.
-say|Prof. Bart Iver|Your father and I built the Concordance together.;We were trying to prove;Daemons are not merely species to classify.
-say|Prof. Bart Iver|They are bound to deeper patterns.;An older structure hidden underneath the world.;I call it the Cipher.
-say|You|My father worked on this?
-say|Prof. Bart Iver|Yes.;And that is why I could not tell you sooner.
-say|Prof. Bart Iver|When the university shut us down,;they split the work apart.;One fragment stayed here.
-say|Prof. Bart Iver|Another went into academy records.;The rest were transferred away.
+say|Prof. Bart Iver|This is the Concordance Index.;Not the Concordance itself, only the catalog of fragments.
+say|You|You knew what I was carrying the moment you saw it.
+say|Prof. Bart Iver|I knew what I hoped had survived.
+say|Prof. Bart Iver|Your father and I built the Concordance together.;We were trying to prove Daemons are stable manifestations.
+say|Prof. Bart Iver|Not just names on paper.;Not just entries in a species table.
+say|Prof. Bart Iver|They are tied to deeper patterns beneath the world.;An older formal structure the university never wanted named.;I call it the Cipher.
+say|You|My father was part of this?
+say|Prof. Bart Iver|Yes.;And that is why I could not tell you too early.
+say|Prof. Bart Iver|When the university shut us down,;they broke the work apart.;One fragment stayed here.
+say|Prof. Bart Iver|One went into academy records.;The rest were transferred out.
 say|Prof. Bart Iver|The Foundations Badge should open Viridian Academy's archive.;Find the transfer ledger.
-say|Prof. Bart Iver|It will tell us where the next fragment went.;Then we decide how much truth either of us can afford.
+say|Prof. Bart Iver|It will tell us where the next fragment went.;After that, we decide what truth is worth carrying forward.
 move|prof_bart_iver|6|3
 sync
 face|prof_bart_iver|down

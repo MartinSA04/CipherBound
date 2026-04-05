@@ -31,6 +31,6 @@ music|assets/audio/015 Pokémon Center.mp3
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
-pewter_center_healer|Nurse|healer|7|3|down|0|We've restored your party to full health!|nurse@hidden|
+pewter_center_healer|Nurse|healer|7|3|down|0|Your party is restored to full baseline.;Vitals and charge all stable.|nurse@hidden|
 pewter_center_nurse_dummy|Nurse|normal|7|2|down|0||nurse|
 pc_pewter_center|PC|pc|11|1|down|0||-|

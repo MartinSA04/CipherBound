@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "daemon-map-tools"
+version = "0.1.0"
+description = "Python tooling for authoring maps and NPC sprite sheets in the Daemon game project."
+requires-python = ">=3.12"
+dependencies = [
+  "pyside6>=6.8.0",
+  "pillow>=10.0.0",
+]
+
+[project.scripts]
+map-editor = "map_editor:main"
+make-map = "make_map:main"
+make-spritesheet = "make_spritesheet:main"
+
+[tool.setuptools]
+py-modules = ["map_editor", "make_map", "make_spritesheet"]

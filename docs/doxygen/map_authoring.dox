@@ -9,6 +9,10 @@
  * - one or two background images under `assets/tilesets/`
  * - optional NPC dialogue and party entries inside the map file itself
  *
+ * For a visual workflow, run `python3 map_editor.py` from the repository root.
+ * The editor can paint tile rows, pick background and overlay images, and place
+ * warp and NPC coordinates directly on the map.
+ *
  * The runtime parser is documented in @ref MapFormat.
  *
  * @section map_authoring_sections Required Sections

@@ -18,4 +18,5 @@ make-map = "make_map:main"
 make-spritesheet = "make_spritesheet:main"
 
 [tool.setuptools]
+package-dir = {"" = "tools"}
 py-modules = ["map_editor", "make_map", "make_spritesheet"]

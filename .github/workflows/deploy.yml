@@ -60,14 +60,14 @@ jobs:
       - name: Build web version
         run: |
           source emsdk/emsdk_env.sh
-          chmod +x ./build_web.sh
+          chmod +x ./scripts/build_web.sh
           SITE_URL=https://cipherbound.com/ \
           BUILD_VERSION='${{ steps.version.outputs.build_version }}' \
           BUILD_COMMIT_SHA='${{ github.sha }}' \
           BUILD_COMMIT_SHORT='${{ steps.version.outputs.short_sha }}' \
           BUILD_TIMESTAMP='${{ steps.version.outputs.build_timestamp }}' \
           BUILD_REF_NAME='${{ github.ref_name }}' \
-          ./build_web.sh
+          ./scripts/build_web.sh
 
       - name: Rewrite asset base for production
         run: |

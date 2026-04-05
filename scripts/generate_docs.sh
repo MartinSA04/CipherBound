@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$source_root"
 
 if ! command -v doxygen >/dev/null 2>&1; then
@@ -10,7 +10,7 @@ if ! command -v doxygen >/dev/null 2>&1; then
 fi
 
 if ! command -v dot >/dev/null 2>&1; then
-    echo "graphviz 'dot' is required because HAVE_DOT=YES in Doxyfile."
+    echo "graphviz 'dot' is required because HAVE_DOT=YES in docs/Doxyfile."
     exit 1
 fi
 
@@ -20,7 +20,7 @@ log_file="$(mktemp)"
 filtered_log_file="$(mktemp)"
 trap 'rm -f "$log_file" "$filtered_log_file"' EXIT
 
-if ! doxygen Doxyfile >"$log_file" 2>&1; then
+if ! doxygen docs/Doxyfile >"$log_file" 2>&1; then
     cat "$log_file"
     exit 1
 fi

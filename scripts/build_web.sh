@@ -1,10 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+source_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$source_root"
+
 BUILD_DIR="buildw"
 DEPLOY_DIR="$BUILD_DIR/deploy"
 BASENAME="index"
-MESON_CROSS_FILE="emscripten-cross.ini"
+MESON_CROSS_FILE="cross/emscripten-cross.ini"
+MESON_CMD_LINE_FILE="$BUILD_DIR/meson-private/cmd_line.txt"
+
+if [ -f "$MESON_CMD_LINE_FILE" ] && ! grep -Fq "$source_root/$MESON_CROSS_FILE" "$MESON_CMD_LINE_FILE"; then
+    echo "=== Removing stale Emscripten build directory (cached cross-file path changed) ==="
+    rm -rf "$BUILD_DIR"
+fi
+
 if ! command -v emcc >/dev/null 2>&1; then
     echo "Error: emcc not found. Activate Emscripten first:"
     echo "  source /path/to/emsdk/emsdk_env.sh"

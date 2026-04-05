@@ -29,7 +29,7 @@ jobs:
             graphviz
 
       - name: Generate docs
-        run: ./generate_docs.sh
+        run: ./scripts/generate_docs.sh
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4

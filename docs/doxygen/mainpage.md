@@ -38,7 +38,7 @@ This site is organized around contributor entry points rather than raw source la
 ## Generate Locally
 
 ```bash
-./generate_docs.sh
+./scripts/generate_docs.sh
 ```
 
 The generated HTML is written to `docs/html/`. Repository build and runtime instructions remain in `README.md`.

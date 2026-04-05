@@ -4,7 +4,7 @@ set -euo pipefail
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source_root="${1:-$(cd "$script_dir/.." && pwd)}"
 
-"$source_root/generate_docs.sh"
+"$source_root/scripts/generate_docs.sh"
 
 index_html="$source_root/docs/html/index.html"
 pages_html="$source_root/docs/html/pages.html"

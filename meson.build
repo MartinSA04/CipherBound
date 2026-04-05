@@ -162,7 +162,7 @@ elif host_machine.system() == 'emscripten'
     '-sNO_DISABLE_EXCEPTION_CATCHING',
     '-lidbfs.js',
     '--preload-file=' + meson.project_source_root() / 'assets' + '@' + '/assets',
-    '--shell-file=' + meson.project_source_root() / 'shell.html',
+    '--shell-file=' + meson.project_source_root() / 'web' / 'shell.html',
     '-o', 'index.html',
   ]
 

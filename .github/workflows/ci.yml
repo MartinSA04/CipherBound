@@ -124,7 +124,7 @@ jobs:
       - name: Build web target
         run: |
           source emsdk/emsdk_env.sh
-          ./build_web.sh
+          ./scripts/build_web.sh
 
       - name: Verify web build output
         run: |

@@ -19,12 +19,12 @@ Single-region input layout (3x4 grid of 32x32 tiles):
   Row 3: walk left2, walk up2,    walk down2
 
 Usage:
-  python3 make_spritesheet.py <gif_folder_or_region.png> [output.png]
+  python3 tools/make_spritesheet.py <gif_folder_or_region.png> [output.png]
 
 Examples:
-  python3 make_spritesheet.py assets/sprites/npcs/bart_iver
-  python3 make_spritesheet.py npc_region.png
-  python3 make_spritesheet.py npc_region.png output_sheet.png
+  python3 tools/make_spritesheet.py assets/sprites/npcs/bart_iver
+  python3 tools/make_spritesheet.py npc_region.png
+  python3 tools/make_spritesheet.py npc_region.png output_sheet.png
 """
 
 import argparse

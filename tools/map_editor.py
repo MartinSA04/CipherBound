@@ -43,7 +43,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-PROJECT_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_MAP_DIR = PROJECT_ROOT / "assets" / "data" / "maps"
 DEFAULT_TILE_CHAR = "."
 SOURCE_TILE_SIZE = 16

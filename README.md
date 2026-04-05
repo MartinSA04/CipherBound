@@ -93,15 +93,15 @@ A helper script is provided:
 source /path/to/emsdk/emsdk_env.sh
 
 # Build for production (defaults SEO URLs to https://cipherbound.com/ if SITE_URL is unset)
-./build_web.sh
+./scripts/build_web.sh
 
 # Build and serve locally on port 8080
-./build_web.sh serve
+./scripts/build_web.sh serve
 ```
 
-This cross-compiles to WebAssembly using `emscripten-cross.ini`, bundles game assets into a `.data` file, and produces a deployable site in `buildw/deploy/` from the custom `shell.html` template.
+This cross-compiles to WebAssembly using `cross/emscripten-cross.ini`, bundles game assets into a `.data` file, and produces a deployable site in `buildw/deploy/` from the custom `web/shell.html` template.
 
-The build defaults `SITE_URL` to `https://cipherbound.com/`. Override it only if you need a different deploy root, for example `SITE_URL=https://staging.cipherbound.com/ ./build_web.sh`. The build uses it for the canonical URL, structured data, `robots.txt`, and `sitemap.xml`.
+The build defaults `SITE_URL` to `https://cipherbound.com/`. Override it only if you need a different deploy root, for example `SITE_URL=https://staging.cipherbound.com/ ./scripts/build_web.sh`. The build uses it for the canonical URL, structured data, `robots.txt`, and `sitemap.xml`.
 
 To **deploy**, upload the files from `buildw/deploy/` to a web server:
 
@@ -128,7 +128,7 @@ Most game content is **data-driven**. Species, moves, items, maps, cutscenes, an
 Generate the contributor/API docs with:
 
 ```bash
-./generate_docs.sh
+./scripts/generate_docs.sh
 ```
 
 Then open `docs/html/index.html`. The generated site contains a curated architecture overview, grouped subsystem reference, and format documentation for maps, cutscenes, and saves.
@@ -138,6 +138,7 @@ CI validates the docs on pushes and pull requests. Pushes to `main` also publish
 ## Use of AI
 
 - **Daemon sprites** — Some Daemon sprite artwork was generated with the help of AI image generation tools.
+- **Map editor** — The `tools/map_editor.py` map editor was created with AI coding assistance.
 - **Emscripten/web build setup** — AI coding assistance (GitHub Copilot) was used to help configure the Meson build system for Emscripten cross-compilation, create the custom HTML shell template, and resolve compatibility issues (main loop adaptation, font system fallbacks, exception handling flags).
 - **Testing and restructuring help** — AI coding assistance, including OpenAI Codex, was also used to help set up automated tests and CI checks, and to suggest parts of the codebase restructuring and cleanup work (for example session coordination, battle support code extraction, parser cleanup, and typed cross-mode requests).
 - **Story development** — AI assistance was also used to help brainstorm and refine story beats, character hooks, and story documentation for the game's narrative direction.

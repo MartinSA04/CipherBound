@@ -10,8 +10,8 @@ if [ ! -f "$source_root/.clang-format" ]; then
     exit 1
 fi
 
-if [ ! -f "$source_root/clang_format.sh" ]; then
-    echo "Missing clang_format.sh helper"
+if [ ! -f "$source_root/scripts/clang_format.sh" ]; then
+    echo "Missing scripts/clang_format.sh helper"
     exit 1
 fi
 

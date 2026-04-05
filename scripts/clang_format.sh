@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+source_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$source_root"
+
 # Check if clang-format is installed
 if ! command -v clang-format &> /dev/null; then
     echo "Error: clang-format is not installed or not in PATH"

@@ -3,10 +3,10 @@
 Generate a valid map skeleton for the game's current map format.
 
 Usage:
-  python3 make_map.py <map_id> <width> <height> <output_folder>
+  python3 tools/make_map.py <map_id> <width> <height> <output_folder>
 
 Example:
-  python3 make_map.py new_route 24 18 assets/data/maps
+  python3 tools/make_map.py new_route 24 18 assets/data/maps
 
 This creates:
   <output_folder>/<map_id>.map

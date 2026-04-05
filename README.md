@@ -152,12 +152,46 @@ The optimizer only accepts candidates that decode to the exact same RGBA pixels 
 It tries smaller encodings such as indexed/palette PNG, grayscale where possible, and stripped
 metadata plus stronger PNG compression.
 
+Music assets can also be re-encoded to smaller MP3 files with `ffmpeg`:
+
+```bash
+# Preview or write sibling *_optimized.mp3 files
+python3 tools/optimize_audio.py assets/audio --recursive --bitrate 128k
+
+# Rewrite music assets in place
+./scripts/optimize_music_assets.sh --bitrate 128k
+
+# Installed console script form
+optimize-audio assets/audio --recursive --bitrate 128k --in-place
+```
+
+This tool is aimed at music, not sound effects. It keeps the files as MP3, does not trim silence,
+and only writes the re-encoded file when it is actually smaller, unless `--keep-larger` is used.
+
+WAV sound effects have a separate optimizer:
+
+```bash
+# Preview sibling *_optimized.wav files with mono + 22050 Hz output
+python3 tools/optimize_sfx_wav.py assets/audio/sound_effects --recursive --mono --sample-rate 22050
+
+# Rewrite SFX in place
+./scripts/optimize_sfx_assets.sh --mono --sample-rate 22050
+
+# Installed console script form
+optimize-sfx assets/audio/sound_effects --recursive --mono --sample-rate 22050 --in-place
+```
+
+This tool keeps files as WAV and is intended for short sound effects. It supports mono conversion,
+lower sample rates, and smaller PCM formats, and only replaces a file when the output is smaller
+unless `--keep-larger` is used.
+
 CI validates the docs on pushes and pull requests. Pushes to `main` also publish the generated Doxygen site through GitHub Pages once the repository Pages source is set to **GitHub Actions**.
 
 ## Use of AI
 
 - **Daemon sprites** — Some Daemon sprite artwork was generated with the help of AI image generation tools.
 - **Map editor** — The `tools/map_editor.py` map editor was created with AI coding assistance.
+- **Asset optimization scripts** — The PNG and audio optimization scripts in `tools/` and `scripts/` were created with AI coding assistance.
 - **Emscripten/web build setup** — AI coding assistance (GitHub Copilot) was used to help configure the Meson build system for Emscripten cross-compilation, create the custom HTML shell template, and resolve compatibility issues (main loop adaptation, font system fallbacks, exception handling flags).
 - **Testing and restructuring help** — AI coding assistance, including OpenAI Codex, was also used to help set up automated tests and CI checks, and to suggest parts of the codebase restructuring and cleanup work (for example session coordination, battle support code extraction, parser cleanup, and typed cross-mode requests).
 - **Story development** — AI assistance was also used to help brainstorm and refine story beats, character hooks, and story documentation for the game's narrative direction.

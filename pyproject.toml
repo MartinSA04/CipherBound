@@ -17,7 +17,9 @@ map-editor = "map_editor:main"
 make-map = "make_map:main"
 make-spritesheet = "make_spritesheet:main"
 optimize-png = "optimize_png:main"
+optimize-audio = "optimize_audio:main"
+optimize-sfx = "optimize_sfx_wav:main"
 
 [tool.setuptools]
 package-dir = {"" = "tools"}
-py-modules = ["map_editor", "make_map", "make_spritesheet", "optimize_png"]
+py-modules = ["map_editor", "make_map", "make_spritesheet", "optimize_png", "optimize_audio", "optimize_sfx_wav"]

@@ -1,4 +1,6 @@
 # Pewter faculty aftermath after defeating the Applied Physics leader.
+# map_id|pewter_faculty
+# player_spawn|6|6|up
 
 [header]
 id|applied_physics_aftermath

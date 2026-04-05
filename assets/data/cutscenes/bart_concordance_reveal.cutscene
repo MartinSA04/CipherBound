@@ -1,4 +1,6 @@
 # Bart's first major reveal after the player returns from the first faculty.
+# map_id|bart_iver_lab
+# player_spawn|6|12|up
 
 [header]
 id|bart_concordance_reveal

@@ -1,4 +1,6 @@
 # First academy archive search after Bart's reveal.
+# map_id|viridian_academy
+# player_spawn|4|7|up
 
 [header]
 id|academy_archive

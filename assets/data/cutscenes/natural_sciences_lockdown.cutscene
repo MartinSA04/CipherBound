@@ -1,4 +1,6 @@
 # First inspection of the Natural Sciences Building in Pewter.
+# map_id|natural_sciences_building
+# player_spawn|14|9|up
 
 [header]
 id|natural_sciences_lockdown

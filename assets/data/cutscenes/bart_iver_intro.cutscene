@@ -1,6 +1,8 @@
 # Bart Iver's Lab Introduction Cutscene
+# map_id|bart_iver_lab
+# player_spawn|6|12|up
 # Triggered when the player enters bart_iver_lab without "bart_iver_intro_done" flag.
-# Player enters from the door at (6,13). Bart Iver is at (6,3).
+# Door warp tile is at (6,13), so the cutscene starts one tile above it at (6,12). Bart Iver is at (6,3).
 #
 # Map layout (key tiles):
 #   y=3: Bart Iver's position (6,3), walkable row

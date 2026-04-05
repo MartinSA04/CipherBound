@@ -13,13 +13,20 @@ dependencies = [
 ]
 
 [project.scripts]
+cutscene-editor = "cutscene_editor:main"
+dev-workbench = "dev_workbench:main"
 map-editor = "map_editor:main"
 make-map = "make_map:main"
 make-spritesheet = "make_spritesheet:main"
 optimize-png = "optimize_png:main"
 optimize-audio = "optimize_audio:main"
 optimize-sfx = "optimize_sfx_wav:main"
+lint-content = "lint_content:main"
+validate-cutscene = "validate_cutscene:main"
+dialogue-browser = "dialogue_browser:main"
+new-content = "new_content:main"
+balance-report = "balance_report:main"
 
 [tool.setuptools]
 package-dir = {"" = "tools"}
-py-modules = ["map_editor", "make_map", "make_spritesheet", "optimize_png", "optimize_audio", "optimize_sfx_wav"]
+py-modules = ["cutscene_editor", "dev_workbench", "map_editor", "make_map", "make_spritesheet", "optimize_png", "optimize_audio", "optimize_sfx_wav", "content_tools", "lint_content", "validate_cutscene", "dialogue_browser", "new_content", "balance_report"]

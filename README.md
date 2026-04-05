@@ -185,12 +185,88 @@ This tool keeps files as WAV and is intended for short sound effects. It support
 lower sample rates, and smaller PCM formats, and only replaces a file when the output is smaller
 unless `--keep-larger` is used.
 
+## Content Tooling
+
+Several CLI tools are included to make content authoring easier:
+
+```bash
+# Lint maps, dialogue, and cutscenes together
+python3 tools/lint_content.py
+
+# Validate a cutscene against a specific map and preview final positions
+python3 tools/validate_cutscene.py assets/data/cutscenes/bart_iver_intro.cutscene --map bart_iver_lab --show-positions
+
+# Search dialogue files and inline map text
+python3 tools/dialogue_browser.py --area viridian_town --search archive --include-inline
+
+# Scaffold new content
+python3 tools/new_content.py map viridian_town new_room 10 8
+python3 tools/new_content.py dialogue viridian_town new_npc
+python3 tools/new_content.py cutscene new_scene
+
+# Report wild/trainer level curve and basic type coverage
+python3 tools/balance_report.py --area route_2
+```
+
+Installed console-script forms are also available through the Python tools package:
+`lint-content`, `validate-cutscene`, `dialogue-browser`, `new-content`, and `balance-report`.
+
+## Dev Workbench
+
+There is also an integrated PySide6 workbench that collects the project's authoring tools in one GUI:
+
+```bash
+# Launch the IDE-like workbench
+python3 tools/dev_workbench.py
+
+# Or use the installed console script
+dev-workbench
+
+# Optionally open a map directly in the embedded editor
+dev-workbench --map assets/data/maps/viridian_town/viridian_town.map
+```
+
+The workbench includes:
+
+- a project explorer with preview support for text and image assets
+- multiple embedded map editor tabs in the main window
+- a cutscene editor with path visualization, a frame scrubber, and the exact player-camera box
+- content-tool panels for linting, cutscene validation, dialogue browsing, and balance reports
+- scaffolding panels for new maps, dialogue files, cutscenes, and area folders
+- asset-tool panels for PNG optimization, music optimization, WAV SFX optimization, and spritesheet generation
+
+There is also a standalone cutscene editor:
+
+```bash
+# Launch the standalone cutscene editor
+python3 tools/cutscene_editor.py --cutscene assets/data/cutscenes/bart_iver_intro.cutscene --map assets/data/maps/pallet_town/bart_iver_lab.map
+
+# Or use the installed console script
+cutscene-editor --cutscene assets/data/cutscenes/bart_iver_intro.cutscene --map assets/data/maps/pallet_town/bart_iver_lab.map
+```
+
+The cutscene editor mirrors the C++ cutscene runner for `move`, `walk`, `face`, `wait`, `sync`,
+`hide`, and `show`, uses the same movement timing and player-follow camera math, and overlays the
+current viewport rectangle on the full map preview. Dialogue steps are shown as pauses in the
+timeline and can be auto-advanced for full-cutscene visualization.
+
+To let the editor auto-open the right map, add an editor-only comment near the top of the cutscene:
+
+```text
+# map_id|bart_iver_lab
+# player_spawn|6|12|up
+```
+
+If `player_spawn` is present, the cutscene editor uses it as the simulated player start for the
+timeline and camera preview. Because these are comments, the C++ cutscene loader ignores them
+completely.
+
 CI validates the docs on pushes and pull requests. Pushes to `main` also publish the generated Doxygen site through GitHub Pages once the repository Pages source is set to **GitHub Actions**.
 
 ## Use of AI
 
 - **Daemon sprites** — Some Daemon sprite artwork was generated with the help of AI image generation tools.
-- **Map editor** — The `tools/map_editor.py` map editor was created with AI coding assistance.
+- **Map editor, cutscene editor, and dev workbench** — The `tools/map_editor.py` map editor, `tools/cutscene_editor.py` cutscene editor, and `tools/dev_workbench.py` IDE-like workbench were created with AI coding assistance.
 - **Asset optimization scripts** — The PNG and audio optimization scripts in `tools/` and `scripts/` were created with AI coding assistance.
 - **Emscripten/web build setup** — AI coding assistance (GitHub Copilot) was used to help configure the Meson build system for Emscripten cross-compilation, create the custom HTML shell template, and resolve compatibility issues (main loop adaptation, font system fallbacks, exception handling flags).
 - **Testing and restructuring help** — AI coding assistance, including OpenAI Codex, was also used to help set up automated tests and CI checks, and to suggest parts of the codebase restructuring and cleanup work (for example session coordination, battle support code extraction, parser cleanup, and typed cross-mode requests).

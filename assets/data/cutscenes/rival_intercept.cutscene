@@ -1,4 +1,6 @@
 # Rival introduction after the first faculty.
+# map_id|viridian_town
+# player_spawn|36|11|down
 
 [header]
 id|rival_intercept

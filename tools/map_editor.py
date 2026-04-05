@@ -7,6 +7,7 @@ import argparse
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Callable
 
 from PySide6.QtCore import QPoint, QRect, Qt
 from PySide6.QtGui import QAction, QColor, QImage, QPainter, QPen, QPixmap
@@ -422,9 +423,20 @@ class MapCanvas(QGraphicsView):
 
 
 class MapEditorWindow(QMainWindow):
-    def __init__(self, safe_mode: bool = False) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        safe_mode: bool = False,
+        *,
+        new_tab_callback: Callable[[], None] | None = None,
+        open_tab_callback: Callable[[], None] | None = None,
+        close_tab_callback: Callable[[], None] | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
         self.safe_mode = safe_mode
+        self.new_tab_callback = new_tab_callback
+        self.open_tab_callback = open_tab_callback
+        self.close_tab_callback = close_tab_callback
         self.map_data = MapData.blank()
         self.current_path: Path | None = None
         self.dirty = False
@@ -459,7 +471,7 @@ class MapEditorWindow(QMainWindow):
         toolbar = QHBoxLayout()
         root.addLayout(toolbar)
 
-        for action in (self.new_action, self.open_action, self.save_action, self.save_as_action):
+        for action in (self.new_action, self.open_action, self.save_action, self.save_as_action, self.close_action):
             button = QToolButton()
             button.setDefaultAction(action)
             toolbar.addWidget(button)
@@ -513,9 +525,11 @@ class MapEditorWindow(QMainWindow):
         self.open_action = QAction("Open", self)
         self.save_action = QAction("Save", self)
         self.save_as_action = QAction("Save As", self)
+        self.close_action = QAction("Close Tab", self)
         self.new_action.setShortcut("Ctrl+N")
         self.open_action.setShortcut("Ctrl+O")
         self.save_action.setShortcut("Ctrl+S")
+        self.close_action.setShortcut("Ctrl+W")
 
     def _build_map_section(self) -> QWidget:
         box = QGroupBox("Map")
@@ -689,10 +703,11 @@ class MapEditorWindow(QMainWindow):
         return box
 
     def _connect_signals(self) -> None:
-        self.new_action.triggered.connect(self.new_map)
-        self.open_action.triggered.connect(self.open_map)
+        self.new_action.triggered.connect(self.request_new_map)
+        self.open_action.triggered.connect(self.request_open_map)
         self.save_action.triggered.connect(self.save_map)
         self.save_as_action.triggered.connect(self.save_map_as)
+        self.close_action.triggered.connect(self.request_close_editor)
 
         self.map_id_edit.textChanged.connect(self.on_metadata_changed)
         self.background_edit.textChanged.connect(self.on_metadata_changed)
@@ -813,6 +828,24 @@ class MapEditorWindow(QMainWindow):
         else:
             event.ignore()
 
+    def request_new_map(self) -> None:
+        if self.new_tab_callback is not None:
+            self.new_tab_callback()
+            return
+        self.new_map()
+
+    def request_open_map(self) -> None:
+        if self.open_tab_callback is not None:
+            self.open_tab_callback()
+            return
+        self.open_map()
+
+    def request_close_editor(self) -> None:
+        if self.close_tab_callback is not None:
+            self.close_tab_callback()
+            return
+        self.close()
+
     def new_map(self) -> None:
         if not self.confirm_discard_changes():
             return
@@ -830,13 +863,21 @@ class MapEditorWindow(QMainWindow):
         )
         if not path_str:
             return
-        path = Path(path_str)
+        self._load_map_path(Path(path_str))
+
+    def open_map_path(self, path: Path) -> bool:
+        if not self.confirm_discard_changes():
+            return False
+        return self._load_map_path(path)
+
+    def _load_map_path(self, path: Path) -> bool:
         try:
             self.load_map_data(parse_map_file(path), path)
         except Exception as exc:  # noqa: BLE001
             QMessageBox.critical(self, "Open Failed", str(exc))
-            return
+            return False
         self.statusBar().showMessage(f"Opened {path.name}.")
+        return True
 
     def save_map(self) -> bool:
         if not self.sync_forms_before_save():

@@ -1,4 +1,6 @@
 # Example cutscene file
+# map_id|
+# player_spawn|
 # Demonstrates all available step types
 #
 # Step types:

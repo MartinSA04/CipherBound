@@ -1,9 +1,17 @@
 # Bart's follow-up after the player recovers the Resonance Ledger.
+# map_id|bart_iver_lab
+# player_spawn|6|12|up
 
 [header]
 id|bart_resonance_followup
 
 [steps]
+move|player|6|8
+sync
+move|prof_bart_iver|6|5
+sync
+face|prof_bart_iver|down
+face|player|up
 say|Prof. Bart Iver|Resonance...;So that is what they called it in the end.
 say|Prof. Bart Iver|Applied Physics did not just store the Concordance.;They turned it into an instrumented field program.
 say|Prof. Bart Iver|And the rival's brother was attached to the final stable run.

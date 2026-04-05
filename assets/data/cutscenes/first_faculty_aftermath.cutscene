@@ -1,4 +1,6 @@
 # First faculty aftermath after defeating Marius Thaule.
+# map_id|viridian_faculty
+# player_spawn|6|6|up
 
 [header]
 id|first_faculty_aftermath

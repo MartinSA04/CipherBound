@@ -1,4 +1,6 @@
 # Arrival in Pewter after following the archive transfer lead.
+# map_id|pewter_town
+# player_spawn|22|38|up
 
 [header]
 id|pewter_arrival

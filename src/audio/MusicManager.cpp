@@ -68,7 +68,7 @@ void MusicManager::playPath(const std::string &path, TDT4102::AnimationWindow &w
         return;
     }
 
-    if (currentTrack == MusicTrack::none && currentPath == path)
+    if (currentPath == path)
         return;
 
     Mix_HaltMusic();

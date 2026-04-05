@@ -16,7 +16,8 @@ dependencies = [
 map-editor = "map_editor:main"
 make-map = "make_map:main"
 make-spritesheet = "make_spritesheet:main"
+optimize-png = "optimize_png:main"
 
 [tool.setuptools]
 package-dir = {"" = "tools"}
-py-modules = ["map_editor", "make_map", "make_spritesheet"]
+py-modules = ["map_editor", "make_map", "make_spritesheet", "optimize_png"]

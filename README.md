@@ -133,6 +133,25 @@ Generate the contributor/API docs with:
 
 Then open `docs/html/index.html`. The generated site contains a curated architecture overview, grouped subsystem reference, and format documentation for maps, cutscenes, and saves.
 
+## Asset Tooling
+
+Lossless PNG optimization tools are included for sprites and tilesets:
+
+```bash
+# Optimize one PNG and write a sibling *_optimized.png
+python3 tools/optimize_png.py assets/sprites/foo.png
+
+# Optimize whole asset folders in place
+./scripts/optimize_png_assets.sh
+
+# Or use the installed console script if you've installed the Python tools package
+optimize-png --in-place --recursive assets/sprites assets/tilesets
+```
+
+The optimizer only accepts candidates that decode to the exact same RGBA pixels as the source.
+It tries smaller encodings such as indexed/palette PNG, grayscale where possible, and stripped
+metadata plus stronger PNG compression.
+
 CI validates the docs on pushes and pull requests. Pushes to `main` also publish the generated Doxygen site through GitHub Pages once the repository Pages source is set to **GitHub Actions**.
 
 ## Use of AI

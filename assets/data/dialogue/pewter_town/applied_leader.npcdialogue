@@ -1,0 +1,21 @@
+[flag bart_resonance_followup_done]
+So Bart finally saw the ledger.
+Good.
+Now he can no longer pretend Applied Physics stopped at storage.
+
+[flag received_resonance_ledger]
+You found what was still hidden upstairs.
+Whatever you do with it now, do not confuse access with innocence.
+
+[flag got_induction_badge]
+The badge opened the building.
+What you find there belongs to history more than it belongs to me.
+
+[flag defeated_applied_physics_leader]
+You earned the badge.
+You have not yet earned
+the comfort of what it opens.
+
+[default]
+You want Applied Physics clearance?
+Then prove you can carry more than theory.

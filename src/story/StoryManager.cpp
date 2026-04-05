@@ -13,6 +13,44 @@ constexpr const char *bartConcordanceRevealCutscenePath =
     "assets/data/cutscenes/bart_concordance_reveal.cutscene";
 constexpr const char *academyArchiveCutscenePath =
     "assets/data/cutscenes/academy_archive.cutscene";
+constexpr const char *pewterArrivalCutscenePath =
+    "assets/data/cutscenes/pewter_arrival.cutscene";
+constexpr const char *naturalSciencesLockdownCutscenePath =
+    "assets/data/cutscenes/natural_sciences_lockdown.cutscene";
+constexpr const char *appliedPhysicsAftermathCutscenePath =
+    "assets/data/cutscenes/applied_physics_aftermath.cutscene";
+constexpr const char *resonanceLabRevealCutscenePath =
+    "assets/data/cutscenes/resonance_lab_reveal.cutscene";
+constexpr const char *bartResonanceFollowupCutscenePath =
+    "assets/data/cutscenes/bart_resonance_followup.cutscene";
+
+void setHiddenIfPresent(World &world, const std::string &mapId, const char *npcId, bool hidden) {
+    if (NPC *npc = world.findNPCById(mapId, npcId); npc != nullptr)
+        npc->setHidden(hidden);
+}
+
+void applyMapStoryState(World &world) {
+    Player &player = world.getPlayer();
+    const std::string &mapId = world.getCurrentMapId();
+
+    if (mapId == "route_2") {
+        const bool shortcutOpen = player.hasFlag("got_induction_badge");
+        setHiddenIfPresent(world, mapId, "route2_shortcut_guard", shortcutOpen);
+        setHiddenIfPresent(world, mapId, "route2_shortcut_aide", shortcutOpen);
+    }
+
+    if (mapId == "natural_sciences_building") {
+        const bool buildingUnlocked = player.hasFlag("got_induction_badge");
+        setHiddenIfPresent(world, mapId, "ns_stair_guard", buildingUnlocked);
+        setHiddenIfPresent(world, mapId, "ns_right_guard", buildingUnlocked);
+    }
+
+    if (mapId == "natural_sciences_building_2f") {
+        const bool hideRival = !player.hasFlag("got_induction_badge") ||
+                               player.hasFlag("received_resonance_ledger");
+        setHiddenIfPresent(world, mapId, "ns_rival", hideRival);
+    }
+}
 
 } // namespace
 
@@ -97,10 +135,28 @@ StoryAction StoryManager::checkWarp(const WarpPoint &warp, Player &player) {
         }
     }
 
+    if (warp.targetMapId == "route_2" && !player.hasFlag("academy_archive_searched")) {
+        return StoryAction::blockWarp(
+            {"Bart needs the academy transfer record first.",
+             "Route 2 can wait until I know where the next fragment went."});
+    }
+
+    if (warp.targetMapId == "pewter_faculty" && player.hasFlag("academy_archive_searched") &&
+        !player.hasFlag("natural_sciences_access_denied")) {
+        return StoryAction::blockWarp(
+            {"The archive pointed to the Natural Sciences Building, not the faculty hall.",
+             "I should inspect the transfer site before I challenge anyone here."});
+    }
+
     return StoryAction::none();
 }
 
-StoryAction StoryManager::checkMapEnter(const std::string &mapId, Player &player) {
+StoryAction StoryManager::checkMapEnter(World &world) {
+    applyMapStoryState(world);
+
+    Player &player = world.getPlayer();
+    const std::string &mapId = world.getCurrentMapId();
+
     if (mapId == "bart_iver_lab" && !player.hasFlag("bart_iver_intro_done")) {
         return StoryAction::startCutscene(bartIntroCutscenePath);
     }
@@ -123,6 +179,32 @@ StoryAction StoryManager::checkMapEnter(const std::string &mapId, Player &player
     if (mapId == "viridian_academy" && player.hasFlag("academy_archive_unlocked") &&
         !player.hasFlag("academy_archive_searched")) {
         return StoryAction::startCutscene(academyArchiveCutscenePath);
+    }
+
+    if (mapId == "pewter_town" && player.hasFlag("academy_archive_searched") &&
+        !player.hasFlag("aureate_intro_done")) {
+        return StoryAction::startCutscene(pewterArrivalCutscenePath);
+    }
+
+    if (mapId == "natural_sciences_building" && player.hasFlag("aureate_intro_done") &&
+        !player.hasFlag("natural_sciences_access_denied") &&
+        !player.hasFlag("got_induction_badge")) {
+        return StoryAction::startCutscene(naturalSciencesLockdownCutscenePath);
+    }
+
+    if (mapId == "pewter_faculty" && player.hasFlag("defeated_applied_physics_leader") &&
+        !player.hasFlag("got_induction_badge")) {
+        return StoryAction::startCutscene(appliedPhysicsAftermathCutscenePath);
+    }
+
+    if (mapId == "natural_sciences_building_2f" && player.hasFlag("got_induction_badge") &&
+        !player.hasFlag("received_resonance_ledger")) {
+        return StoryAction::startCutscene(resonanceLabRevealCutscenePath);
+    }
+
+    if (mapId == "bart_iver_lab" && player.hasFlag("received_resonance_ledger") &&
+        !player.hasFlag("bart_resonance_followup_done")) {
+        return StoryAction::startCutscene(bartResonanceFollowupCutscenePath);
     }
 
     return StoryAction::none();
@@ -177,7 +259,43 @@ StoryManager::ObjectiveInfo StoryManager::currentObjective(const Player &player)
                  "Find the transfer ledger for the next Concordance fragment."}};
     }
 
-    return {"Follow The Transfer",
-            {"The archive points toward the Applied Physics Faculty at Aureate Campus.",
-             "That is where the next Concordance fragment was sent."}};
+    if (!player.hasFlag("aureate_intro_done")) {
+        return {"Reach Aureate Campus",
+                {"Follow the transfer north through Route 2.",
+                 "The next Concordance fragment was sent to Applied Physics at Pewter."}};
+    }
+
+    if (!player.hasFlag("natural_sciences_access_denied")) {
+        return {"Investigate Natural Sciences",
+                {"The transfer trail leads into Pewter's Natural Sciences Building.",
+                 "See what Applied Physics is hiding there."}};
+    }
+
+    if (!player.hasFlag("defeated_applied_physics_leader")) {
+        return {"Earn The Induction Badge",
+                {"Natural Sciences is sealed without Pewter Faculty authorization.",
+                 "Defeat the Applied Physics faculty leader to force the building open."}};
+    }
+
+    if (!player.hasFlag("got_induction_badge")) {
+        return {"Claim The Induction Badge",
+                {"The faculty leader still has more to say after the battle.",
+                 "Take the badge that opens the sealed Natural Sciences sections."}};
+    }
+
+    if (!player.hasFlag("received_resonance_ledger")) {
+        return {"Return To Natural Sciences",
+                {"The Induction Badge should open the blocked stair and east wing now.",
+                 "Search the upper floor for the missing Resonance records."}};
+    }
+
+    if (!player.hasFlag("bart_resonance_followup_done")) {
+        return {"Return To Bart",
+                {"Bring the Resonance Ledger back to Bart Iver's lab.",
+                 "He needs to explain what Applied Physics was doing with the Concordance."}};
+    }
+
+    return {"Decode The Ledger",
+            {"Bart confirmed Aureate turned the Concordance into the Resonance Project.",
+             "The next step lies deeper in the trail the university keeps sealing off."}};
 }

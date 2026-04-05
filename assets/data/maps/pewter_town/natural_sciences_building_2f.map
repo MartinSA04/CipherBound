@@ -7,6 +7,7 @@ width|19
 height|10
 background|assets/tilesets/pewter_town/natural_sciences_building_2f.png
 background_overlay|assets/tilesets/pewter_town/natural_sciences_building_2f_overlay.png
+music|assets/audio/1-07. Elm Pokemon Lab_.mp3
 
 [tiles]
 ###################
@@ -31,3 +32,4 @@ background_overlay|assets/tilesets/pewter_town/natural_sciences_building_2f_over
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
+ns_rival|Rival|normal|15|6|left|0||blue@hidden|

@@ -36,3 +36,7 @@ music|assets/audio/1-04. New Bark Town_.mp3
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
+applied_trainer1|TA Mara|trainer|4|10|right|3|dialogue:assets/data/dialogue/pewter_town/applied_trainer1.npcdialogue|lyra|16:10,10:10
+applied_trainer2|Field Tech Oskar|trainer|9|8|left|3|dialogue:assets/data/dialogue/pewter_town/applied_trainer2.npcdialogue|hiker|13:10,7:10
+applied_trainer3|Researcher Nils|trainer|3|8|right|3|dialogue:assets/data/dialogue/pewter_town/applied_trainer3.npcdialogue|painter_man|10:11,16:11
+applied_physics_leader|Dean Solveig|gymLeader|6|5|down|0|dialogue:assets/data/dialogue/pewter_town/applied_leader.npcdialogue|fighter_lady|17:12,14:12,11:13

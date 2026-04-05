@@ -6,6 +6,7 @@ Use the story docs like this:
 
 - [story_current_game.md](story_current_game.md) records what is actually playable right now
 - [story_post_first_faculty.md](story_post_first_faculty.md) defines the intended next chapter after the current playable endpoint
+- [story_aureate_applied_physics.md](story_aureate_applied_physics.md) outlines the next major faculty arc after the archive lead
 - [story_future_notes.md](story_future_notes.md) stores larger worldbuilding, mystery, and character direction
 
 ## Refined High Concept
@@ -100,6 +101,18 @@ Its job is to provide:
 - the first explicit link between Bart and the player's father
 - a new short-term goal that leads into the academy archives and the next faculty arc
 
+## Next Major Arc
+
+The next intended chapter after the archive discovery is now outlined in [story_aureate_applied_physics.md](story_aureate_applied_physics.md).
+
+Its job is to:
+
+- turn Aureate Campus into the first larger institutional escalation
+- give the rival a more active investigative role
+- reveal that confiscated Concordance research was reused inside a respectable university program
+- connect the rival's missing brother directly to that program
+- deepen uncertainty around Bart's account of the original research collapse
+
 ## Long-Term Structure
 
 The broader game can scale naturally if each major chapter follows this rhythm:
@@ -116,4 +129,5 @@ The broader game can scale naturally if each major chapter follows this rhythm:
 
 - [story_current_game.md](story_current_game.md)
 - [story_post_first_faculty.md](story_post_first_faculty.md)
+- [story_aureate_applied_physics.md](story_aureate_applied_physics.md)
 - [story_future_notes.md](story_future_notes.md)

@@ -43,7 +43,7 @@ class StoryManager {
     StoryAction checkWarp(const WarpPoint &warp, Player &player);
 
     /// Returns any story action triggered by entering a new map.
-    StoryAction checkMapEnter(const std::string &mapId, Player &player);
+    StoryAction checkMapEnter(World &world);
 
     /// Returns the current main objective shown in the pause menu.
     ObjectiveInfo currentObjective(const Player &player) const;

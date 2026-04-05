@@ -7,6 +7,7 @@ width|48
 height|40
 background|assets/tilesets/pewter_town/pewter_town.png
 background_overlay|assets/tilesets/pewter_town/pewter_town_overlay.png
+music|assets/audio/022 Violet City.mp3
 
 [tiles]
 ################################################
@@ -70,3 +71,7 @@ background_overlay|assets/tilesets/pewter_town/pewter_town_overlay.png
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
+pewter_rival|Rival|normal|30|33|left|0||blue@hidden|
+pewter_researcher|Researcher|normal|18|33|right|0|dialogue:assets/data/dialogue/pewter_town/pewter_researcher.npcdialogue|silver|
+pewter_officer|Officer|normal|22|8|down|0|dialogue:assets/data/dialogue/pewter_town/pewter_officer.npcdialogue|policeman|
+pewter_shopper|Shopper|normal|29|22|up|0|dialogue:assets/data/dialogue/pewter_town/pewter_shopper.npcdialogue|biker_girl|

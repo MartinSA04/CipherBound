@@ -10,3 +10,4 @@
 6|Great Ball|A better ball for catching|capture|600|2
 7|Ultra Ball|A high-performance ball|capture|1200|3
 8|Concordance Index|A sealed index page recovered from Bart Iver's confiscated research|keyItem|0|0
+9|Resonance Ledger|A sealed field ledger copied from the Resonance Project's Concordance experiments|keyItem|0|0

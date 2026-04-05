@@ -1,0 +1,13 @@
+# Bart's follow-up after the player recovers the Resonance Ledger.
+
+[header]
+id|bart_resonance_followup
+
+[steps]
+say|Prof. Bart Iver|Resonance...;So that is what they renamed it.
+say|Prof. Bart Iver|Applied Physics did not merely store the Concordance.;They turned it into a field program.
+say|Prof. Bart Iver|And the rival's brother was attached to the final stable run.
+say|You|You never told me the university got that far.
+say|Prof. Bart Iver|Because I never knew which fragment they weaponized first.;Now we finally know where to look.
+say|Prof. Bart Iver|Give me time with this ledger.;It names a field site beyond campus, and that is where the trail continues.
+flag|bart_resonance_followup_done

@@ -30,8 +30,7 @@ void TransitionMode::completeFadeOut(GameContext &ctx) {
         ctx.world.getPlayer().startAnimation(ctx.world.getPlayer().getFacing());
 
         // Check if entering this map triggers a cutscene
-        StoryAction mapAction =
-            ctx.story.checkMapEnter(ctx.world.getCurrentMapId(), ctx.world.getPlayer());
+        StoryAction mapAction = ctx.story.checkMapEnter(ctx.world);
         if (!mapAction.is<StoryNoAction>())
             ctx.pushRequest(ModeRequest::storyAction(mapAction));
     }

@@ -4,8 +4,7 @@
 #include "../../ui/InputManager.h"
 
 void OverworldMode::onEnter(GameContext &ctx) {
-    StoryAction mapAction =
-        ctx.story.checkMapEnter(ctx.world.getCurrentMapId(), ctx.world.getPlayer());
+    StoryAction mapAction = ctx.story.checkMapEnter(ctx.world);
     if (!mapAction.is<StoryNoAction>())
         ctx.pushRequest(ModeRequest::storyAction(std::move(mapAction)));
 }

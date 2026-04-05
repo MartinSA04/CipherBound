@@ -16,6 +16,8 @@ struct ShopDefinition {
 std::optional<ShopDefinition> shopDefinitionFor(const NPC &npc) {
     if (npc.getId() == "viridian_mart_shopkeeper")
         return ShopDefinition{"Viridian Mart", {1, 5}};
+    if (npc.getId() == "pewter_mart_shopkeeper")
+        return ShopDefinition{"Pewter Mart", {1, 2, 3, 5, 6, 7}};
     return std::nullopt;
 }
 

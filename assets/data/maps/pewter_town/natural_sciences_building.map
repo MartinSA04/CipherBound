@@ -7,6 +7,7 @@ width|28
 height|11
 background|assets/tilesets/pewter_town/natural_sciences_building.png
 background_overlay|assets/tilesets/pewter_town/natural_sciences_building_overlay.png
+music|assets/audio/1-07. Elm Pokemon Lab_.mp3
 
 [tiles]
 ############################
@@ -33,3 +34,7 @@ background_overlay|assets/tilesets/pewter_town/natural_sciences_building_overlay
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
+ns_receptionist|Receptionist|normal|4|2|down|0|dialogue:assets/data/dialogue/pewter_town/ns_receptionist.npcdialogue|lyra|
+ns_grad_student|Grad Student|normal|2|5|right|0|dialogue:assets/data/dialogue/pewter_town/ns_grad_student.npcdialogue|schoolboy|
+ns_stair_guard|Security|normal|9|8|down|0|No stair access without the Induction Badge.|policeman|
+ns_right_guard|Project Aide|normal|21|9|left|0|East wing is sealed to general students.;Faculty clearance only.|schoolgirl|

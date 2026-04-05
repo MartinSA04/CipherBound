@@ -1,0 +1,11 @@
+# Pewter faculty aftermath after defeating the Applied Physics leader.
+
+[header]
+id|applied_physics_aftermath
+
+[steps]
+say|Dean Solveig|Enough.;You handled every circuit I placed in your path.;Then you can carry this clearance.
+badge|Induction Badge
+flag|got_induction_badge
+say|Dean Solveig|The Induction Badge opens the sealed sections in Natural Sciences.
+say|Dean Solveig|If you insist on reading what we locked upstairs,;read it carefully.;Resonance work stopped being harmless long before you arrived.

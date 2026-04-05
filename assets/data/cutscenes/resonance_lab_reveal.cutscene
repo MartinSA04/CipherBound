@@ -1,0 +1,21 @@
+# Discovery of the Resonance Ledger in Natural Sciences.
+
+[header]
+id|resonance_lab_reveal
+
+[steps]
+move|player|11|6
+move|ns_rival|14|6
+sync
+face|player|right
+face|ns_rival|left
+say|Rival|The badge opened a sealed cabinet up here.;Look at the heading.
+say|Rival|Resonance Project.;They copied Concordance notation straight into field logs.
+say|You|And your brother's name?
+say|Rival|Transfer witness.;Observation team.;Final run.;Then nothing.
+say|Rival|They didn't just hide Bart's research.;They used it.
+say|You|This ledger is a fragment in everything but name.
+item|9|1
+flag|resonance_project_discovered
+flag|received_resonance_ledger
+say|Rival|Take it to Bart if you want.;But if he knew this project existed and stayed quiet,;I'm done taking his version on faith.

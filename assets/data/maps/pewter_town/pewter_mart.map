@@ -32,3 +32,4 @@ music|assets/audio/25. Poké Mart.mp3
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
 pewter_mart_shopkeeper|Clerk|shopkeeper|3|3|right|0||saleswoman@hidden|
 pewter_mart_clerk_dummy|Clerk|normal|2|3|right|0||saleswoman|
+pewter_mart_customer|Student|normal|7|5|left|0|They finally stocked stronger medicine and better balls.;Pewter students burn through supplies fast.|boy|

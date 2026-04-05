@@ -91,7 +91,14 @@ music|assets/audio/1-04. New Bark Town_.mp3
 
 [encounters]
 # Format: speciesId|minLevel|maxLevel|weight
+7|6|8|30
+10|6|9|25
+13|7|10|25
+16|7|10|20
 
 [npcs]
 # Format: id|name|type|x|y|facing|sightRange|dialogue|sprite|party
 # Dialogue supports inline stages or dialogue:path to an external .npcdialogue file
+forest_trainer1|Bug Collector Oda|trainer|10|28|down|8|dialogue:assets/data/dialogue/route_2/forest_trainer1.npcdialogue|bug_catcher|7:8,10:8
+forest_trainer2|Forager Signe|trainer|47|30|right|4|dialogue:assets/data/dialogue/route_2/forest_trainer2.npcdialogue|girl|13:9,16:9
+forest_trainer3|Lost Senior|trainer|36|61|up|8|dialogue:assets/data/dialogue/route_2/forest_trainer3.npcdialogue|schoolboy|10:10,13:10

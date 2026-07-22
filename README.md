@@ -2,6 +2,8 @@
 
 A Pokémon-inspired RPG built in C++20 with SDL2, where Daemons are themed around physics and mathematics concepts instead of traditional elements.
 
+Built as the final project for TDT4102 at NTNU, where it was awarded **best project**.
+
 ![C++20](https://img.shields.io/badge/C%2B%2B-20-blue)
 ![SDL2](https://img.shields.io/badge/SDL2-2.x-green)
 ![Meson](https://img.shields.io/badge/build-Meson-blueviolet)
